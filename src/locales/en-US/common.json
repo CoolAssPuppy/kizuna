@@ -150,6 +150,27 @@
       "needsTransfer": "I will need an airport transfer."
     }
   },
+  "itinerary": {
+    "title": "Your itinerary",
+    "subtitle": "Cached for offline. Updates push live when you have connectivity.",
+    "empty": "Nothing on your itinerary yet. Sessions and flights will appear here as they're confirmed.",
+    "offline": "You are offline. Showing the last cached schedule.",
+    "checkin": {
+      "title": "Check-in",
+      "subtitle": "Show this code at registration to confirm your arrival.",
+      "noToken": "Your check-in code will appear here once your registration is approved."
+    },
+    "itemTypes": {
+      "session": "Session",
+      "flight": "Flight",
+      "transport": "Transport",
+      "accommodation": "Accommodation",
+      "announcement": "Announcement",
+      "reminder": "Reminder"
+    },
+    "conflict": "Overlaps with another item on your day",
+    "withGuest": "With your guest"
+  },
   "guests": {
     "invitationTitle": "You're invited to Supafest",
     "invitationSubtitle": "Set a password to accept your guest invitation. The link expires seven days from when {{sponsor}} sent it.",

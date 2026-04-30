@@ -26,6 +26,23 @@ export default defineConfig({
               },
             },
           },
+          {
+            // Itinerary + registration data: stale-while-revalidate so the
+            // offline cache always serves the last known good copy while
+            // a background fetch refreshes when connectivity returns.
+            urlPattern: ({ url }) =>
+              url.pathname.startsWith('/rest/v1/itinerary_items') ||
+              url.pathname.startsWith('/rest/v1/registrations') ||
+              url.pathname.startsWith('/rest/v1/documents'),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'kizuna-data',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+            },
+          },
         ],
       },
       manifest: {

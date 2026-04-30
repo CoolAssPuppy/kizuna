@@ -14,13 +14,23 @@ end $$;
 
 
 -- Auth users (real ones come from Supabase Auth signup; these are dev fixtures)
-insert into auth.users (id, email, aud, role, raw_user_meta_data) values
-  ('11111111-1111-1111-1111-111111111111', 'admin@kizuna.dev',     'authenticated', 'authenticated', '{"name":"Admin Adams"}'),
-  ('22222222-2222-2222-2222-222222222222', 'lu@kizuna.dev',        'authenticated', 'authenticated', '{"name":"Lu Liu"}'),
-  ('33333333-3333-3333-3333-333333333333', 'paul@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Paul Park"}'),
-  ('44444444-4444-4444-4444-444444444444', 'maya@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Maya Mason"}'),
-  ('55555555-5555-5555-5555-555555555555', 'guest.alex@kizuna.dev','authenticated', 'authenticated', '{"name":"Alex Guest"}')
+-- Local dev password is "kizuna-dev-only" for every seeded user. The bcrypt
+-- hash is computed at runtime via pgcrypto so the SSO fallback in
+-- src/features/auth/sso.ts can sign Paul in without any third-party setup.
+insert into auth.users (id, email, aud, role, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at, instance_id) values
+  ('11111111-1111-1111-1111-111111111111', 'admin@kizuna.dev',     'authenticated', 'authenticated', '{"name":"Admin Adams"}',  crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
+  ('22222222-2222-2222-2222-222222222222', 'lu@kizuna.dev',        'authenticated', 'authenticated', '{"name":"Lu Liu"}',       crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
+  ('33333333-3333-3333-3333-333333333333', 'paul@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Paul Park"}',    crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
+  ('44444444-4444-4444-4444-444444444444', 'maya@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Maya Mason"}',   crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
+  ('55555555-5555-5555-5555-555555555555', 'guest.alex@kizuna.dev','authenticated', 'authenticated', '{"name":"Alex Guest"}',   crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000')
 on conflict (id) do nothing;
+
+-- Insert identities so Supabase's auth flow recognises these accounts.
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+select gen_random_uuid(), id, id::text, jsonb_build_object('sub', id::text, 'email', email), 'email', now(), now(), now()
+from auth.users
+where email like '%@kizuna.dev'
+on conflict do nothing;
 
 
 insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider, is_active) values
