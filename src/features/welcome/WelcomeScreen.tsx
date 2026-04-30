@@ -14,13 +14,20 @@ export function WelcomeScreen(): JSX.Element {
   const backgroundUrl = useMemo(() => backgroundFor(period), [period]);
   const fallbackGradient = useMemo(() => fallbackGradientFor(period), [period]);
 
+  // Period-specific overlay tints. Both keep text legible but day reads
+  // warm (sunrise) and night reads cool (twilight).
+  const overlay =
+    period === 'day'
+      ? 'linear-gradient(135deg, rgba(190, 18, 60, 0.35), rgba(15, 23, 42, 0.65))'
+      : 'linear-gradient(135deg, rgba(15, 23, 42, 0.55), rgba(2, 6, 23, 0.85))';
+
   const greetingName = user?.email.split('@')[0] ?? '';
 
   return (
     <main
       className="relative flex min-h-screen items-center justify-center p-6 text-white"
       style={{
-        backgroundImage: `linear-gradient(rgba(10, 15, 30, 0.55), rgba(10, 15, 30, 0.85)), url(${backgroundUrl}), ${fallbackGradient}`,
+        backgroundImage: `${overlay}, url(${backgroundUrl}), ${fallbackGradient}`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
