@@ -15,10 +15,24 @@
   "auth": {
     "signIn": "Sign in",
     "signUp": "Sign up",
+    "signOut": "Sign out",
     "email": "Email",
     "password": "Password",
-    "continueWithSso": "Continue with SSO",
-    "checkingSession": "Checking your session"
+    "continueWithSso": "Continue with single sign-on",
+    "checkingSession": "Checking your session",
+    "signedInAs": "Signed in as {{email}}",
+    "signInTitle": "Welcome back",
+    "signInSubtitle": "Use single sign-on if you are a Supabase teammate. Use your invitation email and password if you are a guest.",
+    "guestTab": "Guest",
+    "employeeTab": "Employee",
+    "needAccount": "Need to create a guest account?",
+    "createAccount": "Create account",
+    "alreadyHaveAccount": "Already have an account?",
+    "errors": {
+      "invalidCredentials": "That email and password do not match.",
+      "weakPassword": "Password must be at least 8 characters.",
+      "generic": "Could not complete sign-in. Try again."
+    }
   },
   "welcome": {
     "title": "Welcome to {{eventName}}",

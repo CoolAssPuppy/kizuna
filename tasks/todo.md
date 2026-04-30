@@ -75,21 +75,30 @@ This is the source of truth for milestone tracking. Update inline as work progre
 - Bug found and fixed by simplifier: itinerary_items lacked unique constraint, so `on conflict do nothing` was a silent no-op. Added partial unique index on (user_id, item_type, source_id) where source_id is not null and updated triggers to reference it. Wrote regression test.
 - Architectural decision: app role lives in JWT custom claim `app_role` (not `role`) so Supabase's standard `authenticated`/`anon` postgres role mapping continues to work. Custom Access Token hook reads from public.users.role.
 
-### M2 - Auth, identity, providers
+### M2 - Auth, identity, providers [complete]
 
 **Goal:** Authenticated app shell with role-aware routing, employee SSO stub, guest email/password.
 
-- [ ] Supabase client setup (browser-safe, anon key)
-- [ ] AuthProvider with session management
-- [ ] Employee SSO stub (graceful when no Okta keys)
-- [ ] Guest email + password sign-in/sign-up
-- [ ] Sign-out
-- [ ] Protected route component (role-based)
-- [ ] Welcome screen (role-aware)
-- [ ] Role helpers (`useRole`, `requireRole`)
-- [ ] Vitest coverage for auth utilities
-- [ ] Playwright: auth happy path
-- [ ] Commit: `feat(auth): role-aware authentication with SSO stub`
+- [x] Supabase client setup (singleton, publishable key)
+- [x] AuthProvider with session management via onAuthStateChange (INITIAL_SESSION on mount)
+- [x] AuthContext split out so AuthProvider only exports the component (react-refresh)
+- [x] Employee SSO stub via signInWithSSO with Okta domain; graceful dev fallback to seeded employee credentials when keys absent
+- [x] Guest email + password sign-in / sign-up via signInWithPassword + signUp
+- [x] Sign-out (no double dispatch — onAuthStateChange handles state clear)
+- [x] RequireAuth route guard with allow list, loading state, redirect with from-state
+- [x] Welcome screen (role-aware, sign-out wired)
+- [x] Role helpers: useRole, useIsAdmin, useIsSuperAdmin, hasRole
+- [x] shadcn primitives: Input, Label
+- [x] Sign-in screen with employee/guest tabs, sign-up toggle, error surface
+- [x] Vitest: 14 tests across utils, hooks, sso, WelcomeScreen (with mocked client firing INITIAL_SESSION)
+- [x] Playwright: 4 specs (smoke + auth)
+- [x] code-simplifier and refactor-scan run, all critical/suggested findings addressed
+- [x] Commit: `feat(auth): role-aware authentication with SSO stub`
+
+**M2 review:**
+- Architectural cleanups during refactor-scan: removed race between manual getSession() and onAuthStateChange (now listener-only), fixed wrong OAuth provider call (was 'azure', now signInWithSSO with Okta domain), removed double dispatch on signOut, surfaced loadAppUser errors via AuthState.error instead of swallowing into console.warn.
+- renderWithProviders default flipped: withAuth now defaults to false to prevent test leakage of the Supabase singleton; tests opt in.
+- Quality gates green: typecheck, lint, format, 14/14 vitest, 4/4 playwright, build.
 
 ### M3 - Consent gate and document management
 

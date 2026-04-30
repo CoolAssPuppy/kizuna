@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-test('welcome screen renders the app name', async ({ page }) => {
+test('app boots and unauthenticated users land on the sign-in screen', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kizuna');
+  await expect(page).toHaveURL(/\/sign-in/);
 });
 
 test('unknown route shows the not found screen', async ({ page }) => {

@@ -47,6 +47,7 @@ export default tseslint.config(
     files: ['**/*.{test,spec}.{ts,tsx}', 'src/test/**'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/unbound-method': 'off',
       'react-refresh/only-export-components': 'off',
     },
   },

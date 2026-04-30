@@ -112,6 +112,38 @@
 
 **How to apply:** Always grant `usage` on the `tap` schema and `execute` on its functions to the `authenticated`/`anon` roles, and add `set search_path to public, tap, extensions;` at the top of each test file (else `tap.plan()` is unreachable from the authenticated role).
 
+## 2026-04-30 - Lean on onAuthStateChange exclusively; never call getSession in parallel
+
+**Rule:** In an AuthProvider, subscribe to `onAuthStateChange` only. The listener fires `INITIAL_SESSION` on mount, so the manual `getSession()` is redundant *and* races with the listener.
+
+**Why:** Calling both creates a race: if `INITIAL_SESSION` fires before `getSession()` resolves, two `syncSession` calls happen for the same session. The race is silent today but breaks the moment a downstream effect reacts to state changes.
+
+**How to apply:** AuthProvider's useEffect arms only the listener. Tests mock `onAuthStateChange` to invoke the callback synchronously with the desired session so the provider hydrates without waiting on a real subscription.
+
+## 2026-04-30 - Use signInWithSSO for enterprise IdPs, not signInWithOAuth
+
+**Rule:** Okta / SAML / generic enterprise SSO uses `supabase.auth.signInWithSSO({ domain })`. `signInWithOAuth({ provider: 'azure' })` is for Microsoft Entra (Azure AD) consumer/work accounts and is NOT a generic Okta switch.
+
+**Why:** Initial M2 implementation called `signInWithOAuth({ provider: 'azure' })` while reading `oktaDomain` from env. The Okta config was tested for presence but never actually used at the call site — Azure AD would have been hit regardless. Caught by refactor-scan.
+
+**How to apply:** Pass the Okta domain via `signInWithSSO({ domain: oktaDomain, options: { redirectTo } })`. Configure the SSO provider in the Supabase dashboard so the domain is recognized.
+
+## 2026-04-30 - Don't double-dispatch state on signOut
+
+**Rule:** After `supabase.auth.signOut()` succeeds, do NOT manually dispatch a `cleared` action. `onAuthStateChange` fires `SIGNED_OUT` and the listener handles it.
+
+**Why:** Manual dispatch + listener dispatch = two state transitions for one logical event. Latent bug: any consumer that reacts to clears (logging, analytics) will fire twice.
+
+**How to apply:** signOut just awaits the call and surfaces errors. The listener owns state transitions.
+
+## 2026-04-30 - renderWithProviders default should be opt-in for AuthProvider
+
+**Rule:** Test render helpers default to NOT wrapping in AuthProvider. Tests opt in with `withAuth: true` when the component reads `useAuth`.
+
+**Why:** Default-on means every test triggers the Supabase singleton via `getSupabaseClient()`. State leaks across tests if `__resetSupabaseClientForTests` isn't called religiously. Inverting the default makes the dependency explicit and contains it to tests that actually need it.
+
+**How to apply:** `renderWithProviders(ui)` skips auth. `renderWithProviders(ui, { withAuth: true })` wraps. The opt-in test must also inject a fake client via `__resetSupabaseClientForTests` whose `onAuthStateChange` synchronously fires `INITIAL_SESSION`.
+
 ## 2026-04-30 - Don't auto-seed via supabase config when using declarative schemas
 
 **Rule:** Set `[db.seed].sql_paths = []` in `supabase/config.toml`. Run seed yourself after applying schemas.
