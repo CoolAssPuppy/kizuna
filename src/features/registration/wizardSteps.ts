@@ -18,12 +18,15 @@ export interface WizardStep {
 
 export const WIZARD_STEPS: ReadonlyArray<WizardStep> = [
   { taskKey: 'personal_info', i18nKey: 'registration.steps.personalInfo', path: 'personal-info' },
-  { taskKey: 'dietary', i18nKey: 'registration.steps.dietary', path: 'dietary' },
+  { taskKey: 'passport', i18nKey: 'registration.steps.passport', path: 'passport' },
   {
     taskKey: 'emergency_contact',
     i18nKey: 'registration.steps.emergencyContact',
     path: 'emergency-contact',
   },
+  { taskKey: 'dietary', i18nKey: 'registration.steps.dietary', path: 'dietary' },
+  { taskKey: 'swag', i18nKey: 'registration.steps.swag', path: 'swag' },
+  { taskKey: 'transport', i18nKey: 'registration.steps.transport', path: 'transport' },
 ];
 
 /** Returns the slug of the first step that is still pending. */

@@ -27,18 +27,20 @@ describe('nextPendingStep', () => {
   it('returns the first step that is still pending', () => {
     const tasks: RegistrationTaskRow[] = [
       fakeTask({ task_key: 'personal_info', status: 'complete' }),
-      fakeTask({ task_key: 'dietary', status: 'pending' }),
+      fakeTask({ task_key: 'passport', status: 'complete' }),
       fakeTask({ task_key: 'emergency_contact', status: 'pending' }),
+      fakeTask({ task_key: 'dietary', status: 'pending' }),
     ];
-    expect(nextPendingStep(tasks)?.taskKey).toBe('dietary');
+    expect(nextPendingStep(tasks)?.taskKey).toBe('emergency_contact');
   });
 
-  it('skips waived steps', () => {
+  it('treats waived as done when finding the next pending step', () => {
     const tasks: RegistrationTaskRow[] = [
       fakeTask({ task_key: 'personal_info', status: 'waived' }),
-      fakeTask({ task_key: 'dietary', status: 'pending' }),
+      fakeTask({ task_key: 'passport', status: 'waived' }),
+      fakeTask({ task_key: 'emergency_contact', status: 'pending' }),
     ];
-    expect(nextPendingStep(tasks)?.taskKey).toBe('dietary');
+    expect(nextPendingStep(tasks)?.taskKey).toBe('emergency_contact');
   });
 
   it('returns null when every wizard step is complete or waived', () => {

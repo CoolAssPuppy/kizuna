@@ -5,8 +5,11 @@ import { useActiveEvent } from '@/features/events/useActiveEvent';
 
 import { DietaryStep } from './DietaryStep';
 import { EmergencyContactStep } from './EmergencyContactStep';
+import { PassportStep } from './PassportStep';
 import { PersonalInfoStep } from './PersonalInfoStep';
 import { RegistrationLayout } from './RegistrationLayout';
+import { SwagStep } from './SwagStep';
+import { TransportStep } from './TransportStep';
 import { useRegistration } from './useRegistration';
 import type { RegistrationBundle } from './types';
 import { findStepByPath, nextPendingStep, WIZARD_STEPS } from './wizardSteps';
@@ -23,10 +26,16 @@ function StepRouter({
   switch (stepPath) {
     case 'personal-info':
       return <PersonalInfoStep bundle={bundle} onComplete={onComplete} />;
-    case 'dietary':
-      return <DietaryStep bundle={bundle} onComplete={onComplete} />;
+    case 'passport':
+      return <PassportStep bundle={bundle} onComplete={onComplete} />;
     case 'emergency-contact':
       return <EmergencyContactStep bundle={bundle} onComplete={onComplete} />;
+    case 'dietary':
+      return <DietaryStep bundle={bundle} onComplete={onComplete} />;
+    case 'swag':
+      return <SwagStep bundle={bundle} onComplete={onComplete} />;
+    case 'transport':
+      return <TransportStep bundle={bundle} onComplete={onComplete} />;
     default:
       return <Navigate to="/registration" replace />;
   }

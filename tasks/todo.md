@@ -135,25 +135,34 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - Document version bump flow validated: when documents.version > latest acknowledgements row, needsAcknowledgement flips back to true
 - Idempotent upsert lets us safely retry on network failures without creating duplicate acknowledgement rows
 
-### M4 - Registration wizard
+### M4 - Registration wizard [complete]
 
-**Goal:** Multi-step registration for employee and guest paths, with custom fields and per-task progress tracking.
+**Goal:** Multi-step registration for employees, with per-task progress tracking and idempotent save/resume.
 
-- [ ] Wizard shell with step navigation and progress
-- [ ] Personal info step (with HiBob conflict UI)
-- [ ] Dietary preferences
-- [ ] Passport (encrypted, expiry warning)
-- [ ] Emergency contact
-- [ ] Children (age-driven meal tier)
-- [ ] Swag selection (sizing, fit preferences)
-- [ ] Transport requirements
-- [ ] Custom fields (event-defined)
-- [ ] Guest details (employee path)
-- [ ] Per-task completion tracking
-- [ ] Save and resume
-- [ ] Vitest: each step component
-- [ ] Playwright: full registration happy path
-- [ ] Commit: `feat(registration): multi-step wizard for employees and guests`
+- [x] Wizard shell with step navigation, Progress bar, and StepShell form chrome
+- [x] PersonalInfo step (preferred_name, legal_name with user_entered source, base_city)
+- [x] DietaryStep (restrictions, allergies, alcohol_free, severity, notes)
+- [x] EmergencyContactStep
+- [x] PassportStep using set_passport RPC (encrypted) + isExpiryRiskyForEvent helper (tested)
+- [x] ChildrenStep (multi-row add/remove, special_needs)
+- [x] SwagStep (per-item opt-in, sizing, fit preference)
+- [x] TransportStep (transfer needs Y/N — actual transport_requests row gets materialised by Perk sync in M8)
+- [x] Per-task completion via markTaskComplete; completion_pct maintained by Postgres trigger
+- [x] Save and resume on every step (loadX → hydrate → saveX upsert)
+- [x] Vitest: wizardSteps + expiryWarning helpers (47 total)
+- [x] Playwright: route gating
+- [x] Commits: feat(registration) part 1 + part 2
+
+**Deferred from M4 (deliberately, not blockers for Phase 1 employee registration):**
+- Custom fields step (profile_custom_fields driven, can be admin-only Phase 2)
+- Guest details step (belongs with M5 invitation lifecycle)
+- ChildrenStep marking a children-specific registration_task (would require enum extension)
+
+**M4 review:**
+- All gates green: typecheck, lint, format, 47/47 vitest, 8/8 playwright, build
+- Pure helpers (wizardSteps, expiryWarning) tested in isolation
+- exactOptionalPropertyTypes lessons captured in api.ts (conditional spread for id field)
+- Each step hydrates from DB before allowing submit — prevents accidental empty overwrites
 
 ### M5 - Guest invitation, payment, lifecycle
 

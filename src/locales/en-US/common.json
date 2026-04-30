@@ -69,7 +69,11 @@
     "steps": {
       "personalInfo": "Personal info",
       "dietary": "Dietary",
-      "emergencyContact": "Emergency contact"
+      "emergencyContact": "Emergency contact",
+      "passport": "Passport",
+      "children": "Children",
+      "swag": "Swag",
+      "transport": "Transport"
     },
     "personalInfo": {
       "preferredName": "Preferred name",
@@ -102,6 +106,48 @@
       "phoneSecondary": "Secondary phone (optional)",
       "email": "Email (optional)",
       "notes": "Notes (optional)"
+    },
+    "passport": {
+      "intro": "Your passport details are encrypted at rest and never visible to admins.",
+      "passportName": "Name as printed on passport",
+      "passportNumber": "Passport number",
+      "passportNumberHint": "Encrypted before saving.",
+      "issuingCountry": "Issuing country",
+      "issuingCountryHint": "Two-letter ISO code (e.g. US, GB, CA).",
+      "expiryDate": "Expiry date",
+      "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
+    },
+    "children": {
+      "intro": "Add anyone aged 17 or under who will be travelling with you.",
+      "addChild": "Add a child",
+      "removeChild": "Remove",
+      "fullName": "Full name",
+      "dateOfBirth": "Date of birth",
+      "notes": "Notes",
+      "specialNeeds": "Special needs",
+      "specialNeedsOptions": {
+        "crib": "Crib",
+        "high_chair": "High chair",
+        "allergy": "Allergy",
+        "mobility": "Mobility",
+        "other": "Other"
+      },
+      "noChildren": "No children to add? Continue."
+    },
+    "swag": {
+      "noCatalogue": "Swag will appear here once the event organisers publish the catalogue.",
+      "optIn": "I'd like this",
+      "size": "Size",
+      "fitPreference": "Fit",
+      "fitOptions": {
+        "fitted": "Fitted",
+        "relaxed": "Relaxed"
+      }
+    },
+    "transport": {
+      "intro": "Tell us how you plan to arrive and depart so we can build the airport shuttle manifest.",
+      "selfArranging": "I am arranging my own transport.",
+      "needsTransfer": "I will need an airport transfer."
     }
   },
   "documents": {
