@@ -1,0 +1,97 @@
+# Lessons learned
+
+> Append entries after every correction or surprising finding. Keep it tight: rule, why, how to apply.
+
+## Format
+
+```
+## YYYY-MM-DD - Short title
+
+**Rule:** [the rule itself]
+
+**Why:** [the reason - often a past incident or strong preference]
+
+**How to apply:** [when/where this guidance kicks in]
+```
+
+---
+
+## 2026-04-30 - Follow the spec on platform choice
+
+**Rule:** Vite + React 18 PWA, not Next.js, for Kizuna.
+
+**Why:** The 90-min YYC→Banff bus has no signal. Offline access to itinerary, room assignment, and transport details is operational. Vite + Workbox is the cleaner offline-first path. Spec author chose this deliberately. User confirmed.
+
+**How to apply:** Reach for Vite tooling and React Router for any new routing. Do not introduce Next.js or React Server Components. PWA via vite-plugin-pwa.
+
+## 2026-04-30 - Designers must be able to re-skin without code changes
+
+**Rule:** All theming through CSS variables in `src/styles/globals.css`. All copy through i18n. Component code stays untouched when a designer changes brand.
+
+**Why:** This codebase is meant to be picked up and re-skinned by designers (Paper MCP integration planned). Hard-coded colors, spacing, or English strings break that promise.
+
+**How to apply:** Never hard-code hex values in components. Never write English in JSX. Use Tailwind tokens that map to CSS variables. Use the `t()` function for every visible string.
+
+## 2026-04-30 - Fail gracefully without integration credentials
+
+**Rule:** HiBob, Perk, Slack, Stripe, Resend, Notion, Okta integrations must run in two modes: live (creds present) or stubbed (creds missing, deterministic mock, warning logged, no throw).
+
+**Why:** The user wants to build the entire app locally before any third-party setup. Anything that throws on missing creds blocks the whole app.
+
+**How to apply:** Wrap each integration in a single module that checks for env vars at the top. If absent, return a stub implementation. Log the missing var once at boot, not on every call.
+
+## 2026-04-30 - Quality bar is peer review, not personal use
+
+**Rule:** Every line should be defensible by a staff engineer in code review. Idiomatic Vite, idiomatic Supabase, idiomatic React.
+
+**Why:** The user is non-technical but wants to earn the trust of the Supabase engineering org. Sloppy patterns or shortcuts will undermine that goal.
+
+**How to apply:** When two paths exist, choose the one a senior engineer would defend. Prefer explicit over clever. No `any`. No silent error swallowing. Write tests first.
+
+## 2026-04-30 - Only declare dependencies that are actually used
+
+**Rule:** Never speculatively add packages to `package.json` "for the next milestone." Add them when the feature that needs them is being built.
+
+**Why:** Speculative deps inflate bundle size, slow `npm ci`, and signal sloppiness in review. M0 originally listed eleven runtime deps with zero callsites; the refactor-scan caught it.
+
+**How to apply:** When starting a new milestone, only add a dependency at the point of first import. Use `shadcn add <component>` to pull in radix subdeps automatically. Run `depcheck` periodically to catch stragglers.
+
+## 2026-04-30 - exactOptionalPropertyTypes hates `value: undefined`
+
+**Rule:** With `exactOptionalPropertyTypes: true`, an optional field is "either the property is absent or it has a defined value." Setting `prop: undefined` is a type error. Use object spread with conditional keys instead.
+
+**Why:** Bit me on `playwright.config.ts` (`workers: process.env.CI ? 1 : undefined`) and `renderWithProviders` (passing `initialRoute?: string` through to a component expecting a defined value).
+
+**How to apply:** When you want "set this field only sometimes," use `...(condition ? { field: value } : {})`. When passing an optional through to a stricter consumer, default at the boundary (`{ initialRoute = '/' } = {}`).
+
+## 2026-04-30 - Test scaffolding tsconfig hygiene
+
+**Rule:** Don't put `vitest/globals` in `tsconfig.app.json` `types`. Use a triple-slash reference inside the test setup file instead. Also keep tests excluded from the app tsconfig include.
+
+**Why:** Mixing test globals into prod scope means `describe` and `it` are typed as available everywhere, masking accidental usage outside tests.
+
+**How to apply:** `/// <reference types="vitest/globals" />` at the top of `src/test/setup.ts`. App tsconfig include is `["src"]` only. E2E tests under `tests/e2e/` are excluded from ESLint and have their own Playwright runtime.
+
+## 2026-04-30 - One QueryClient per test, not per re-render
+
+**Rule:** When building a `renderWithProviders` helper, instantiate the `QueryClient` inside the helper function (once per test), not inside the wrapper component (which re-runs on every re-render).
+
+**Why:** A wrapper that creates a fresh client on every render breaks cache continuity within a single test, hiding mutation/cache bugs that production wouldn't have.
+
+**How to apply:** Helper signature is `renderWithProviders(ui, options)` → creates one client → passes it to the wrapper as a prop.
+
+## 2026-04-30 - Class ErrorBoundary, functional fallback
+
+**Rule:** Keep the class component for catching render errors (only classes can do this in React) but split the rendered fallback into its own functional file so it can call hooks like `useTranslation`.
+
+**Why:** `withTranslation()` HOC pollutes props with `WithTranslation`, requires renaming exports, and trips the `react-refresh/only-export-components` rule. The two-file split is cleaner and idiomatic.
+
+**How to apply:** `ErrorBoundary.tsx` (class) imports `ErrorFallback.tsx` (function). Class re-renders fallback on error. Fallback freely uses hooks.
+
+## 2026-04-30 - Supabase CLI is a system install, not an npm dep
+
+**Rule:** Don't add `supabase` to `package.json` devDependencies. Install via `brew install supabase/tap/supabase` (or system equivalent) and document it in README prerequisites.
+
+**Why:** The npm-distributed package lags the official one. Mixing the two leads to `command not found: supabase` confusion or version mismatch on `db diff`.
+
+**How to apply:** README prerequisites list. CI installs via the official Supabase setup action when we add migration deploys later.

@@ -1,0 +1,92 @@
+{
+  "name": "kizuna",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Event and community platform for Supafest, built natively on Supabase",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json,md}\" \"tests/**/*.{ts,tsx}\" \"*.{json,md,ts}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json,md}\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:apply": "for f in supabase/schemas/*.sql; do echo \"applying $f\"; PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f \"$f\"; done && PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres -v ON_ERROR_STOP=1 -f supabase/seed.sql",
+    "db:diff": "supabase db diff -f",
+    "db:test": "supabase test db",
+    "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
+    "prepare": "husky 2>/dev/null || true"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.1.0",
+    "@supabase/supabase-js": "^2.45.4",
+    "@tanstack/react-query": "^5.59.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "i18next": "^23.16.0",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.0.3",
+    "react-router-dom": "^6.26.2",
+    "tailwind-merge": "^2.5.3",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@testing-library/jest-dom": "^6.5.0",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "@vitejs/plugin-react": "^4.3.2",
+    "@vitest/coverage-v8": "^2.1.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "eslint-plugin-react": "^7.37.1",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.12",
+    "globals": "^15.10.0",
+    "happy-dom": "^15.7.4",
+    "husky": "^9.1.6",
+    "lint-staged": "^15.2.10",
+    "msw": "^2.4.9",
+    "postcss": "^8.4.47",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.8",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.8.0",
+    "vite": "^5.4.8",
+    "vite-plugin-pwa": "^0.20.5",
+    "vitest": "^2.1.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  }
+}

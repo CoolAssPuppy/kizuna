@@ -1,0 +1,48 @@
+{
+  "app": {
+    "name": "Kizuna",
+    "tagline": "An enduring bond"
+  },
+  "nav": {
+    "home": "Home",
+    "itinerary": "Itinerary",
+    "registration": "Registration",
+    "documents": "Documents",
+    "community": "Community",
+    "admin": "Admin",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "continueWithSso": "Continue with SSO",
+    "checkingSession": "Checking your session"
+  },
+  "welcome": {
+    "title": "Welcome to {{eventName}}",
+    "loading": "Loading your event"
+  },
+  "errors": {
+    "boundary": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Reload the page to try again.",
+      "reload": "Reload"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist.",
+      "goHome": "Go home"
+    }
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "next": "Next",
+    "back": "Back",
+    "submit": "Submit",
+    "agree": "I agree",
+    "close": "Close"
+  }
+}
