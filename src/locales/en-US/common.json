@@ -59,6 +59,51 @@
     "agree": "I agree",
     "close": "Close"
   },
+  "registration": {
+    "title": "Registration",
+    "stepLabel": "Step {{current}} of {{total}}",
+    "progress": "{{percent}}% complete",
+    "saveAndContinue": "Save and continue",
+    "saving": "Saving",
+    "errorSaving": "We could not save your changes. Please try again.",
+    "steps": {
+      "personalInfo": "Personal info",
+      "dietary": "Dietary",
+      "emergencyContact": "Emergency contact"
+    },
+    "personalInfo": {
+      "preferredName": "Preferred name",
+      "preferredNameHint": "How your name appears on your badge.",
+      "legalName": "Legal name",
+      "legalNameHint": "Exactly as printed on your passport.",
+      "baseCity": "Current city",
+      "baseCityHint": "Where you are travelling from."
+    },
+    "dietary": {
+      "restrictions": "Dietary restrictions",
+      "restrictionsHint": "Select all that apply.",
+      "allergies": "Allergies",
+      "allergiesHint": "Select any that apply.",
+      "alcoholFree": "Please do not serve me alcohol",
+      "severity": "Severity",
+      "severityHint": "Anaphylactic risks are flagged to the kitchen.",
+      "severityOptions": {
+        "preference": "Preference",
+        "intolerance": "Intolerance",
+        "allergy": "Allergy (anaphylactic risk)"
+      },
+      "notes": "Anything else our kitchen should know"
+    },
+    "emergencyContact": {
+      "fullName": "Full name",
+      "relationship": "Relationship",
+      "phonePrimary": "Primary phone",
+      "phonePrimaryHint": "Include country code.",
+      "phoneSecondary": "Secondary phone (optional)",
+      "email": "Email (optional)",
+      "notes": "Notes (optional)"
+    }
+  },
   "documents": {
     "tabTitle": "Documents",
     "consentTitle": "Please review the following",

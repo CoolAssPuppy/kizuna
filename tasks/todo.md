@@ -5,6 +5,16 @@
 
 This is the source of truth for milestone tracking. Update inline as work progresses. After each milestone: commit, run `/simplify` and `/clean-and-refactor`, fix findings, then move on.
 
+## Pending: Paper design pass
+
+Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upgrades or the quota resets, run the Paper design work:
+
+- All shipped screens at desktop (1440x900) and mobile (390x844)
+- Currently shipped: SignInScreen, WelcomeScreen, ConsentGate, DocumentsTab, NotFound
+- Mirror the CSS variables from src/styles/globals.css (Supabase green primary hsl(153 60% 53%), Inter font)
+- Use the frontend-design skill for layout polish
+- Keep the design easy for a designer to take over and refine
+
 ## Phase 1 milestones
 
 ### M0 - Foundation [complete]
