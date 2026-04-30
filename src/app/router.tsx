@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 
+import { AdminRoute } from '@/features/admin/AdminRoute';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { SignInScreen } from '@/features/auth/SignInScreen';
 import { ConsentRoute } from '@/features/documents/ConsentRoute';
@@ -60,6 +61,14 @@ export function AppRouter(): JSX.Element {
         element={
           <RequireAuth>
             <RegistrationRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth allow={['admin', 'super_admin']}>
+            <AdminRoute />
           </RequireAuth>
         }
       />

@@ -150,6 +150,31 @@
       "needsTransfer": "I will need an airport transfer."
     }
   },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Live operational data. Reports always render fresh, never frozen exports.",
+    "tabs": {
+      "registration": "Registration progress",
+      "rooming": "Rooming list",
+      "dietary": "Dietary summary",
+      "swag": "Swag order",
+      "payments": "Payments",
+      "conflicts": "Data conflicts"
+    },
+    "exportCsv": "Export CSV",
+    "noRows": "No rows to display.",
+    "conflicts": {
+      "field": "Field",
+      "kizunaValue": "Kizuna value",
+      "externalValue": "External value",
+      "external": "External source",
+      "detectedAt": "Detected",
+      "acceptKizuna": "Keep Kizuna value",
+      "acceptExternal": "Use external value",
+      "noConflicts": "No open conflicts."
+    },
+    "blocked": "You do not have permission to view this page."
+  },
   "itinerary": {
     "title": "Your itinerary",
     "subtitle": "Cached for offline. Updates push live when you have connectivity.",
