@@ -227,20 +227,18 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [ ] Playwright: admin report happy path
 - [ ] Commit: `feat(admin): reports with shareable links and conflict resolution`
 
-### M8 - HiBob and Perk sync
+### M8 - HiBob and Perk sync [partial]
 
 **Goal:** HiBob bidirectional sync, Perk CSV import, conflict tracking.
 
-- [ ] Edge function: `sync_hibob` (graceful when no creds)
-- [ ] HiBob webhook receiver
-- [ ] Conflict detection: write to `data_conflicts` when `field_locked`
-- [ ] Perk CSV upload UI (admin only)
-- [ ] Edge function: `import_perk_csv`
-- [ ] Flight change detection → `transport_requests.needs_review`
-- [ ] `hibob_sync_log` reporting
-- [ ] Manual sync trigger from admin dashboard
-- [ ] Vitest: conflict detection logic
-- [ ] Commit: `feat(sync): hibob and perk integrations with conflict tracking`
+- [x] src/lib/integrations/hibob.ts wraps the HiBob /people endpoint with graceful stub mode
+- [x] src/lib/integrations/hibobReconcile.ts is a pure planner that diffs HiBob against Kizuna and emits update + conflict plans
+- [x] supabase/functions/sync-hibob writes audit row, applies updates, inserts data_conflicts
+- [x] hibob_sync_log auditing on every run
+- [x] 12 vitest covering API wrapper + reconciliation
+- [ ] Perk CSV upload UI + edge function (deferred to M8b)
+- [ ] HiBob webhook receiver (deferred to M8b)
+- [ ] Manual sync trigger button in admin dashboard (deferred to M8b)
 
 ### M9 - Notifications
 
