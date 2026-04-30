@@ -6,6 +6,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import i18n from '@/lib/i18n';
 
+import { ThemeProvider } from './ThemeProvider';
+
 interface AppProvidersProps {
   children: ReactNode;
 }
@@ -28,16 +30,18 @@ export function AppProviders({ children }: AppProvidersProps): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
-        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <AuthProvider
-            ssoConfig={{
-              oktaDomain: import.meta.env['VITE_OKTA_DOMAIN'],
-              oktaClientId: import.meta.env['VITE_OKTA_CLIENT_ID'],
-            }}
-          >
-            {children}
-          </AuthProvider>
-        </BrowserRouter>
+        <ThemeProvider>
+          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <AuthProvider
+              ssoConfig={{
+                oktaDomain: import.meta.env['VITE_OKTA_DOMAIN'],
+                oktaClientId: import.meta.env['VITE_OKTA_CLIENT_ID'],
+              }}
+            >
+              {children}
+            </AuthProvider>
+          </BrowserRouter>
+        </ThemeProvider>
       </I18nextProvider>
     </QueryClientProvider>
   );

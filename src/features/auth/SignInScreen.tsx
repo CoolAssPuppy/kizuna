@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
 import { useAuth } from './AuthContext';
+import { DevSignInShortcuts } from './DevSignInShortcuts';
 
 type Tab = 'employee' | 'guest';
 type Mode = 'sign-in' | 'sign-up';
@@ -96,9 +97,12 @@ export function SignInScreen(): JSX.Element {
         </div>
 
         {tab === 'employee' ? (
-          <Button onClick={() => void handleSso()} disabled={busy} className="w-full" size="lg">
-            {t('auth.continueWithSso')}
-          </Button>
+          <div className="space-y-4">
+            <Button onClick={() => void handleSso()} disabled={busy} className="w-full" size="lg">
+              {t('auth.continueWithSso')}
+            </Button>
+            {import.meta.env.DEV ? <DevSignInShortcuts disabled={busy} /> : null}
+          </div>
         ) : (
           <form onSubmit={(event) => void handlePassword(event)} className="space-y-4" noValidate>
             <div className="space-y-2">

@@ -17,21 +17,23 @@ export function RegistrationLayout({ bundle, stepIndex, children }: Props): JSX.
   const { t } = useTranslation();
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-6 py-10">
-      <header className="mb-8 space-y-3">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {t('registration.stepLabel', {
-            current: stepIndex + 1,
-            total: WIZARD_STEPS.length,
-          })}
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight">{t('registration.title')}</h1>
-        <Progress
-          value={bundle.registration.completion_pct}
-          aria-label={t('registration.progress', { percent: bundle.registration.completion_pct })}
-        />
-      </header>
-      {children}
+    <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <div className="mx-auto max-w-2xl">
+        <header className="mb-8 space-y-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t('registration.stepLabel', {
+              current: stepIndex + 1,
+              total: WIZARD_STEPS.length,
+            })}
+          </p>
+          <h1 className="text-3xl font-semibold tracking-tight">{t('registration.title')}</h1>
+          <Progress
+            value={bundle.registration.completion_pct}
+            aria-label={t('registration.progress', { percent: bundle.registration.completion_pct })}
+          />
+        </header>
+        {children}
+      </div>
     </main>
   );
 }

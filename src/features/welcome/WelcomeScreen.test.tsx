@@ -52,13 +52,12 @@ describe('WelcomeScreen', () => {
     expect(screen.getByText('An enduring bond')).toBeInTheDocument();
   });
 
-  it('shows the signed-in identity when a user is present', async () => {
+  it('shows a personalised greeting when a user is present', async () => {
     __resetSupabaseClientForTests(
       makeFakeClient({ authedUser: { id: 'u1', email: 'paul@kizuna.dev' } }),
     );
     renderWithProviders(<WelcomeScreen />, { withAuth: true });
 
-    expect(await screen.findByText(/paul@kizuna.dev/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+    expect(await screen.findByText(/Hi paul/i)).toBeInTheDocument();
   });
 });

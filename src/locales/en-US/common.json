@@ -32,11 +32,26 @@
       "invalidCredentials": "That email and password do not match.",
       "weakPassword": "Password must be at least 8 characters.",
       "generic": "Could not complete sign-in. Try again."
+    },
+    "dev": {
+      "header": "Dev sign-in shortcuts",
+      "subtitle": "These buttons only appear locally. They sign you in as a seeded fixture so QA does not need to manage credentials.",
+      "asEmployee": "Pretend you're an employee",
+      "asAdmin": "Pretend you're an admin"
     }
   },
   "welcome": {
     "title": "Welcome to {{eventName}}",
-    "loading": "Loading your event"
+    "loading": "Loading your event",
+    "greeting": "Hi {{name}}, you are signed in.",
+    "tiles": {
+      "registration": "Finish your event registration step by step.",
+      "itinerary": "Your flights, transfers, room, and sessions.",
+      "documents": "Waiver, code of conduct, and travel guidance.",
+      "consent": "Review and re-confirm any pending documents.",
+      "consentTitle": "Pending documents",
+      "admin": "Live reports, conflict resolution, and operations."
+    }
   },
   "errors": {
     "boundary": {
@@ -49,6 +64,24 @@
       "description": "The page you are looking for does not exist.",
       "goHome": "Go home"
     }
+  },
+  "header": {
+    "uploadAvatar": "Upload your avatar",
+    "avatarMenu": "Open account menu"
+  },
+  "footer": {
+    "tagline": "Kizuna · An enduring bond.",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "barbie": "Barbie"
+    },
+    "language": "Language",
+    "languages": {
+      "en-US": "English (United States)"
+    },
+    "rights": "Powered by Supabase. Built with Kizuna."
   },
   "actions": {
     "save": "Save",

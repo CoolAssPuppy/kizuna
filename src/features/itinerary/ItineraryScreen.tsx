@@ -64,7 +64,7 @@ export function ItineraryScreen({ eventId }: Props): JSX.Element {
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-3xl space-y-8 px-6 py-10">
+    <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">{t('itinerary.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('itinerary.subtitle')}</p>

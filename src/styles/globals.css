@@ -8,12 +8,18 @@
  * All design tokens live as CSS variables here. A designer can re-skin the
  * entire app by editing the values below — never by changing component code.
  *
+ * Three themes ship: light (default Supabase brand), dark (Supabase brand
+ * inverted), and barbie (pink playful). The theme is applied as a data
+ * attribute on the html element by ThemeProvider.
+ *
  * Colors are stored as HSL channel triples (e.g. "0 0% 100%") so Tailwind
  * can wrap them with hsl() and apply opacity modifiers.
  */
 
 @layer base {
-  :root {
+  /* === Light: Supabase brand === */
+  :root,
+  [data-theme='light'] {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
 
@@ -45,33 +51,88 @@
     --radius: 0.625rem;
   }
 
-  .dark {
-    --background: 240 10% 3.9%;
+  /* === Dark: Supabase brand on near-black, green accents === */
+  [data-theme='dark'] {
+    --background: 0 0% 7%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 0 0% 9%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 153 60% 53%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary-foreground: 0 0% 7%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 0 0% 14%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 0 0% 16%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 153 60% 53%;
+  }
+
+  /* === Barbie: pink confidence, soft surfaces === */
+  [data-theme='barbie'] {
+    --background: 340 100% 97%;
+    --foreground: 332 70% 18%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 332 70% 18%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 332 70% 18%;
+
+    --primary: 332 80% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 90% 92%;
+    --secondary-foreground: 332 70% 18%;
+
+    --muted: 340 90% 95%;
+    --muted-foreground: 332 30% 38%;
+
+    --accent: 340 100% 88%;
+    --accent-foreground: 332 70% 18%;
+
+    --destructive: 0 84% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 340 70% 85%;
+    --input: 340 70% 85%;
+    --ring: 332 80% 56%;
+  }
+
+  /* Legacy shadcn .dark selector still works for any opt-in dark element */
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 153 60% 53%;
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
     --ring: 153 60% 53%;
   }
 }

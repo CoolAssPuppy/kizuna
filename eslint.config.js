@@ -64,6 +64,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['tests/e2e/**', 'supabase/functions/**'],
+    ignores: ['tests/e2e/**', 'supabase/functions/**', 'scripts/**'],
   },
 );

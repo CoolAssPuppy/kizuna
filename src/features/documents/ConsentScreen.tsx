@@ -40,24 +40,26 @@ export function ConsentScreen({ eventId, redirectTo = '/' }: ConsentScreenProps)
   }
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-2xl px-6 py-10">
-      <header className="mb-8 space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">{t('documents.consentTitle')}</h1>
-      </header>
+    <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <div className="mx-auto max-w-2xl">
+        <header className="mb-8 space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight">{t('documents.consentTitle')}</h1>
+        </header>
 
-      <ConsentGate
-        document={next.document}
-        onAcknowledge={async ({ scrolledToBottom, explicitCheckbox, deviceType }) => {
-          await mutateAsync({
-            documentId: next.document.id,
-            documentKey: next.document.document_key,
-            documentVersion: next.document.version,
-            scrolledToBottom,
-            explicitCheckbox,
-            deviceType,
-          });
-        }}
-      />
+        <ConsentGate
+          document={next.document}
+          onAcknowledge={async ({ scrolledToBottom, explicitCheckbox, deviceType }) => {
+            await mutateAsync({
+              documentId: next.document.id,
+              documentKey: next.document.document_key,
+              documentVersion: next.document.version,
+              scrolledToBottom,
+              explicitCheckbox,
+              deviceType,
+            });
+          }}
+        />
+      </div>
     </main>
   );
 }
