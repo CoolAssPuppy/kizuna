@@ -16,13 +16,24 @@ end $$;
 -- Auth users (real ones come from Supabase Auth signup; these are dev fixtures)
 -- Local dev password is "kizuna-dev-only" for every seeded user. The bcrypt
 -- hash is computed at runtime via pgcrypto so the SSO fallback in
--- src/features/auth/sso.ts can sign Paul in without any third-party setup.
-insert into auth.users (id, email, aud, role, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at, instance_id) values
-  ('11111111-1111-1111-1111-111111111111', 'admin@kizuna.dev',     'authenticated', 'authenticated', '{"name":"Admin Adams"}',  crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
-  ('22222222-2222-2222-2222-222222222222', 'lu@kizuna.dev',        'authenticated', 'authenticated', '{"name":"Lu Liu"}',       crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
-  ('33333333-3333-3333-3333-333333333333', 'paul@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Paul Park"}',    crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
-  ('44444444-4444-4444-4444-444444444444', 'maya@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Maya Mason"}',   crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000'),
-  ('55555555-5555-5555-5555-555555555555', 'guest.alex@kizuna.dev','authenticated', 'authenticated', '{"name":"Alex Guest"}',   crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000')
+-- src/features/auth/sso.ts can sign Prashant in without any third-party setup.
+--
+-- Note on the empty-string defaults: GoTrue stores token fields as NOT NULL
+-- text and chokes on NULL when scanning. We explicitly set every one of
+-- those columns so the row is compatible with `auth.users` query path.
+insert into auth.users (
+  id, email, aud, role, raw_user_meta_data, encrypted_password,
+  email_confirmed_at, created_at, updated_at, instance_id,
+  confirmation_token, recovery_token, email_change_token_new, email_change,
+  email_change_token_current, phone_change, phone_change_token, reauthentication_token,
+  raw_app_meta_data
+) values
+  ('00000000-0000-0000-0000-0000000000aa', 'prashant@kizuna.dev',  'authenticated', 'authenticated', '{"name":"Prashant Sridharan"}', crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}'),
+  ('11111111-1111-1111-1111-111111111111', 'admin@kizuna.dev',     'authenticated', 'authenticated', '{"name":"Admin Adams"}',        crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}'),
+  ('22222222-2222-2222-2222-222222222222', 'lu@kizuna.dev',        'authenticated', 'authenticated', '{"name":"Lu Liu"}',             crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}'),
+  ('33333333-3333-3333-3333-333333333333', 'paul@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Paul Park"}',          crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}'),
+  ('44444444-4444-4444-4444-444444444444', 'maya@kizuna.dev',      'authenticated', 'authenticated', '{"name":"Maya Mason"}',         crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}'),
+  ('55555555-5555-5555-5555-555555555555', 'guest.alex@kizuna.dev','authenticated', 'authenticated', '{"name":"Alex Guest"}',         crypt('kizuna-dev-only', gen_salt('bf')), now(), now(), now(), '00000000-0000-0000-0000-000000000000', '', '', '', '', '', '', '', '', '{"provider":"email","providers":["email"]}')
 on conflict (id) do nothing;
 
 -- Insert identities so Supabase's auth flow recognises these accounts.
@@ -34,6 +45,7 @@ on conflict do nothing;
 
 
 insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider, is_active) values
+  ('00000000-0000-0000-0000-0000000000aa', 'prashant@kizuna.dev',  'super_admin', 'hibob_prashant', null,                               'sso',             true),
   ('11111111-1111-1111-1111-111111111111', 'admin@kizuna.dev',     'super_admin', 'hibob_admin', null,                                  'sso',             true),
   ('22222222-2222-2222-2222-222222222222', 'lu@kizuna.dev',        'admin',       'hibob_lu',    null,                                  'sso',             true),
   ('33333333-3333-3333-3333-333333333333', 'paul@kizuna.dev',      'employee',    'hibob_paul',  null,                                  'sso',             true),
@@ -43,6 +55,7 @@ on conflict (id) do nothing;
 
 
 insert into public.employee_profiles (user_id, preferred_name, legal_name, department, team, job_title, start_date, home_country, base_city, slack_handle, years_attended) values
+  ('00000000-0000-0000-0000-0000000000aa', 'Prashant',  'Prashant Sridharan', 'Marketing',  'DevRel',     'Head of DevRel',     '2024-01-15', 'US', 'San Francisco', 'prashant', 3),
   ('11111111-1111-1111-1111-111111111111', 'Adams',      'Adams Admin',     'Operations',  'Events',     'Head of Events',     '2021-01-15', 'US', 'San Francisco', 'adams', 4),
   ('22222222-2222-2222-2222-222222222222', 'Lu',         'Lu Liu',          'Operations',  'Events',     'Events Manager',     '2022-03-01', 'CA', 'Toronto',       'lu',    3),
   ('33333333-3333-3333-3333-333333333333', 'Paul',       'Paul Park',       'Engineering', 'Database',   'Senior Engineer',    '2023-06-01', 'GB', 'London',        'paul',  2),

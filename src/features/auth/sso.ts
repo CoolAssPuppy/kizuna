@@ -12,7 +12,7 @@
 
 import type { AppSupabaseClient } from '@/lib/supabase';
 
-const DEV_SSO_EMAIL = 'paul@kizuna.dev';
+const DEV_SSO_EMAIL = 'prashant@kizuna.dev';
 const DEV_SSO_PASSWORD = 'kizuna-dev-only';
 
 interface SsoConfig {
