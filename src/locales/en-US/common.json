@@ -58,5 +58,18 @@
     "submit": "Submit",
     "agree": "I agree",
     "close": "Close"
+  },
+  "documents": {
+    "tabTitle": "Documents",
+    "consentTitle": "Please review the following",
+    "scrollToContinue": "Scroll to the end to continue",
+    "explicitCheckboxLabel": "I have read and agree to the {{title}}",
+    "agreeAndContinue": "I agree and continue",
+    "savingAcknowledgement": "Recording your acknowledgement",
+    "acknowledgedOn": "Acknowledged on {{date}}",
+    "version": "Version {{version}}",
+    "versionBumped": "This document has been updated. Please re-read and confirm.",
+    "noDocuments": "No documents to display.",
+    "errorSaving": "We could not record your acknowledgement. Please try again."
   }
 }

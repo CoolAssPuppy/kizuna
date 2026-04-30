@@ -100,21 +100,30 @@ This is the source of truth for milestone tracking. Update inline as work progre
 - renderWithProviders default flipped: withAuth now defaults to false to prevent test leakage of the Supabase singleton; tests opt in.
 - Quality gates green: typecheck, lint, format, 14/14 vitest, 4/4 playwright, build.
 
-### M3 - Consent gate and document management
+### M3 - Consent gate and document management [complete]
 
 **Goal:** Consent gate with full legal audit trail, document versioning, re-acknowledgement on version bump.
 
-- [ ] Document rendering (markdown via react-markdown)
-- [ ] Scroll-to-bottom enforcement
-- [ ] Explicit checkbox gate
-- [ ] Audit trail capture (IP, UA, scrolled, explicit, device type)
-- [ ] `document_acknowledgements` insert with version pinning
-- [ ] Document version comparison hook
-- [ ] Re-acknowledgement flow on version bump
-- [ ] Documents tab (permanent reference)
-- [ ] Vitest coverage for consent component
-- [ ] Playwright: consent flow happy path + scroll-to-bottom enforcement
-- [ ] Commit: `feat(consent): document gate with legal audit trail`
+- [x] Document rendering (react-markdown + remark-gfm)
+- [x] Scroll-to-bottom enforcement (pure isScrolledToBottom helper, tested)
+- [x] Explicit checkbox gate (Radix-based shadcn Checkbox)
+- [x] Audit trail capture: scrolled, explicit, deviceType (IP captured server-side)
+- [x] document_acknowledgements upsert keyed on (user, event, doc_key, doc_version)
+- [x] Document version comparison via fetchDocuments needsAcknowledgement field
+- [x] Re-acknowledgement flow on version bump (tested via api unit test)
+- [x] DocumentsTab (permanent read-only reference)
+- [x] ConsentScreen + DocumentsScreen route wrappers reading active event
+- [x] useActiveEvent hook
+- [x] Vitest: 20 documents tests (deviceType, scroll, api, ConsentGate)
+- [x] Playwright: route gating spec
+- [x] code-simplifier run, findings addressed
+- [x] Commit: `feat(consent): document gate with legal audit trail`
+
+**M3 review:**
+- 34 vitest tests across 8 files passing; 6 playwright specs passing
+- ConsentGate enforces scroll-to-bottom AND explicit checkbox before submit; both signals plus device type travel to acknowledge() so the audit trail is complete
+- Document version bump flow validated: when documents.version > latest acknowledgements row, needsAcknowledgement flips back to true
+- Idempotent upsert lets us safely retry on network failures without creating duplicate acknowledgement rows
 
 ### M4 - Registration wizard
 
