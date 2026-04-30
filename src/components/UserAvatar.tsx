@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -20,6 +21,7 @@ function initialsFor(email: string | undefined): string {
 export function UserAvatar(): JSX.Element {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -117,6 +119,17 @@ export function UserAvatar(): JSX.Element {
             <div className="border-b px-3 py-2 text-xs text-muted-foreground">{user.email}</div>
           ) : null}
 
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setMenuOpen(false);
+              navigate('/profile/edit');
+            }}
+            className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent"
+          >
+            {t('header.editProfile')}
+          </button>
           <button
             type="button"
             role="menuitem"

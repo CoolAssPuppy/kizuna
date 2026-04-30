@@ -67,7 +67,17 @@
   },
   "header": {
     "uploadAvatar": "Upload your avatar",
-    "avatarMenu": "Open account menu"
+    "avatarMenu": "Open account menu",
+    "editProfile": "Edit profile"
+  },
+  "profile": {
+    "title": "Your profile",
+    "subtitle": "Quick links to everything you can do here.",
+    "editTitle": "Edit profile",
+    "comingSoon": "Profile editing arrives in the next milestone."
+  },
+  "community": {
+    "comingSoon": "Community lands in Phase 2: profiles, world map, group chat, and people-matching."
   },
   "footer": {
     "tagline": "Kizuna · An enduring bond.",

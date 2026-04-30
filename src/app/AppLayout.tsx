@@ -21,9 +21,9 @@ export function AppLayout({ children }: Props): JSX.Element {
   const alwaysBare = ALWAYS_BARE_PATHS.has(pathname);
   const signedOut = status === 'unauthenticated';
 
-  // Only the sign-in and accept-invitation routes go fully bare. Logged-out
-  // visitors to any other route also see no chrome — there's nothing
-  // useful in the header until you're signed in.
+  // Sign-in and accept-invitation always run bare. Otherwise: signed-in
+  // visitors get header + footer everywhere; signed-out visitors get
+  // nothing (the home hero stands on its own).
   const bare = alwaysBare || signedOut;
 
   if (bare) {

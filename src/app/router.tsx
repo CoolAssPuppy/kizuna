@@ -3,11 +3,14 @@ import { Route, Routes } from 'react-router-dom';
 import { AdminRoute } from '@/features/admin/AdminRoute';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { SignInScreen } from '@/features/auth/SignInScreen';
+import { CommunityScreen } from '@/features/community/CommunityScreen';
 import { ConsentRoute } from '@/features/documents/ConsentRoute';
 import { DocumentsRoute } from '@/features/documents/DocumentsRoute';
 import { NotFound } from '@/features/errors/NotFound';
 import { AcceptInvitationScreen } from '@/features/guests/AcceptInvitationScreen';
 import { ItineraryRoute } from '@/features/itinerary/ItineraryRoute';
+import { EditProfileScreen } from '@/features/profile/EditProfileScreen';
+import { ProfileScreen } from '@/features/profile/ProfileScreen';
 import { RegistrationRoute } from '@/features/registration/RegistrationRoute';
 import { WelcomeScreen } from '@/features/welcome/WelcomeScreen';
 
@@ -16,11 +19,20 @@ export function AppRouter(): JSX.Element {
     <Routes>
       <Route path="/sign-in" element={<SignInScreen />} />
       <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
+      <Route path="/" element={<WelcomeScreen />} />
       <Route
-        path="/"
+        path="/profile"
         element={
           <RequireAuth>
-            <WelcomeScreen />
+            <ProfileScreen />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/profile/edit"
+        element={
+          <RequireAuth>
+            <EditProfileScreen />
           </RequireAuth>
         }
       />
@@ -61,6 +73,14 @@ export function AppRouter(): JSX.Element {
         element={
           <RequireAuth>
             <RegistrationRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/community"
+        element={
+          <RequireAuth>
+            <CommunityScreen />
           </RequireAuth>
         }
       />
