@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
+import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import i18n from '@/lib/i18n';
 
@@ -38,7 +39,7 @@ export function AppProviders({ children }: AppProvidersProps): JSX.Element {
                 oktaClientId: import.meta.env['VITE_OKTA_CLIENT_ID'],
               }}
             >
-              {children}
+              <ToastProvider>{children}</ToastProvider>
             </AuthProvider>
           </BrowserRouter>
         </ThemeProvider>

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 
+import { NavTile } from '@/components/NavTile';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
 
@@ -54,27 +54,5 @@ export function ProfileScreen(): JSX.Element {
         ) : null}
       </section>
     </main>
-  );
-}
-
-interface NavTileProps {
-  to: string;
-  title: string;
-  description: string;
-  highlight?: boolean;
-}
-
-function NavTile({ to, title, description, highlight = false }: NavTileProps): JSX.Element {
-  return (
-    <Link
-      to={to}
-      className={
-        'group flex flex-col gap-2 rounded-xl border p-6 transition-colors hover:bg-accent ' +
-        (highlight ? 'border-primary/40 bg-primary/5' : 'bg-card')
-      }
-    >
-      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-      <p className="text-sm text-muted-foreground">{description}</p>
-    </Link>
   );
 }

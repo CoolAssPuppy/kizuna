@@ -74,7 +74,18 @@
     "title": "Your profile",
     "subtitle": "Quick links to everything you can do here.",
     "editTitle": "Edit profile",
-    "comingSoon": "Profile editing arrives in the next milestone."
+    "editSubtitle": "Update any section. Each saves on its own.",
+    "cards": {
+      "personalInfo": "Name, badge name, and the city you call home.",
+      "emergencyContact": "Who we should reach out to if something happens.",
+      "dietary": "Restrictions and notes for the kitchen."
+    },
+    "toast": {
+      "personalInfoSaved": "Personal info saved.",
+      "emergencyContactSaved": "Emergency contact saved.",
+      "dietarySaved": "Dietary preferences saved.",
+      "error": "Something went wrong. Please try again."
+    }
   },
   "community": {
     "comingSoon": "Community lands in Phase 2: profiles, world map, group chat, and people-matching."
@@ -220,7 +231,7 @@
   },
   "itinerary": {
     "title": "Your itinerary",
-    "subtitle": "Cached for offline. Updates push live when you have connectivity.",
+    "subtitle": "Your schedule for the event.",
     "empty": "Nothing on your itinerary yet. Sessions and flights will appear here as they're confirmed.",
     "offline": "You are offline. Showing the last cached schedule.",
     "checkin": {
