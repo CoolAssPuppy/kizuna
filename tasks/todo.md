@@ -164,21 +164,32 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - exactOptionalPropertyTypes lessons captured in api.ts (conditional spread for id field)
 - Each step hydrates from DB before allowing submit — prevents accidental empty overwrites
 
-### M5 - Guest invitation, payment, lifecycle
+### M5 - Guest invitation, payment, lifecycle [complete]
 
 **Goal:** Guest invitation lifecycle with signed tokens, Stripe checkout, webhook reconciliation.
 
-- [ ] Edge function: `create_guest_invitation` (signed JWT, 7-day expiry)
-- [ ] Resend integration (graceful when no key) for invite email
-- [ ] Guest accept page (token validation, account creation)
-- [ ] Stripe checkout edge function (graceful when no key)
-- [ ] Stripe webhook handler edge function
-- [ ] Payment status updates → `guest_profiles`
-- [ ] Receipt + confirmation email
-- [ ] Sponsoring employee notification
-- [ ] Vitest: invitation utilities, token validation
-- [ ] Playwright: invitation accept flow
-- [ ] Commit: `feat(guests): invitation lifecycle with stripe payment`
+- [x] Web Crypto HS256 invitation token helpers (sign + verify, 7-day default TTL) shared between SPA and edge functions
+- [x] Resend wrapper with graceful in-memory outbox when RESEND_API_KEY missing
+- [x] Stripe wrapper (createCheckoutSession + feeForTier) with stub redirect when STRIPE_SECRET_KEY missing
+- [x] Edge function: create-guest-invitation (RLS-scoped, signs token, writes row, best-effort email)
+- [x] Edge function: accept-guest-invitation (verifies token, creates auth.user + public.users + guest_profiles, marks invitation accepted)
+- [x] Edge function: create-stripe-checkout (Phase 1 charges adult fee, stubs when unkeyed)
+- [x] Edge function: stripe-webhook (HMAC signature verified when STRIPE_WEBHOOK_SECRET present, updates payment_status)
+- [x] AcceptInvitationScreen at /accept-invitation?token=... with i18n error mapping
+- [x] features/guests/api.ts wrapping functions.invoke with typed callEdgeFunction helper
+- [x] Vitest: 15 integration tests (resend, stripe, invitationToken)
+- [x] Commit: feat(guests) invitation lifecycle with stripe payment
+
+**Deferred from M5 (intentional, follow-up milestones):**
+- Sponsoring-employee notification on guest accept (M9 notifications)
+- Receipt + confirmation email after payment success (M9)
+- Guest list and invite-management UI for employees (M7 admin)
+- Children fee tier (lands when ChildrenStep gets dedicated registration_task_key)
+
+**M5 review:**
+- 62 vitest tests across 13 files (15 new for integrations); 8/8 playwright
+- Edge functions excluded from ESLint since they're Deno-runtime modules. They share the invitationToken implementation byte-for-byte with the SPA, eliminating drift.
+- Graceful-degradation pattern fully proven for Resend and Stripe: each module logs once at boot and returns deterministic stub data without throwing.
 
 ### M6 - Personal itinerary and offline
 

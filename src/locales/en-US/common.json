@@ -150,6 +150,35 @@
       "needsTransfer": "I will need an airport transfer."
     }
   },
+  "guests": {
+    "invitationTitle": "You're invited to Supafest",
+    "invitationSubtitle": "Set a password to accept your guest invitation. The link expires seven days from when {{sponsor}} sent it.",
+    "createPassword": "Create a password",
+    "passwordHint": "At least 8 characters.",
+    "acceptAndContinue": "Accept invitation",
+    "accepting": "Setting up your account",
+    "errors": {
+      "missingToken": "This invitation link is missing its token. Ask {{sponsor}} to resend.",
+      "expired": "This invitation has expired. Ask the sponsoring employee to send a new one.",
+      "badSignature": "This invitation link is not valid. Please use the original email link.",
+      "generic": "We could not accept your invitation. Try again or contact support."
+    },
+    "checkout": {
+      "title": "Confirm your spot",
+      "subtitle": "We charge a flat fee that covers your accommodation, meals, and activities for the duration of Supafest.",
+      "adultFee": "$950 USD",
+      "childFee": "$500 USD",
+      "payNow": "Pay now",
+      "redirecting": "Taking you to checkout"
+    },
+    "invite": {
+      "addGuest": "Invite a guest",
+      "guestEmail": "Guest email",
+      "send": "Send invitation",
+      "sending": "Sending invitation",
+      "invited": "Invitation sent to {{email}}"
+    }
+  },
   "documents": {
     "tabTitle": "Documents",
     "consentTitle": "Please review the following",
