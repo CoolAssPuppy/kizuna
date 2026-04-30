@@ -15,7 +15,7 @@ let clientInstance: AppSupabaseClient | null = null;
  */
 export function getSupabaseClient(): AppSupabaseClient {
   if (clientInstance === null) {
-    clientInstance = createClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
+    clientInstance = createClient<Database>(env.supabaseUrl, env.supabasePublishableKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,

@@ -38,30 +38,42 @@ This is the source of truth for milestone tracking. Update inline as work progre
 - Refactor-scan flagged 11 unused production deps (now removed; will be added back per-feature), tsconfig.node.json strictness gap (fixed), QueryClient lifecycle in renderWithProviders (fixed), legacy withTranslation HOC in ErrorBoundary (refactored to functional ErrorFallback + class ErrorBoundary), speculative /api/itinerary cache (removed).
 - Lessons captured in tasks/lessons.md.
 
-### M1 - Database schema, RLS, triggers (TDD)
+### M1 - Database schema, RLS, triggers (TDD) [complete]
 
-**Goal:** All 35 tables defined declaratively with full RLS, triggers, and pgTAP coverage. Type generation working.
+**Goal:** 33 tables defined declaratively with full RLS, triggers, and pgTAP coverage. Type generation working.
 
-- [ ] Enable extensions: pgcrypto, citext (if needed)
-- [ ] Core identity: `users`, `employee_profiles`, `guest_profiles`, `guest_invitations`, `children`, `emergency_contacts`
-- [ ] Registration: `registrations`, `registration_tasks`, `profile_custom_fields`, `profile_field_responses`, `passport_details`, `dietary_preferences`
-- [ ] Logistics: `flights`, `accommodations`, `accommodation_occupants`, `transport_requests`, `transport_vehicles`, `swag_items`, `swag_selections`
-- [ ] Events: `events`, `sessions`, `session_registrations`, `dinner_seating`, `itinerary_items`
-- [ ] Reporting: `report_snapshots`
-- [ ] Community: `attendee_profiles`, `messages`, `votes`
-- [ ] Documents: `documents`, `document_acknowledgements`
-- [ ] Infrastructure: `notifications`, `data_conflicts`, `hibob_sync_log`
-- [ ] Enums: all role, status, source, type enums
-- [ ] RLS policies on every table (per spec section 7)
-- [ ] Trigger: `update_registration_completion()` on `registration_tasks`
-- [ ] Trigger: flights → transport_requests `needs_review` cascade
-- [ ] Triggers: itinerary_items materialisation (sessions, flights, transport, accommodations)
-- [ ] Trigger: passport_number encryption on insert/update
-- [ ] pgTAP tests for every RLS policy (positive + negative cases)
-- [ ] pgTAP tests for every trigger
-- [ ] Seed data: 1 event, ~5 employees, ~3 guests, ~10 sessions
-- [ ] Type generation pipeline (`npm run gen:types`)
-- [ ] Commit: `feat(db): declarative schema with full RLS and pgTAP coverage`
+- [x] Extensions: pgcrypto, citext
+- [x] Enums for every role, status, source, type
+- [x] Core identity: users, employee_profiles, guest_profiles, guest_invitations, children, emergency_contacts
+- [x] Registration: registrations, registration_tasks, profile_custom_fields, profile_field_responses, passport_details, dietary_preferences
+- [x] Logistics: flights, accommodations, accommodation_occupants, transport_requests, transport_vehicles, swag_items, swag_selections
+- [x] Events: events, sessions, session_registrations, dinner_seating, itinerary_items
+- [x] Reporting: report_snapshots
+- [x] Community: attendee_profiles, messages, votes
+- [x] Documents: documents, document_acknowledgements
+- [x] Infrastructure: notifications, data_conflicts, hibob_sync_log
+- [x] RLS policies on every table (62 policies via helpers `is_admin`, `is_self_or_admin`, `channel_has_access`)
+- [x] Custom Access Token auth hook to inject `app_role` into JWT
+- [x] Trigger: update_registration_completion() on registration_tasks
+- [x] Trigger: flights → transport_requests needs_review cascade
+- [x] Triggers: itinerary_items materialisation from sessions, flights, transport, accommodations
+- [x] Functions: set_passport / get_passport_number with pgcrypto encryption
+- [x] Trigger: touch_updated_at on all tables with updated_at columns
+- [x] Unique constraint on itinerary_items(user_id, item_type, source_id) — fixes silent dedup bug caught by simplifier
+- [x] pgTAP tests: 9 files, 25 assertions covering RLS, encryption, completion trigger, flight cascade, channel access, dedup, and constraints
+- [x] Seed: 1 event, 4 employees + 1 guest, 5 sessions, 2 documents, 14 registration tasks
+- [x] Type generation pipeline (npm run gen:types) — 1965-line database.types.ts
+- [x] db:apply script handling schemas, pgTAP isolation, seed
+- [x] code-simplifier and refactor-scan run, all critical/suggested findings addressed
+- [x] Commit: `feat(db): declarative schema with full RLS and pgTAP coverage`
+
+**M1 review:**
+- 33 tables (spec lists "35" but two — photos, ideas — are P3 territory; deferred)
+- 62 RLS policies, 18 triggers, 9 SQL functions
+- pgTAP tests: 9 files, 25 assertions, all green
+- Frontend gates green: typecheck, lint, 5/5 vitest, 2/2 playwright, build
+- Bug found and fixed by simplifier: itinerary_items lacked unique constraint, so `on conflict do nothing` was a silent no-op. Added partial unique index on (user_id, item_type, source_id) where source_id is not null and updated triggers to reference it. Wrote regression test.
+- Architectural decision: app role lives in JWT custom claim `app_role` (not `role`) so Supabase's standard `authenticated`/`anon` postgres role mapping continues to work. Custom Access Token hook reads from public.users.role.
 
 ### M2 - Auth, identity, providers
 

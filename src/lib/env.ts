@@ -20,5 +20,5 @@ function requireEnv(key: keyof ImportMetaEnv): string {
 
 export const env = {
   supabaseUrl: requireEnv('VITE_SUPABASE_URL'),
-  supabaseAnonKey: requireEnv('VITE_SUPABASE_ANON_KEY'),
+  supabasePublishableKey: requireEnv('VITE_SUPABASE_PUBLISHABLE_KEY'),
 } as const;

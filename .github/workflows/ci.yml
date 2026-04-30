@@ -40,7 +40,7 @@ jobs:
       - name: Build
         env:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
-          VITE_SUPABASE_ANON_KEY: ci-anon-placeholder
+          VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-placeholder
         run: npm run build
 
   e2e:
@@ -64,7 +64,7 @@ jobs:
       - name: Run Playwright
         env:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
-          VITE_SUPABASE_ANON_KEY: ci-anon-placeholder
+          VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-placeholder
         run: npm run test:e2e -- --project=chromium
 
       - name: Upload Playwright report

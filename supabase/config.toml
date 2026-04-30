@@ -47,7 +47,11 @@ enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory. For example:
 # sql_paths = ['./seeds/*.sql', '../project-src/seeds/*-load-testing.sql']
-sql_paths = ['./seed.sql']
+# Seed is applied manually via `npm run db:apply` after declarative schemas
+# in supabase/schemas/ are applied. The Supabase CLI does not yet support
+# declarative schema application during `db reset`, so we keep seed_paths
+# empty here and own the order ourselves.
+sql_paths = []
 
 [realtime]
 enabled = true
@@ -170,10 +174,10 @@ max_frequency = "5s"
 # Force log out if the user has been inactive longer than the specified duration.
 # inactivity_timeout = "8h"
 
-# This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
-# [auth.hook.custom_access_token]
-# enabled = true
-# uri = "pg-functions://<database>/<schema>/<hook_name>"
+# Inject app_role into JWT claims from public.users.role on every token issuance.
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-functions://postgres/public/custom_access_token_hook"
 
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]

@@ -46,7 +46,7 @@ cd kizuna
 cp .env.example .env
 
 # Start the local Supabase stack (Postgres, Auth, Storage, ...).
-# This prints anon and service-role keys — copy the anon key into .env.
+# This prints a publishable key (sb_publishable_*) — copy it into .env.
 supabase start
 
 # Apply the declarative schemas to the local DB.

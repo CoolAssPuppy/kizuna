@@ -7,7 +7,16 @@ import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'coverage', 'playwright-report', 'test-results'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'coverage',
+      'playwright-report',
+      'test-results',
+      'src/types/database.types.ts',
+    ],
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommendedTypeChecked, prettier],
     files: ['**/*.{ts,tsx}'],

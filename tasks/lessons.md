@@ -88,6 +88,38 @@
 
 **How to apply:** `ErrorBoundary.tsx` (class) imports `ErrorFallback.tsx` (function). Class re-renders fallback on error. Fallback freely uses hooks.
 
+## 2026-04-30 - JWT app_role lives in a custom claim, not the standard role claim
+
+**Rule:** App roles (`employee | guest | admin | super_admin`) go in JWT custom claim `app_role`, not the top-level `role` claim. The standard `role` stays `authenticated`/`anon` so Supabase's `auth.role()` and Postgres role mapping work.
+
+**Why:** The spec wrote `auth.jwt() ->> 'role'` which conflicts with Supabase's built-in role mapping. Overriding `role` to `'employee'` would break the `authenticated` checks in `events_authenticated_read` and similar policies, and require dropping Supabase's standard JWT contract.
+
+**How to apply:** Set `app_role` via a Custom Access Token Hook (see `supabase/schemas/85_auth_hooks.sql`). RLS policies read it through `public.auth_role()`. Tests inject it directly with `set local request.jwt.claims to '{... "app_role":"employee" ...}'`.
+
+## 2026-04-30 - `on conflict do nothing` requires a real unique constraint
+
+**Rule:** When you write `on conflict ... do nothing`, the conflict target must point at an actual unique index/constraint. There is no "silent dedup" mode — duplicate inserts succeed without one.
+
+**Why:** Bit me on `itinerary_items`. The materialisation triggers used `on conflict do nothing` but the table had no unique constraint, so duplicate flight/session inserts would silently double the itinerary. Caught by code-simplifier.
+
+**How to apply:** Pair every `on conflict do nothing` with an explicit unique index/constraint and reference it (`on conflict (col1, col2) do nothing`). For partial unique indexes, also append the `where` predicate (`on conflict (cols) where source_id is not null do nothing`).
+
+## 2026-04-30 - pgTAP belongs in its own schema
+
+**Rule:** Install pgTAP via `create extension pgtap with schema tap`, not into public.
+
+**Why:** pgTAP exports many SQL functions (~hundreds). When installed in `public`, they pollute `supabase gen types` output and trigger generated-code lint errors (duplicate type constituents). Isolating in a `tap` schema keeps `public` types clean.
+
+**How to apply:** Always grant `usage` on the `tap` schema and `execute` on its functions to the `authenticated`/`anon` roles, and add `set search_path to public, tap, extensions;` at the top of each test file (else `tap.plan()` is unreachable from the authenticated role).
+
+## 2026-04-30 - Don't auto-seed via supabase config when using declarative schemas
+
+**Rule:** Set `[db.seed].sql_paths = []` in `supabase/config.toml`. Run seed yourself after applying schemas.
+
+**Why:** `supabase db reset` runs migrations then seed. Declarative schemas aren't migrations, so reset wipes the DB and seed runs against an empty schema, blowing up. Owning the order ourselves (reset → apply schemas → install pgtap → seed) keeps the loop fast and predictable.
+
+**How to apply:** Use `scripts/db-apply.sh` (wraps the four steps idempotently). The package.json `db:apply` script calls it.
+
 ## 2026-04-30 - Supabase CLI is a system install, not an npm dep
 
 **Rule:** Don't add `supabase` to `package.json` devDependencies. Install via `brew install supabase/tap/supabase` (or system equivalent) and document it in README prerequisites.
