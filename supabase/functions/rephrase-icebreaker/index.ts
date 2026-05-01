@@ -11,11 +11,19 @@
 // run the full flow in dev without an OpenAI key and gives a
 // graceful no-op when the key rotates or the model is unavailable.
 //
+// Result caching: every successful rephrase persists to
+// public.icebreaker_rephrasings keyed by a normalised version of the
+// fact (lowercased, trimmed, trailing-punctuation-stripped). On every
+// call we hit the cache first; only a true miss spends an OpenAI
+// token. Bear note: the SPA reads the cache directly via RLS, so most
+// page loads never even invoke this function.
+//
 // We deliberately use gpt-4o-mini at temperature 0 with a short
 // system prompt; the rephrase is one sentence, so anything bigger
 // is a waste of tokens.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
@@ -43,6 +51,20 @@ Deno.serve(async (req) => {
   const fact = body.fact?.trim();
   if (!fact || fact.length < 3) {
     return jsonResponse({ error: 'invalid_fact' }, { status: 400 });
+  }
+
+  const factKey = normaliseFactKey(fact);
+  const admin = getAdminClient();
+
+  // 1) Cache lookup. Every successful rephrase has been persisted, so a
+  //    second sighting of the same fact never spends an OpenAI token.
+  const cacheRead = await admin
+    .from('icebreaker_rephrasings')
+    .select('question')
+    .eq('fact_key', factKey)
+    .maybeSingle();
+  if (cacheRead.data?.question) {
+    return jsonResponse({ question: cacheRead.data.question, source: 'cache' });
   }
 
   const apiKey = Deno.env.get('OPENAI_API_KEY');
@@ -81,12 +103,44 @@ Deno.serve(async (req) => {
     if (!raw) {
       return jsonResponse({ question: localFallback(fact), source: 'fallback' });
     }
-    return jsonResponse({ question: normalise(raw), source: 'live' });
+    const question = normalise(raw);
+
+    // 2) Persist for the next caller. Best-effort: a write failure
+    //    doesn't break this response — we still hand the question
+    //    back to the SPA. Conflicts (someone wrote the same key
+    //    between our read and write) get swallowed by upsert.
+    await admin
+      .from('icebreaker_rephrasings')
+      .upsert(
+        {
+          fact_key: factKey,
+          fact_original: fact,
+          question,
+          model,
+        },
+        { onConflict: 'fact_key' },
+      );
+
+    return jsonResponse({ question, source: 'live' });
   } catch (err) {
     console.warn('[rephrase-icebreaker] error, falling back', err);
     return jsonResponse({ question: localFallback(fact), source: 'fallback' });
   }
 });
+
+/**
+ * Normalise a fact for cache lookup: lowercase, collapse internal
+ * whitespace, trim, drop trailing sentence punctuation. Keeps the
+ * cache hit-rate high across "I love chess.", "I love chess",
+ * "  i love chess  ".
+ */
+function normaliseFactKey(rawFact: string): string {
+  return rawFact
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .replace(/[.?!]+\s*$/, '')
+    .trim();
+}
 
 /**
  * Mirror of src/features/home/icebreaker.ts -> reframeAsTeammateQuestion

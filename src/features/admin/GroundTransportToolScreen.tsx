@@ -48,8 +48,8 @@ export function GroundTransportToolScreen(): JSX.Element {
   const [newVehicleOpen, setNewVehicleOpen] = useState(false);
 
   const passengersQ = useQuery({
-    queryKey: ['admin', 'gt', 'passengers', direction],
-    queryFn: () => fetchPassengers(getSupabaseClient(), direction),
+    queryKey: ['admin', 'gt', 'passengers', direction, event?.airport_iata ?? null],
+    queryFn: () => fetchPassengers(getSupabaseClient(), direction, event?.airport_iata ?? null),
     enabled: !!eventId,
   });
   const vehiclesQ = useQuery({

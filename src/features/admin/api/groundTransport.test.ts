@@ -92,7 +92,7 @@ function flight(overrides: Partial<FlightShape> = {}): FlightShape {
 describe('fetchPassengers', () => {
   it('queries inbound flights and confirmed-only on arrival', async () => {
     const { client, selectArgs } = makeClient([flight()]);
-    await fetchPassengers(client, 'arrival');
+    await fetchPassengers(client, 'arrival', 'YYC');
     expect(selectArgs.eqs).toEqual(
       expect.arrayContaining([
         ['direction', 'inbound'],
@@ -118,7 +118,7 @@ describe('fetchPassengers', () => {
         },
       }),
     ]);
-    await fetchPassengers(client, 'departure');
+    await fetchPassengers(client, 'departure', 'YYC');
     expect(selectArgs.eqs).toEqual(expect.arrayContaining([['direction', 'outbound']]));
     expect(selectArgs.orderBy).toBe('departure_at');
   });
@@ -154,7 +154,7 @@ describe('fetchPassengers', () => {
         },
       }),
     ]);
-    const result = await fetchPassengers(client, 'arrival');
+    const result = await fetchPassengers(client, 'arrival', 'YYC');
     expect(result.map((r) => r.user_id)).toEqual(['u-keep']);
   });
 
@@ -162,9 +162,9 @@ describe('fetchPassengers', () => {
     const { client } = makeClient([
       flight({ user: { ...flight().user, attendee_profiles: { ground_transport_need: 'both' } } }),
     ]);
-    const arrivals = await fetchPassengers(client, 'arrival');
+    const arrivals = await fetchPassengers(client, 'arrival', 'YYC');
     expect(arrivals).toHaveLength(1);
-    const departures = await fetchPassengers(client, 'departure');
+    const departures = await fetchPassengers(client, 'departure', 'YYC');
     expect(departures).toHaveLength(1);
   });
 
@@ -172,7 +172,7 @@ describe('fetchPassengers', () => {
     const arr = '2027-01-11T21:00:00.000Z';
     const dep = '2027-01-15T18:00:00.000Z';
     const { client: arrClient } = makeClient([flight({ arrival_at: arr, departure_at: dep })]);
-    const arrivals = await fetchPassengers(arrClient, 'arrival');
+    const arrivals = await fetchPassengers(arrClient, 'arrival', 'YYC');
     expect(arrivals[0]?.pickup_at).toBe(arr);
 
     const { client: depClient } = makeClient([
@@ -182,7 +182,7 @@ describe('fetchPassengers', () => {
         user: { ...flight().user, attendee_profiles: { ground_transport_need: 'both' } },
       }),
     ]);
-    const departures = await fetchPassengers(depClient, 'departure');
+    const departures = await fetchPassengers(depClient, 'departure', 'YYC');
     expect(departures[0]?.pickup_at).toBe(dep);
   });
 
@@ -209,7 +209,7 @@ describe('fetchPassengers', () => {
         ],
       }),
     ]);
-    const arrivals = await fetchPassengers(client, 'arrival');
+    const arrivals = await fetchPassengers(client, 'arrival', 'YYC');
     expect(arrivals[0]?.transport_request_id).toBe('tr-arr');
     expect(arrivals[0]?.assigned_vehicle_id).toBe('v-arr');
     expect(arrivals[0]?.needs_review).toBe(false);

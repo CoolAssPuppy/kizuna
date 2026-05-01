@@ -92,3 +92,22 @@ comment on column public.data_conflicts.external_value is
 
 create index data_conflicts_user_status_idx on public.data_conflicts(user_id, status);
 create index data_conflicts_status_open_idx on public.data_conflicts(status) where status = 'open';
+
+
+-- =====================================================================
+-- Icebreaker rephrase cache
+-- =====================================================================
+-- gpt-4o-mini-rephrased questions for the home "Get to know your
+-- teammate" card. Keying by a normalised fact (lowercase + trimmed)
+-- de-duplicates "I love chess." vs "I love chess" vs "  i love
+-- chess.". We never re-call the model for a fact we've seen before.
+create table public.icebreaker_rephrasings (
+  fact_key text primary key check (length(fact_key) between 3 and 1000),
+  fact_original text not null,
+  question text not null,
+  model text,
+  created_at timestamptz not null default now()
+);
+
+comment on table public.icebreaker_rephrasings is
+  'OpenAI rephrase cache for the Get-to-know-your-teammate home card. fact_key is the normalised (lowercase + trimmed + trailing-punctuation-stripped) version of the fact; fact_original keeps the original cased text for reference. Read by the rephrase-icebreaker edge function before any external call.';

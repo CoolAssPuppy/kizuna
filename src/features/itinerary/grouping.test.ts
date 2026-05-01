@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { flagConflicts, groupItineraryByDay, toLocalDateKey } from './grouping';
+import { groupItineraryByDay, toLocalDateKey } from './grouping';
 import type { ItineraryItemRow } from './types';
 
 function makeItem(overrides: Partial<ItineraryItemRow>): ItineraryItemRow {
@@ -59,29 +59,51 @@ describe('groupItineraryByDay', () => {
     const grouped = groupItineraryByDay(items, 'UTC');
     expect(grouped.map((d) => d.date)).toEqual(['2027-04-12', '2027-04-13', '2027-04-14']);
   });
-});
 
-describe('flagConflicts', () => {
-  it('marks items that overlap', () => {
-    const a = makeItem({ starts_at: '2027-04-12T18:00:00Z', ends_at: '2027-04-12T20:00:00Z' });
-    const b = makeItem({ starts_at: '2027-04-12T19:00:00Z', ends_at: '2027-04-12T21:00:00Z' });
-    const flagged = flagConflicts([a, b]);
-    expect(flagged.every((item) => item.is_conflict)).toBe(true);
+  it('inbound flight to event city uses ARRIVAL time so an overnight flight lands on the right day', () => {
+    // Flight: departs Apr 11 17:00 UTC at JFK (America/New_York), lands
+    // Apr 12 08:00 UTC at YYC (America/Edmonton, the event tz).
+    // Hotel: 5pm check-in same day in Edmonton tz.
+    // Both should bucket to Apr 12 in the event tz; flight first.
+    const flight = makeItem({
+      item_type: 'flight',
+      starts_at: '2027-04-11T17:00:00Z',
+      starts_tz: 'America/New_York',
+      ends_at: '2027-04-12T08:00:00Z',
+      ends_tz: 'America/Edmonton',
+    });
+    const hotel = makeItem({
+      item_type: 'accommodation',
+      starts_at: '2027-04-12T17:00:00Z',
+      starts_tz: 'America/Edmonton',
+      ends_at: null,
+    });
+    const grouped = groupItineraryByDay([hotel, flight], 'America/Edmonton');
+    expect(grouped).toHaveLength(1);
+    expect(grouped[0]?.date).toBe('2027-04-12');
+    expect(grouped[0]?.items.map((i) => i.item_type)).toEqual(['flight', 'accommodation']);
   });
 
-  it('leaves non-overlapping items alone', () => {
-    const a = makeItem({ starts_at: '2027-04-12T18:00:00Z', ends_at: '2027-04-12T19:00:00Z' });
-    const b = makeItem({ starts_at: '2027-04-12T19:00:00Z', ends_at: '2027-04-12T20:00:00Z' });
-    const flagged = flagConflicts([a, b]);
-    expect(flagged.every((item) => item.is_conflict === false)).toBe(true);
-  });
-
-  it('handles items with no end time as point-in-time', () => {
-    const a = makeItem({ starts_at: '2027-04-12T18:00:00Z', ends_at: null });
-    const b = makeItem({ starts_at: '2027-04-12T18:00:00Z', ends_at: null });
-    const flagged = flagConflicts([a, b]);
-    // Two point events at exactly the same instant: per the half-open
-    // interval semantics, they do not overlap. Ensures we don't false-positive.
-    expect(flagged.every((item) => item.is_conflict === false)).toBe(true);
+  it('outbound flight from event city uses DEPARTURE time, not the landing-elsewhere time', () => {
+    // Flight YYC -> JFK on Apr 15: departs 14:00 Mountain (= 20:00 UTC),
+    // lands 23:00 Eastern (= 03:00 UTC Apr 16). The card belongs to
+    // Apr 15 (departure day), and within Apr 15 it should sort by the
+    // 14:00 departure, not the 23:00 landing in a different city.
+    const lunch = makeItem({
+      item_type: 'session',
+      starts_at: '2027-04-15T18:00:00Z',
+      starts_tz: 'America/Edmonton',
+    });
+    const flight = makeItem({
+      item_type: 'flight',
+      starts_at: '2027-04-15T20:00:00Z',
+      starts_tz: 'America/Edmonton',
+      ends_at: '2027-04-16T03:00:00Z',
+      ends_tz: 'America/New_York',
+    });
+    const grouped = groupItineraryByDay([flight, lunch], 'America/Edmonton');
+    expect(grouped).toHaveLength(1);
+    expect(grouped[0]?.date).toBe('2027-04-15');
+    expect(grouped[0]?.items.map((i) => i.item_type)).toEqual(['session', 'flight']);
   });
 });

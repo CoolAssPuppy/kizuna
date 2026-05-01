@@ -2,11 +2,11 @@ import type { LucideIcon } from 'lucide-react';
 import {
   AlertTriangle,
   BarChart3,
+  Bed,
+  Bus,
   CalendarRange,
   FileText,
-  Hotel,
   Newspaper,
-  PlaneLanding,
   Send,
   Users,
 } from 'lucide-react';
@@ -24,8 +24,8 @@ interface NavSection {
 
 const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
-  { to: '/admin/ground-transport', icon: PlaneLanding, labelKey: 'admin.nav.groundTransport' },
-  { to: '/admin/rooms', icon: Hotel, labelKey: 'admin.nav.roomAssignment' },
+  { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
+  { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },

@@ -642,6 +642,19 @@ create policy hibob_sync_log_admin_only on public.hibob_sync_log
   with check (public.is_admin());
 
 
+-- icebreaker_rephrasings: any authenticated user can read the cache so
+-- the SPA can surface a polished question without a round trip to the
+-- model. Writes are limited to the rephrase-icebreaker edge function
+-- (service-role bypass via SECURITY DEFINER on the helper, or just
+-- service-role from the function itself).
+create policy icebreaker_rephrasings_read on public.icebreaker_rephrasings
+  for select using (auth.role() = 'authenticated');
+
+create policy icebreaker_rephrasings_admin_write on public.icebreaker_rephrasings
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+
 -- data_conflicts: only super_admin can resolve, admin can read.
 create policy data_conflicts_admin_read on public.data_conflicts
   for select using (public.is_admin());

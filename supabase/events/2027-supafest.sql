@@ -29,11 +29,11 @@ begin
   end if;
 
   insert into public.events (
-    id, name, subtitle, type, location, time_zone,
+    id, name, subtitle, type, location, airport_iata, time_zone,
     start_date, end_date, reg_opens_at, reg_closes_at,
     is_active, hero_image_url, logo_url, invite_all_employees
   ) values (
-    v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, v_event_tz,
+    v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, 'YYC', v_event_tz,
     v_start_date, v_end_date, v_reg_opens_at, v_reg_closes_at,
     true, v_hero_image_url, v_logo_url, true
   );

@@ -108,18 +108,29 @@ const FLIGHT_DIRECTION = {
 } as const;
 
 /**
- * Loads every flight for the requested leg, filtered to passengers whose
- * attendee_profiles.ground_transport_need covers this direction. The
- * Ground Transport Tool calls this twice (once per direction) so the
- * Arrival and Departure tabs each render only their relevant audience.
+ * Loads every flight for the requested leg, filtered to:
+ *   - passengers whose attendee_profiles.ground_transport_need
+ *     covers this direction
+ *   - flights actually arriving at / departing from the event's
+ *     gateway airport (events.airport_iata)
+ *
+ * Direction filter alone wasn't tight enough — a user could create an
+ * "inbound" flight whose destination wasn't the event city, and it
+ * would still surface on the Arrival tab. Anchoring to airport_iata
+ * keeps the manifest scoped to flights the shuttle actually meets.
+ *
+ * `eventAirportIata` is null until the event admin sets it; in that
+ * case the airport filter is skipped (legacy behaviour) and a
+ * console.warn fires so admins know to set it.
  */
 export async function fetchPassengers(
   client: AppSupabaseClient,
   direction: TransportDirection,
+  eventAirportIata: string | null,
 ): Promise<PassengerRow[]> {
   const flightDirection = FLIGHT_DIRECTION[direction];
 
-  const flights = await client
+  let query = client
     .from('flights')
     .select(
       `
@@ -139,8 +150,21 @@ export async function fetchPassengers(
     // Tentative flights are excluded from manifests by schema convention
     // (see comment on flights.is_confirmed). Match the contract here so
     // admins never assign a vehicle to a flight that hasn't been booked.
-    .eq('is_confirmed', true)
-    .order(direction === 'arrival' ? 'arrival_at' : 'departure_at', { ascending: true });
+    .eq('is_confirmed', true);
+
+  if (eventAirportIata) {
+    // Arrival tab → flight lands at event airport. Departure tab →
+    // flight departs from event airport.
+    query = query.eq(direction === 'arrival' ? 'destination' : 'origin', eventAirportIata);
+  } else {
+    console.warn(
+      '[groundTransport] events.airport_iata is null — Ground Transport Tool will not filter by airport. Set it in the admin event editor to scope the manifest.',
+    );
+  }
+
+  const flights = await query.order(direction === 'arrival' ? 'arrival_at' : 'departure_at', {
+    ascending: true,
+  });
   if (flights.error) throw flights.error;
 
   return ((flights.data ?? []) as unknown as FlightRowShape[])

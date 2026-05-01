@@ -11,6 +11,12 @@ create table public.events (
   subtitle text,
   type event_type not null,
   location text,
+  -- IATA code for the event's gateway airport. Drives the Ground
+  -- Transport Tool: arrival tab is scoped to flights.destination =
+  -- airport_iata, departure tab to flights.origin = airport_iata.
+  -- Three letters per IATA spec. Null pre-launch; set when an event is
+  -- finalised.
+  airport_iata text check (airport_iata is null or length(airport_iata) = 3),
   time_zone text not null default 'UTC',
   start_date date not null,
   end_date date not null check (end_date >= start_date),

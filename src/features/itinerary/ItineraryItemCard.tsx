@@ -45,7 +45,6 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
         className={cn(
           'group flex flex-col gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-sm transition-all sm:flex-row sm:items-start sm:gap-4',
           'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
-          item.is_conflict && 'border-destructive/50',
         )}
       >
         <span
@@ -77,11 +76,6 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
             {item.includes_guest ? (
               <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 {t('itinerary.withGuest')}
-              </span>
-            ) : null}
-            {item.is_conflict ? (
-              <span className="inline-flex items-center rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
-                {t('itinerary.conflict')}
               </span>
             ) : null}
           </div>

@@ -26,30 +26,17 @@
 // own profile. Do not generalise without re-thinking the trust model.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { HIBOB_STUB_BY_EMAIL, type HiBobStubPerson } from '../_shared/hibobStub.ts';
 import { getAdminClient, getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
 const HIBOB_SEARCH_URL = 'https://api.hibob.com/v1/people/search';
 
-interface HiBobPerson {
-  hibobId: string;
-  workEmail: string;
-  privateEmail: string | null;
-  legalName: string;
-  preferredName: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  department: string | null;
-  jobTitle: string | null;
-  startDate: string | null;
-  homeCountry: string | null;
-  baseCity: string | null;
-  phone: string | null;
-  avatarUrl: string | null;
-  tshirtSize: string | null;
-  shoeSizeEu: number | null;
-}
+// Local shape mirrors HiBobStubPerson minus the `team` + `isActive`
+// flags this function does not consume. Keeping a typed alias makes
+// the upsert payload below readable.
+type HiBobPerson = Omit<HiBobStubPerson, 'team' | 'isActive'>;
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -145,7 +132,11 @@ async function fetchHiBob(
     console.warn(
       '[hibob-self] HIBOB_SERVICE_USER_ID / HIBOB_SERVICE_USER_TOKEN missing — using stub directory.',
     );
-    return STUB_BY_EMAIL.get(email.toLowerCase()) ?? null;
+    const stub = HIBOB_STUB_BY_EMAIL.get(email.toLowerCase());
+    if (!stub) return null;
+    // Strip team/isActive — they're not in the local HiBobPerson shape.
+    const { team: _team, isActive: _isActive, ...rest } = stub;
+    return rest;
   }
 
   const fields: string[] = [
@@ -215,38 +206,4 @@ async function fetchHiBob(
   };
 }
 
-// Stub directory — keep aligned with the SPA-side stub in
-// src/lib/integrations/hibob.ts so local dev sees consistent shapes
-// from both sides of the wire.
-const STUB_BY_EMAIL: Map<string, HiBobPerson> = new Map([
-  [
-    'paul@kizuna.dev',
-    {
-      hibobId: 'hibob_paul', workEmail: 'paul@kizuna.dev', privateEmail: 'paul.park@gmail.com',
-      legalName: 'Paul Park', preferredName: 'Paul', firstName: 'Paul', lastName: 'Park',
-      department: 'Engineering', jobTitle: 'Senior Engineer', startDate: '2023-06-01',
-      homeCountry: 'GB', baseCity: 'London', phone: '+44 20 7946 0123', avatarUrl: null,
-      tshirtSize: 'L', shoeSizeEu: 44,
-    },
-  ],
-  [
-    'maya@kizuna.dev',
-    {
-      hibobId: 'hibob_maya', workEmail: 'maya@kizuna.dev', privateEmail: null,
-      legalName: 'Maya Mason', preferredName: 'Maya', firstName: 'Maya', lastName: 'Mason',
-      department: 'Marketing', jobTitle: 'Content Lead', startDate: '2024-09-15',
-      homeCountry: 'US', baseCity: 'New York', phone: null, avatarUrl: null,
-      tshirtSize: 'M', shoeSizeEu: 39,
-    },
-  ],
-  [
-    'lu@kizuna.dev',
-    {
-      hibobId: 'hibob_lu', workEmail: 'lu@kizuna.dev', privateEmail: null,
-      legalName: 'Lu Liu', preferredName: 'Lu', firstName: 'Lu', lastName: 'Liu',
-      department: 'Operations', jobTitle: 'Events Manager', startDate: '2022-03-01',
-      homeCountry: 'CA', baseCity: 'Toronto', phone: '+1 416 555 0123', avatarUrl: null,
-      tshirtSize: 'S', shoeSizeEu: 38,
-    },
-  ],
-]);
+// (Stub directory consolidated to supabase/functions/_shared/hibobStub.ts.)

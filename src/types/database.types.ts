@@ -699,6 +699,7 @@ export type Database = {
       }
       events: {
         Row: {
+          airport_iata: string | null
           end_date: string
           hero_image_url: string | null
           id: string
@@ -715,6 +716,7 @@ export type Database = {
           type: Database["public"]["Enums"]["event_type"]
         }
         Insert: {
+          airport_iata?: string | null
           end_date: string
           hero_image_url?: string | null
           id?: string
@@ -731,6 +733,7 @@ export type Database = {
           type: Database["public"]["Enums"]["event_type"]
         }
         Update: {
+          airport_iata?: string | null
           end_date?: string
           hero_image_url?: string | null
           id?: string
@@ -1046,6 +1049,30 @@ export type Database = {
           category?: string
           label?: string
           slug?: string
+        }
+        Relationships: []
+      }
+      icebreaker_rephrasings: {
+        Row: {
+          created_at: string
+          fact_key: string
+          fact_original: string
+          model: string | null
+          question: string
+        }
+        Insert: {
+          created_at?: string
+          fact_key: string
+          fact_original: string
+          model?: string | null
+          question: string
+        }
+        Update: {
+          created_at?: string
+          fact_key?: string
+          fact_original?: string
+          model?: string | null
+          question?: string
         }
         Relationships: []
       }

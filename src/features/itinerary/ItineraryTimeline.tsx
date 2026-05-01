@@ -2,7 +2,7 @@ import { Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { flagConflicts, groupItineraryByDay } from './grouping';
+import { groupItineraryByDay } from './grouping';
 import { ItineraryItemCard } from './ItineraryItemCard';
 import type { ItineraryItemRow } from './types';
 
@@ -62,10 +62,7 @@ export function ItineraryTimeline({
   now = new Date(),
 }: Props): JSX.Element {
   const { t } = useTranslation();
-  const days = useMemo(
-    () => groupItineraryByDay(flagConflicts(items), timeZone),
-    [items, timeZone],
-  );
+  const days = useMemo(() => groupItineraryByDay(items, timeZone), [items, timeZone]);
   const todayKeyValue = DAY_KEY_FMT.format(now);
 
   if (days.length === 0) {
