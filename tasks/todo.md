@@ -172,6 +172,24 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - EditProfileScreen now mirrors all 7 wizard steps, delivering on "registration steps all need to be reflected in profile".
 - 105/105 vitest, lint clean, typecheck clean.
 
+**M4.2 — Identity, profile, accessibility, openai, api split [complete]:**
+- Renamed `children` table → `additional_guests`, replaced date_of_birth with age int, dropped child_meal_tier enum.
+- Profile collapse: `/profile` now renders the editor directly (no more `/profile/edit`). Avatar in header.
+- New AccessibilitySection (mobility, vision, hearing, neurodivergent, chronic, other) inserted after Dietary in the wizard and present on Profile. accessibility_preferences table + RLS + i18n.
+- registration api.ts split into per-domain files under `api/` with an index.ts barrel (was 380 lines).
+- OpenAI integration scaffold (graceful stub): `src/lib/integrations/openai.ts` shares the parser prompt + types with the parse-itinerary edge function. 6 vitest cases.
+- Footer pickers redesigned as segmented controls (icons for theme, flags for language).
+- db-apply auto-applies fixtures (sample_employees) so the dev sign-in shortcut works after every reset.
+
+**M4.3 — Itinerary, timezones, event config [complete]:**
+- New Itinerary screen: gradient Hero with live countdown, day-grouped vertical timeline with per-type icon chips and `kizuna-fade-in` stagger animation.
+- ImportItineraryDialog (paste / upload / email tabs; paste live, others coming soon). Calls parse-itinerary edge function (graceful 404 fallback).
+- saveParsedFlights persists into public.flights with IATA → IANA timezone lookup.
+- Timezone first-class: itinerary_items.{starts_tz,ends_tz}, flights.{departure_tz,arrival_tz}, transport_requests.pickup_tz, events.time_zone. Materialisation triggers populate them.
+- Event config refactor: `supabase/events/YYYY-supafest.sql` is the single source of truth per year. Copy the file, edit the constants, db:apply. Supafest 2027 dates corrected to Jan 11-15 per Notion.
+- Tech-debt audit findings fixed: flights RLS gap (users can now insert manual_obs flights), ImportDialog actually persists flights (was reporting success while writing nothing), ItineraryItemCard renders each row in its row's tz, dietary i18n hardcoded labels removed, toggleArrayMember helper extracted, GuestsSection uses Checkbox with stable keys, additional_guests gains updated_at.
+- 111/111 vitest, lint clean, typecheck clean.
+
 ### M5 - Guest invitation, payment, lifecycle [complete]
 
 **Goal:** Guest invitation lifecycle with signed tokens, Stripe checkout, webhook reconciliation.

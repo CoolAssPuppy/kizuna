@@ -152,6 +152,30 @@
 
 **How to apply:** Use `scripts/db-apply.sh` (wraps the four steps idempotently). The package.json `db:apply` script calls it.
 
+## 2026-04-30 - Event-specific data lives in `supabase/events/`, not `seed.sql`
+
+**Rule:** Event identity (one Supafest year) lives in its own SQL file under `supabase/events/`. `seed.sql` is for *people* fixtures only — auth users, employee_profiles, the lone guest. The two are applied in order by `scripts/db-apply.sh`.
+
+**Why:** Year-end resets: drop the old events file, add the new one. The seed identity stays. Mixing them meant a year transition required hand-editing dates inside an already-busy seed. The user ran into this with the Notion update (Jan 11-15 vs the wrong Apr 12-16 we had).
+
+**How to apply:** Each `events/YYYY-supafest.sql` opens with a `do $$` block that defines the constants (event id, name, dates, time zone, deadlines) and exits early if that event id already exists. Documents, sessions, and starter registrations follow. Add a new year by copying the file and editing the constants.
+
+## 2026-04-30 - Save the data you parsed before reporting success
+
+**Rule:** When an import flow has a "parse" step and a "persist" step, the UI must call both before reporting success to the user. Reporting success after parse-only is a data-loss bug.
+
+**Why:** The first cut of `ImportItineraryDialog` called `parseItineraryViaEdge` and then `onImported()` without ever calling `saveParsedFlights`. The toast said "Imported N items" but nothing landed in `public.flights`. Caught by the post-merge audit, not by the user, but it would have shown up the first time someone tried to import.
+
+**How to apply:** Treat persist as part of the same try/catch as parse. The success toast count comes from the *persist* return value, not the parse result, so the user sees what actually got saved.
+
+## 2026-04-30 - timestamptz isn't enough — render zone matters
+
+**Rule:** Every itinerary-style row needs a render timezone column alongside its timestamptz. A flight from SFO to YYC has departure in PT and arrival in MT; rendering both in the viewer's local clock is wrong.
+
+**Why:** timestamptz stores UTC. `Intl.DateTimeFormat` defaults to the viewer's timezone. Without an explicit IANA name on the row, the data round-trips correctly but renders incorrectly. Adding the columns later means a backfill — easier to bake in from day one.
+
+**How to apply:** New event-time tables (itinerary_items, flights, transport_requests, sessions backed by accommodations) get `*_tz text` columns. Triggers populate from `events.time_zone` (default), `flights.departure_tz/arrival_tz` (per-airport), or `transport_requests.pickup_tz`. The renderer threads the row's tz into `Intl.DateTimeFormat({ timeZone })`.
+
 ## 2026-04-30 - One Section per registration domain, two render modes
 
 **Rule:** Each registration domain (personal info, dietary, etc.) lives in exactly one component — `XyzSection` — that takes a `mode` discriminated union for wizard vs profile. There are no mirrored Step/Card pairs.
