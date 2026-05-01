@@ -12,12 +12,8 @@
 --
 -- Plus a handful of guest invitations and registrations in flight.
 --
--- This file is opt-in. It is NOT part of the default `npm run db:apply`
--- pipeline. Apply with:
---
---   PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres \
---     -v ON_ERROR_STOP=1 -f supabase/fixtures/sample_employees.sql
---
+-- Applied automatically as the last step of `npm run db:apply` so the dev
+-- sign-in shortcuts (Pretend you're an employee / admin) always work.
 -- Idempotent: re-running is safe (uuid PKs guard against duplicates).
 
 begin;
