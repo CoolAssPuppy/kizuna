@@ -10,6 +10,7 @@ import { ConflictsScreen } from './ConflictsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { EventsListScreen } from './EventsListScreen';
 import { ReportsScreen } from './ReportsScreen';
+import { StatsScreen } from './StatsScreen';
 
 export function AdminRoute(): JSX.Element {
   const { t } = useTranslation();
@@ -42,10 +43,7 @@ export function AdminRoute(): JSX.Element {
             />
           }
         />
-        <Route
-          path="stats"
-          element={<ComingSoon titleKey="admin.stats.title" subtitleKey="admin.stats.subtitle" />}
-        />
+        <Route path="stats" element={<StatsScreen />} />
         <Route
           path="nudges"
           element={<ComingSoon titleKey="admin.nudges.title" subtitleKey="admin.nudges.subtitle" />}

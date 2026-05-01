@@ -336,7 +336,53 @@
     },
     "stats": {
       "title": "Stats",
-      "subtitle": "Attendance, dietary mix, registration funnel, country breakdown."
+      "subtitle": "Attendance, dietary mix, registration funnel, country breakdown.",
+      "empty": "No data yet.",
+      "funnel": {
+        "title": "Registration funnel",
+        "subtitle": "How attendees are progressing through registration.",
+        "invited": "Invited",
+        "started": "Started",
+        "complete": "Complete",
+        "cancelled": "Cancelled"
+      },
+      "role": {
+        "title": "By role",
+        "subtitle": "Active accounts split by role."
+      },
+      "country": {
+        "title": "Home country",
+        "subtitle": "Top 12 countries by employee headcount."
+      },
+      "department": {
+        "title": "By department",
+        "subtitle": "Distribution across the org."
+      },
+      "dietary": {
+        "title": "Dietary restrictions",
+        "subtitle": "Vegan, vegetarian, halal, kosher, gluten-free, dairy-free."
+      },
+      "allergies": {
+        "title": "Allergies",
+        "subtitle": "Nuts, shellfish, dairy, eggs, soy, wheat, sesame, other."
+      },
+      "alcoholFree": {
+        "title": "Alcohol-free",
+        "subtitle": "Share of attendees who prefer no alcohol.",
+        "label": "alcohol-free"
+      },
+      "payments": {
+        "title": "Guest payments",
+        "subtitle": "Pending, paid, waived, refunded, failed."
+      },
+      "tenure": {
+        "title": "Years attended",
+        "subtitle": "How many prior Supafests this person has attended."
+      },
+      "accessibility": {
+        "title": "Accessibility needs",
+        "subtitle": "Mobility, vision, hearing, neurodivergent, chronic, other."
+      }
     },
     "nudges": {
       "title": "Nudges",
