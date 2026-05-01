@@ -412,6 +412,21 @@ values
   ('a0000000-0000-0000-0000-000000000040', 'maggie.simpson@example.com','Maggie Simpson', 'adult', 950.00, 'sample-token-homer', 'accepted', now() + interval '2 days')
 on conflict do nothing;
 
+
+-- =====================================================================
+-- Sample dependents (under-18 minors)
+-- =====================================================================
+-- Luke gets a teen and an under-12 so the SubjectSelector + dependent
+-- profile flow works out-of-the-box. The
+-- ensure_additional_guest_user_bi trigger mints the shadow
+-- public.users row for each minor.
+
+insert into public.additional_guests (sponsor_id, full_name, age_bracket, fee_amount, payment_status)
+values
+  ('a0000000-0000-0000-0000-000000000010', 'Ben Skywalker',  'under_12', 0, 'paid'),
+  ('a0000000-0000-0000-0000-000000000010', 'Leia Skywalker', 'teen',     0, 'paid')
+on conflict do nothing;
+
 commit;
 
 -- Apply with:
