@@ -37,9 +37,7 @@ function findSlot(items: ReadonlyArray<ItineraryItemRow>, now: Date): Slot | nul
   return null;
 }
 
-interface GapTranslate {
-  (key: string, options: { count: number }): string;
-}
+type GapTranslate = (key: string, options: { count: number }) => string;
 
 function formatHumanGap(minutes: number, t: GapTranslate): string {
   if (minutes < 60) return t('itinerary.nowNext.inMinutes', { count: minutes });

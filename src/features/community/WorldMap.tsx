@@ -131,9 +131,7 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
                 key={pin.user.user_id}
                 coordinates={[pin.lon, pin.lat]}
                 onMouseEnter={() => setHovered(pin.user.user_id)}
-                onMouseLeave={() =>
-                  setHovered((current) => (current === pin.user.user_id ? null : current))
-                }
+                onMouseLeave={() => setHovered(null)}
                 style={{
                   default: {
                     transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',

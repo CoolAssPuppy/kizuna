@@ -23,7 +23,7 @@ interface NavSection {
 
 const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
-  { to: '/admin/arrivals', icon: PlaneLanding, labelKey: 'admin.nav.arrivals' },
+  { to: '/admin/itinerary-analyzer', icon: PlaneLanding, labelKey: 'admin.nav.itineraryAnalyzer' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },

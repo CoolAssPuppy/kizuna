@@ -1,8 +1,16 @@
-import { ClipboardPaste, Mail, Upload, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ClipboardPaste, Mail, Upload } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -33,39 +41,25 @@ const TAB_ICON: Record<SourceTab, typeof ClipboardPaste> = {
   email: Mail,
 };
 
+const TABS: ReadonlyArray<SourceTab> = ['paste', 'upload', 'email'];
+
 /**
- * Lightweight dialog (no Radix dependency) for importing itinerary text.
- * Phase 1 supports paste; upload and email are surfaced as "soon" so the
- * design pattern is in place and the feature flag can flip later.
+ * Dialog for importing itinerary text. Phase 1 supports paste; upload
+ * and email render a "coming soon" affordance so the design pattern is
+ * already in place when those flows ship.
  */
 export function ImportItineraryDialog({
   open,
   onOpenChange,
   eventTimezone,
   onImported,
-}: Props): JSX.Element | null {
+}: Props): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const { user } = useAuth();
   const [tab, setTab] = useState<SourceTab>('paste');
   const [pasted, setPasted] = useState('');
   const [busy, setBusy] = useState(false);
-  const closeRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onKey(event: KeyboardEvent): void {
-      if (event.key === 'Escape') onOpenChange(false);
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onOpenChange]);
-
-  useEffect(() => {
-    if (open) closeRef.current?.focus();
-  }, [open]);
-
-  if (!open) return null;
 
   async function handleParse(): Promise<void> {
     if (!pasted.trim() || !user) return;
@@ -99,40 +93,15 @@ export function ImportItineraryDialog({
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="import-itinerary-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-6 backdrop-blur-sm"
-    >
-      {/* Backdrop is a separate button so keyboard users get an explicit close affordance */}
-      <button
-        type="button"
-        aria-label={t('actions.close')}
-        onClick={() => onOpenChange(false)}
-        className="absolute inset-0 cursor-default focus:outline-none"
-      />
-      <div className="kizuna-fade-in relative w-full max-w-2xl overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-xl">
-        <header className="flex items-start justify-between gap-4 border-b px-6 py-5">
-          <div className="space-y-1">
-            <h2 id="import-itinerary-title" className="text-lg font-semibold">
-              {t('itinerary.import.title')}
-            </h2>
-            <p className="text-sm text-muted-foreground">{t('itinerary.import.subtitle')}</p>
-          </div>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={() => onOpenChange(false)}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            aria-label={t('actions.close')}
-          >
-            <X aria-hidden className="h-4 w-4" />
-          </button>
-        </header>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="gap-0 p-0">
+        <DialogHeader className="border-b px-6 py-5">
+          <DialogTitle>{t('itinerary.import.title')}</DialogTitle>
+          <DialogDescription>{t('itinerary.import.subtitle')}</DialogDescription>
+        </DialogHeader>
 
         <div role="tablist" className="flex border-b bg-muted/30 px-6">
-          {(['paste', 'upload', 'email'] as const).map((id) => {
+          {TABS.map((id) => {
             const Icon = TAB_ICON[id];
             const active = tab === id;
             return (
@@ -166,13 +135,12 @@ export function ImportItineraryDialog({
               />
               <p className="text-xs text-muted-foreground">{t('itinerary.import.pasteHint')}</p>
             </div>
-          ) : null}
-
-          {tab === 'upload' ? <ComingSoon kind="upload" /> : null}
-          {tab === 'email' ? <ComingSoon kind="email" /> : null}
+          ) : (
+            <ComingSoon kind={tab} />
+          )}
         </div>
 
-        <footer className="flex items-center justify-end gap-2 border-t px-6 py-4">
+        <DialogFooter className="border-t px-6 py-4">
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
             {t('actions.cancel')}
           </Button>
@@ -182,9 +150,9 @@ export function ImportItineraryDialog({
           >
             {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
           </Button>
-        </footer>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

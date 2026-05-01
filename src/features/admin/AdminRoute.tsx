@@ -5,8 +5,8 @@ import { useIsAdmin } from '@/features/auth/hooks';
 
 import { AdminLayout } from './AdminLayout';
 import { AgendaAdminScreen } from './AgendaAdminScreen';
-import { ArrivalsScreen } from './ArrivalsScreen';
 import { ConflictsScreen } from './ConflictsScreen';
+import { ItineraryAnalyzerScreen } from './ItineraryAnalyzerScreen';
 import { DocumentsScreen } from './DocumentsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { FeedScreen } from './FeedScreen';
@@ -36,7 +36,8 @@ export function AdminRoute(): JSX.Element {
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />
         <Route path="agenda" element={<AgendaAdminScreen />} />
-        <Route path="arrivals" element={<ArrivalsScreen />} />
+        <Route path="itinerary-analyzer" element={<ItineraryAnalyzerScreen />} />
+        <Route path="arrivals" element={<Navigate to="/admin/itinerary-analyzer" replace />} />
         <Route path="feed" element={<FeedScreen />} />
         <Route path="documents" element={<DocumentsScreen />} />
         <Route path="stats" element={<StatsScreen />} />

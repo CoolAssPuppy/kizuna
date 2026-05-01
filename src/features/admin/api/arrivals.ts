@@ -23,14 +23,6 @@ export interface ArrivalRow {
   assigned_vehicle_id: string | null;
 }
 
-export interface AccommodationOption {
-  id: string;
-  hotel_name: string;
-  room_number: string | null;
-  capacity: number;
-  occupied: number;
-}
-
 export interface VehicleOption {
   id: string;
   vehicle_name: string;
@@ -165,29 +157,6 @@ export async function fetchArrivals(
   });
 }
 
-export async function fetchAccommodationOptions(
-  client: AppSupabaseClient,
-  eventId: string,
-): Promise<AccommodationOption[]> {
-  const { data, error } = await client
-    .from('accommodations')
-    .select('id, hotel_name, room_number, room_type, accommodation_occupants(count)')
-    .eq('event_id', eventId)
-    .order('hotel_name', { ascending: true });
-  if (error) throw error;
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    hotel_name: row.hotel_name,
-    room_number: row.room_number,
-    // For now: family rooms hold 4, suites 3, others 2. Tune when we have real data.
-    capacity: row.room_type === 'family' ? 4 : row.room_type === 'suite' ? 3 : 2,
-    occupied:
-      Array.isArray(row.accommodation_occupants)
-        ? (row.accommodation_occupants[0]?.count ?? 0)
-        : 0,
-  }));
-}
-
 export async function fetchVehicleOptions(
   client: AppSupabaseClient,
   eventId: string,
@@ -199,41 +168,6 @@ export async function fetchVehicleOptions(
     .order('vehicle_name', { ascending: true });
   if (error) throw error;
   return data ?? [];
-}
-
-export async function assignRoom(
-  client: AppSupabaseClient,
-  args: { userId: string; accommodationId: string | null; eventId: string },
-): Promise<void> {
-  // Replace the user's room assignment for this event in one transaction-y
-  // dance: drop their existing occupant rows for any room of this event,
-  // then insert the new one if non-null.
-  const drop = await client
-    .from('accommodation_occupants')
-    .delete()
-    .eq('user_id', args.userId)
-    .in(
-      'accommodation_id',
-      // Limit deletion to rooms in this event so we don't touch other events.
-      (
-        await client
-          .from('accommodations')
-          .select('id')
-          .eq('event_id', args.eventId)
-      ).data?.map((a) => a.id) ?? [],
-    );
-  if (drop.error) throw drop.error;
-
-  if (args.accommodationId) {
-    const { error } = await client
-      .from('accommodation_occupants')
-      .insert({
-        user_id: args.userId,
-        accommodation_id: args.accommodationId,
-        is_primary: false,
-      });
-    if (error) throw error;
-  }
 }
 
 export async function assignVehicle(

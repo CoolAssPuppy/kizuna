@@ -29,25 +29,17 @@ const SHORT_DAY_FMT = new Intl.DateTimeFormat(undefined, {
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-function todayKey(now: Date): string {
-  const formatter = new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  });
-  return formatter.format(now);
-}
+const DAY_KEY_FMT = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
 
-function dayCountBetween(start: string, end: string): number {
-  const startMs = new Date(`${start}T00:00:00Z`).getTime();
-  const endMs = new Date(`${end}T00:00:00Z`).getTime();
-  return Math.round((endMs - startMs) / ONE_DAY_MS) + 1;
-}
-
-function dayIndex(start: string, dayKey: string): number {
-  const startMs = new Date(`${start}T00:00:00Z`).getTime();
-  const dayMs = new Date(`${dayKey}T00:00:00Z`).getTime();
-  return Math.round((dayMs - startMs) / ONE_DAY_MS) + 1;
+/** Whole-day delta between two YYYY-MM-DD keys. */
+function daysBetween(fromKey: string, toKey: string): number {
+  const fromMs = new Date(`${fromKey}T00:00:00Z`).getTime();
+  const toMs = new Date(`${toKey}T00:00:00Z`).getTime();
+  return Math.round((toMs - fromMs) / ONE_DAY_MS);
 }
 
 function dayPillIndex(
@@ -56,8 +48,8 @@ function dayPillIndex(
   eventEnd: string | null | undefined,
 ): { idx: number; total: number } | null {
   if (!eventStart || !eventEnd) return null;
-  const idx = dayIndex(eventStart, dayKey);
-  const total = dayCountBetween(eventStart, eventEnd);
+  const idx = daysBetween(eventStart, dayKey) + 1;
+  const total = daysBetween(eventStart, eventEnd) + 1;
   if (idx < 1 || idx > total) return null;
   return { idx, total };
 }
@@ -74,7 +66,7 @@ export function ItineraryTimeline({
     () => groupItineraryByDay(flagConflicts(items), timeZone),
     [items, timeZone],
   );
-  const todayKeyValue = todayKey(now);
+  const todayKeyValue = DAY_KEY_FMT.format(now);
 
   if (days.length === 0) {
     return (
@@ -98,11 +90,14 @@ export function ItineraryTimeline({
         const date = new Date(`${day.date}T12:00:00Z`);
         const isToday = day.date === todayKeyValue;
         const dayOfEvent = dayPillIndex(day.date, eventStart, eventEnd);
-        const pillText = isToday
-          ? t('itinerary.day.today')
-          : dayOfEvent
-            ? t('itinerary.day.dayOf', { day: dayOfEvent.idx, total: dayOfEvent.total })
-            : SHORT_DAY_FMT.format(date);
+        let pillText: string;
+        if (isToday) {
+          pillText = t('itinerary.day.today');
+        } else if (dayOfEvent) {
+          pillText = t('itinerary.day.dayOf', { day: dayOfEvent.idx, total: dayOfEvent.total });
+        } else {
+          pillText = SHORT_DAY_FMT.format(date);
+        }
         return (
           <li
             key={day.date}
