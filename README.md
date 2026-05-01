@@ -170,6 +170,16 @@ npm run simulate:community
 
 It signs in as 16 sample employees and replays a scripted multi-channel conversation with debounced typing presence. Watch bubbles arrive live and "people are typing…" indicators appear without page reload.
 
+## Local edge functions
+
+`supabase start` brings up the edge runtime container but does **not** auto-register functions. To exercise the parse-itinerary / send-notification / share-report flows from the SPA, you also need:
+
+```bash
+npm run functions:serve
+```
+
+That runs `doppler secrets download` into `supabase/.env` (so `OPENAI_API_KEY` and friends are available to the runtime) and then starts `supabase functions serve`. Leave it running in a second terminal alongside `npm run dev`.
+
 ## Common commands
 
 | Command                                       | What it does                                       |
@@ -192,6 +202,8 @@ It signs in as 16 sample employees and replays a scripted multi-channel conversa
 | `npm run db:apply`                            | Apply declarative schemas + pgTAP + seed via psql  |
 | `npm run db:diff`                             | Generate a migration from declarative schema diffs |
 | `npm run db:test`                             | Run pgTAP tests                                    |
+| `npm run functions:env`                       | Sync Doppler secrets into `supabase/.env` for the local edge runtime |
+| `npm run functions:serve`                     | Sync env, then `supabase functions serve` (run in a second terminal) |
 | `npm run gen:types`                           | Regenerate `src/types/database.types.ts`           |
 | `npm run simulate:community`                  | Replay a scripted realtime chat to 5 channels      |
 | `npx tsx scripts/snapshot-email-templates.ts` | Regenerate `supabase/email-templates/*`            |

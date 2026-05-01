@@ -28,6 +28,8 @@
     "db:apply": "bash scripts/db-apply.sh",
     "db:diff": "supabase db diff -f",
     "db:test": "supabase test db",
+    "functions:env": "doppler secrets download --project kizuna --config dev --no-file --format env > supabase/.env",
+    "functions:serve": "npm run functions:env && supabase functions serve --env-file supabase/.env",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
     "simulate:community": "if command -v doppler >/dev/null 2>&1; then doppler run -- tsx scripts/simulate-community.ts; else tsx scripts/simulate-community.ts; fi",
     "prepare": "husky 2>/dev/null || true"
