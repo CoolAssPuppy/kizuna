@@ -14,13 +14,7 @@ import {
   saveSelfSwagSize,
 } from '../api/swag';
 import { loadAdditionalGuests } from '../api/additionalGuests';
-import {
-  EU_SHOE_SIZES,
-  US_SHOE_SIZES,
-  euToUs,
-  type ShoeSizeSystem,
-  toEu,
-} from '../shoeSize';
+import { EU_SHOE_SIZES, US_SHOE_SIZES, euToUs, type ShoeSizeSystem, toEu } from '../shoeSize';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
@@ -163,12 +157,7 @@ interface SizingFieldsetProps {
   tshirtSizes: ReadonlyArray<string>;
 }
 
-function SizingFieldset({
-  title,
-  value,
-  onChange,
-  tshirtSizes,
-}: SizingFieldsetProps): JSX.Element {
+function SizingFieldset({ title, value, onChange, tshirtSizes }: SizingFieldsetProps): JSX.Element {
   const { t } = useTranslation();
   const shoeOptions = value.shoeSystem === 'eu' ? EU_SHOE_SIZES : US_SHOE_SIZES;
   return (
@@ -222,9 +211,7 @@ function SizingFieldset({
             />
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">
-          {t('registration.swag.shoeSizeHint')}
-        </p>
+        <p className="text-xs text-muted-foreground">{t('registration.swag.shoeSizeHint')}</p>
       </div>
     </fieldset>
   );

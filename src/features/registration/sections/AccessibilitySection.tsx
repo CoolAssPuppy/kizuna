@@ -79,9 +79,7 @@ export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
     >
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{t('registration.accessibility.needs')}</legend>
-        <p className="text-xs text-muted-foreground">
-          {t('registration.accessibility.needsHint')}
-        </p>
+        <p className="text-xs text-muted-foreground">{t('registration.accessibility.needsHint')}</p>
         <div className="grid grid-cols-2 gap-2 pt-1">
           {NEEDS_OPTIONS.map((option) => (
             <label key={option} className="flex items-center gap-2 text-sm">

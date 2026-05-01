@@ -72,10 +72,10 @@ export function ImportItineraryDialog({
         saveParsedTransfers(user.id, result.car_services, result.rental_cars, eventTimezone),
       ]);
       const parsed =
-        result.flights.length
-        + result.hotels.length
-        + result.rental_cars.length
-        + result.car_services.length;
+        result.flights.length +
+        result.hotels.length +
+        result.rental_cars.length +
+        result.car_services.length;
       const persisted = flightCount + hotelCount + transferCount;
       if (persisted === 0 && parsed === 0) {
         show(t('itinerary.import.nothingFound'), 'error');

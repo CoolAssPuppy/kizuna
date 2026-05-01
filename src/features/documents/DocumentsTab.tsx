@@ -112,11 +112,7 @@ function DocumentCard({ entry }: DocumentCardProps): JSX.Element {
   );
 }
 
-function DocumentPreview({
-  document,
-}: {
-  document: DocumentWithAck['document'];
-}): JSX.Element {
+function DocumentPreview({ document }: { document: DocumentWithAck['document'] }): JSX.Element {
   const { t } = useTranslation();
   const pdfUrl = useStorageImage('documents', document.pdf_path);
 

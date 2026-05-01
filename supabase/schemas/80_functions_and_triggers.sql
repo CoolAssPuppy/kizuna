@@ -97,19 +97,34 @@ create trigger update_registration_completion_aiud
 
 -- flights -> transport_requests cascade
 --
--- When a flight's arrival_at changes, every linked transport_request needs
--- admin review before the next manifest export.
+-- When a flight's arrival/departure time, airline, or flight_number changes
+-- AND the linked transport_request already has a vehicle assigned, the
+-- assignment is revoked: the admin must re-pick a vehicle that still
+-- matches the new flight time. needs_review trips on every flight edit
+-- so the Ground Transport Tool surfaces the row even when no vehicle was
+-- previously assigned.
 create or replace function public.flag_transport_for_review_on_flight_change()
 returns trigger
 language plpgsql
 as $$
+declare
+  v_material_change boolean;
 begin
-  if new.arrival_at is distinct from old.arrival_at
-     or new.departure_at is distinct from old.departure_at then
+  v_material_change :=
+       new.arrival_at      is distinct from old.arrival_at
+    or new.departure_at    is distinct from old.departure_at
+    or new.airline         is distinct from old.airline
+    or new.flight_number   is distinct from old.flight_number
+    or new.origin          is distinct from old.origin
+    or new.destination     is distinct from old.destination;
+
+  if v_material_change then
     update public.transport_requests
-    set needs_review = true
+    set needs_review = true,
+        assigned_vehicle_id = null
     where flight_id = new.id;
   end if;
+
   return new;
 end
 $$;

@@ -29,6 +29,7 @@ declare
     -- Logistics
     'flights',
     'transport_requests',
+    'transport_vehicles',
     -- Community
     'channels',
     'messages'

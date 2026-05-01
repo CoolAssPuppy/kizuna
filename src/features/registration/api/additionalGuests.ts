@@ -58,8 +58,6 @@ export async function saveAdditionalGuests(
     special_needs: row.special_needs,
     notes: row.notes,
   }));
-  const { error } = await client
-    .from('additional_guests')
-    .upsert(upsertRows, { onConflict: 'id' });
+  const { error } = await client.from('additional_guests').upsert(upsertRows, { onConflict: 'id' });
   if (error) throw error;
 }

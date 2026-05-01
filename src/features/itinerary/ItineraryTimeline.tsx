@@ -74,9 +74,7 @@ export function ItineraryTimeline({
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Sparkles aria-hidden className="h-6 w-6" />
         </div>
-        <p className="mt-4 text-sm font-semibold tracking-tight">
-          {t('itinerary.empty.title')}
-        </p>
+        <p className="mt-4 text-sm font-semibold tracking-tight">{t('itinerary.empty.title')}</p>
         <p className="mx-auto mt-1 max-w-md text-xs text-muted-foreground">
           {t('itinerary.empty.body')}
         </p>
@@ -107,9 +105,7 @@ export function ItineraryTimeline({
             <header className="mb-4 flex items-baseline gap-3">
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-[0.18em] ${
-                  isToday
-                    ? 'bg-primary/15 text-primary'
-                    : 'bg-secondary text-secondary-foreground'
+                  isToday ? 'bg-primary/15 text-primary' : 'bg-secondary text-secondary-foreground'
                 }`}
               >
                 {pillText.toUpperCase()}

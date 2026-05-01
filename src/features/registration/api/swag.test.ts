@@ -2,11 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import type { AppSupabaseClient } from '@/lib/supabase';
 
-import {
-  loadSelfSwagSize,
-  saveAdditionalGuestSwagSize,
-  saveSelfSwagSize,
-} from './swag';
+import { loadSelfSwagSize, saveAdditionalGuestSwagSize, saveSelfSwagSize } from './swag';
 
 function makeReadClient(row: unknown): AppSupabaseClient {
   return {

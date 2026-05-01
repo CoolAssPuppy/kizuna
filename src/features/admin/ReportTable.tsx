@@ -69,9 +69,7 @@ export function ReportTable({ rows }: Props): JSX.Element | null {
 
   const sortedRows = useMemo(() => {
     if (!sortKey) return rows;
-    const sorted = [...rows].sort((a, b) =>
-      compareValues(a[sortKey], b[sortKey]),
-    );
+    const sorted = [...rows].sort((a, b) => compareValues(a[sortKey], b[sortKey]));
     if (sortDir === 'desc') sorted.reverse();
     return sorted;
   }, [rows, sortKey, sortDir]);
@@ -146,9 +144,7 @@ export function ReportTable({ rows }: Props): JSX.Element | null {
           >
             {t('admin.pagination.prev')}
           </Button>
-          <span>
-            {t('admin.pagination.pageOf', { page: safePage + 1, total: pageCount })}
-          </span>
+          <span>{t('admin.pagination.pageOf', { page: safePage + 1, total: pageCount })}</span>
           <Button
             variant="outline"
             size="sm"
@@ -202,4 +198,3 @@ function Cell({ column, value }: CellProps): JSX.Element {
   }
   return <span>{JSON.stringify(value)}</span>;
 }
-

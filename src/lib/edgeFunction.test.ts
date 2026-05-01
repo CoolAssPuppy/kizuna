@@ -5,9 +5,7 @@ import type { AppSupabaseClient } from '@/lib/supabase';
 import { callEdgeFunction } from './edgeFunction';
 
 function makeClient(
-  result:
-    | { data: unknown; error: null }
-    | { data: null; error: Error | string | null },
+  result: { data: unknown; error: null } | { data: null; error: Error | string | null },
 ): AppSupabaseClient {
   return {
     functions: {

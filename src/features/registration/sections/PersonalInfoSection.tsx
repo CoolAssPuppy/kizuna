@@ -152,9 +152,7 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="personal-altemail">
-            {t('registration.personalInfo.alternateEmail')}
-          </Label>
+          <Label htmlFor="personal-altemail">{t('registration.personalInfo.alternateEmail')}</Label>
           <Input
             id="personal-altemail"
             type="email"

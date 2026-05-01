@@ -51,6 +51,7 @@ create type dietary_severity as enum ('preference', 'intolerance', 'allergy');
 create type flight_direction as enum ('inbound', 'outbound');
 create type flight_source_type as enum ('perk_sync', 'perk_csv', 'manual_obs');
 create type transport_direction as enum ('arrival', 'departure');
+create type ground_transport_need as enum ('none', 'arrival', 'departure', 'both');
 
 -- Events and sessions
 create type event_type as enum ('supafest', 'select', 'meetup');

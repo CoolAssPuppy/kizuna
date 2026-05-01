@@ -18,9 +18,7 @@ export interface NudgeHistoryRow {
 /** Shape of the joined users row for the recipient email. Single-row FK join. */
 type RecipientJoin = { email: string } | null;
 
-export async function fetchNudgeHistory(
-  client: AppSupabaseClient,
-): Promise<NudgeHistoryRow[]> {
+export async function fetchNudgeHistory(client: AppSupabaseClient): Promise<NudgeHistoryRow[]> {
   const { data, error } = await client
     .from('notifications')
     .select(

@@ -4,6 +4,7 @@ import {
   BarChart3,
   CalendarRange,
   FileText,
+  Hotel,
   Newspaper,
   PlaneLanding,
   Send,
@@ -23,7 +24,8 @@ interface NavSection {
 
 const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
-  { to: '/admin/itinerary-analyzer', icon: PlaneLanding, labelKey: 'admin.nav.itineraryAnalyzer' },
+  { to: '/admin/ground-transport', icon: PlaneLanding, labelKey: 'admin.nav.groundTransport' },
+  { to: '/admin/rooms', icon: Hotel, labelKey: 'admin.nav.roomAssignment' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },

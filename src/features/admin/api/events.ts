@@ -38,12 +38,7 @@ export async function updateEvent(
   id: string,
   patch: EventUpdate,
 ): Promise<EventRow> {
-  const { data, error } = await client
-    .from('events')
-    .update(patch)
-    .eq('id', id)
-    .select()
-    .single();
+  const { data, error } = await client.from('events').update(patch).eq('id', id).select().single();
   if (error) throw error;
   return data;
 }

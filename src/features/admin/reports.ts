@@ -125,10 +125,8 @@ export interface SwagOrderRow extends CsvRow {
 }
 
 export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrderRow[]> {
-  const { data, error } = await client
-    .from('swag_sizes')
-    .select(
-      `
+  const { data, error } = await client.from('swag_sizes').select(
+    `
       tshirt_size, shoe_size_eu,
       user:users!swag_sizes_user_id_fkey (
         email, role,
@@ -137,7 +135,7 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
       ),
       additional_guests ( full_name, sponsor_id, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
     `,
-    );
+  );
   if (error) throw error;
 
   return (data ?? []).map((row) => {
@@ -165,8 +163,7 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
 
     const employee = flatJoin(user?.employee_profiles);
     const guest = flatJoin(user?.guest_profiles);
-    const fullName =
-      employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
     const attendeeType: 'employee' | 'guest' = user?.role === 'guest' ? 'guest' : 'employee';
     return {
       email: user?.email ?? '',
@@ -316,8 +313,7 @@ export async function fetchRegistrationProgress(
     }>(row.user);
     const employee = flatJoin(u?.employee_profiles);
     const guest = flatJoin(u?.guest_profiles);
-    const fullName =
-      employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
     const { first, last } = splitName(fullName);
     return {
       first_name: first,

@@ -289,7 +289,6 @@ export function EventEditScreen(): JSX.Element {
           </Button>
         </div>
       </form>
-
     </section>
   );
 }

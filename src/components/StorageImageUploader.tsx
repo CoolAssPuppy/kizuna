@@ -54,9 +54,7 @@ export function StorageImageUploader({
       return;
     }
     void (async () => {
-      const { data } = await getSupabaseClient()
-        .storage.from(bucket)
-        .createSignedUrl(value, 3600);
+      const { data } = await getSupabaseClient().storage.from(bucket).createSignedUrl(value, 3600);
       if (!cancelled) setPreviewUrl(data?.signedUrl ?? null);
     })();
     return () => {
@@ -90,11 +88,7 @@ export function StorageImageUploader({
 
       {previewUrl ? (
         <figure className="relative overflow-hidden rounded-md border bg-muted">
-          <img
-            src={previewUrl}
-            alt=""
-            className="aspect-[3/2] w-full object-cover"
-          />
+          <img src={previewUrl} alt="" className="aspect-[3/2] w-full object-cover" />
           <Button
             type="button"
             size="icon"

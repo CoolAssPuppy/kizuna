@@ -13,9 +13,7 @@ export async function callEdgeFunction<T>(
 ): Promise<T> {
   const response = await client.functions.invoke<T>(name, { body });
   if (response.error) {
-    throw response.error instanceof Error
-      ? response.error
-      : new Error(String(response.error));
+    throw response.error instanceof Error ? response.error : new Error(String(response.error));
   }
   if (response.data === null || response.data === undefined) {
     throw new Error(`${name} returned no payload`);

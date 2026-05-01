@@ -39,17 +39,15 @@ export async function saveSelfSwagSize(
   userId: string,
   input: SwagSizeInput,
 ): Promise<void> {
-  const { error } = await client
-    .from('swag_sizes')
-    .upsert(
-      {
-        user_id: userId,
-        additional_guest_id: null,
-        tshirt_size: input.tshirtSize,
-        shoe_size_eu: input.shoeSizeEu,
-      },
-      { onConflict: 'user_id' },
-    );
+  const { error } = await client.from('swag_sizes').upsert(
+    {
+      user_id: userId,
+      additional_guest_id: null,
+      tshirt_size: input.tshirtSize,
+      shoe_size_eu: input.shoeSizeEu,
+    },
+    { onConflict: 'user_id' },
+  );
   if (error) throw error;
 }
 
@@ -58,16 +56,14 @@ export async function saveAdditionalGuestSwagSize(
   additionalGuestId: string,
   input: SwagSizeInput,
 ): Promise<void> {
-  const { error } = await client
-    .from('swag_sizes')
-    .upsert(
-      {
-        user_id: null,
-        additional_guest_id: additionalGuestId,
-        tshirt_size: input.tshirtSize,
-        shoe_size_eu: input.shoeSizeEu,
-      },
-      { onConflict: 'additional_guest_id' },
-    );
+  const { error } = await client.from('swag_sizes').upsert(
+    {
+      user_id: null,
+      additional_guest_id: additionalGuestId,
+      tshirt_size: input.tshirtSize,
+      shoe_size_eu: input.shoeSizeEu,
+    },
+    { onConflict: 'additional_guest_id' },
+  );
   if (error) throw error;
 }

@@ -76,4 +76,3 @@ export function acceptGuestInvitation(
     password: args.password,
   });
 }
-

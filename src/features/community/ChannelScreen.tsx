@@ -39,10 +39,10 @@ const COMMUNITY_MEDIA_BUCKET = 'community-media';
 function senderLabel(m: MessageWithSender): string {
   if (!m.sender) return '';
   return (
-    m.sender.employee_profiles?.preferred_name
-      ?? m.sender.guest_profiles?.full_name
-      ?? m.sender.email.split('@')[0]
-      ?? m.sender.email
+    m.sender.employee_profiles?.preferred_name ??
+    m.sender.guest_profiles?.full_name ??
+    m.sender.email.split('@')[0] ??
+    m.sender.email
   );
 }
 
@@ -73,10 +73,7 @@ export function ChannelScreen(): JSX.Element {
   const myDisplayName = user?.email.split('@')[0] ?? '';
   const { typingUsers, emitTyping } = useTypingPresence(slug, myDisplayName);
 
-  const groups = useMemo(
-    () => groupMessagesForBubbles(messagesQ.data ?? []),
-    [messagesQ.data],
-  );
+  const groups = useMemo(() => groupMessagesForBubbles(messagesQ.data ?? []), [messagesQ.data]);
 
   // Realtime: refetch on insert / soft-delete in this channel.
   useEffect(() => {
@@ -130,8 +127,7 @@ export function ChannelScreen(): JSX.Element {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => softDeleteMessage(getSupabaseClient(), id),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ['community', 'messages', slug] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['community', 'messages', slug] }),
   });
 
   async function handleFile(file: File): Promise<void> {
@@ -172,9 +168,7 @@ export function ChannelScreen(): JSX.Element {
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-lg font-semibold tracking-tight">
-            #{channelQ.data?.name ?? slug}
-          </h1>
+          <h1 className="text-lg font-semibold tracking-tight">#{channelQ.data?.name ?? slug}</h1>
           {channelQ.data?.description ? (
             <p className="text-xs text-muted-foreground">{channelQ.data.description}</p>
           ) : null}
@@ -198,9 +192,7 @@ export function ChannelScreen(): JSX.Element {
                 size={32}
               />
               <div className={`max-w-[70%] space-y-1 ${isMe ? 'items-end' : 'items-start'}`}>
-                {!isMe ? (
-                  <p className="px-3 text-xs text-muted-foreground">{display}</p>
-                ) : null}
+                {!isMe ? <p className="px-3 text-xs text-muted-foreground">{display}</p> : null}
                 {group.messages.map((m) => {
                   const original = (messagesQ.data ?? []).find((x) => x.id === m.id);
                   return (
@@ -213,8 +205,8 @@ export function ChannelScreen(): JSX.Element {
                       <div
                         className={`rounded-2xl px-4 py-2 text-sm leading-relaxed ${
                           isMe
-                            ? 'bg-primary text-primary-foreground rounded-br-md'
-                            : 'bg-secondary text-secondary-foreground rounded-bl-md'
+                            ? 'rounded-br-md bg-primary text-primary-foreground'
+                            : 'rounded-bl-md bg-secondary text-secondary-foreground'
                         }`}
                       >
                         {m.media_url ? <ChannelImage path={m.media_url} /> : null}
@@ -229,7 +221,7 @@ export function ChannelScreen(): JSX.Element {
                         <button
                           type="button"
                           aria-label={t('community.channels.deleteMessage')}
-                          className="opacity-0 transition-opacity group-hover:opacity-100 focus:opacity-100"
+                          className="opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
                           onClick={() => deleteMutation.mutate(m.id)}
                         >
                           <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
@@ -238,11 +230,7 @@ export function ChannelScreen(): JSX.Element {
                     </div>
                   );
                 })}
-                <p
-                  className={`px-3 text-[10px] text-muted-foreground ${
-                    isMe ? 'text-right' : ''
-                  }`}
-                >
+                <p className={`px-3 text-[10px] text-muted-foreground ${isMe ? 'text-right' : ''}`}>
                   {messageTimeLabel(group.startedAt)}
                 </p>
               </div>
@@ -326,17 +314,13 @@ export function ChannelScreen(): JSX.Element {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('community.channels.broadcastConfirmTitle')}</DialogTitle>
-            <DialogDescription>
-              {t('community.channels.broadcastConfirmBody')}
-            </DialogDescription>
+            <DialogDescription>{t('community.channels.broadcastConfirmBody')}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmBroadcastOpen(false)}>
               {t('common.cancel')}
             </Button>
-            <Button onClick={confirmBroadcast}>
-              {t('community.channels.broadcastConfirm')}
-            </Button>
+            <Button onClick={confirmBroadcast}>{t('community.channels.broadcastConfirm')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -359,11 +343,5 @@ function ChannelImage({ path }: { path: string }): JSX.Element | null {
     };
   }, [path]);
   if (!src) return null;
-  return (
-    <img
-      src={src}
-      alt=""
-      className="mb-2 max-h-72 w-full rounded-lg object-cover"
-    />
-  );
+  return <img src={src} alt="" className="mb-2 max-h-72 w-full rounded-lg object-cover" />;
 }

@@ -41,9 +41,7 @@ describe('MarkdownText', () => {
   });
 
   it('linkifies bare urls', () => {
-    const { container } = render(
-      <MarkdownText source="check https://example.com today" />,
-    );
+    const { container } = render(<MarkdownText source="check https://example.com today" />);
     const anchor = container.querySelector('a');
     expect(anchor?.getAttribute('href')).toBe('https://example.com');
   });

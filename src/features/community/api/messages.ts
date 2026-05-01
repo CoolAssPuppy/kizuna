@@ -39,14 +39,18 @@ export async function fetchMessages(
     .limit(limit);
   if (error) throw error;
 
-  return ((data ?? []) as unknown as Array<Omit<MessageWithSender, 'sender' | 'reactions'> & {
-    sender: Joined<{
-      email: string;
-      employee_profiles: Joined<{ preferred_name: string | null; avatar_url: string | null }>;
-      guest_profiles: Joined<{ full_name: string }>;
-    }>;
-    reactions: Record<string, string[]> | null;
-  }>)
+  return (
+    (data ?? []) as unknown as Array<
+      Omit<MessageWithSender, 'sender' | 'reactions'> & {
+        sender: Joined<{
+          email: string;
+          employee_profiles: Joined<{ preferred_name: string | null; avatar_url: string | null }>;
+          guest_profiles: Joined<{ full_name: string }>;
+        }>;
+        reactions: Record<string, string[]> | null;
+      }
+    >
+  )
     .map((row) => ({
       ...row,
       reactions: row.reactions ?? {},

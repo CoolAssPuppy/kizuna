@@ -11,11 +11,7 @@ import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
-import {
-  clearEventOverride,
-  setEventOverride,
-  useEventOverride,
-} from './eventOverride';
+import { clearEventOverride, setEventOverride, useEventOverride } from './eventOverride';
 
 function isPast(event: EventRow): boolean {
   return new Date(event.end_date) < new Date();
@@ -110,13 +106,7 @@ interface EventCardProps {
   onView: () => void;
 }
 
-function EventCard({
-  event,
-  viewing,
-  isOverriding,
-  isAdmin,
-  onView,
-}: EventCardProps): JSX.Element {
+function EventCard({ event, viewing, isOverriding, isAdmin, onView }: EventCardProps): JSX.Element {
   const { t } = useTranslation();
   const past = isPast(event);
   return (

@@ -80,6 +80,9 @@ create table public.transport_vehicles (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   vehicle_name text not null,
+  direction transport_direction not null,
+  pickup_at timestamptz not null,
+  pickup_tz text not null default 'America/Edmonton',
   capacity_passengers int not null check (capacity_passengers > 0),
   capacity_bags int not null check (capacity_bags >= 0),
   handles_special_equipment text[] not null default '{}',
@@ -88,7 +91,12 @@ create table public.transport_vehicles (
 );
 
 comment on table public.transport_vehicles is
-  'Vehicle fleet for airport transfers. handles_special_equipment limits which transport_requests can be assigned.';
+  'Vehicle fleet for airport transfers. direction + pickup_at scope each vehicle to one trip; the Ground Transport Tool only suggests vehicles that match the passenger leg and time window.';
+comment on column public.transport_vehicles.pickup_at is
+  'Scheduled pickup moment (UTC). Used by the auto-suggest scorer in Ground Transport Tool — closer matches rank higher.';
+
+create index transport_vehicles_event_direction_pickup_idx
+  on public.transport_vehicles(event_id, direction, pickup_at);
 
 
 create table public.transport_requests (

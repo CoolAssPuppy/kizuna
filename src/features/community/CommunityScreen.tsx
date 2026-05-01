@@ -120,9 +120,7 @@ export function CommunityScreen(): JSX.Element {
 
       <section className="space-y-3">
         <header className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">
-            {t('community.channels.title')}
-          </h2>
+          <h2 className="text-lg font-semibold tracking-tight">{t('community.channels.title')}</h2>
           <Button
             variant="outline"
             size="sm"
@@ -141,7 +139,7 @@ export function CommunityScreen(): JSX.Element {
             >
               <Link
                 to={`/community/channels/${c.slug}`}
-                className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+                className="block rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 aria-label={t('community.channels.openChannel', { name: c.name })}
               >
                 <div className="flex items-center gap-2 text-sm font-semibold">
@@ -215,9 +213,7 @@ function PeopleSection({
                 <th className="px-3 py-2 font-medium">{t('community.matches.name')}</th>
                 <th className="px-3 py-2 font-medium">{t('community.matches.email')}</th>
                 {showMatched ? (
-                  <th className="px-3 py-2 font-medium">
-                    {t('community.matches.matchedHobbies')}
-                  </th>
+                  <th className="px-3 py-2 font-medium">{t('community.matches.matchedHobbies')}</th>
                 ) : null}
               </tr>
             </thead>
@@ -256,11 +252,7 @@ interface NewChannelDialogProps {
   onCreated: () => void;
 }
 
-function NewChannelDialog({
-  open,
-  onOpenChange,
-  onCreated,
-}: NewChannelDialogProps): JSX.Element {
+function NewChannelDialog({ open, onOpenChange, onCreated }: NewChannelDialogProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { show } = useToast();

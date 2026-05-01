@@ -11,7 +11,8 @@ import { useNotifications } from './useNotifications';
 function formatRelative(iso: string, locale?: string): string {
   const ms = Date.now() - new Date(iso).getTime();
   const minutes = Math.round(ms / (60 * 1000));
-  if (minutes < 1) return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(0, 'minute');
+  if (minutes < 1)
+    return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(0, 'minute');
   if (minutes < 60) {
     return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(-minutes, 'minute');
   }
@@ -134,7 +135,7 @@ function NotificationItem({ row, onClick, locale }: ItemProps): JSX.Element {
             <span aria-hidden className="h-2 w-2 shrink-0 rounded-full bg-primary" />
           ) : null}
         </span>
-        <span className="text-xs text-muted-foreground line-clamp-2">{row.body}</span>
+        <span className="line-clamp-2 text-xs text-muted-foreground">{row.body}</span>
         <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
           {formatRelative(row.sent_at, locale)}
         </span>

@@ -9,10 +9,7 @@
     "src/test/**/*.ts"
   ],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": [
-    "supabase/functions/**",
-    "src/types/database.types.ts"
-  ],
+  "ignore": ["supabase/functions/**", "src/types/database.types.ts"],
   "ignoreDependencies": [
     "@typescript-eslint/eslint-plugin",
     "@typescript-eslint/parser",

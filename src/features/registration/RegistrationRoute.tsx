@@ -43,12 +43,7 @@ function RegistrationInner({ event }: { event: EventRow }): JSX.Element {
   const { t } = useTranslation();
   const { stepPath } = useParams<{ stepPath?: string }>();
   const navigate = useNavigate();
-  const {
-    data: bundle,
-    isLoading,
-    error,
-    invalidate,
-  } = useRegistration({ eventId: event.id });
+  const { data: bundle, isLoading, error, invalidate } = useRegistration({ eventId: event.id });
 
   if (isLoading) {
     return (

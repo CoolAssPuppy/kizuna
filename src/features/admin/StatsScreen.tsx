@@ -36,10 +36,15 @@ export function StatsScreen(): JSX.Element {
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
 
-  const { data: stats, isLoading, error } = useQuery({
+  const {
+    data: stats,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['admin', 'stats', eventId],
     enabled: eventId !== null,
-    queryFn: () => (eventId ? fetchAdminStats(getSupabaseClient(), eventId) : Promise.resolve(null)),
+    queryFn: () =>
+      eventId ? fetchAdminStats(getSupabaseClient(), eventId) : Promise.resolve(null),
   });
 
   if (isLoading) {
@@ -69,14 +74,14 @@ export function StatsScreen(): JSX.Element {
       </header>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <ChartCard title={t('admin.stats.funnel.title')} subtitle={t('admin.stats.funnel.subtitle')}>
+        <ChartCard
+          title={t('admin.stats.funnel.title')}
+          subtitle={t('admin.stats.funnel.subtitle')}
+        >
           <BarHorizontal data={funnelRows} />
         </ChartCard>
 
-        <ChartCard
-          title={t('admin.stats.role.title')}
-          subtitle={t('admin.stats.role.subtitle')}
-        >
+        <ChartCard title={t('admin.stats.role.title')} subtitle={t('admin.stats.role.subtitle')}>
           <DonutChart data={stats.attendeesByRole} />
         </ChartCard>
 

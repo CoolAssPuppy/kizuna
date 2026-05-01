@@ -26,9 +26,7 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
   // Each row renders in its own zone — a SFO→YYC flight shows departure
   // time in PT and arrival in MT even when both timestamps live as UTC.
   const startLabel = formatTime(item.starts_at, item.starts_tz);
-  const endLabel = item.ends_at
-    ? formatTime(item.ends_at, item.ends_tz ?? item.starts_tz)
-    : null;
+  const endLabel = item.ends_at ? formatTime(item.ends_at, item.ends_tz ?? item.starts_tz) : null;
 
   return (
     <li
@@ -73,9 +71,7 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
             {t(`itinerary.itemTypes.${item.item_type}`)}
           </p>
 
-          {item.subtitle ? (
-            <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-          ) : null}
+          {item.subtitle ? <p className="text-sm text-muted-foreground">{item.subtitle}</p> : null}
 
           <div className="flex flex-wrap gap-2 pt-1">
             {item.includes_guest ? (

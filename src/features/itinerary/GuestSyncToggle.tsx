@@ -32,11 +32,7 @@ export function GuestSyncToggle({ onToggle }: { onToggle: () => void }): JSX.Ele
     mutationFn: (next: boolean) => setGuestSync(getSupabaseClient(), user!.id, next),
     onSuccess: async (_data, next) => {
       await qc.invalidateQueries({ queryKey: ['guest', 'sync', user?.id] });
-      show(
-        next
-          ? t('itinerary.guestSync.enabled')
-          : t('itinerary.guestSync.disabled'),
-      );
+      show(next ? t('itinerary.guestSync.enabled') : t('itinerary.guestSync.disabled'));
       onToggle();
     },
     onError: (err: Error) => show(err.message, 'error'),

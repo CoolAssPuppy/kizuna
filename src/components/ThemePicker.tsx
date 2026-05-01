@@ -34,8 +34,7 @@ export function ThemePicker(): JSX.Element {
             className={cn(
               'inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-all',
               'hover:text-foreground',
-              active &&
-                'bg-background text-foreground shadow-sm ring-1 ring-border',
+              active && 'bg-background text-foreground shadow-sm ring-1 ring-border',
             )}
             title={t(`footer.themes.${value}`)}
             aria-label={t(`footer.themes.${value}`)}

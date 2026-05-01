@@ -39,8 +39,10 @@ function sameLocation(
   b: { city: string | null; country: string | null },
 ): boolean {
   if (!a.city || !a.country || !b.city || !b.country) return false;
-  return a.city.trim().toLowerCase() === b.city.trim().toLowerCase()
-    && a.country.toLowerCase() === b.country.toLowerCase();
+  return (
+    a.city.trim().toLowerCase() === b.city.trim().toLowerCase() &&
+    a.country.toLowerCase() === b.country.toLowerCase()
+  );
 }
 
 export function filterByHometown(self: Profile, all: Profile[]): Profile[] {
@@ -48,8 +50,8 @@ export function filterByHometown(self: Profile, all: Profile[]): Profile[] {
   if (!ours.city || !ours.country) return [];
   return all.filter(
     (p) =>
-      p.user_id !== self.user_id
-      && sameLocation(ours, { city: p.hometown_city, country: p.hometown_country }),
+      p.user_id !== self.user_id &&
+      sameLocation(ours, { city: p.hometown_city, country: p.hometown_country }),
   );
 }
 
@@ -58,7 +60,7 @@ export function filterByCurrentTown(self: Profile, all: Profile[]): Profile[] {
   if (!ours.city || !ours.country) return [];
   return all.filter(
     (p) =>
-      p.user_id !== self.user_id
-      && sameLocation(ours, { city: p.current_city, country: p.current_country }),
+      p.user_id !== self.user_id &&
+      sameLocation(ours, { city: p.current_city, country: p.current_country }),
   );
 }

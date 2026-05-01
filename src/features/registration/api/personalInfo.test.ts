@@ -10,9 +10,9 @@ describe('composeLegalName', () => {
   });
 
   it('inserts a middle initial with a trailing dot', () => {
-    expect(
-      composeLegalName({ first_name: 'Mary', middle_initial: 'J', last_name: 'Watson' }),
-    ).toBe('Mary J. Watson');
+    expect(composeLegalName({ first_name: 'Mary', middle_initial: 'J', last_name: 'Watson' })).toBe(
+      'Mary J. Watson',
+    );
   });
 
   it('preserves an existing dot rather than doubling it', () => {
@@ -22,14 +22,12 @@ describe('composeLegalName', () => {
   });
 
   it('returns an empty string when every part is missing', () => {
-    expect(
-      composeLegalName({ first_name: null, middle_initial: null, last_name: null }),
-    ).toBe('');
+    expect(composeLegalName({ first_name: null, middle_initial: null, last_name: null })).toBe('');
   });
 
   it('handles a single-name attendee gracefully', () => {
-    expect(
-      composeLegalName({ first_name: 'Sting', middle_initial: null, last_name: null }),
-    ).toBe('Sting');
+    expect(composeLegalName({ first_name: 'Sting', middle_initial: null, last_name: null })).toBe(
+      'Sting',
+    );
   });
 });

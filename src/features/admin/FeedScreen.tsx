@@ -93,7 +93,8 @@ export function FeedScreen(): JSX.Element {
   const { data: items } = useQuery({
     queryKey: ['admin', 'feed', eventId],
     enabled: eventId !== null,
-    queryFn: () => (eventId ? fetchAllFeedItems(getSupabaseClient(), eventId) : Promise.resolve([])),
+    queryFn: () =>
+      eventId ? fetchAllFeedItems(getSupabaseClient(), eventId) : Promise.resolve([]),
   });
 
   const save = useMutation({
@@ -199,7 +200,13 @@ interface FeedBucketProps {
   onReorder: (orderedIds: string[]) => void;
 }
 
-function FeedBucket({ location, items, onEdit, onDelete, onReorder }: FeedBucketProps): JSX.Element {
+function FeedBucket({
+  location,
+  items,
+  onEdit,
+  onDelete,
+  onReorder,
+}: FeedBucketProps): JSX.Element {
   const { t } = useTranslation();
   const [dragId, setDragId] = useState<string | null>(null);
 
@@ -311,9 +318,7 @@ function FeedDialog({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.El
           }}
         >
           <DialogHeader>
-            <DialogTitle>
-              {state.id ? t('admin.feed.edit') : t('admin.feed.create')}
-            </DialogTitle>
+            <DialogTitle>{state.id ? t('admin.feed.edit') : t('admin.feed.create')}</DialogTitle>
           </DialogHeader>
 
           <div className="grid grid-cols-1 gap-4 py-2 md:grid-cols-2">
@@ -322,9 +327,7 @@ function FeedDialog({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.El
               <select
                 id="feed-location"
                 value={state.location}
-                onChange={(e) =>
-                  setState({ ...state, location: e.target.value as FeedLocation })
-                }
+                onChange={(e) => setState({ ...state, location: e.target.value as FeedLocation })}
                 className="h-10 w-full rounded-md border bg-background px-3 text-sm"
               >
                 {LOCATIONS.map((loc) => (

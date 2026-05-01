@@ -26,7 +26,8 @@ export function groupMessagesForBubbles(messages: Message[]): BubbleGroup[] {
   for (const m of messages) {
     const last = groups[groups.length - 1];
     const gap = last
-      ? new Date(m.sent_at).getTime() - new Date(last.messages[last.messages.length - 1]!.sent_at).getTime()
+      ? new Date(m.sent_at).getTime() -
+        new Date(last.messages[last.messages.length - 1]!.sent_at).getTime()
       : Infinity;
     if (last && last.sender_id === m.sender_id && gap <= FIVE_MINUTES_MS) {
       last.messages.push(m);

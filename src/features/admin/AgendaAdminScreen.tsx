@@ -12,12 +12,7 @@ import { cn } from '@/lib/utils';
 
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
 
-import {
-  agendaToCsv,
-  blankAgendaCsv,
-  importAgendaCsv,
-  sessionsToCsvRows,
-} from './agendaCsv';
+import { agendaToCsv, blankAgendaCsv, importAgendaCsv, sessionsToCsvRows } from './agendaCsv';
 import {
   type SessionRow,
   createSession,
@@ -27,11 +22,7 @@ import {
 } from './api/sessions';
 import { downloadCsv } from './csv';
 import { SessionDialog } from './SessionDialog';
-import {
-  type SessionDraft,
-  emptySessionDraft,
-  rowToDraft,
-} from './sessionDraft';
+import { type SessionDraft, emptySessionDraft, rowToDraft } from './sessionDraft';
 
 function toIso(value: string): string {
   return new Date(value).toISOString();
@@ -74,14 +65,14 @@ export function AgendaAdminScreen(): JSX.Element {
   });
 
   const timeZone = event?.time_zone ?? 'UTC';
-  const dayBuckets = useMemo(() => uniqueDayBuckets(sessions ?? [], timeZone), [
-    sessions,
-    timeZone,
-  ]);
+  const dayBuckets = useMemo(
+    () => uniqueDayBuckets(sessions ?? [], timeZone),
+    [sessions, timeZone],
+  );
   const visibleSessions = useMemo(
     () =>
       dayFilter === 'all'
-        ? sessions ?? []
+        ? (sessions ?? [])
         : (sessions ?? []).filter((s) => dayKey(s.starts_at, timeZone) === dayFilter),
     [sessions, dayFilter, timeZone],
   );
@@ -109,9 +100,7 @@ export function AgendaAdminScreen(): JSX.Element {
   const save = useMutation({
     mutationFn: async (draft: SessionDraft) => {
       if (!eventId) throw new Error('No active event');
-      const capacity = draft.capacity.trim()
-        ? Number.parseInt(draft.capacity.trim(), 10)
-        : null;
+      const capacity = draft.capacity.trim() ? Number.parseInt(draft.capacity.trim(), 10) : null;
       const payload = {
         event_id: eventId,
         title: draft.title,
@@ -189,7 +178,9 @@ export function AgendaAdminScreen(): JSX.Element {
           />
           <IconAction
             icon={<Upload aria-hidden className="h-4 w-4" />}
-            label={importMutation.isPending ? t('admin.agenda.importing') : t('admin.agenda.import')}
+            label={
+              importMutation.isPending ? t('admin.agenda.importing') : t('admin.agenda.import')
+            }
             onClick={() => fileInputRef.current?.click()}
             disabled={importMutation.isPending}
           />
@@ -322,11 +313,11 @@ function SessionListItem({ session, isPast, onEdit, onDelete }: SessionListItemP
       <button
         type="button"
         onClick={onEdit}
-        className="flex flex-1 flex-col items-start gap-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+        className="flex flex-1 flex-col items-start gap-0.5 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="flex flex-wrap items-baseline justify-between gap-2 self-stretch">
           <span className="font-medium">{session.title}</span>
-          <span className="tabular-nums text-xs text-muted-foreground">
+          <span className="text-xs tabular-nums text-muted-foreground">
             {mediumDateTimeFormatter.format(new Date(session.starts_at))}
           </span>
         </div>
@@ -334,12 +325,19 @@ function SessionListItem({ session, isPast, onEdit, onDelete }: SessionListItemP
           <p className="text-xs text-muted-foreground">{session.subtitle}</p>
         ) : null}
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          {t(`admin.agenda.types.${session.type}`)} · {t(`admin.agenda.audiences.${session.audience}`)}
+          {t(`admin.agenda.types.${session.type}`)} ·{' '}
+          {t(`admin.agenda.audiences.${session.audience}`)}
           {session.location ? ` · ${session.location}` : ''}
         </p>
       </button>
-      <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onEdit} aria-label={t('actions.edit')}>
+      <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8"
+          onClick={onEdit}
+          aria-label={t('actions.edit')}
+        >
           <Pencil aria-hidden className="h-3.5 w-3.5" />
         </Button>
         <Button

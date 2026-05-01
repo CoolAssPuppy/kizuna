@@ -50,12 +50,12 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   }
 
   const sessions = data ?? [];
-  const filteredByMode =
-    filter === 'favorites' ? sessions.filter((s) => s.is_favorite) : sessions;
+  const filteredByMode = filter === 'favorites' ? sessions.filter((s) => s.is_favorite) : sessions;
   const allDays = groupSessionsByDay(sessions, event.time_zone);
-  const visible = dayFilter === 'all'
-    ? filteredByMode
-    : filteredByMode.filter((s) => dayKey(s.starts_at, event.time_zone) === dayFilter);
+  const visible =
+    dayFilter === 'all'
+      ? filteredByMode
+      : filteredByMode.filter((s) => dayKey(s.starts_at, event.time_zone) === dayFilter);
   const days = groupSessionsByDay(visible, event.time_zone);
   const now = Date.now();
 
@@ -117,9 +117,7 @@ export function AgendaScreen({ event }: Props): JSX.Element {
                     timeZone={event.time_zone}
                     isPast={new Date(session.ends_at).getTime() < now}
                     onToggleFavorite={() => toggleFavorite(session)}
-                    favoriteLabel={t(
-                      session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite',
-                    )}
+                    favoriteLabel={t(session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite')}
                   />
                 ))}
               </ul>
@@ -180,8 +178,7 @@ function SessionCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-xs font-medium tabular-nums text-muted-foreground">
-            {formatTime(session.starts_at, timeZone)} —{' '}
-            {formatTime(session.ends_at, timeZone)}
+            {formatTime(session.starts_at, timeZone)} — {formatTime(session.ends_at, timeZone)}
             {session.location ? <span> · {session.location}</span> : null}
           </p>
           <h3 className="text-base font-semibold">{session.title}</h3>

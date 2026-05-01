@@ -63,17 +63,19 @@ export async function saveParsedFlights(
 ): Promise<number> {
   const rows = flights
     .filter(
-      (f): f is ParsedFlight & {
+      (
+        f,
+      ): f is ParsedFlight & {
         departure_airport: string;
         arrival_airport: string;
         departure_time_local: string;
         arrival_time_local: string;
       } =>
         Boolean(
-          f.departure_airport
-            && f.arrival_airport
-            && f.departure_time_local
-            && f.arrival_time_local,
+          f.departure_airport &&
+          f.arrival_airport &&
+          f.departure_time_local &&
+          f.arrival_time_local,
         ),
     )
     .map((flight) => {

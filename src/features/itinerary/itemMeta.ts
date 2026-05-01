@@ -46,4 +46,3 @@ export const ITEM_META: Record<ItineraryItemType, ItemMeta> = {
     dotClass: 'bg-rose-500',
   },
 };
-

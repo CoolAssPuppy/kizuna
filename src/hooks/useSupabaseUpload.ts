@@ -116,12 +116,10 @@ export function useSupabaseUpload(options: UseSupabaseUploadOptions) {
     const responses = await Promise.all(
       filesToUpload.map(async (file) => {
         const objectPath = path ? `${path}/${file.name}` : file.name;
-        const { error } = await client.storage
-          .from(bucketName)
-          .upload(objectPath, file, {
-            cacheControl: cacheControl.toString(),
-            upsert,
-          });
+        const { error } = await client.storage.from(bucketName).upload(objectPath, file, {
+          cacheControl: cacheControl.toString(),
+          upsert,
+        });
         return error
           ? { name: file.name, path: objectPath, message: error.message }
           : { name: file.name, path: objectPath, message: undefined };

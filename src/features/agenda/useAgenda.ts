@@ -3,12 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import {
-  type AgendaSession,
-  favoriteSession,
-  fetchAgenda,
-  unfavoriteSession,
-} from './api';
+import { type AgendaSession, favoriteSession, fetchAgenda, unfavoriteSession } from './api';
 
 const queryKey = (eventId: string, userId: string): readonly unknown[] =>
   ['agenda', eventId, userId] as const;
@@ -49,9 +44,7 @@ export function useAgenda(eventId: string): {
       if (previous) {
         queryClient.setQueryData<AgendaSession[]>(
           queryKey(eventId, userId),
-          previous.map((s) =>
-            s.id === session.id ? { ...s, is_favorite: !s.is_favorite } : s,
-          ),
+          previous.map((s) => (s.id === session.id ? { ...s, is_favorite: !s.is_favorite } : s)),
         );
       }
       return { previous };

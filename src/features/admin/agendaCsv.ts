@@ -68,7 +68,12 @@ const SESSION_TYPES: ReadonlyArray<SessionType> = [
   'transport',
   'social',
 ];
-const AUDIENCES: ReadonlyArray<SessionAudience> = ['all', 'employees_only', 'guests_only', 'opt_in'];
+const AUDIENCES: ReadonlyArray<SessionAudience> = [
+  'all',
+  'employees_only',
+  'guests_only',
+  'opt_in',
+];
 
 function asSessionType(value: string): SessionType {
   if (!SESSION_TYPES.includes(value as SessionType)) {
@@ -245,7 +250,10 @@ export function sessionsToCsvRows(
   return sessions.map((s) => {
     const start = new Date(s.starts_at);
     const end = new Date(s.ends_at);
-    const dayOffset = Math.round((Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()) - baseDate) / 86_400_000);
+    const dayOffset = Math.round(
+      (Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()) - baseDate) /
+        86_400_000,
+    );
     return {
       day_offset: dayOffset,
       start_time: start.toISOString().slice(11, 16),

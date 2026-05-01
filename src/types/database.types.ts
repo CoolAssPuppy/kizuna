@@ -166,6 +166,7 @@ export type Database = {
           current_city: string | null
           current_country: string | null
           fun_fact: string | null
+          ground_transport_need: Database["public"]["Enums"]["ground_transport_need"]
           hobbies: string[]
           hometown_city: string | null
           hometown_country: string | null
@@ -181,6 +182,7 @@ export type Database = {
           current_city?: string | null
           current_country?: string | null
           fun_fact?: string | null
+          ground_transport_need?: Database["public"]["Enums"]["ground_transport_need"]
           hobbies?: string[]
           hometown_city?: string | null
           hometown_country?: string | null
@@ -196,6 +198,7 @@ export type Database = {
           current_city?: string | null
           current_country?: string | null
           fun_fact?: string | null
+          ground_transport_need?: Database["public"]["Enums"]["ground_transport_need"]
           hobbies?: string[]
           hometown_city?: string | null
           hometown_country?: string | null
@@ -1747,30 +1750,39 @@ export type Database = {
         Row: {
           capacity_bags: number
           capacity_passengers: number
+          direction: Database["public"]["Enums"]["transport_direction"]
           event_id: string
           handles_special_equipment: string[]
           id: string
           notes: string | null
+          pickup_at: string
+          pickup_tz: string
           provider: string | null
           vehicle_name: string
         }
         Insert: {
           capacity_bags: number
           capacity_passengers: number
+          direction: Database["public"]["Enums"]["transport_direction"]
           event_id: string
           handles_special_equipment?: string[]
           id?: string
           notes?: string | null
+          pickup_at: string
+          pickup_tz?: string
           provider?: string | null
           vehicle_name: string
         }
         Update: {
           capacity_bags?: number
           capacity_passengers?: number
+          direction?: Database["public"]["Enums"]["transport_direction"]
           event_id?: string
           handles_special_equipment?: string[]
           id?: string
           notes?: string | null
+          pickup_at?: string
+          pickup_tz?: string
           provider?: string | null
           vehicle_name?: string
         }
@@ -1920,6 +1932,7 @@ export type Database = {
       field_source_type: "hibob" | "perk" | "user_entered" | "admin_set"
       flight_direction: "inbound" | "outbound"
       flight_source_type: "perk_sync" | "perk_csv" | "manual_obs"
+      ground_transport_need: "none" | "arrival" | "departure" | "both"
       guest_invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       guest_payment_status:
         | "pending"
@@ -2133,6 +2146,7 @@ export const Constants = {
       field_source_type: ["hibob", "perk", "user_entered", "admin_set"],
       flight_direction: ["inbound", "outbound"],
       flight_source_type: ["perk_sync", "perk_csv", "manual_obs"],
+      ground_transport_need: ["none", "arrival", "departure", "both"],
       guest_invitation_status: ["pending", "accepted", "expired", "cancelled"],
       guest_payment_status: ["pending", "paid", "waived", "refunded", "failed"],
       guest_relationship: ["partner", "family", "friend", "other"],

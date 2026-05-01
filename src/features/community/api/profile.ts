@@ -45,10 +45,7 @@ export async function saveCommunityProfile(
 ): Promise<void> {
   const { error } = await client
     .from('attendee_profiles')
-    .upsert(
-      { user_id: userId, ...profile },
-      { onConflict: 'user_id' },
-    );
+    .upsert({ user_id: userId, ...profile }, { onConflict: 'user_id' });
   if (error) throw error;
 }
 
@@ -58,9 +55,7 @@ export interface HobbyOption {
   category: string;
 }
 
-export async function loadHobbyCatalog(
-  client: AppSupabaseClient,
-): Promise<HobbyOption[]> {
+export async function loadHobbyCatalog(client: AppSupabaseClient): Promise<HobbyOption[]> {
   const { data, error } = await client
     .from('hobby_catalog')
     .select('slug, label, category')

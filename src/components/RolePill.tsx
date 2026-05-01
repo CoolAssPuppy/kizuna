@@ -19,8 +19,7 @@ function sentenceCase(value: string): string {
   return flat.charAt(0).toUpperCase() + flat.slice(1);
 }
 
-const PILL_BASE =
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium';
+const PILL_BASE = 'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium';
 
 /**
  * Pill badge for a user role. Used on the Profile header and the admin
@@ -30,9 +29,7 @@ const PILL_BASE =
 export function RolePill({ role }: Props): JSX.Element {
   const { t } = useTranslation();
   const label = isAppRole(role) ? t(`roles.${role}`) : sentenceCase(role);
-  return (
-    <span className={`${PILL_BASE} bg-secondary text-secondary-foreground`}>{label}</span>
-  );
+  return <span className={`${PILL_BASE} bg-secondary text-secondary-foreground`}>{label}</span>;
 }
 
 /**

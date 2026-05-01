@@ -12,11 +12,7 @@ import type { SectionProps } from '@/features/registration/sections/types';
 import { useSectionSubmit } from '@/features/registration/sections/useSectionSubmit';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import {
-  loadCommunityProfile,
-  loadHobbyCatalog,
-  saveCommunityProfile,
-} from './api';
+import { loadCommunityProfile, loadHobbyCatalog, saveCommunityProfile } from './api';
 import { COUNTRIES, isValidCountryCode } from './countries';
 
 interface FormState {
@@ -93,8 +89,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
     return hobbyCatalog
       .filter(
         (h) =>
-          !taken.has(h.slug)
-          && (h.label.toLowerCase().includes(draft) || h.slug.includes(draft)),
+          !taken.has(h.slug) && (h.label.toLowerCase().includes(draft) || h.slug.includes(draft)),
       )
       .slice(0, 6);
   }, [hobbyCatalog, values.hobbies, values.hobbyDraft]);
@@ -229,9 +224,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
 
       <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
         <div className="space-y-2">
-          <Label htmlFor="community-hometown-city">
-            {t('community.profile.hometownCity')}
-          </Label>
+          <Label htmlFor="community-hometown-city">{t('community.profile.hometownCity')}</Label>
           <Input
             id="community-hometown-city"
             value={values.hometownCity}
@@ -239,9 +232,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="community-hometown-country">
-            {t('community.profile.country')}
-          </Label>
+          <Label htmlFor="community-hometown-country">{t('community.profile.country')}</Label>
           <CountrySelect
             id="community-hometown-country"
             value={values.hometownCountry}
@@ -252,9 +243,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
 
       <div className="grid gap-4 sm:grid-cols-[1fr_14rem]">
         <div className="space-y-2">
-          <Label htmlFor="community-current-city">
-            {t('community.profile.currentCity')}
-          </Label>
+          <Label htmlFor="community-current-city">{t('community.profile.currentCity')}</Label>
           <Input
             id="community-current-city"
             value={values.currentCity}
@@ -262,9 +251,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="community-current-country">
-            {t('community.profile.country')}
-          </Label>
+          <Label htmlFor="community-current-country">{t('community.profile.country')}</Label>
           <CountrySelect
             id="community-current-country"
             value={values.currentCountry}

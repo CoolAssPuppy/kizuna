@@ -92,20 +92,20 @@ function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
   const body = (
     <article className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent">
       {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt=""
-          className="aspect-[3/1] w-full rounded-md object-cover"
-        />
+        <img src={imageUrl} alt="" className="aspect-[3/1] w-full rounded-md object-cover" />
       ) : null}
       <h3 className="text-base font-semibold">{item.title}</h3>
-      {item.subtitle ? (
-        <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-      ) : null}
+      {item.subtitle ? <p className="text-sm text-muted-foreground">{item.subtitle}</p> : null}
       {item.body ? <p className="text-sm leading-relaxed">{item.body}</p> : null}
     </article>
   );
-  return item.link_url ? <li><a href={item.link_url}>{body}</a></li> : <li>{body}</li>;
+  return item.link_url ? (
+    <li>
+      <a href={item.link_url}>{body}</a>
+    </li>
+  ) : (
+    <li>{body}</li>
+  );
 }
 
 function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
@@ -113,11 +113,7 @@ function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
   return (
     <CardShell title={item.title} {...(item.subtitle ? { description: item.subtitle } : {})}>
       {imageUrl ? (
-        <img
-          src={imageUrl}
-          alt=""
-          className="aspect-[3/2] w-full rounded-md object-cover"
-        />
+        <img src={imageUrl} alt="" className="aspect-[3/2] w-full rounded-md object-cover" />
       ) : null}
       {item.body ? <p className="pt-3 text-sm text-muted-foreground">{item.body}</p> : null}
     </CardShell>

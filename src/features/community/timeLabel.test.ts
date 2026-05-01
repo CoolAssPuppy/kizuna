@@ -6,8 +6,9 @@ describe('messageTimeLabel', () => {
   const now = new Date('2027-01-15T15:30:00Z');
 
   it('formats today messages as the time of day', () => {
-    expect(messageTimeLabel('2027-01-15T13:05:00Z', { now, locale: 'en-US', timeZone: 'UTC' }))
-      .toMatch(/1:05/);
+    expect(
+      messageTimeLabel('2027-01-15T13:05:00Z', { now, locale: 'en-US', timeZone: 'UTC' }),
+    ).toMatch(/1:05/);
   });
 
   it('prefixes "Yesterday" for messages 1 calendar day ago', () => {

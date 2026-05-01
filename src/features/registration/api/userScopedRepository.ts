@@ -37,10 +37,7 @@ export function createUserScopedRepository<T extends keyof Tables, F>({
   return {
     async load(client, userId): Promise<RowOf<T> | null> {
       const builder: any = client.from(table as any);
-      const { data, error } = await builder
-        .select(select)
-        .eq('user_id', userId)
-        .maybeSingle();
+      const { data, error } = await builder.select(select).eq('user_id', userId).maybeSingle();
       if (error) throw error;
       return (data ?? null) as RowOf<T> | null;
     },

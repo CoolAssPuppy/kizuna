@@ -45,10 +45,7 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
       if (!next || !user) return;
       void (async () => {
         const client = getSupabaseClient();
-        await client
-          .from('employee_profiles')
-          .update({ avatar_url: next })
-          .eq('user_id', user.id);
+        await client.from('employee_profiles').update({ avatar_url: next }).eq('user_id', user.id);
         const { data: signed } = await client.storage
           .from(AVATAR_BUCKET)
           .createSignedUrl(next, 60 * 60);

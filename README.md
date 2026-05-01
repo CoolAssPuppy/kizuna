@@ -50,29 +50,29 @@ The Phase 1 deadline is **2026-08-01** — the date by which we must begin compi
 
 Every design decision in this codebase maps to one of these:
 
-| Principle     | Key surfaces                                                       | What it covers                                                          |
-| ------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| Connection    | `attendee_profiles`, `channels`, `messages`, `hobby_catalog`       | Profiles, world map, people-matching, channel chat, typing presence     |
-| Collaboration | `sessions`, `votes`, `session_registrations`                       | Voting, breakout sign-ups, idea boards (P3)                             |
-| Clarity       | `registrations`, `flights`, `accommodations`, `itinerary_items`    | Personal itinerary, tasks, document sign-offs                           |
-| Commitment    | `registration_tasks`, `notifications`                              | Deadline tracking, nudges, year-over-year continuity                    |
-| Celebration   | `votes`, `messages`, `feed_items`                                  | Gamification, recognition, editorial home feed                          |
+| Principle     | Key surfaces                                                    | What it covers                                                      |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Connection    | `attendee_profiles`, `channels`, `messages`, `hobby_catalog`    | Profiles, world map, people-matching, channel chat, typing presence |
+| Collaboration | `sessions`, `votes`, `session_registrations`                    | Voting, breakout sign-ups, idea boards (P3)                         |
+| Clarity       | `registrations`, `flights`, `accommodations`, `itinerary_items` | Personal itinerary, tasks, document sign-offs                       |
+| Commitment    | `registration_tasks`, `notifications`                           | Deadline tracking, nudges, year-over-year continuity                |
+| Celebration   | `votes`, `messages`, `feed_items`                               | Gamification, recognition, editorial home feed                      |
 
 ## Tech stack
 
-| Layer    | Choice                                                             |
-| -------- | ------------------------------------------------------------------ |
-| Frontend | Vite 5 + React 18 + TypeScript (strict, exactOptionalPropertyTypes)|
-| Routing  | React Router v6 with route-level lazy + Suspense                   |
-| Styling  | Tailwind CSS 3 + shadcn/ui (New York) with CSS-variable themes     |
-| State    | TanStack Query (server) + Zustand (sparingly, local)               |
-| Forms    | react-hook-form + zod                                              |
-| i18n     | i18next + react-i18next, English-US default                        |
-| PWA      | vite-plugin-pwa with Workbox (precache + stale-while-revalidate)   |
-| Backend  | Supabase: Postgres, Auth, Realtime, Storage, Edge Functions (Deno) |
-| Schema   | Declarative SQL in `supabase/schemas/` (no timestamped migrations) |
-| Tests    | Vitest · React Testing Library · Playwright · pgTAP · MSW          |
-| Deploy   | Vercel (web) · Supabase Cloud (backend, GitHub Actions later)      |
+| Layer    | Choice                                                              |
+| -------- | ------------------------------------------------------------------- |
+| Frontend | Vite 5 + React 18 + TypeScript (strict, exactOptionalPropertyTypes) |
+| Routing  | React Router v6 with route-level lazy + Suspense                    |
+| Styling  | Tailwind CSS 3 + shadcn/ui (New York) with CSS-variable themes      |
+| State    | TanStack Query (server) + Zustand (sparingly, local)                |
+| Forms    | react-hook-form + zod                                               |
+| i18n     | i18next + react-i18next, English-US default                         |
+| PWA      | vite-plugin-pwa with Workbox (precache + stale-while-revalidate)    |
+| Backend  | Supabase: Postgres, Auth, Realtime, Storage, Edge Functions (Deno)  |
+| Schema   | Declarative SQL in `supabase/schemas/` (no timestamped migrations)  |
+| Tests    | Vitest · React Testing Library · Playwright · pgTAP · MSW           |
+| Deploy   | Vercel (web) · Supabase Cloud (backend, GitHub Actions later)       |
 
 ## Architecture at a glance
 
@@ -144,12 +144,12 @@ npm run dev
 
 ### Doppler configs
 
-| Config           | Purpose                                                           |
-| ---------------- | ----------------------------------------------------------------- |
-| `dev`            | Shared local defaults (local Supabase URLs, dev placeholders)     |
-| `dev_personal`   | Your personal overrides — set keys here that should not be shared |
-| `stg`            | Staging cloud Supabase + integrations                             |
-| `prd`            | Production                                                        |
+| Config         | Purpose                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| `dev`          | Shared local defaults (local Supabase URLs, dev placeholders)     |
+| `dev_personal` | Your personal overrides — set keys here that should not be shared |
+| `stg`          | Staging cloud Supabase + integrations                             |
+| `prd`          | Production                                                        |
 
 Each config holds the same 24 keys as `.env.example`. Empty values fall through the integration stub paths gracefully (see [Integrations and graceful degradation](#integrations-and-graceful-degradation)).
 
@@ -182,31 +182,31 @@ That runs `doppler secrets download` into `supabase/.env` (so `OPENAI_API_KEY` a
 
 ## Common commands
 
-| Command                                       | What it does                                       |
-| --------------------------------------------- | -------------------------------------------------- |
-| `npm run dev`                                 | Vite dev server on port 5173                       |
-| `npm run build`                               | Production build (route-split + vendor chunks)     |
-| `npm run preview`                             | Preview the production build locally               |
-| `npm run typecheck`                           | `tsc --noEmit` across the whole project            |
-| `npm run lint`                                | ESLint over `src` and `tests`                      |
-| `npm run lint:fix`                            | ESLint with autofix                                |
-| `npm run format`                              | Prettier write                                     |
-| `npm run format:check`                        | Prettier verify (used in CI)                       |
-| `npm run test`                                | Vitest in watch mode                               |
-| `npm run test:run`                            | Vitest single run (used in CI)                     |
-| `npm run test:coverage`                       | Vitest with coverage report                        |
-| `npm run test:e2e`                            | Playwright end-to-end                              |
-| `npm run db:start`                            | Start local Supabase stack                         |
-| `npm run db:stop`                             | Stop local Supabase stack                          |
-| `npm run db:reset`                            | Reset DB — drops state and reapplies init scripts  |
-| `npm run db:apply`                            | Apply declarative schemas + pgTAP + seed via psql  |
-| `npm run db:diff`                             | Generate a migration from declarative schema diffs |
-| `npm run db:test`                             | Run pgTAP tests                                    |
+| Command                                       | What it does                                                         |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| `npm run dev`                                 | Vite dev server on port 5173                                         |
+| `npm run build`                               | Production build (route-split + vendor chunks)                       |
+| `npm run preview`                             | Preview the production build locally                                 |
+| `npm run typecheck`                           | `tsc --noEmit` across the whole project                              |
+| `npm run lint`                                | ESLint over `src` and `tests`                                        |
+| `npm run lint:fix`                            | ESLint with autofix                                                  |
+| `npm run format`                              | Prettier write                                                       |
+| `npm run format:check`                        | Prettier verify (used in CI)                                         |
+| `npm run test`                                | Vitest in watch mode                                                 |
+| `npm run test:run`                            | Vitest single run (used in CI)                                       |
+| `npm run test:coverage`                       | Vitest with coverage report                                          |
+| `npm run test:e2e`                            | Playwright end-to-end                                                |
+| `npm run db:start`                            | Start local Supabase stack                                           |
+| `npm run db:stop`                             | Stop local Supabase stack                                            |
+| `npm run db:reset`                            | Reset DB — drops state and reapplies init scripts                    |
+| `npm run db:apply`                            | Apply declarative schemas + pgTAP + seed via psql                    |
+| `npm run db:diff`                             | Generate a migration from declarative schema diffs                   |
+| `npm run db:test`                             | Run pgTAP tests                                                      |
 | `npm run functions:env`                       | Sync Doppler secrets into `supabase/.env` for the local edge runtime |
 | `npm run functions:serve`                     | Sync env, then `supabase functions serve` (run in a second terminal) |
-| `npm run gen:types`                           | Regenerate `src/types/database.types.ts`           |
-| `npm run simulate:community`                  | Replay a scripted realtime chat to 5 channels      |
-| `npx tsx scripts/snapshot-email-templates.ts` | Regenerate `supabase/email-templates/*`            |
+| `npm run gen:types`                           | Regenerate `src/types/database.types.ts`                             |
+| `npm run simulate:community`                  | Replay a scripted realtime chat to 5 channels                        |
+| `npx tsx scripts/snapshot-email-templates.ts` | Regenerate `supabase/email-templates/*`                              |
 
 ## Project structure
 
@@ -262,26 +262,26 @@ tasks/             Plan, lessons, refactor audit
 
 ## Routing map
 
-| Path                              | Auth         | Purpose                                                      |
-| --------------------------------- | ------------ | ------------------------------------------------------------ |
-| `/sign-in`                        | public       | Dual-tab sign-in (employee SSO / guest password)             |
-| `/accept-invitation`              | public       | Guest accepts a 7-day signed invitation token                |
-| `/share/reports/:token`           | public token | Read-only report shared with hotels / bus operator           |
-| `/`                               | required     | Home dashboard with feed, countdown, jet-lag, facts          |
-| `/all-events`                     | required     | Event gallery with per-browser event override                |
-| `/registration`                   | required     | Wizard router (jumps to next pending step)                   |
-| `/registration/:stepPath`         | required     | Personal info, dietary, accessibility, passport, swag, ...   |
-| `/consent`                        | required     | Consent gate for documents requiring acknowledgement         |
-| `/documents`                      | required     | Read-only document library with version status               |
-| `/documents/:documentId/sign`     | required     | Sign or re-acknowledge a document                            |
-| `/documents/new`                  | admin        | Admin create flow                                            |
-| `/itinerary`                      | required     | Personal schedule with offline cache + QR check-in           |
-| `/agenda`                         | required     | Public session agenda with day picker                        |
-| `/community`                      | required     | World map + matches + channel list                           |
-| `/community/channels/:slug`       | required     | iMessage-style channel with realtime + typing                |
-| `/profile`                        | required     | Profile editor with left-nav sections (personal, community…) |
-| `/admin/*`                        | admin only   | Reports, conflicts, stats, agenda, feed, nudges, documents   |
-| `*`                               | public       | Not Found                                                    |
+| Path                          | Auth         | Purpose                                                      |
+| ----------------------------- | ------------ | ------------------------------------------------------------ |
+| `/sign-in`                    | public       | Dual-tab sign-in (employee SSO / guest password)             |
+| `/accept-invitation`          | public       | Guest accepts a 7-day signed invitation token                |
+| `/share/reports/:token`       | public token | Read-only report shared with hotels / bus operator           |
+| `/`                           | required     | Home dashboard with feed, countdown, jet-lag, facts          |
+| `/all-events`                 | required     | Event gallery with per-browser event override                |
+| `/registration`               | required     | Wizard router (jumps to next pending step)                   |
+| `/registration/:stepPath`     | required     | Personal info, dietary, accessibility, passport, swag, ...   |
+| `/consent`                    | required     | Consent gate for documents requiring acknowledgement         |
+| `/documents`                  | required     | Read-only document library with version status               |
+| `/documents/:documentId/sign` | required     | Sign or re-acknowledge a document                            |
+| `/documents/new`              | admin        | Admin create flow                                            |
+| `/itinerary`                  | required     | Personal schedule with offline cache + QR check-in           |
+| `/agenda`                     | required     | Public session agenda with day picker                        |
+| `/community`                  | required     | World map + matches + channel list                           |
+| `/community/channels/:slug`   | required     | iMessage-style channel with realtime + typing                |
+| `/profile`                    | required     | Profile editor with left-nav sections (personal, community…) |
+| `/admin/*`                    | admin only   | Reports, conflicts, stats, agenda, feed, nudges, documents   |
+| `*`                           | public       | Not Found                                                    |
 
 Routes other than `/sign-in`, `/accept-invitation`, and `/share/*` show the `AppHeader` and `AppFooter`. Logged-out visitors see no chrome regardless of route.
 

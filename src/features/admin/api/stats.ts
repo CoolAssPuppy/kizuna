@@ -64,9 +64,7 @@ export async function fetchAdminStats(
   ] = await Promise.all([
     client.from('registrations').select('status').eq('event_id', eventId),
     client.from('users').select('id, role, is_active'),
-    client
-      .from('employee_profiles')
-      .select('user_id, home_country, department, years_attended'),
+    client.from('employee_profiles').select('user_id, home_country, department, years_attended'),
     client.from('dietary_preferences').select('restrictions, allergies, alcohol_free'),
     client.from('guest_profiles').select('payment_status'),
     client.from('accessibility_preferences').select('needs'),

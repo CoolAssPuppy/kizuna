@@ -34,18 +34,17 @@ interface Props {
  * passes it flips to a pulsing "Live" pill. Single source of truth for
  * countdown UI across the itinerary hero and the home header.
  */
-export function EventCountdown({ startsAt, size = 'default', fullWidth = false }: Props): JSX.Element {
+export function EventCountdown({
+  startsAt,
+  size = 'default',
+  fullWidth = false,
+}: Props): JSX.Element {
   const { t } = useTranslation();
-  const [countdown, setCountdown] = useState<Countdown>(() =>
-    diffToCountdown(new Date(startsAt)),
-  );
+  const [countdown, setCountdown] = useState<Countdown>(() => diffToCountdown(new Date(startsAt)));
 
   useEffect(() => {
     setCountdown(diffToCountdown(new Date(startsAt)));
-    const id = window.setInterval(
-      () => setCountdown(diffToCountdown(new Date(startsAt))),
-      60_000,
-    );
+    const id = window.setInterval(() => setCountdown(diffToCountdown(new Date(startsAt))), 60_000);
     return () => window.clearInterval(id);
   }, [startsAt]);
 
@@ -91,7 +90,13 @@ function Tile({
   label: string;
 }): JSX.Element {
   return (
-    <div className={size === 'sm' ? 'flex min-w-10 flex-col items-center' : 'flex min-w-14 flex-col items-center'}>
+    <div
+      className={
+        size === 'sm'
+          ? 'flex min-w-10 flex-col items-center'
+          : 'flex min-w-14 flex-col items-center'
+      }
+    >
       <dt
         className={
           size === 'sm'

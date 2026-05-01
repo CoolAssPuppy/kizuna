@@ -116,7 +116,10 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
               <Checkbox
                 checked={values.restrictions.includes(option)}
                 onCheckedChange={() =>
-                  setValues((v) => ({ ...v, restrictions: toggleArrayMember(v.restrictions, option) }))
+                  setValues((v) => ({
+                    ...v,
+                    restrictions: toggleArrayMember(v.restrictions, option),
+                  }))
                 }
               />
               {t(`registration.dietary.restrictionOptions.${option}`)}

@@ -27,7 +27,9 @@ export function useStorageImage(
       return;
     }
     void (async () => {
-      const { data } = await getSupabaseClient().storage.from(bucket).createSignedUrl(path, ttlSeconds);
+      const { data } = await getSupabaseClient()
+        .storage.from(bucket)
+        .createSignedUrl(path, ttlSeconds);
       if (!cancelled) setUrl(data?.signedUrl ?? null);
     })();
     return () => {

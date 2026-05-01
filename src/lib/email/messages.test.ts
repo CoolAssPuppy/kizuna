@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  deadlineReminderEmail,
-  guestInvitationEmail,
-  paymentReceiptEmail,
-} from './messages';
+import { deadlineReminderEmail, guestInvitationEmail, paymentReceiptEmail } from './messages';
 
 describe('guestInvitationEmail', () => {
   const ctx = {

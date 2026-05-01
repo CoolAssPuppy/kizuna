@@ -35,9 +35,7 @@ function makeClient(channels: ChannelRow[], messages: MessageRow[] = []): AppSup
     order: vi.fn().mockResolvedValue({ data: messages, error: null }),
   };
   return {
-    from: vi.fn((table: string) =>
-      table === 'channels' ? channelsBuilder : messagesBuilder,
-    ),
+    from: vi.fn((table: string) => (table === 'channels' ? channelsBuilder : messagesBuilder)),
   } as unknown as AppSupabaseClient;
 }
 

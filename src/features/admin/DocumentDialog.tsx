@@ -225,7 +225,7 @@ export function DocumentDialog({
 
             {draft.content_type === 'markdown' ? (
               <div className="md:col-span-2">
-                <div role="tablist" className="mb-2 flex gap-1 rounded-md border p-1 w-fit">
+                <div role="tablist" className="mb-2 flex w-fit gap-1 rounded-md border p-1">
                   {(['write', 'preview'] as const).map((mode) => (
                     <button
                       key={mode}
@@ -240,7 +240,9 @@ export function DocumentDialog({
                           : 'text-muted-foreground',
                       )}
                     >
-                      {t(`adminDocuments.${mode === 'write' ? 'writeMarkdown' : 'previewMarkdown'}`)}
+                      {t(
+                        `adminDocuments.${mode === 'write' ? 'writeMarkdown' : 'previewMarkdown'}`,
+                      )}
                     </button>
                   ))}
                 </div>
@@ -285,7 +287,7 @@ export function DocumentDialog({
               </div>
             ) : null}
 
-            <div className="md:col-span-2 space-y-2 border-t pt-4">
+            <div className="space-y-2 border-t pt-4 md:col-span-2">
               <FlagRow
                 id="doc-active"
                 label={t('adminDocuments.fields.isActive')}

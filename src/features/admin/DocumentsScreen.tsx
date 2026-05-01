@@ -9,11 +9,7 @@ import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import {
-  type DocumentRow,
-  deleteDocument,
-  fetchAllDocuments,
-} from './api/documents';
+import { type DocumentRow, deleteDocument, fetchAllDocuments } from './api/documents';
 import { DocumentDialog } from './DocumentDialog';
 
 const KIND_LABELS: Record<DocumentRow['document_key'], string> = {

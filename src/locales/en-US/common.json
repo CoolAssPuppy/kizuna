@@ -416,9 +416,13 @@
       "age_other": "{{age}} years old"
     },
     "transport": {
-      "intro": "Tell us how you plan to arrive and depart so we can build the airport shuttle manifest.",
-      "selfArranging": "I am arranging my own transport.",
-      "needsTransfer": "I will need an airport transfer."
+      "intro": "Tell us which legs you'd like an airport transfer for. We use this to build the shuttle manifest.",
+      "options": {
+        "none": "I'm arranging my own transport for both legs.",
+        "arrival": "I need a ride from the airport on arrival only.",
+        "departure": "I need a ride to the airport on departure only.",
+        "both": "I need rides for both arrival and departure."
+      }
     }
   },
   "admin": {
@@ -429,7 +433,8 @@
     "nav": {
       "label": "Admin sections",
       "agenda": "Agenda",
-      "itineraryAnalyzer": "Itinerary analyzer",
+      "groundTransport": "Ground Transport Tool",
+      "roomAssignment": "Room Assignment Tool",
       "feed": "Feed",
       "documents": "Documents",
       "stats": "Stats",
@@ -437,28 +442,41 @@
       "reports": "Reports",
       "conflicts": "Conflicts"
     },
-    "arrivals": {
-      "empty": "No inbound flights yet. They'll appear here as travel data syncs.",
+    "groundTransport": {
+      "title": "Ground Transport Tool",
+      "subtitle": "Flights grouped into 30-minute pickup windows, then by shared flight. Assign each passenger to a vehicle.",
+      "tabs": {
+        "arrival": "Arrival",
+        "departure": "Departure"
+      },
+      "empty": "No flights for this leg yet. They will appear as travel data syncs.",
       "noEvent": "Select an active event first.",
       "unassigned": "Unassigned",
-      "col": {
-        "vehicle": "Vehicle"
-      }
-    },
-    "itineraryAnalyzer": {
-      "title": "Itinerary analyzer",
-      "subtitle": "Inbound flights grouped into 30-minute arrival windows. Assign each passenger to a ground transport vehicle.",
+      "needsReview": "Itinerary changed",
+      "needsReviewHint": "This passenger's flight changed after a vehicle was assigned. Pick a new vehicle.",
       "newVehicle": "New vehicle",
       "newVehicleTitle": "Add ground transport vehicle",
       "createVehicle": "Add vehicle",
       "vehicleName": "Vehicle name",
+      "vehicleNamePlaceholder": "e.g. Shuttle A",
+      "vehicleDirection": "Direction",
+      "vehiclePickupDate": "Pickup date",
+      "vehiclePickupTime": "Pickup time (Mountain)",
       "capacityPax": "Passenger capacity",
       "capacityBags": "Bag capacity",
       "vehiclesHeader": "Vehicles",
       "noVehicles": "No vehicles yet. Click New vehicle to add the first.",
       "windowSummary": "{{passengers}} passengers · {{bags}} bags",
+      "flightSummary": "{{passengers}} passengers · {{bags}} bags",
       "full": "(full)",
-      "dragHint": "Drag-and-drop assignment is on the roadmap. Use the per-passenger select for now."
+      "vehicleLabel": "{{name}} · {{time}} · {{assigned}}/{{capacity}}",
+      "suggested": "Best match",
+      "noVehiclesForLeg": "No vehicles for this leg. Add one to start assigning."
+    },
+    "roomAssignment": {
+      "title": "Room Assignment Tool",
+      "subtitle": "Import rooms from your hotel block, then assign attendees by leadership tier, family size, and registration order.",
+      "comingSoon": "This tool is being built. Hold tight."
     },
     "events": {
       "title": "Events",

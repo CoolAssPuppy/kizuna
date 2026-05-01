@@ -169,9 +169,7 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
             <DialogTitle>{t('registration.guests.inviteTitle')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
-            <p className="text-sm text-muted-foreground">
-              {t('registration.guests.inviteBody')}
-            </p>
+            <p className="text-sm text-muted-foreground">{t('registration.guests.inviteBody')}</p>
             <div className="space-y-1.5">
               <Label htmlFor="invite-email">{t('registration.guests.guestEmail')}</Label>
               <Input
@@ -189,9 +187,7 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
               {t('actions.cancel')}
             </Button>
             <Button type="submit" disabled={invite.isPending || !email.trim()}>
-              {invite.isPending
-                ? t('registration.guests.sending')
-                : t('registration.guests.send')}
+              {invite.isPending ? t('registration.guests.sending') : t('registration.guests.send')}
             </Button>
           </DialogFooter>
         </form>

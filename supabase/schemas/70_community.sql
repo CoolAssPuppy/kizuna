@@ -19,11 +19,14 @@ create table public.attendee_profiles (
   hometown_country text check (hometown_country is null or length(hometown_country) = 2),
   current_city text,
   current_country text check (current_country is null or length(current_country) = 2),
-  visibility attendee_visibility not null default 'attendees_only'
+  visibility attendee_visibility not null default 'attendees_only',
+  ground_transport_need ground_transport_need not null default 'none'
 );
 
 comment on table public.attendee_profiles is
   'Public-facing profile for connection. Sponsor-only / private modes supported.';
+comment on column public.attendee_profiles.ground_transport_need is
+  'Whether the attendee needs an admin-arranged airport transfer. Drives Ground Transport Tool buckets.';
 comment on column public.attendee_profiles.hometown_country is
   'ISO-3166-1 alpha-2. Lowercased canonical form is what the UI accepts.';
 comment on column public.attendee_profiles.current_country is
