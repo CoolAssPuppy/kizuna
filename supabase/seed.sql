@@ -69,8 +69,9 @@ on conflict (user_id) do nothing;
 
 
 -- The event
-insert into public.events (id, name, type, location, start_date, end_date, reg_opens_at, reg_closes_at, is_active, hero_image_url) values
+insert into public.events (id, name, type, location, time_zone, start_date, end_date, reg_opens_at, reg_closes_at, is_active, hero_image_url) values
   ('99999999-9999-9999-9999-999999999999', 'Supafest 2027', 'supafest', 'Banff, Alberta, Canada',
+   'America/Edmonton',
    '2027-04-12', '2027-04-16', '2026-08-01 00:00:00+00', '2027-02-15 23:59:59+00', true,
    'https://kizuna.dev/banff-hero.jpg')
 on conflict (id) do nothing;

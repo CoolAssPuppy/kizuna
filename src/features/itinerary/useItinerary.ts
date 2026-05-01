@@ -27,6 +27,7 @@ export function useItinerary({ eventId }: Args): {
   data: ItineraryItemRow[] | undefined;
   isLoading: boolean;
   error: Error | null;
+  invalidate: () => void;
 } {
   const { user } = useAuth();
   const userId = user?.id ?? null;
@@ -71,6 +72,11 @@ export function useItinerary({ eventId }: Args): {
     data: query.data,
     isLoading: query.isLoading,
     error: query.error ?? null,
+    invalidate: () => {
+      void queryClient.invalidateQueries({
+        queryKey: itineraryKey(eventId, userId ?? 'anon'),
+      });
+    },
   };
 }
 

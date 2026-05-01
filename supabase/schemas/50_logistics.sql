@@ -13,7 +13,9 @@ create table public.flights (
   origin text not null check (length(origin) = 3),
   destination text not null check (length(destination) = 3),
   departure_at timestamptz not null,
+  departure_tz text not null,
   arrival_at timestamptz not null check (arrival_at > departure_at),
+  arrival_tz text not null,
   airline text,
   flight_number text,
   source flight_source_type not null,
@@ -27,6 +29,10 @@ comment on column public.flights.origin is
   'IATA airport code (3 letters).';
 comment on column public.flights.destination is
   'IATA airport code. Typically YYC for arrivals.';
+comment on column public.flights.departure_tz is
+  'IANA timezone name for the origin airport (e.g. America/Los_Angeles). Drives local-time rendering.';
+comment on column public.flights.arrival_tz is
+  'IANA timezone name for the destination airport (e.g. America/Edmonton).';
 comment on column public.flights.is_confirmed is
   'False = tentative. Excluded from transport manifests until confirmed.';
 
@@ -90,6 +96,7 @@ create table public.transport_requests (
   flight_id uuid references public.flights(id) on delete set null,
   direction transport_direction not null,
   pickup_datetime timestamptz not null,
+  pickup_tz text not null default 'America/Edmonton',
   passenger_count int not null check (passenger_count > 0),
   bag_count int not null default 0 check (bag_count >= 0),
   special_equipment text[] not null default '{}',

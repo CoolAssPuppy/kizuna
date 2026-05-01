@@ -25,5 +25,5 @@ export function ItineraryRoute(): JSX.Element {
     );
   }
 
-  return <ItineraryScreen eventId={event.id} />;
+  return <ItineraryScreen event={event} />;
 }

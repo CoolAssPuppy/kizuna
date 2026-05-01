@@ -595,6 +595,7 @@ export type Database = {
           reg_closes_at: string | null
           reg_opens_at: string | null
           start_date: string
+          time_zone: string
           type: Database["public"]["Enums"]["event_type"]
         }
         Insert: {
@@ -607,6 +608,7 @@ export type Database = {
           reg_closes_at?: string | null
           reg_opens_at?: string | null
           start_date: string
+          time_zone?: string
           type: Database["public"]["Enums"]["event_type"]
         }
         Update: {
@@ -619,6 +621,7 @@ export type Database = {
           reg_closes_at?: string | null
           reg_opens_at?: string | null
           start_date?: string
+          time_zone?: string
           type?: Database["public"]["Enums"]["event_type"]
         }
         Relationships: []
@@ -627,8 +630,10 @@ export type Database = {
         Row: {
           airline: string | null
           arrival_at: string
+          arrival_tz: string
           cost: number | null
           departure_at: string
+          departure_tz: string
           destination: string
           direction: Database["public"]["Enums"]["flight_direction"]
           flight_number: string | null
@@ -644,8 +649,10 @@ export type Database = {
         Insert: {
           airline?: string | null
           arrival_at: string
+          arrival_tz: string
           cost?: number | null
           departure_at: string
+          departure_tz: string
           destination: string
           direction: Database["public"]["Enums"]["flight_direction"]
           flight_number?: string | null
@@ -661,8 +668,10 @@ export type Database = {
         Update: {
           airline?: string | null
           arrival_at?: string
+          arrival_tz?: string
           cost?: number | null
           departure_at?: string
+          departure_tz?: string
           destination?: string
           direction?: Database["public"]["Enums"]["flight_direction"]
           flight_number?: string | null
@@ -829,6 +838,7 @@ export type Database = {
       itinerary_items: {
         Row: {
           ends_at: string | null
+          ends_tz: string | null
           event_id: string
           id: string
           includes_guest: boolean
@@ -838,6 +848,7 @@ export type Database = {
           source: Database["public"]["Enums"]["itinerary_source"]
           source_id: string | null
           starts_at: string
+          starts_tz: string
           subtitle: string | null
           title: string
           updated_at: string
@@ -845,6 +856,7 @@ export type Database = {
         }
         Insert: {
           ends_at?: string | null
+          ends_tz?: string | null
           event_id: string
           id?: string
           includes_guest?: boolean
@@ -854,6 +866,7 @@ export type Database = {
           source: Database["public"]["Enums"]["itinerary_source"]
           source_id?: string | null
           starts_at: string
+          starts_tz?: string
           subtitle?: string | null
           title: string
           updated_at?: string
@@ -861,6 +874,7 @@ export type Database = {
         }
         Update: {
           ends_at?: string | null
+          ends_tz?: string | null
           event_id?: string
           id?: string
           includes_guest?: boolean
@@ -870,6 +884,7 @@ export type Database = {
           source?: Database["public"]["Enums"]["itinerary_source"]
           source_id?: string | null
           starts_at?: string
+          starts_tz?: string
           subtitle?: string | null
           title?: string
           updated_at?: string
@@ -1504,6 +1519,7 @@ export type Database = {
           needs_review: boolean
           passenger_count: number
           pickup_datetime: string
+          pickup_tz: string
           special_equipment: string[]
           updated_at: string
           user_id: string
@@ -1517,6 +1533,7 @@ export type Database = {
           needs_review?: boolean
           passenger_count: number
           pickup_datetime: string
+          pickup_tz?: string
           special_equipment?: string[]
           updated_at?: string
           user_id: string
@@ -1530,6 +1547,7 @@ export type Database = {
           needs_review?: boolean
           passenger_count?: number
           pickup_datetime?: string
+          pickup_tz?: string
           special_equipment?: string[]
           updated_at?: string
           user_id?: string

@@ -156,11 +156,14 @@ begin
 
   insert into public.itinerary_items (
     user_id, event_id, item_type, source, source_id,
-    title, subtitle, starts_at, ends_at, includes_guest
-  ) values (
-    new.user_id, v_session.event_id, 'session', 'self_registered', v_session.id,
-    v_session.title, v_session.location, v_session.starts_at, v_session.ends_at, new.includes_guest
+    title, subtitle, starts_at, starts_tz, ends_at, ends_tz, includes_guest
   )
+  select
+    new.user_id, v_session.event_id, 'session', 'self_registered', v_session.id,
+    v_session.title, v_session.location,
+    v_session.starts_at, e.time_zone, v_session.ends_at, e.time_zone,
+    new.includes_guest
+  from public.events e where e.id = v_session.event_id
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
   return new;
@@ -191,12 +194,12 @@ begin
 
   insert into public.itinerary_items (
     user_id, event_id, item_type, source, source_id,
-    title, subtitle, starts_at, ends_at
+    title, subtitle, starts_at, starts_tz, ends_at, ends_tz
   ) values (
     new.user_id, v_event_id, 'flight', 'assigned', new.id,
     coalesce(new.airline || ' ' || new.flight_number, 'Flight'),
     new.origin || ' → ' || new.destination,
-    new.departure_at, new.arrival_at
+    new.departure_at, new.departure_tz, new.arrival_at, new.arrival_tz
   )
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
@@ -205,7 +208,9 @@ begin
   set title = coalesce(new.airline || ' ' || new.flight_number, 'Flight'),
       subtitle = new.origin || ' → ' || new.destination,
       starts_at = new.departure_at,
-      ends_at = new.arrival_at
+      starts_tz = new.departure_tz,
+      ends_at = new.arrival_at,
+      ends_tz = new.arrival_tz
   where source_id = new.id and item_type = 'flight';
 
   return new;
@@ -236,19 +241,20 @@ begin
 
   insert into public.itinerary_items (
     user_id, event_id, item_type, source, source_id,
-    title, subtitle, starts_at
+    title, subtitle, starts_at, starts_tz
   ) values (
     new.user_id, v_event_id, 'transport', 'assigned', new.id,
     case new.direction when 'arrival' then 'Airport pickup' else 'Airport drop-off' end,
-    'Pickup at ' || to_char(new.pickup_datetime, 'HH24:MI'),
-    new.pickup_datetime
+    'Pickup at ' || to_char(new.pickup_datetime at time zone new.pickup_tz, 'HH24:MI'),
+    new.pickup_datetime, new.pickup_tz
   )
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
   update public.itinerary_items
   set title = case new.direction when 'arrival' then 'Airport pickup' else 'Airport drop-off' end,
-      subtitle = 'Pickup at ' || to_char(new.pickup_datetime, 'HH24:MI'),
-      starts_at = new.pickup_datetime
+      subtitle = 'Pickup at ' || to_char(new.pickup_datetime at time zone new.pickup_tz, 'HH24:MI'),
+      starts_at = new.pickup_datetime,
+      starts_tz = new.pickup_tz
   where source_id = new.id and item_type = 'transport';
 
   return new;
@@ -277,14 +283,15 @@ begin
 
   insert into public.itinerary_items (
     user_id, event_id, item_type, source, source_id,
-    title, subtitle, starts_at, ends_at
-  ) values (
+    title, subtitle, starts_at, starts_tz, ends_at, ends_tz
+  )
+  select
     new.user_id, v_acc.event_id, 'accommodation', 'assigned', v_acc.id,
     v_acc.hotel_name,
     coalesce('Room ' || v_acc.room_number, v_acc.room_type),
-    v_acc.check_in::timestamptz,
-    v_acc.check_out::timestamptz
-  )
+    v_acc.check_in::timestamptz, e.time_zone,
+    v_acc.check_out::timestamptz, e.time_zone
+  from public.events e where e.id = v_acc.event_id
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
   return new;

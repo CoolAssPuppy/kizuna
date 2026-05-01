@@ -272,8 +272,38 @@
   "itinerary": {
     "title": "Your Itinerary",
     "subtitle": "Your schedule for the event.",
-    "empty": "Nothing on your itinerary yet.",
+    "timelineTitle": "Timeline",
+    "empty": "Nothing on your itinerary yet. Add a flight or paste your booking confirmation to get started.",
     "offline": "You are offline. Showing the last cached schedule.",
+    "hero": {
+      "eyebrow": "Get ready for",
+      "live": "Happening now",
+      "countdownLabel": "Countdown to event start",
+      "days": "Days",
+      "hours": "Hours",
+      "minutes": "Minutes"
+    },
+    "import": {
+      "cta": "Add to Itinerary",
+      "title": "Add to Your Itinerary",
+      "subtitle": "Paste a confirmation email, upload a PDF, or forward your booking. We'll structure it for you.",
+      "tabs": {
+        "paste": "Paste text",
+        "upload": "Upload file",
+        "email": "Forward email"
+      },
+      "pastePlaceholder": "Paste your flight, hotel, or transfer confirmation here…",
+      "pasteHint": "Works best with the full text of the confirmation email.",
+      "parse": "Parse and Add",
+      "parsing": "Parsing your itinerary",
+      "success": "Imported {{count}} item(s) into your itinerary.",
+      "nothingFound": "We could not find anything to import. Try pasting more text.",
+      "error": "We could not parse that just now. Try again or import manually.",
+      "uploadComingSoonTitle": "File upload is coming soon",
+      "uploadComingSoonHint": "PDF and image uploads will land in the next sprint. Use Paste text in the meantime.",
+      "emailComingSoonTitle": "Email forwarding is coming soon",
+      "emailComingSoonHint": "Forward to itinerary@kizuna.dev once we have it wired."
+    },
     "checkin": {
       "title": "Check-In",
       "subtitle": "Show this code at registration to confirm your arrival.",

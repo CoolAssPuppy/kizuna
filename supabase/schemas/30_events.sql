@@ -10,6 +10,7 @@ create table public.events (
   name text not null,
   type event_type not null,
   location text,
+  time_zone text not null default 'UTC',
   start_date date not null,
   end_date date not null check (end_date >= start_date),
   reg_opens_at timestamptz,
@@ -17,6 +18,9 @@ create table public.events (
   is_active boolean not null default false,
   hero_image_url text
 );
+
+comment on column public.events.time_zone is
+  'IANA timezone for the event venue (e.g. America/Edmonton for Banff). Used as the default render timezone for sessions and accommodations.';
 
 comment on table public.events is
   'Top-level event container. Multiple events can coexist (Supafest 2027, Select SF, ...).';
@@ -85,6 +89,12 @@ create index dinner_seating_session_id_idx on public.dinner_seating(session_id);
 
 -- itinerary_items: denormalised, materialised, single-table read for offline.
 -- Kept in sync by triggers on sessions, flights, transport_requests, accommodations.
+--
+-- Timezone handling: starts_at and ends_at are timestamptz (UTC). The
+-- starts_tz / ends_tz columns are IANA names (e.g. 'America/Edmonton',
+-- 'Asia/Tokyo') that the renderer uses to display each row in its local
+-- time. A SFO→YYC flight stores departure in America/Los_Angeles and
+-- arrival in America/Edmonton even though both timestamps live as UTC.
 create table public.itinerary_items (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.users(id) on delete cascade,
@@ -95,12 +105,19 @@ create table public.itinerary_items (
   title text not null,
   subtitle text,
   starts_at timestamptz not null,
+  starts_tz text not null default 'UTC',
   ends_at timestamptz,
+  ends_tz text,
   includes_guest boolean not null default false,
   is_conflict boolean not null default false,
   is_offline_cached boolean not null default true,
   updated_at timestamptz not null default now()
 );
+
+comment on column public.itinerary_items.starts_tz is
+  'IANA timezone name (e.g. America/Edmonton) used to render starts_at locally. UTC is a sentinel meaning "no preference; render in viewer''s tz".';
+comment on column public.itinerary_items.ends_tz is
+  'IANA timezone for ends_at. May differ from starts_tz on flights (departure tz vs arrival tz).';
 
 comment on table public.itinerary_items is
   'Materialised personal schedule. One row per visible item. No joins on read. Maintained by triggers.';
