@@ -1,0 +1,7 @@
+# Default owner for everything in the repo. Add team owners as the project grows.
+*       @CoolAssPuppy
+
+# Schema and security-sensitive paths require explicit review.
+/supabase/schemas/   @CoolAssPuppy
+/supabase/functions/ @CoolAssPuppy
+/.github/            @CoolAssPuppy
