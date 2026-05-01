@@ -18,6 +18,31 @@ begin
 end
 $$;
 
+-- Cascade delete from auth.users to public.users.
+--
+-- Replaces the old FK cascade (public.users.id REFERENCES
+-- auth.users(id) ON DELETE CASCADE). The FK was dropped because
+-- dependents have no auth.users entry, so the FK would block their
+-- shadow rows. We still need the cascade for real attendees: when an
+-- auth account is deleted, its public.users row should follow,
+-- and every per-section table that FKs to public.users(id) cascades
+-- from there.
+create or replace function public.cascade_auth_user_delete()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  delete from public.users where id = old.id;
+  return old;
+end
+$$;
+
+create trigger cascade_auth_user_delete_ad
+  after delete on auth.users
+  for each row execute function public.cascade_auth_user_delete();
+
 -- Wire touch_updated_at onto every table that owns an updated_at column. The
 -- list lives here (rather than scanning information_schema) so the surface
 -- area is explicit and reviewable in one place.
@@ -654,6 +679,50 @@ create trigger set_additional_guest_fee_biu
 create trigger set_guest_invitation_fee_biu
   before insert or update on public.guest_invitations
   for each row execute function public.set_guest_fee_amount();
+
+
+-- =====================================================================
+-- Shadow user for each dependent (additional_guest)
+-- =====================================================================
+-- The sponsor fills in the dependent's dietary, accessibility, swag,
+-- passport, etc. via the same Section components used for the sponsor.
+-- Those sections write to per-table rows keyed on user_id. So every
+-- dependent needs a real public.users row to anchor those writes —
+-- but no auth.users entry, since the dependent never signs in.
+--
+-- The trigger mints the shadow row on additional_guest insert when the
+-- caller doesn't supply user_id. role='dependent', sponsor_id set,
+-- email is synthetic (sponsorid+ag-id@dependent.kizuna.local) to keep
+-- the NOT NULL + unique constraints on public.users honest without
+-- ever letting the address receive mail.
+create or replace function public.ensure_additional_guest_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_email text;
+  v_new_user_id uuid;
+begin
+  if new.user_id is not null then return new; end if;
+
+  v_new_user_id := gen_random_uuid();
+  -- Synthetic non-routable address. The .invalid TLD is reserved by
+  -- RFC 2606 specifically so anything sent there bounces.
+  v_email := format('dependent+%s@%s.invalid', v_new_user_id, new.sponsor_id);
+
+  insert into public.users (id, email, role, sponsor_id, auth_provider)
+  values (v_new_user_id, v_email, 'dependent', new.sponsor_id, 'email_password');
+
+  new.user_id := v_new_user_id;
+  return new;
+end
+$$;
+
+create trigger ensure_additional_guest_user_bi
+  before insert on public.additional_guests
+  for each row execute function public.ensure_additional_guest_user();
 
 
 -- =====================================================================

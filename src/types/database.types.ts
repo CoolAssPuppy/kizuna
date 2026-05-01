@@ -147,6 +147,7 @@ export type Database = {
           sponsor_id: string
           stripe_payment_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
@@ -161,6 +162,7 @@ export type Database = {
           sponsor_id: string
           stripe_payment_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
@@ -175,12 +177,20 @@ export type Database = {
           sponsor_id?: string
           stripe_payment_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "additional_guests_sponsor_id_fkey"
             columns: ["sponsor_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "additional_guests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2095,7 +2105,7 @@ export type Database = {
       sync_status: "success" | "partial" | "failed"
       task_audience: "all" | "employee_only" | "guest_only"
       transport_direction: "arrival" | "departure"
-      user_role: "employee" | "guest" | "admin" | "super_admin"
+      user_role: "employee" | "guest" | "admin" | "super_admin" | "dependent"
       vote_target_type: "session" | "idea" | "announcement"
     }
     CompositeTypes: {
@@ -2318,7 +2328,7 @@ export const Constants = {
       sync_status: ["success", "partial", "failed"],
       task_audience: ["all", "employee_only", "guest_only"],
       transport_direction: ["arrival", "departure"],
-      user_role: ["employee", "guest", "admin", "super_admin"],
+      user_role: ["employee", "guest", "admin", "super_admin", "dependent"],
       vote_target_type: ["session", "idea", "announcement"],
     },
   },

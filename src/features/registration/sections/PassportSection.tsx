@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { CountrySelect } from '@/components/CountrySelect';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
+import { useActiveSubject } from '@/features/profile/useActiveSubject';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadPassportMetadata, savePassport } from '../api';
@@ -31,12 +31,12 @@ const EMPTY: FormState = {
 
 export function PassportSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const subject = useActiveSubject();
   const { data: event } = useActiveEvent();
   const { data: meta, isSuccess: hydrated } = useQuery({
-    queryKey: ['passport-metadata', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () => loadPassportMetadata(getSupabaseClient(), user!.id),
+    queryKey: ['passport-metadata', subject.userId],
+    enabled: !!subject.userId,
+    queryFn: () => loadPassportMetadata(getSupabaseClient(), subject.userId),
   });
   const [values, setValues] = useHydratedFormState(hydrated, meta, EMPTY, (row) => ({
     passportName: row?.passport_name ?? '',
@@ -63,9 +63,9 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
     !values.expiryDate;
 
   function handleSubmit(): void {
-    if (!user || submitDisabled) return;
+    if (!subject.userId || submitDisabled) return;
     void submit(() =>
-      savePassport(getSupabaseClient(), user.id, {
+      savePassport(getSupabaseClient(), subject.userId, {
         passportName: values.passportName,
         passportNumber: values.passportNumber,
         issuingCountry: values.issuingCountry.toUpperCase(),

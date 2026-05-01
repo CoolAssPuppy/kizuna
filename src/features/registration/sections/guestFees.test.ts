@@ -26,6 +26,7 @@ function minor(overrides: Partial<AdditionalGuestRow> = {}): AdditionalGuestRow 
   return {
     id: 'm-1',
     sponsor_id: 's-1',
+    user_id: null,
     full_name: 'Kid',
     legal_name: null,
     age_bracket: 'under_12',

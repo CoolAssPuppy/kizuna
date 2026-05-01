@@ -5,8 +5,15 @@
 -- (email_password, sponsor_id non-null). Admins and super_admins are
 -- elevated employees — they still carry the underlying employee profile.
 
+-- public.users.id is NOT FK'd to auth.users(id). Most rows DO match an
+-- auth.users entry one-to-one (employees via SSO, adult guests via the
+-- accept-invitation flow) but dependents are a deliberate exception:
+-- they're shadow rows created by the additional_guests insert trigger
+-- with no auth.users counterpart, so the FK would block insert.
+-- Cleanup-on-auth-delete is handled by a separate trigger on
+-- auth.users below rather than the FK cascade.
 create table public.users (
-  id uuid primary key references auth.users(id) on delete cascade,
+  id uuid primary key,
   email citext unique not null,
   role user_role not null default 'employee',
   is_leadership boolean not null default false,
@@ -27,12 +34,15 @@ comment on column public.users.sponsor_id is
 comment on column public.users.is_leadership is
   'Orthogonal to role. A guest investor or an employee VP can both be flagged. Only admins/super_admins can set this; enforced by the users_leadership_change_guard trigger.';
 
--- Constraint: a guest must have a sponsor; a non-guest must not.
+-- Constraint: a guest or dependent must have a sponsor; an
+-- employee/admin/super_admin must not. Dependents are minors with a
+-- shadow row in this table — they do not sign in but their per-section
+-- data still keys on user_id, so they get a row here.
 alter table public.users
   add constraint users_guest_must_have_sponsor
   check (
-    (role = 'guest' and sponsor_id is not null)
-    or (role <> 'guest' and sponsor_id is null)
+    (role in ('guest', 'dependent') and sponsor_id is not null)
+    or (role not in ('guest', 'dependent') and sponsor_id is null)
   );
 
 create index users_role_idx on public.users(role) where is_active;
@@ -154,6 +164,13 @@ create index guest_invitations_status_idx on public.guest_invitations(status);
 create table public.additional_guests (
   id uuid primary key default gen_random_uuid(),
   sponsor_id uuid not null references public.users(id) on delete cascade,
+  -- A dependent has a SHADOW row in public.users (role='dependent', no
+  -- matching auth.users). Every per-section table is keyed on user_id,
+  -- so threading the shadow id here lets dietary/accessibility/swag/etc.
+  -- queries scope to the dependent without per-table sponsor_id columns.
+  -- The trigger ensure_additional_guest_user mints the row on insert
+  -- when the caller doesn't supply one.
+  user_id uuid unique references public.users(id) on delete cascade,
   full_name text not null,
   legal_name text,
   age_bracket guest_age_bracket not null

@@ -63,12 +63,34 @@ $$;
 -- Convenience helpers for row-ownership checks. Most policies follow the
 -- shape "this row belongs to me, or I'm an admin". Wrapping that in a single
 -- function keeps policy bodies short and consistent.
+-- Self, sponsor-of-dependent, or admin.
+--
+-- Per-section data (dietary, accessibility, swag, passport, emergency
+-- contact, attendee profile, registrations, etc.) is keyed on user_id.
+-- A dependent has a shadow public.users row with role='dependent' and
+-- sponsor_id pointing at the employee who added them. The sponsor
+-- needs to write into the dependent's per-section rows on their
+-- behalf — so this helper resolves true when p_user_id is a dependent
+-- whose sponsor is the caller.
+--
+-- SECURITY DEFINER so the inline lookup against public.users (which
+-- itself has RLS) doesn't fight the surrounding policy evaluation.
 create or replace function public.is_self_or_admin(p_user_id uuid)
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
-  select p_user_id = auth.uid() or public.is_admin()
+  select
+    p_user_id = auth.uid()
+    or public.is_admin()
+    or exists (
+      select 1 from public.users u
+      where u.id = p_user_id
+        and u.role = 'dependent'
+        and u.sponsor_id = auth.uid()
+    )
 $$;
 
 
@@ -407,19 +429,37 @@ create policy profile_field_responses_self_all on public.profile_field_responses
   with check (public.is_self_or_admin(user_id));
 
 
--- Passport: only the owning user can read or write. Admins are blocked
--- entirely (no policy granted) because passport numbers must remain private.
+-- Passport: the owning user (or, for a dependent, the sponsor) can
+-- read and write. Admins are blocked entirely — passport numbers must
+-- remain private. is_self_or_admin's body resolves sponsor-of-dependent
+-- but admin coverage is intentional here, so we exclude it inline.
 create policy passport_details_self_only on public.passport_details
-  for all using (user_id = auth.uid())
-  with check (user_id = auth.uid());
+  for all using (
+    user_id = auth.uid()
+    or exists (
+      select 1 from public.users u
+      where u.id = passport_details.user_id
+        and u.role = 'dependent'
+        and u.sponsor_id = auth.uid()
+    )
+  )
+  with check (
+    user_id = auth.uid()
+    or exists (
+      select 1 from public.users u
+      where u.id = passport_details.user_id
+        and u.role = 'dependent'
+        and u.sponsor_id = auth.uid()
+    )
+  );
 
 
 create policy dietary_preferences_self_read on public.dietary_preferences
   for select using (public.is_self_or_admin(user_id));
 
 create policy dietary_preferences_self_write on public.dietary_preferences
-  for all using (user_id = auth.uid())
-  with check (user_id = auth.uid());
+  for all using (public.is_self_or_admin(user_id))
+  with check (public.is_self_or_admin(user_id));
 
 create policy dietary_preferences_admin_all on public.dietary_preferences
   for all using (public.is_admin())
@@ -549,8 +589,8 @@ create policy attendee_profiles_admin_read on public.attendee_profiles
   for select using (public.is_admin());
 
 create policy attendee_profiles_self_write on public.attendee_profiles
-  for all using (user_id = auth.uid())
-  with check (user_id = auth.uid());
+  for all using (public.is_self_or_admin(user_id))
+  with check (public.is_self_or_admin(user_id));
 
 
 create policy messages_channel_read on public.messages

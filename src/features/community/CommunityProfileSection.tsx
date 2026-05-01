@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveSubject } from '@/features/profile/useActiveSubject';
 import { SectionChrome } from '@/features/registration/sections/SectionChrome';
 import type { SectionProps } from '@/features/registration/sections/types';
 import { useSectionSubmit } from '@/features/registration/sections/useSectionSubmit';
@@ -41,7 +41,7 @@ const EMPTY: FormState = {
 
 export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const subject = useActiveSubject();
   const qc = useQueryClient();
   const [values, setValues] = useState<FormState>(EMPTY);
   const [hydratedFor, setHydratedFor] = useState<string | null>(null);
@@ -52,22 +52,22 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   });
 
   const profileQuery = useQuery({
-    queryKey: ['community', 'profile', user?.id],
-    queryFn: () => loadCommunityProfile(getSupabaseClient(), user!.id),
-    enabled: !!user,
+    queryKey: ['community', 'profile', subject.userId],
+    queryFn: () => loadCommunityProfile(getSupabaseClient(), subject.userId),
+    enabled: !!subject.userId,
   });
   const catalogQuery = useQuery({
     queryKey: ['community', 'hobbyCatalog'],
     queryFn: () => loadHobbyCatalog(getSupabaseClient()),
   });
   const hobbyCatalog = useMemo(() => catalogQuery.data ?? [], [catalogQuery.data]);
-  const hydrated = hydratedFor === user?.id;
+  const hydrated = hydratedFor === subject.userId;
 
-  // Hydrate the form once per user from the query result. We cannot
-  // derive form state directly because the user edits it; the query
-  // is the seed, not the live source.
+  // Hydrate the form once per subject from the query result. Switching
+  // subjects (e.g. from sponsor to dependent) re-fires this branch and
+  // refills with the dependent's data.
   useEffect(() => {
-    if (!user || !profileQuery.data || hydratedFor === user.id) return;
+    if (!subject.userId || !profileQuery.data || hydratedFor === subject.userId) return;
     const row = profileQuery.data;
     setValues({
       bio: row.bio ?? '',
@@ -79,8 +79,8 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
       currentCity: row.current_city ?? '',
       currentCountry: row.current_country ?? '',
     });
-    setHydratedFor(user.id);
-  }, [user, profileQuery.data, hydratedFor]);
+    setHydratedFor(subject.userId);
+  }, [subject.userId, profileQuery.data, hydratedFor]);
 
   // Suggestions are derived from the current draft + catalog: pure
   // computation, no effect needed.
@@ -118,9 +118,9 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   }
 
   function handleSubmit(): void {
-    if (!user) return;
+    if (!subject.userId) return;
     void submit(async () => {
-      await saveCommunityProfile(getSupabaseClient(), user.id, {
+      await saveCommunityProfile(getSupabaseClient(), subject.userId, {
         bio: values.bio.trim() || null,
         fun_fact: values.funFact.trim() || null,
         hobbies: values.hobbies,
@@ -137,7 +137,7 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
       // community page so the next mount sees the saved values without
       // a hard refresh.
       await Promise.all([
-        qc.invalidateQueries({ queryKey: ['community', 'profile', user.id] }),
+        qc.invalidateQueries({ queryKey: ['community', 'profile', subject.userId] }),
         qc.invalidateQueries({ queryKey: ['community', 'people'] }),
       ]);
     });

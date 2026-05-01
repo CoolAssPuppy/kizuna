@@ -5,7 +5,12 @@
 -- remove or rename safely without rebuilding dependent tables).
 
 -- Identity and access
-create type user_role as enum ('employee', 'guest', 'admin', 'super_admin');
+-- 'dependent' is a synthetic role for under-18 additional_guests. The
+-- row in public.users is a shadow with no matching auth.users entry —
+-- the sponsor (and the sponsor's adult guests) write the dependent's
+-- profile data through the standard sections, but the dependent never
+-- signs in. RLS routes those writes through sponsor identity.
+create type user_role as enum ('employee', 'guest', 'admin', 'super_admin', 'dependent');
 create type auth_provider as enum ('sso', 'email_password');
 
 -- Field provenance and conflict tracking

@@ -168,6 +168,11 @@
       "emergencyContact": "Who we should reach out to if something happens.",
       "dietary": "Restrictions and notes for the kitchen."
     },
+    "subjectSelector": {
+      "label": "Active subject",
+      "heading": "Filling in for",
+      "yourself": "Yourself"
+    },
     "toast": {
       "personalInfoSaved": "Personal info saved.",
       "emergencyContactSaved": "Emergency contact saved.",
@@ -346,7 +351,8 @@
       "notesHint": "Anything we should know in advance — quiet rooms, dietary needs already covered above, room layout requests."
     },
     "emergencyContact": {
-      "fullName": "Full Name",
+      "firstName": "First Name",
+      "lastName": "Last Name",
       "relationship": "Relationship",
       "phonePrimary": "Primary Phone",
       "phonePrimaryHint": "Include country code.",

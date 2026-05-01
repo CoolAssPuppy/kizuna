@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveSubject } from '@/features/profile/useActiveSubject';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadAccessibility, saveAccessibility } from '../api';
@@ -32,11 +32,11 @@ const EMPTY: FormState = { needs: [], notes: '' };
 
 export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const subject = useActiveSubject();
   const { data: loaded, isSuccess: hydrated } = useQuery({
-    queryKey: ['accessibility', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () => loadAccessibility(getSupabaseClient(), user!.id),
+    queryKey: ['accessibility', subject.userId],
+    enabled: !!subject.userId,
+    queryFn: () => loadAccessibility(getSupabaseClient(), subject.userId),
   });
   const [values, setValues] = useHydratedFormState(hydrated, loaded, EMPTY, (row) => ({
     needs: row?.needs ?? [],
@@ -49,9 +49,9 @@ export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
   });
 
   function handleSubmit(): void {
-    if (!user) return;
+    if (!subject.userId) return;
     void submit(() =>
-      saveAccessibility(getSupabaseClient(), user.id, {
+      saveAccessibility(getSupabaseClient(), subject.userId, {
         needs: values.needs,
         notes: values.notes.trim() || null,
       }),

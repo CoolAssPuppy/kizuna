@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveSubject } from '@/features/profile/useActiveSubject';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadDietary, saveDietary } from '../api';
@@ -50,11 +50,11 @@ const EMPTY: FormState = {
 
 export function DietarySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const subject = useActiveSubject();
   const { data: row, isSuccess: hydrated } = useQuery({
-    queryKey: ['dietary', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () => loadDietary(getSupabaseClient(), user!.id),
+    queryKey: ['dietary', subject.userId],
+    enabled: !!subject.userId,
+    queryFn: () => loadDietary(getSupabaseClient(), subject.userId),
   });
   const [values, setValues] = useHydratedFormState(hydrated, row, EMPTY, (loaded) =>
     loaded
@@ -74,9 +74,9 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
   });
 
   function handleSubmit(): void {
-    if (!user) return;
+    if (!subject.userId) return;
     void submit(() =>
-      saveDietary(getSupabaseClient(), user.id, {
+      saveDietary(getSupabaseClient(), subject.userId, {
         restrictions: values.restrictions,
         allergies: values.allergies,
         alcohol_free: values.alcoholFree,
