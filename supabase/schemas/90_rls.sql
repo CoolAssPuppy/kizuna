@@ -146,6 +146,19 @@ create policy users_admin_all on public.users
   for all using (public.is_admin())
   with check (public.is_admin());
 
+-- Community read: any authenticated user can resolve email + role +
+-- leadership flag for an attendee with a non-private community profile.
+-- This is the spine of the people-matching tables and channel sender
+-- rendering — without it, joins through users come back null.
+create policy users_community_read on public.users
+  for select using (
+    auth.role() = 'authenticated'
+    and exists (
+      select 1 from public.attendee_profiles ap
+      where ap.user_id = users.id and ap.visibility <> 'private'
+    )
+  );
+
 
 create policy employee_profiles_self_read on public.employee_profiles
   for select using (public.is_self_or_admin(user_id));
@@ -157,6 +170,20 @@ create policy employee_profiles_self_write on public.employee_profiles
 create policy employee_profiles_admin_all on public.employee_profiles
   for all using (public.is_admin())
   with check (public.is_admin());
+
+-- Same community read rule for employee_profiles. Limits exposure to the
+-- columns the SDK joins for the community page (preferred_name,
+-- legal_name, first_name/last_name, avatar_url) — every other column is
+-- already covered by the self/admin read policy or simply not selected
+-- on the community surface.
+create policy employee_profiles_community_read on public.employee_profiles
+  for select using (
+    auth.role() = 'authenticated'
+    and exists (
+      select 1 from public.attendee_profiles ap
+      where ap.user_id = employee_profiles.user_id and ap.visibility <> 'private'
+    )
+  );
 
 
 create policy guest_profiles_sponsor_read on public.guest_profiles

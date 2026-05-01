@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,6 +44,7 @@ const EMPTY: FormState = {
 export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const qc = useQueryClient();
   const [values, setValues] = useState<FormState>(EMPTY);
   const [hydratedFor, setHydratedFor] = useState<string | null>(null);
   const { busy, errorKey, submit } = useSectionSubmit({
@@ -121,8 +122,8 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
 
   function handleSubmit(): void {
     if (!user) return;
-    void submit(() =>
-      saveCommunityProfile(getSupabaseClient(), user.id, {
+    void submit(async () => {
+      await saveCommunityProfile(getSupabaseClient(), user.id, {
         bio: values.bio.trim() || null,
         fun_fact: values.funFact.trim() || null,
         hobbies: values.hobbies,
@@ -134,8 +135,15 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
         current_country: isValidCountryCode(values.currentCountry)
           ? values.currentCountry.toUpperCase()
           : null,
-      }),
-    );
+      });
+      // Bust the cached profile + the people list that drives the
+      // community page so the next mount sees the saved values without
+      // a hard refresh.
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['community', 'profile', user.id] }),
+        qc.invalidateQueries({ queryKey: ['community', 'people'] }),
+      ]);
+    });
   }
 
   return (
