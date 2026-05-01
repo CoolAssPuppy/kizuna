@@ -92,6 +92,41 @@ export type Database = {
           },
         ]
       }
+      additional_guests: {
+        Row: {
+          age: number
+          full_name: string
+          id: string
+          notes: string | null
+          special_needs: string[]
+          sponsor_id: string
+        }
+        Insert: {
+          age: number
+          full_name: string
+          id?: string
+          notes?: string | null
+          special_needs?: string[]
+          sponsor_id: string
+        }
+        Update: {
+          age?: number
+          full_name?: string
+          id?: string
+          notes?: string | null
+          special_needs?: string[]
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "additional_guests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendee_profiles: {
         Row: {
           bio: string | null
@@ -131,44 +166,6 @@ export type Database = {
             foreignKeyName: "attendee_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      children: {
-        Row: {
-          date_of_birth: string
-          full_name: string
-          id: string
-          meal_tier: Database["public"]["Enums"]["child_meal_tier"] | null
-          notes: string | null
-          special_needs: string[]
-          sponsor_id: string
-        }
-        Insert: {
-          date_of_birth: string
-          full_name: string
-          id?: string
-          meal_tier?: Database["public"]["Enums"]["child_meal_tier"] | null
-          notes?: string | null
-          special_needs?: string[]
-          sponsor_id: string
-        }
-        Update: {
-          date_of_birth?: string
-          full_name?: string
-          id?: string
-          meal_tier?: Database["public"]["Enums"]["child_meal_tier"] | null
-          notes?: string | null
-          special_needs?: string[]
-          sponsor_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "children_sponsor_id_fkey"
-            columns: ["sponsor_id"]
-            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1679,7 +1676,6 @@ export type Database = {
     Enums: {
       attendee_visibility: "public" | "attendees_only" | "private"
       auth_provider: "sso" | "email_password"
-      child_meal_tier: "free" | "half" | "full"
       conflict_status:
         | "open"
         | "accepted_kizuna"
@@ -1885,7 +1881,6 @@ export const Constants = {
     Enums: {
       attendee_visibility: ["public", "attendees_only", "private"],
       auth_provider: ["sso", "email_password"],
-      child_meal_tier: ["free", "half", "full"],
       conflict_status: [
         "open",
         "accepted_kizuna",

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { ChildrenSection } from '@/features/registration/sections/ChildrenSection';
+import { GuestsSection } from '@/features/registration/sections/GuestsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
 import { EmergencyContactSection } from '@/features/registration/sections/EmergencyContactSection';
 import { PassportSection } from '@/features/registration/sections/PassportSection';
@@ -25,7 +25,7 @@ export function EditProfileScreen(): JSX.Element {
         <EmergencyContactSection mode={PROFILE_MODE} />
         <DietarySection mode={PROFILE_MODE} />
         <PassportSection mode={PROFILE_MODE} />
-        <ChildrenSection mode={PROFILE_MODE} />
+        <GuestsSection mode={PROFILE_MODE} />
         <SwagSection mode={PROFILE_MODE} />
         <TransportSection mode={PROFILE_MODE} />
       </div>

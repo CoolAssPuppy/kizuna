@@ -109,21 +109,22 @@ create index guest_invitations_sponsor_id_idx on public.guest_invitations(sponso
 create index guest_invitations_status_idx on public.guest_invitations(status);
 
 
--- Children of employees. Age computed at event time drives meal_tier and fee.
-create table public.children (
+-- Additional guests an employee is bringing (partners, kids, parents, etc.)
+-- These are *not* full Kizuna accounts; they ride on the sponsor's
+-- registration. Adults with their own login live in public.guest_profiles.
+create table public.additional_guests (
   id uuid primary key default gen_random_uuid(),
   sponsor_id uuid not null references public.users(id) on delete cascade,
   full_name text not null,
-  date_of_birth date not null,
-  meal_tier child_meal_tier,
+  age int not null check (age >= 0 and age < 120),
   special_needs text[] not null default '{}',
   notes text
 );
 
-comment on table public.children is
-  'Children of attending employees. age_at_event is computed against events.start_date in views.';
+comment on table public.additional_guests is
+  'Additional guests (children, partners, dependents) accompanying an employee. Age drives the fee tier and meal allowance at billing time.';
 
-create index children_sponsor_id_idx on public.children(sponsor_id);
+create index additional_guests_sponsor_id_idx on public.additional_guests(sponsor_id);
 
 
 -- Emergency contacts. One required for every attendee.

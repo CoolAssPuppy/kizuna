@@ -159,7 +159,7 @@ create policy guest_invitations_admin_all on public.guest_invitations
   with check (public.is_admin());
 
 
-create policy children_sponsor_all on public.children
+create policy additional_guests_sponsor_all on public.additional_guests
   for all using (public.is_self_or_admin(sponsor_id))
   with check (public.is_self_or_admin(sponsor_id));
 

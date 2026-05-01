@@ -8,50 +8,51 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadChildren, saveChildren } from '../api';
+import { loadAdditionalGuests, saveAdditionalGuests } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
 
 const SPECIAL_NEEDS_OPTIONS = ['crib', 'high_chair', 'allergy', 'mobility', 'other'] as const;
 
-interface ChildEntry {
+interface GuestEntry {
   id?: string;
   fullName: string;
-  dateOfBirth: string;
+  age: string;
   specialNeeds: string[];
   notes: string;
 }
 
-const EMPTY_CHILD: ChildEntry = { fullName: '', dateOfBirth: '', specialNeeds: [], notes: '' };
+const EMPTY_GUEST: GuestEntry = { fullName: '', age: '', specialNeeds: [], notes: '' };
 
 function toggle(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export function ChildrenSection({ mode }: SectionProps): JSX.Element {
+export function GuestsSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [children, setChildren] = useState<ChildEntry[]>([]);
+  const [guests, setGuests] = useState<GuestEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  // No `children` task in registration_task_key yet (Phase 2 enum extension).
+  // 'guest' in registration_task_key refers to the M5 invitation flow,
+  // not these dependents. No task to mark complete here.
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,
-    toastSuccessKey: 'profile.toast.childrenSaved',
+    toastSuccessKey: 'profile.toast.guestsSaved',
   });
 
   useEffect(() => {
     if (!user) return;
     let active = true;
     void (async () => {
-      const rows = await loadChildren(getSupabaseClient(), user.id);
+      const rows = await loadAdditionalGuests(getSupabaseClient(), user.id);
       if (!active) return;
-      setChildren(
+      setGuests(
         rows.map((row) => ({
           id: row.id,
           fullName: row.full_name,
-          dateOfBirth: row.date_of_birth,
+          age: String(row.age),
           specialNeeds: row.special_needs,
           notes: row.notes ?? '',
         })),
@@ -63,22 +64,22 @@ export function ChildrenSection({ mode }: SectionProps): JSX.Element {
     };
   }, [user]);
 
-  function update(index: number, patch: Partial<ChildEntry>): void {
-    setChildren((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
+  function update(index: number, patch: Partial<GuestEntry>): void {
+    setGuests((prev) => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
   }
 
   function handleSubmit(): void {
     if (!user) return;
     void submit(() =>
-      saveChildren(
+      saveAdditionalGuests(
         getSupabaseClient(),
         user.id,
-        children.map((c) => ({
-          ...(c.id ? { id: c.id } : {}),
-          full_name: c.fullName,
-          date_of_birth: c.dateOfBirth,
-          special_needs: c.specialNeeds,
-          notes: c.notes.trim() || null,
+        guests.map((g) => ({
+          ...(g.id ? { id: g.id } : {}),
+          full_name: g.fullName,
+          age: Number.parseInt(g.age, 10) || 0,
+          special_needs: g.specialNeeds,
+          notes: g.notes.trim() || null,
         })),
       ),
     );
@@ -87,70 +88,74 @@ export function ChildrenSection({ mode }: SectionProps): JSX.Element {
   return (
     <SectionChrome
       mode={mode}
-      title={t('registration.steps.children')}
-      description={t('registration.children.intro')}
+      title={t('registration.steps.guests')}
+      description={t('registration.guests.intro')}
       busy={busy}
       hydrated={hydrated}
       errorKey={errorKey}
       onSubmit={handleSubmit}
     >
-      {children.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('registration.children.noChildren')}</p>
+      {guests.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('registration.guests.noGuests')}</p>
       ) : null}
 
-      {children.map((child, index) => (
+      {guests.map((guest, index) => (
         <fieldset key={index} className="space-y-3 rounded-md border p-4">
           <div className="space-y-2">
-            <Label htmlFor={`child-name-${index}`}>{t('registration.children.fullName')}</Label>
+            <Label htmlFor={`guest-name-${index}`}>{t('registration.guests.fullName')}</Label>
             <Input
-              id={`child-name-${index}`}
+              id={`guest-name-${index}`}
               required
-              value={child.fullName}
+              value={guest.fullName}
               onChange={(e) => update(index, { fullName: e.target.value })}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`child-dob-${index}`}>{t('registration.children.dateOfBirth')}</Label>
+            <Label htmlFor={`guest-age-${index}`}>{t('registration.guests.age')}</Label>
             <Input
-              id={`child-dob-${index}`}
-              type="date"
+              id={`guest-age-${index}`}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={119}
               required
-              value={child.dateOfBirth}
-              onChange={(e) => update(index, { dateOfBirth: e.target.value })}
+              value={guest.age}
+              onChange={(e) => update(index, { age: e.target.value })}
             />
+            <p className="text-xs text-muted-foreground">{t('registration.guests.ageHint')}</p>
           </div>
           <div className="space-y-2">
-            <Label>{t('registration.children.specialNeeds')}</Label>
+            <Label>{t('registration.guests.specialNeeds')}</Label>
             <div className="grid grid-cols-2 gap-2">
               {SPECIAL_NEEDS_OPTIONS.map((option) => (
                 <label key={option} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
                     className="h-4 w-4 accent-primary"
-                    checked={child.specialNeeds.includes(option)}
+                    checked={guest.specialNeeds.includes(option)}
                     onChange={() =>
-                      update(index, { specialNeeds: toggle(child.specialNeeds, option) })
+                      update(index, { specialNeeds: toggle(guest.specialNeeds, option) })
                     }
                   />
-                  {t(`registration.children.specialNeedsOptions.${option}`)}
+                  {t(`registration.guests.specialNeedsOptions.${option}`)}
                 </label>
               ))}
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`child-notes-${index}`}>{t('registration.children.notes')}</Label>
+            <Label htmlFor={`guest-notes-${index}`}>{t('registration.guests.notes')}</Label>
             <Textarea
-              id={`child-notes-${index}`}
-              value={child.notes}
+              id={`guest-notes-${index}`}
+              value={guest.notes}
               onChange={(e) => update(index, { notes: e.target.value })}
             />
           </div>
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setChildren((prev) => prev.filter((_, i) => i !== index))}
+            onClick={() => setGuests((prev) => prev.filter((_, i) => i !== index))}
           >
-            {t('registration.children.removeChild')}
+            {t('registration.guests.removeGuest')}
           </Button>
         </fieldset>
       ))}
@@ -158,9 +163,9 @@ export function ChildrenSection({ mode }: SectionProps): JSX.Element {
       <Button
         type="button"
         variant="outline"
-        onClick={() => setChildren((prev) => [...prev, { ...EMPTY_CHILD }])}
+        onClick={() => setGuests((prev) => [...prev, { ...EMPTY_GUEST }])}
       >
-        {t('registration.children.addChild')}
+        {t('registration.guests.addGuest')}
       </Button>
     </SectionChrome>
   );

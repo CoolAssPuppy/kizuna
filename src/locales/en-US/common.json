@@ -106,7 +106,7 @@
       "emergencyContactSaved": "Emergency contact saved.",
       "dietarySaved": "Dietary preferences saved.",
       "passportSaved": "Passport details saved.",
-      "childrenSaved": "Guests saved.",
+      "guestsSaved": "Guests saved.",
       "swagSaved": "Swag selections saved.",
       "transportSaved": "Transport preference saved.",
       "error": "Something went wrong. Please try again."
@@ -150,7 +150,7 @@
       "dietary": "Dietary",
       "emergencyContact": "Emergency Contact",
       "passport": "Passport",
-      "children": "Children",
+      "guests": "Guests",
       "swag": "Swag",
       "transport": "Transport"
     },
@@ -196,12 +196,13 @@
       "expiryDate": "Expiry Date",
       "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
     },
-    "children": {
-      "intro": "Add anyone aged 17 or under who will be travelling with you.",
-      "addChild": "Add a Child",
-      "removeChild": "Remove",
+    "guests": {
+      "intro": "Add partners, kids, or anyone else travelling with you. Each guest results in a USD $950 fee for adults and $500 for children.",
+      "addGuest": "Add a Guest",
+      "removeGuest": "Remove",
       "fullName": "Full Name",
-      "dateOfBirth": "Date of Birth",
+      "age": "Age",
+      "ageHint": "Used to calculate the fee tier and meal allowance.",
       "notes": "Notes",
       "specialNeeds": "Special Needs",
       "specialNeedsOptions": {
@@ -211,7 +212,7 @@
         "mobility": "Mobility",
         "other": "Other"
       },
-      "noChildren": "No children to add? Continue."
+      "noGuests": "No guests to add? Continue."
     },
     "swag": {
       "noCatalogue": "Swag will appear here once the event organisers publish the catalogue.",

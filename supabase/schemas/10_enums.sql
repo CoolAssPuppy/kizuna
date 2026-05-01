@@ -42,9 +42,6 @@ create type guest_relationship as enum ('partner', 'family', 'friend', 'other');
 create type guest_payment_status as enum ('pending', 'paid', 'waived', 'refunded', 'failed');
 create type guest_invitation_status as enum ('pending', 'accepted', 'expired', 'cancelled');
 
--- Children
-create type child_meal_tier as enum ('free', 'half', 'full');
-
 -- Dietary
 create type dietary_severity as enum ('preference', 'intolerance', 'allergy');
 

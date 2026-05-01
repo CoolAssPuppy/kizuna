@@ -1,7 +1,7 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
 
 import type {
-  ChildRow,
+  AdditionalGuestRow,
   DietaryRow,
   EmergencyContactRow,
   EmployeeProfileRow,
@@ -238,40 +238,43 @@ export async function loadPassportMetadata(
   return data;
 }
 
-/** Children step — replaces the user's children list with the provided rows. */
-interface ChildInput {
+/** Additional guests step — replaces the sponsor's guest list with the provided rows. */
+interface AdditionalGuestInput {
   id?: string;
   full_name: string;
-  date_of_birth: string;
+  age: number;
   special_needs: string[];
   notes: string | null;
 }
 
-export async function loadChildren(client: AppSupabaseClient, userId: string): Promise<ChildRow[]> {
+export async function loadAdditionalGuests(
+  client: AppSupabaseClient,
+  userId: string,
+): Promise<AdditionalGuestRow[]> {
   const { data, error } = await client
-    .from('children')
+    .from('additional_guests')
     .select('*')
     .eq('sponsor_id', userId)
-    .order('date_of_birth', { ascending: true });
+    .order('age', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }
 
-export async function saveChildren(
+export async function saveAdditionalGuests(
   client: AppSupabaseClient,
   userId: string,
-  rows: ChildInput[],
+  rows: AdditionalGuestInput[],
 ): Promise<void> {
   // Replace strategy: delete missing rows, upsert provided rows. Avoids
   // diff-management complexity in the UI for what is rarely more than a
   // handful of records.
-  const existing = await loadChildren(client, userId);
+  const existing = await loadAdditionalGuests(client, userId);
   const keepIds = rows.map((r) => r.id).filter((id): id is string => Boolean(id));
   const toDelete = existing.filter((row) => !keepIds.includes(row.id));
 
   if (toDelete.length > 0) {
     const { error } = await client
-      .from('children')
+      .from('additional_guests')
       .delete()
       .in(
         'id',
@@ -285,11 +288,13 @@ export async function saveChildren(
       ...(row.id ? { id: row.id } : {}),
       sponsor_id: userId,
       full_name: row.full_name,
-      date_of_birth: row.date_of_birth,
+      age: row.age,
       special_needs: row.special_needs,
       notes: row.notes,
     }));
-    const { error } = await client.from('children').upsert(upsertRows, { onConflict: 'id' });
+    const { error } = await client
+      .from('additional_guests')
+      .upsert(upsertRows, { onConflict: 'id' });
     if (error) throw error;
   }
 }
