@@ -188,15 +188,10 @@ where u.id <> 'a0000000-0000-0000-0000-000000000001'
 -- The remaining users keep the schema default of 'none'.
 -- =====================================================================
 update public.attendee_profiles ap
-set ground_transport_need = case (right(ap.user_id::text, 1))
-  when '0' then 'both'::ground_transport_need
-  when '4' then 'both'::ground_transport_need
-  when '8' then 'both'::ground_transport_need
-  when '1' then 'arrival'::ground_transport_need
-  when '5' then 'arrival'::ground_transport_need
-  when '9' then 'arrival'::ground_transport_need
-  when '2' then 'departure'::ground_transport_need
-  when '6' then 'departure'::ground_transport_need
+set ground_transport_need = case
+  when right(ap.user_id::text, 1) in ('0', '4', '8') then 'both'::ground_transport_need
+  when right(ap.user_id::text, 1) in ('1', '5', '9') then 'arrival'::ground_transport_need
+  when right(ap.user_id::text, 1) in ('2', '6')      then 'departure'::ground_transport_need
   else 'none'::ground_transport_need
 end;
 

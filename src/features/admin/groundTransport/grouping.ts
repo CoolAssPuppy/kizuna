@@ -11,12 +11,13 @@ const WINDOW_START_FMT = new Intl.DateTimeFormat(undefined, {
   minute: '2-digit',
   timeZone: WINDOW_TZ,
 });
-const WINDOW_END_FMT = new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: WINDOW_TZ,
-});
-const FLIGHT_TIME_FMT = new Intl.DateTimeFormat(undefined, {
+
+/**
+ * Hour-and-minute formatter pinned to the event tz. Shared by window-end
+ * labels, flight-time labels, and the vehicle dropdown so every clock face
+ * on the Ground Transport Tool reads in MST/MDT.
+ */
+export const WINDOW_TIME_FMT = new Intl.DateTimeFormat(undefined, {
   hour: '2-digit',
   minute: '2-digit',
   timeZone: WINDOW_TZ,
@@ -76,7 +77,7 @@ export function bucketByPickup(
       const flights = groupByFlight(passengers, endpointField);
       return {
         startIso,
-        label: `${WINDOW_START_FMT.format(start)}–${WINDOW_END_FMT.format(end)}`,
+        label: `${WINDOW_START_FMT.format(start)}–${WINDOW_TIME_FMT.format(end)}`,
         totalPassengers: passengers.length,
         totalBags: passengers.reduce((s, p) => s + p.bag_count, 0),
         flights,
@@ -105,7 +106,7 @@ function groupByFlight(
         airline: head.airline ?? '—',
         flightNumber: head.flight_number ?? '—',
         endpoint: head[endpointField],
-        timeLabel: FLIGHT_TIME_FMT.format(new Date(head.pickup_at)),
+        timeLabel: WINDOW_TIME_FMT.format(new Date(head.pickup_at)),
         totalBags: members.reduce((s, m) => s + m.bag_count, 0),
         passengers: members.sort((a, b) => a.full_name.localeCompare(b.full_name)),
       };

@@ -515,6 +515,13 @@ create policy attendee_profiles_authenticated_read on public.attendee_profiles
     and (visibility <> 'private' or user_id = auth.uid())
   );
 
+-- Admin-scoped read policy: admins must see every attendee_profiles row,
+-- including private ones, so manifest tooling (Ground Transport Tool,
+-- room assignment, dietary report) does not silently exclude attendees
+-- who marked their profile private.
+create policy attendee_profiles_admin_read on public.attendee_profiles
+  for select using (public.is_admin());
+
 create policy attendee_profiles_self_write on public.attendee_profiles
   for all using (user_id = auth.uid())
   with check (user_id = auth.uid());

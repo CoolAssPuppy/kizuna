@@ -27,15 +27,21 @@ export interface PassengerRow {
   needs_review: boolean;
 }
 
-export interface VehicleOption {
-  id: string;
-  vehicle_name: string;
-  capacity_passengers: number;
-  capacity_bags: number;
-  pickup_at: string;
-  pickup_tz: string;
-  direction: TransportDirection;
-}
+/**
+ * Subset of transport_vehicles columns the Ground Transport Tool reads.
+ * Sourced from the generated `Database` type so adding or renaming a
+ * column in the schema flows through to a TypeScript error here.
+ */
+export type VehicleOption = Pick<
+  Database['public']['Tables']['transport_vehicles']['Row'],
+  | 'id'
+  | 'vehicle_name'
+  | 'capacity_passengers'
+  | 'capacity_bags'
+  | 'pickup_at'
+  | 'pickup_tz'
+  | 'direction'
+>;
 
 interface FlightRowShape {
   id: string;
@@ -130,6 +136,10 @@ export async function fetchPassengers(
     `,
     )
     .eq('direction', flightDirection)
+    // Tentative flights are excluded from manifests by schema convention
+    // (see comment on flights.is_confirmed). Match the contract here so
+    // admins never assign a vehicle to a flight that hasn't been booked.
+    .eq('is_confirmed', true)
     .order(direction === 'arrival' ? 'arrival_at' : 'departure_at', { ascending: true });
   if (flights.error) throw flights.error;
 
@@ -145,6 +155,10 @@ export async function fetchPassengers(
       // so the badge state and assignment stay aligned.
       const transport = row.transport_requests?.find((tr) => tr.direction === direction) ?? null;
       const pickupAt = direction === 'arrival' ? row.arrival_at : row.departure_at;
+      // pickup_tz reads from the flight itself (arrival_tz on inbound,
+      // departure_tz on outbound = the YYC venue tz) so a future event in
+      // a different city renders correctly without code changes.
+      const pickupTz = direction === 'arrival' ? row.arrival_tz : row.departure_tz;
       return {
         flight_id: row.id,
         user_id: row.user_id,
@@ -155,7 +169,7 @@ export async function fetchPassengers(
         flight_number: row.flight_number,
         airline: row.airline,
         pickup_at: pickupAt,
-        pickup_tz: 'America/Edmonton',
+        pickup_tz: pickupTz,
         passenger_count: transport?.passenger_count ?? 1,
         bag_count: transport?.bag_count ?? 1,
         transport_request_id: transport?.id ?? null,

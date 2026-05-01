@@ -33,15 +33,10 @@ import {
   bucketByPickup,
   flightCohortVehicles,
   rankVehiclesForPassenger,
+  WINDOW_TIME_FMT,
   WINDOW_TZ,
   type VehicleStat,
 } from './groundTransport/grouping';
-
-const TIME_FMT = new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: WINDOW_TZ,
-});
 
 export function GroundTransportToolScreen(): JSX.Element {
   const { t } = useTranslation();
@@ -66,20 +61,16 @@ export function GroundTransportToolScreen(): JSX.Element {
   // Live updates: any flight, transport_request, or vehicle change kicks
   // off a refetch so the screen stays current as attendees self-edit
   // their itineraries or other admins assign in parallel.
-  useRealtimeInvalidation(
-    useMemo(
-      () => [
-        { table: 'flights', invalidates: ['admin', 'gt', 'passengers', direction] },
-        { table: 'transport_requests', invalidates: ['admin', 'gt', 'passengers', direction] },
-        {
-          table: 'transport_vehicles',
-          invalidates: ['admin', 'gt', 'vehicles', eventId, direction],
-        },
-      ],
-      [direction, eventId],
-    ),
-  );
+  // useRealtimeInvalidation fingerprints its bindings internally, so a
+  // fresh array literal each render is fine.
+  useRealtimeInvalidation([
+    { table: 'flights', invalidates: ['admin', 'gt', 'passengers', direction] },
+    { table: 'transport_requests', invalidates: ['admin', 'gt', 'passengers', direction] },
+    { table: 'transport_vehicles', invalidates: ['admin', 'gt', 'vehicles', eventId, direction] },
+  ]);
 
+  // Stable references for downstream useMemos: a fresh `?? []` on every
+  // render would defeat their dependency arrays.
   const passengers = useMemo(() => passengersQ.data ?? [], [passengersQ.data]);
   const vehicles = useMemo(() => vehiclesQ.data ?? [], [vehiclesQ.data]);
   const windows = useMemo(
@@ -148,6 +139,7 @@ export function GroundTransportToolScreen(): JSX.Element {
         open={newVehicleOpen}
         onOpenChange={setNewVehicleOpen}
         eventId={event.id}
+        defaultDate={event.start_date}
         direction={direction}
         onCreated={() => {
           void qc.invalidateQueries({ queryKey: ['admin', 'gt', 'vehicles', eventId, direction] });
@@ -249,7 +241,10 @@ function PassengerLane({
                   <p className="text-sm font-semibold">
                     {group.airline} {group.flightNumber}
                     <span className="ml-2 text-xs font-normal text-muted-foreground">
-                      {direction === 'arrival' ? 'from' : 'to'} {group.endpoint} · {group.timeLabel}
+                      {direction === 'arrival'
+                        ? `${group.endpoint} → YYC`
+                        : `YYC → ${group.endpoint}`}{' '}
+                      · {group.timeLabel}
                     </span>
                   </p>
                   <span className="text-xs text-muted-foreground">
@@ -344,7 +339,7 @@ function PassengerRowCard({
           }
           disabled={assigning}
           className="h-8 flex-1 rounded-md border bg-background px-2 text-xs"
-          aria-label={t('admin.groundTransport.title')}
+          aria-label={passenger.full_name}
         >
           <option value="">{t('admin.groundTransport.unassigned')}</option>
           {ranked.map(({ vehicle, assigned }, idx) => {
@@ -352,7 +347,7 @@ function PassengerRowCard({
             const showFull = remaining <= 0 && passenger.assigned_vehicle_id !== vehicle.id;
             const label = t('admin.groundTransport.vehicleLabel', {
               name: vehicle.vehicle_name,
-              time: TIME_FMT.format(new Date(vehicle.pickup_at)),
+              time: WINDOW_TIME_FMT.format(new Date(vehicle.pickup_at)),
               assigned,
               capacity: vehicle.capacity_passengers,
             });
@@ -404,17 +399,14 @@ function VehicleSidebar({ vehicleStats, direction }: VehicleSidebarProps): JSX.E
   );
 }
 
-function VehicleSidebarRow({
-  vehicle,
-  assigned,
-}: {
+interface VehicleSidebarRowProps {
   vehicle: VehicleOption;
   assigned: number;
-}): JSX.Element {
+}
+
+function VehicleSidebarRow({ vehicle, assigned }: VehicleSidebarRowProps): JSX.Element {
   const ratio = assigned / vehicle.capacity_passengers;
-  let tone = 'bg-primary';
-  if (ratio >= 1) tone = 'bg-destructive';
-  else if (ratio >= 0.8) tone = 'bg-amber-500';
+  const tone = capacityTone(ratio);
   return (
     <li className="space-y-2 rounded-lg border bg-card p-3">
       <div className="flex items-baseline justify-between gap-2">
@@ -424,7 +416,7 @@ function VehicleSidebarRow({
         </span>
       </div>
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
-        {TIME_FMT.format(new Date(vehicle.pickup_at))}
+        {WINDOW_TIME_FMT.format(new Date(vehicle.pickup_at))}
       </p>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
@@ -440,6 +432,8 @@ interface NewVehicleDialogProps {
   open: boolean;
   onOpenChange: (next: boolean) => void;
   eventId: string;
+  /** ISO date (YYYY-MM-DD) seeded into the pickup-date field. */
+  defaultDate: string;
   direction: TransportDirection;
   onCreated: () => void;
 }
@@ -448,13 +442,14 @@ function NewVehicleDialog({
   open,
   onOpenChange,
   eventId,
+  defaultDate,
   direction,
   onCreated,
 }: NewVehicleDialogProps): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const [name, setName] = useState('');
-  const [pickupDate, setPickupDate] = useState('2027-01-11');
+  const [pickupDate, setPickupDate] = useState(defaultDate);
   const [pickupTime, setPickupTime] = useState('14:00');
   const [pax, setPax] = useState(12);
   const [bags, setBags] = useState(12);
@@ -467,8 +462,9 @@ function NewVehicleDialog({
       // Build a UTC ISO from the local-Mountain date+time picker. The Date
       // constructor parses 'YYYY-MM-DDTHH:mm' as LOCAL time, which would
       // pick up whichever timezone the admin's machine is in — wrong for
-      // a Mountain-time event. So we compose the UTC instant manually.
-      const pickupAtIso = mountainToUtcIso(pickupDate, pickupTime);
+      // a Mountain-time event. zonedWallTimeToUtcIso anchors the wall-clock
+      // value to WINDOW_TZ so MST/MDT and any future DST changes are handled.
+      const pickupAtIso = zonedWallTimeToUtcIso(pickupDate, pickupTime, WINDOW_TZ);
       await createVehicle(getSupabaseClient(), {
         eventId,
         vehicleName: name.trim(),
@@ -481,7 +477,7 @@ function NewVehicleDialog({
       onCreated();
       onOpenChange(false);
       setName('');
-      setPickupDate('2027-01-11');
+      setPickupDate(defaultDate);
       setPickupTime('14:00');
       setPax(12);
       setBags(12);
@@ -565,18 +561,51 @@ function NewVehicleDialog({
 }
 
 /**
- * Combine a YYYY-MM-DD date and HH:mm time, interpreted as Mountain Time
- * at the event venue (no DST in Jan, MST = UTC-7), into a UTC ISO string.
- * Browsers do not give us a built-in "construct a Date in tz X" so we
- * compute the offset numerically.
+ * Capacity bar colour: red when full, amber once 80% loaded, primary otherwise.
  */
-function mountainToUtcIso(date: string, time: string): string {
-  // MST is UTC-7. A 14:00 MST pickup is 21:00 UTC.
-  const [hours = '0', minutes = '0'] = time.split(':');
-  const utcHours = (Number(hours) + 7) % 24;
-  const dayOverflow = Number(hours) + 7 >= 24 ? 1 : 0;
-  const baseDate = new Date(`${date}T00:00:00Z`);
-  baseDate.setUTCDate(baseDate.getUTCDate() + dayOverflow);
-  baseDate.setUTCHours(utcHours, Number(minutes), 0, 0);
-  return baseDate.toISOString();
+function capacityTone(ratio: number): string {
+  if (ratio >= 1) return 'bg-destructive';
+  if (ratio >= 0.8) return 'bg-amber-500';
+  return 'bg-primary';
+}
+
+/**
+ * Combine a YYYY-MM-DD date and HH:mm time interpreted as wall-clock in
+ * the given IANA timezone, returning a UTC ISO string.
+ *
+ * Browsers do not expose a "build a Date in tz X" constructor, so we
+ * compute the offset numerically for the requested instant: format the
+ * UTC-equivalent timestamp in the target zone, read back what wall time
+ * the host thinks that is, and shift by the difference. One iteration is
+ * enough because the offset is constant within each DST regime (Calgary
+ * never has more than one transition in a single day).
+ */
+function zonedWallTimeToUtcIso(date: string, time: string, timeZone: string): string {
+  const wallMs = Date.parse(`${date}T${time}:00Z`);
+  const offsetMs = tzOffsetMs(wallMs, timeZone);
+  return new Date(wallMs - offsetMs).toISOString();
+}
+
+/** Offset of `timeZone` relative to UTC at the supplied instant, in milliseconds. */
+function tzOffsetMs(utcMs: number, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(new Date(utcMs));
+  const lookup = (type: string): string => parts.find((p) => p.type === type)?.value ?? '0';
+  const asUtc = Date.UTC(
+    Number(lookup('year')),
+    Number(lookup('month')) - 1,
+    Number(lookup('day')),
+    Number(lookup('hour')) % 24,
+    Number(lookup('minute')),
+    Number(lookup('second')),
+  );
+  return asUtc - utcMs;
 }
