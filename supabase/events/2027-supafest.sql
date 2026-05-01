@@ -12,6 +12,7 @@ declare
   -- ===== Edit these for a new event =====
   v_event_id uuid := '99999999-9999-9999-9999-999999999999';
   v_event_name text := 'Supafest 2027';
+  v_event_subtitle text := 'Banff, Alberta — January 11-15';
   v_event_location text := 'Banff, Alberta, Canada';
   v_event_tz text := 'America/Edmonton';
   v_start_date date := '2027-01-11';
@@ -19,6 +20,7 @@ declare
   v_reg_opens_at timestamptz := '2026-08-01 00:00:00+00';
   v_reg_closes_at timestamptz := '2026-12-15 23:59:59+00';
   v_hero_image_url text := 'https://kizuna.dev/banff-hero.jpg';
+  v_logo_url text := 'https://kizuna.dev/supafest-2027-logo.svg';
   -- ===== End event constants =====
 begin
   if exists (select 1 from public.events where id = v_event_id) then
@@ -27,13 +29,13 @@ begin
   end if;
 
   insert into public.events (
-    id, name, type, location, time_zone,
+    id, name, subtitle, type, location, time_zone,
     start_date, end_date, reg_opens_at, reg_closes_at,
-    is_active, hero_image_url
+    is_active, hero_image_url, logo_url, invite_all_employees
   ) values (
-    v_event_id, v_event_name, 'supafest', v_event_location, v_event_tz,
+    v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, v_event_tz,
     v_start_date, v_end_date, v_reg_opens_at, v_reg_closes_at,
-    true, v_hero_image_url
+    true, v_hero_image_url, v_logo_url, true
   );
 
   -- Documents that every attendee must read and sign.
@@ -69,12 +71,12 @@ Sample code of conduct content. Real content will replace this in production.',
   -- Sessions: timestamps are stored as UTC. The event time zone above
   -- (America/Edmonton in winter = MST, UTC-7) drives display.
   -- 18:00 MST = 01:00 UTC the next day.
-  insert into public.sessions (event_id, title, type, audience, starts_at, ends_at, location, is_mandatory, description) values
-    (v_event_id, 'Welcome dinner',      'dinner',   'all',           '2027-01-12 01:00:00+00', '2027-01-12 04:00:00+00', 'Banff Springs ballroom', true,  'Kick-off dinner. Mandatory for all attendees.'),
-    (v_event_id, 'Engineering keynote', 'keynote',  'employees_only','2027-01-12 16:00:00+00', '2027-01-12 17:30:00+00', 'Main hall',             true,  'Where we are headed in 2027.'),
-    (v_event_id, 'Database deep dive',  'breakout', 'opt_in',        '2027-01-12 18:00:00+00', '2027-01-12 19:00:00+00', 'Studio 2',              false, 'Postgres internals.'),
-    (v_event_id, 'Mountain hike',       'activity', 'opt_in',        '2027-01-13 16:00:00+00', '2027-01-13 20:00:00+00', 'Sulphur Mountain',      false, 'Bring layers.'),
-    (v_event_id, 'Closing party',       'social',   'all',           '2027-01-15 02:00:00+00', '2027-01-15 06:00:00+00', 'Hot springs lodge',     true,  'Send-off celebration.');
+  insert into public.sessions (event_id, title, subtitle, type, audience, starts_at, ends_at, location, is_mandatory, abstract, speaker_email) values
+    (v_event_id, 'Welcome dinner',      null, 'dinner',   'all',            '2027-01-12 01:00:00+00', '2027-01-12 04:00:00+00', 'Banff Springs ballroom', true,  'Kick-off dinner. Mandatory for all attendees.', null),
+    (v_event_id, 'Engineering keynote', 'Where we are headed in 2027', 'keynote',  'employees_only', '2027-01-12 16:00:00+00', '2027-01-12 17:30:00+00', 'Main hall',             true,  'A look at the year ahead.', 'paul@kizuna.dev'),
+    (v_event_id, 'Database deep dive',  'Postgres internals', 'breakout', 'opt_in',     '2027-01-12 18:00:00+00', '2027-01-12 19:00:00+00', 'Studio 2',              false, 'How the WAL actually works.', 'paul@kizuna.dev'),
+    (v_event_id, 'Mountain hike',       'Sulphur Mountain summit', 'activity', 'opt_in', '2027-01-13 16:00:00+00', '2027-01-13 20:00:00+00', 'Sulphur Mountain',      false, 'Bring layers and water. Pace is moderate.', null),
+    (v_event_id, 'Closing party',       null, 'social',   'all',           '2027-01-15 02:00:00+00', '2027-01-15 06:00:00+00', 'Hot springs lodge',     true,  'Send-off celebration.', null);
 
   -- Starter registrations + per-task rows for the dev employees so the
   -- wizard has data to resume from. Other users register on first visit.

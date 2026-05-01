@@ -8,6 +8,7 @@
 create table public.events (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  subtitle text,
   type event_type not null,
   location text,
   time_zone text not null default 'UTC',
@@ -16,8 +17,17 @@ create table public.events (
   reg_opens_at timestamptz,
   reg_closes_at timestamptz check (reg_closes_at is null or reg_opens_at is null or reg_closes_at > reg_opens_at),
   is_active boolean not null default false,
-  hero_image_url text
+  hero_image_url text,
+  logo_url text,
+  invite_all_employees boolean not null default false
 );
+
+comment on column public.events.hero_image_url is
+  'Background image used on the welcome screen and admin event header.';
+comment on column public.events.logo_url is
+  'Event logo (small square or wordmark). Renders next to the event name in admin and home.';
+comment on column public.events.invite_all_employees is
+  'When true, every active employee is implicitly invited (RLS extends visibility to role=employee). When false, only users with a registrations row see the event.';
 
 comment on column public.events.time_zone is
   'IANA timezone for the event venue (e.g. America/Edmonton for Banff). Used as the default render timezone for sessions and accommodations.';
@@ -36,6 +46,7 @@ create table public.sessions (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   title text not null,
+  subtitle text,
   type session_type not null,
   audience session_audience not null default 'all',
   starts_at timestamptz not null,
@@ -43,7 +54,8 @@ create table public.sessions (
   location text,
   capacity int check (capacity is null or capacity > 0),
   is_mandatory boolean not null default false,
-  description text,
+  abstract text,
+  speaker_email text,
   updated_at timestamptz not null default now()
 );
 
@@ -51,9 +63,32 @@ comment on column public.sessions.audience is
   'Determines who sees the session: everyone, employees only, guests only, or opt-in only.';
 comment on column public.sessions.is_mandatory is
   'When true, the session is auto-added to every relevant attendee itinerary.';
+comment on column public.sessions.subtitle is
+  'Single-line subtitle shown under the title in agenda cards.';
+comment on column public.sessions.abstract is
+  'Long-form description of the session (markdown supported). Replaces the older `description` column.';
+comment on column public.sessions.speaker_email is
+  'Email of the speaker. The agenda viewer joins this back to public.users to show photos and links.';
 
 create index sessions_event_id_starts_at_idx on public.sessions(event_id, starts_at);
 create index sessions_type_idx on public.sessions(event_id, type);
+create index sessions_speaker_email_idx on public.sessions(speaker_email) where speaker_email is not null;
+
+
+-- Per-user favorites for sessions. Drives the "starred" filter on the
+-- agenda viewer and the user's "my agenda" subset.
+create table public.session_favorites (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references public.sessions(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  favorited_at timestamptz not null default now(),
+  unique (session_id, user_id)
+);
+
+comment on table public.session_favorites is
+  'Per-user starred sessions. Used by the agenda viewer to filter "my picks".';
+
+create index session_favorites_user_id_idx on public.session_favorites(user_id);
 
 
 create table public.session_registrations (

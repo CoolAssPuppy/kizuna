@@ -179,8 +179,24 @@ create policy accessibility_preferences_self_all on public.accessibility_prefere
 
 
 -- Events: every authenticated user can read; only admins write.
-create policy events_authenticated_read on public.events
-  for select using (auth.role() = 'authenticated');
+-- Users see events they have a registration row in, OR events flagged
+-- invite_all_employees = true (provided they are an active employee).
+-- Admins see every event regardless.
+create policy events_visible_read on public.events
+  for select using (
+    public.is_admin()
+    or exists (
+      select 1 from public.registrations r
+      where r.event_id = events.id and r.user_id = auth.uid()
+    )
+    or (
+      events.invite_all_employees
+      and exists (
+        select 1 from public.users u
+        where u.id = auth.uid() and u.role = 'employee' and u.is_active
+      )
+    )
+  );
 
 create policy events_admin_write on public.events
   for all using (public.is_admin())
@@ -198,6 +214,13 @@ create policy sessions_admin_write on public.sessions
 create policy session_registrations_self_all on public.session_registrations
   for all using (public.is_self_or_admin(user_id))
   with check (public.is_self_or_admin(user_id));
+
+
+-- Session favorites: each user manages their own row, admins read all
+-- so admin reports can show "most starred sessions".
+create policy session_favorites_self_all on public.session_favorites
+  for all using (public.is_self_or_admin(user_id))
+  with check (user_id = auth.uid());
 
 
 create policy dinner_seating_self_read on public.dinner_seating

@@ -592,12 +592,15 @@ export type Database = {
           end_date: string
           hero_image_url: string | null
           id: string
+          invite_all_employees: boolean
           is_active: boolean
           location: string | null
+          logo_url: string | null
           name: string
           reg_closes_at: string | null
           reg_opens_at: string | null
           start_date: string
+          subtitle: string | null
           time_zone: string
           type: Database["public"]["Enums"]["event_type"]
         }
@@ -605,12 +608,15 @@ export type Database = {
           end_date: string
           hero_image_url?: string | null
           id?: string
+          invite_all_employees?: boolean
           is_active?: boolean
           location?: string | null
+          logo_url?: string | null
           name: string
           reg_closes_at?: string | null
           reg_opens_at?: string | null
           start_date: string
+          subtitle?: string | null
           time_zone?: string
           type: Database["public"]["Enums"]["event_type"]
         }
@@ -618,12 +624,15 @@ export type Database = {
           end_date?: string
           hero_image_url?: string | null
           id?: string
+          invite_all_employees?: boolean
           is_active?: boolean
           location?: string | null
+          logo_url?: string | null
           name?: string
           reg_closes_at?: string | null
           reg_opens_at?: string | null
           start_date?: string
+          subtitle?: string | null
           time_zone?: string
           type?: Database["public"]["Enums"]["event_type"]
         }
@@ -1325,6 +1334,42 @@ export type Database = {
           },
         ]
       }
+      session_favorites: {
+        Row: {
+          favorited_at: string
+          id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          favorited_at?: string
+          id?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          favorited_at?: string
+          id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_favorites_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_registrations: {
         Row: {
           id: string
@@ -1369,43 +1414,49 @@ export type Database = {
       }
       sessions: {
         Row: {
+          abstract: string | null
           audience: Database["public"]["Enums"]["session_audience"]
           capacity: number | null
-          description: string | null
           ends_at: string
           event_id: string
           id: string
           is_mandatory: boolean
           location: string | null
+          speaker_email: string | null
           starts_at: string
+          subtitle: string | null
           title: string
           type: Database["public"]["Enums"]["session_type"]
           updated_at: string
         }
         Insert: {
+          abstract?: string | null
           audience?: Database["public"]["Enums"]["session_audience"]
           capacity?: number | null
-          description?: string | null
           ends_at: string
           event_id: string
           id?: string
           is_mandatory?: boolean
           location?: string | null
+          speaker_email?: string | null
           starts_at: string
+          subtitle?: string | null
           title: string
           type: Database["public"]["Enums"]["session_type"]
           updated_at?: string
         }
         Update: {
+          abstract?: string | null
           audience?: Database["public"]["Enums"]["session_audience"]
           capacity?: number | null
-          description?: string | null
           ends_at?: string
           event_id?: string
           id?: string
           is_mandatory?: boolean
           location?: string | null
+          speaker_email?: string | null
           starts_at?: string
+          subtitle?: string | null
           title?: string
           type?: Database["public"]["Enums"]["session_type"]
           updated_at?: string
