@@ -270,14 +270,29 @@ async function parseLive(
   }
 
   const json = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = json.choices?.[0]?.message?.content ?? '{}';
-  const parsed = JSON.parse(content) as Partial<ParsedItinerary>;
+  const rawContent = json.choices?.[0]?.message?.content ?? '{}';
+  const stripped = rawContent
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '');
+  const parsed = JSON.parse(stripped) as Partial<ParsedItinerary>;
   return {
-    flights: parsed.flights ?? [],
-    hotels: parsed.hotels ?? [],
-    rental_cars: parsed.rental_cars ?? [],
-    car_services: parsed.car_services ?? [],
+    flights: nullifyEmptyStrings(parsed.flights ?? []),
+    hotels: nullifyEmptyStrings(parsed.hotels ?? []),
+    rental_cars: nullifyEmptyStrings(parsed.rental_cars ?? []),
+    car_services: nullifyEmptyStrings(parsed.car_services ?? []),
   };
+}
+
+function nullifyEmptyStrings<T>(rows: T[]): T[] {
+  return rows.map((row) => {
+    const out: Record<string, unknown> = { ...(row as Record<string, unknown>) };
+    for (const key of Object.keys(out)) {
+      const value = out[key];
+      if (typeof value === 'string' && value.trim() === '') out[key] = null;
+    }
+    return out as T;
+  });
 }
 
 let stubWarned = false;

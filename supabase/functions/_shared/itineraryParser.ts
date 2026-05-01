@@ -223,12 +223,45 @@ export async function parseItineraryWithOpenAI(text: string): Promise<ParsedItin
   }
 
   const json = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const content = json.choices?.[0]?.message?.content ?? '{}';
-  const parsed = JSON.parse(content) as Partial<ParsedItinerary>;
+  const rawContent = json.choices?.[0]?.message?.content ?? '{}';
+  // Some models wrap JSON in markdown fences even with response_format set.
+  // Strip ```json ... ``` defensively before parsing.
+  const stripped = rawContent
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '');
+
+  let parsed: Partial<ParsedItinerary>;
+  try {
+    parsed = JSON.parse(stripped) as Partial<ParsedItinerary>;
+  } catch (error) {
+    const head = stripped.slice(0, 240);
+    throw new Error(
+      `OpenAI returned non-JSON content (first 240 chars): ${head} — original: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
   return {
-    flights: parsed.flights ?? [],
-    hotels: parsed.hotels ?? [],
-    rental_cars: parsed.rental_cars ?? [],
-    car_services: parsed.car_services ?? [],
+    flights: nullifyEmptyStrings(parsed.flights ?? []),
+    hotels: nullifyEmptyStrings(parsed.hotels ?? []),
+    rental_cars: nullifyEmptyStrings(parsed.rental_cars ?? []),
+    car_services: nullifyEmptyStrings(parsed.car_services ?? []),
   };
+}
+
+/**
+ * Models occasionally return empty strings instead of null for missing
+ * fields. Downstream filters then treat "" as truthy and try to persist
+ * it, which trips schema CHECKs (e.g. departure_airport length=3).
+ * Walk each row and coerce empty strings to null.
+ */
+function nullifyEmptyStrings<T extends Record<string, unknown>>(rows: T[]): T[] {
+  return rows.map((row) => {
+    const out: Record<string, unknown> = { ...row };
+    for (const key of Object.keys(out)) {
+      const value = out[key];
+      if (typeof value === 'string' && value.trim() === '') out[key] = null;
+    }
+    return out as T;
+  });
 }

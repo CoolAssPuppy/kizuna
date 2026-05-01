@@ -429,12 +429,33 @@
     "nav": {
       "label": "Admin sections",
       "agenda": "Agenda",
+      "arrivals": "Arrivals",
       "feed": "Feed",
       "documents": "Documents",
       "stats": "Stats",
       "nudges": "Nudges",
       "reports": "Reports",
       "conflicts": "Conflicts"
+    },
+    "arrivals": {
+      "title": "Arrivals",
+      "subtitle": "Every inbound flight. Assign a room and a vehicle to each passenger.",
+      "empty": "No inbound flights yet. They'll appear here as registrations close and travel data syncs.",
+      "noEvent": "Select an active event before assigning rooms.",
+      "unassigned": "Unassigned",
+      "col": {
+        "passenger": "Passenger",
+        "flight": "Flight",
+        "arrival": "Arrival (MT)",
+        "bags": "Bags",
+        "room": "Room",
+        "vehicle": "Vehicle"
+      },
+      "setup": {
+        "title": "Before you can assign:",
+        "noRooms": "Add at least one accommodation row in the database. Hotel name + room number + room type.",
+        "noVehicles": "Add at least one transport_vehicle row in the database. Vehicle name + capacity."
+      }
     },
     "events": {
       "title": "Events",
