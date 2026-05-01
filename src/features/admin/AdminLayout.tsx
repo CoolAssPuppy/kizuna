@@ -35,7 +35,7 @@ const SECTIONS: ReadonlyArray<NavSection> = [
 export function AdminLayout(): JSX.Element {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto flex w-full max-w-7xl gap-8 px-6 py-10">
+    <div className="mx-auto flex w-full max-w-7xl gap-8 px-8 py-10">
       <aside className="w-56 shrink-0 space-y-1">
         <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight">{t('admin.title')}</h1>
         <nav className="flex flex-col gap-0.5" aria-label={t('admin.nav.label')}>

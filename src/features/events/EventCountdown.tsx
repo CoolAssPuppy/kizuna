@@ -25,6 +25,8 @@ interface Props {
   startsAt: string;
   /** Optional smaller variant for compact placements like the home header. */
   size?: 'default' | 'sm';
+  /** Stretch to fill its container instead of sitting at content width. */
+  fullWidth?: boolean;
 }
 
 /**
@@ -32,7 +34,7 @@ interface Props {
  * passes it flips to a pulsing "Live" pill. Single source of truth for
  * countdown UI across the itinerary hero and the home header.
  */
-export function EventCountdown({ startsAt, size = 'default' }: Props): JSX.Element {
+export function EventCountdown({ startsAt, size = 'default', fullWidth = false }: Props): JSX.Element {
   const { t } = useTranslation();
   const [countdown, setCountdown] = useState<Countdown>(() =>
     diffToCountdown(new Date(startsAt)),
@@ -50,7 +52,11 @@ export function EventCountdown({ startsAt, size = 'default' }: Props): JSX.Eleme
   if (countdown.isLive) {
     return (
       <div
-        className="inline-flex animate-pulse items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+        className={
+          fullWidth
+            ? 'flex animate-pulse items-center justify-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground'
+            : 'inline-flex animate-pulse items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground'
+        }
         role="status"
       >
         <span className="h-2 w-2 rounded-full bg-primary-foreground" aria-hidden />
@@ -59,13 +65,13 @@ export function EventCountdown({ startsAt, size = 'default' }: Props): JSX.Eleme
     );
   }
 
+  const baseClasses =
+    size === 'sm'
+      ? 'grid grid-cols-3 gap-1.5 rounded-lg border bg-card/60 px-3 py-2 text-center backdrop-blur'
+      : 'grid grid-cols-3 gap-2 rounded-xl border bg-card/60 px-4 py-3 text-center backdrop-blur';
   return (
     <dl
-      className={
-        size === 'sm'
-          ? 'grid grid-cols-3 gap-1.5 rounded-lg border bg-card/60 px-3 py-2 text-center backdrop-blur'
-          : 'grid grid-cols-3 gap-2 rounded-xl border bg-card/60 px-4 py-3 text-center backdrop-blur'
-      }
+      className={fullWidth ? `${baseClasses} w-full` : baseClasses}
       aria-label={t('itinerary.hero.countdownLabel')}
     >
       <Tile size={size} value={countdown.days} label={t('itinerary.hero.days')} />

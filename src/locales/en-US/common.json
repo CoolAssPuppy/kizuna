@@ -474,7 +474,39 @@
     },
     "nudges": {
       "title": "Nudges",
-      "subtitle": "Cooldowns, manual nudges, audit log."
+      "subtitle": "Manual nudges, deadline reminders, and the full audit log.",
+      "send": "Send nudge",
+      "sendCta": "Send",
+      "sending": "Sending",
+      "sent": "Sent {{delivered}} of {{attempted}}.",
+      "empty": "No nudges have been sent yet.",
+      "clearUser": "Clear",
+      "userPlaceholder": "Search by email",
+      "fields": {
+        "channel": "Channel",
+        "type": "Type",
+        "audience": "Audience",
+        "subject": "Subject",
+        "body": "Body"
+      },
+      "channels": {
+        "in_app": "In-app",
+        "email": "Email",
+        "slack": "Slack"
+      },
+      "types": {
+        "announcement": "Announcement",
+        "nudge": "Nudge",
+        "deadline_reminder": "Deadline reminder",
+        "flight_update": "Flight update",
+        "room_assignment": "Room assignment",
+        "checkin_reminder": "Check-in reminder"
+      },
+      "audiences": {
+        "all_employees": "All employees",
+        "all_guests": "All guests",
+        "user": "Specific user"
+      }
     },
     "reports": {
       "title": "Reports",

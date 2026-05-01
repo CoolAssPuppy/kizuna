@@ -5,12 +5,12 @@ import { useIsAdmin } from '@/features/auth/hooks';
 
 import { AdminLayout } from './AdminLayout';
 import { AgendaAdminScreen } from './AgendaAdminScreen';
-import { ComingSoon } from './ComingSoon';
 import { ConflictsScreen } from './ConflictsScreen';
 import { DocumentsScreen } from './DocumentsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { EventsListScreen } from './EventsListScreen';
 import { FeedScreen } from './FeedScreen';
+import { NudgesScreen } from './NudgesScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { StatsScreen } from './StatsScreen';
 
@@ -39,10 +39,7 @@ export function AdminRoute(): JSX.Element {
         <Route path="feed" element={<FeedScreen />} />
         <Route path="documents" element={<DocumentsScreen />} />
         <Route path="stats" element={<StatsScreen />} />
-        <Route
-          path="nudges"
-          element={<ComingSoon titleKey="admin.nudges.title" subtitleKey="admin.nudges.subtitle" />}
-        />
+        <Route path="nudges" element={<NudgesScreen />} />
         <Route path="reports" element={<ReportsScreen />} />
         <Route path="conflicts" element={<ConflictsScreen />} />
       </Route>

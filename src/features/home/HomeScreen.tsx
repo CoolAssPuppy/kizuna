@@ -24,8 +24,6 @@ export function HomeScreen(): JSX.Element {
   const { data: feed } = useHomeFeed(eventId);
   const { data: stats } = useEventStats(eventId);
   const editorial = useEditorialFeed(eventId);
-  const dynamicCount = feed?.length ?? 0;
-  const editorialCount = editorial.main.length;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">
@@ -33,13 +31,6 @@ export function HomeScreen(): JSX.Element {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <section className="space-y-4 lg:col-span-3">
-          <header className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold tracking-tight">{t('home.feedTitle')}</h2>
-            <span className="text-xs text-muted-foreground">
-              {dynamicCount + editorialCount} {t('home.itemsLabel')}
-            </span>
-          </header>
-
           {editorial.main.length > 0 ? (
             <ul className="space-y-3">
               {editorial.main.map((item) => (
@@ -56,7 +47,7 @@ export function HomeScreen(): JSX.Element {
             </ul>
           ) : null}
 
-          {editorialCount === 0 && dynamicCount === 0 ? (
+          {editorial.main.length === 0 && (feed?.length ?? 0) === 0 ? (
             <p className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
               {t('home.feedEmpty')}
             </p>
@@ -64,11 +55,7 @@ export function HomeScreen(): JSX.Element {
         </section>
 
         <aside className="space-y-4 lg:col-span-2">
-          {event ? (
-            <div className="flex justify-end">
-              <EventCountdown startsAt={event.start_date} size="sm" />
-            </div>
-          ) : null}
+          {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>
             <dl className="grid grid-cols-1 gap-4">
               <Fact label={t('home.facts.employees')} value={stats?.employeeCount ?? 0} />
