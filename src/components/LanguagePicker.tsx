@@ -14,7 +14,11 @@ export function LanguagePicker(): JSX.Element {
     : SUPPORTED_LOCALES[0];
 
   return (
-    <div role="radiogroup" aria-label={t('footer.language')} className="flex items-center gap-1">
+    <div
+      role="radiogroup"
+      aria-label={t('footer.language')}
+      className="inline-flex items-center rounded-full border bg-muted/40 p-0.5"
+    >
       {SUPPORTED_LOCALES.map((locale) => {
         const active = current === locale;
         return (
@@ -25,9 +29,9 @@ export function LanguagePicker(): JSX.Element {
             aria-checked={active}
             onClick={() => void i18n.changeLanguage(locale)}
             className={cn(
-              'inline-flex h-8 w-8 items-center justify-center rounded-md border border-transparent text-base leading-none transition-colors',
-              'hover:bg-accent',
-              active && 'border-input bg-accent',
+              'inline-flex h-7 min-w-7 items-center justify-center rounded-full px-1 text-sm leading-none transition-all',
+              'hover:bg-background/60',
+              active && 'bg-background shadow-sm ring-1 ring-border',
             )}
             title={t(`footer.languages.${locale}`)}
             aria-label={t(`footer.languages.${locale}`)}
