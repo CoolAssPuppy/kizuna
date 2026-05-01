@@ -125,6 +125,10 @@ create table public.transport_requests (
   passenger_count int not null check (passenger_count > 0),
   bag_count int not null default 0 check (bag_count >= 0),
   special_equipment text[] not null default '{}',
+  -- Free-form note from the attendee surfaced to ground-transport
+  -- ops ("car seat needed", "departing 30 min earlier than the
+  -- group", etc.). Editable from the itinerary edit dialog.
+  special_requests text,
   assigned_vehicle_id uuid references public.transport_vehicles(id) on delete set null,
   needs_review boolean not null default false,
   updated_at timestamptz not null default now()

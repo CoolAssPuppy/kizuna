@@ -1,7 +1,8 @@
 import { Sparkles } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EditItineraryElementDialog } from './EditItineraryElementDialog';
 import { groupItineraryByDay } from './grouping';
 import { ItineraryItemCard } from './ItineraryItemCard';
 import type { ItineraryItemRow } from './types';
@@ -64,6 +65,7 @@ export function ItineraryTimeline({
   const { t } = useTranslation();
   const days = useMemo(() => groupItineraryByDay(items, timeZone), [items, timeZone]);
   const todayKeyValue = DAY_KEY_FMT.format(now);
+  const [editing, setEditing] = useState<ItineraryItemRow | null>(null);
 
   if (days.length === 0) {
     return (
@@ -117,13 +119,19 @@ export function ItineraryTimeline({
               />
               <ul className="space-y-3">
                 {day.items.map((item, itemIndex) => (
-                  <ItineraryItemCard key={item.id} item={item} index={itemIndex} />
+                  <ItineraryItemCard
+                    key={item.id}
+                    item={item}
+                    index={itemIndex}
+                    onClick={setEditing}
+                  />
                 ))}
               </ul>
             </div>
           </li>
         );
       })}
+      <EditItineraryElementDialog item={editing} onClose={() => setEditing(null)} />
     </ol>
   );
 }

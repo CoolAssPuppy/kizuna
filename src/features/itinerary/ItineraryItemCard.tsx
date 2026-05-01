@@ -9,6 +9,8 @@ interface Props {
   item: ItineraryItemRow;
   /** Stagger index so each row fades in slightly behind the previous one. */
   index: number;
+  /** Click handler; when set, the card becomes a button. */
+  onClick?: (item: ItineraryItemRow) => void;
 }
 
 function formatTime(iso: string, timeZone: string | null): string {
@@ -19,7 +21,7 @@ function formatTime(iso: string, timeZone: string | null): string {
   }).format(new Date(iso));
 }
 
-export function ItineraryItemCard({ item, index }: Props): JSX.Element {
+export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element {
   const { t } = useTranslation();
   const meta = ITEM_META[item.item_type];
   const Icon = meta.Icon;
@@ -41,46 +43,60 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
         )}
       />
 
-      <article
-        className={cn(
-          'group flex flex-col gap-3 rounded-xl border bg-card p-4 text-card-foreground shadow-sm transition-all sm:flex-row sm:items-start sm:gap-4',
+      {(() => {
+        const className = cn(
+          'group flex w-full flex-col gap-3 rounded-xl border bg-card p-4 text-left text-card-foreground shadow-sm transition-all sm:flex-row sm:items-start sm:gap-4',
           'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
-        )}
-      >
-        <span
-          aria-hidden
-          className={cn(
-            'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
-            meta.chipClass,
-          )}
-        >
-          <Icon className="h-5 w-5" />
-        </span>
-
-        <div className="flex-1 space-y-1">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <p className="text-sm font-semibold leading-snug">{item.title}</p>
-            <span className="text-xs font-medium tabular-nums text-muted-foreground">
-              {startLabel}
-              {endLabel ? ` – ${endLabel}` : ''}
+          onClick && 'cursor-pointer',
+        );
+        const inner = (
+          <>
+            <span
+              aria-hidden
+              className={cn(
+                'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg',
+                meta.chipClass,
+              )}
+            >
+              <Icon className="h-5 w-5" />
             </span>
-          </div>
 
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            {t(`itinerary.itemTypes.${item.item_type}`)}
-          </p>
+            <div className="flex-1 space-y-1">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                <p className="text-sm font-semibold leading-snug">{item.title}</p>
+                <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                  {startLabel}
+                  {endLabel ? ` – ${endLabel}` : ''}
+                </span>
+              </div>
 
-          {item.subtitle ? <p className="text-sm text-muted-foreground">{item.subtitle}</p> : null}
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                {t(`itinerary.itemTypes.${item.item_type}`)}
+              </p>
 
-          <div className="flex flex-wrap gap-2 pt-1">
-            {item.includes_guest ? (
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                {t('itinerary.withGuest')}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </article>
+              {item.subtitle ? (
+                <p className="text-sm text-muted-foreground">{item.subtitle}</p>
+              ) : null}
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                {item.includes_guest ? (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    {t('itinerary.withGuest')}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          </>
+        );
+        if (onClick) {
+          return (
+            <button type="button" className={className} onClick={() => onClick(item)}>
+              {inner}
+            </button>
+          );
+        }
+        return <article className={className}>{inner}</article>;
+      })()}
     </li>
   );
 }

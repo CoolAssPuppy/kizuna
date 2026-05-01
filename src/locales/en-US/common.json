@@ -829,6 +829,21 @@
       "title": "Nothing on your itinerary yet",
       "body": "Click Add to Itinerary to paste a confirmation email or upload a booking PDF — we'll structure it for you."
     },
+    "edit": {
+      "title": "Edit itinerary element",
+      "editableHint": "Add a special request below — every other detail is system-managed.",
+      "readOnlyHint": "This item is read-only. Details are managed by your event admin.",
+      "titleField": "Title",
+      "subtitleField": "Details",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "specialRequests": "Special requests",
+      "specialRequestsPlaceholder": "Crib, accessibility, dietary, anything else our team should know.",
+      "specialRequestsHint": "Visible to event ops only. Save to update.",
+      "save": "Save",
+      "saving": "Saving",
+      "saved": "Special request saved."
+    },
     "day": {
       "today": "Today",
       "dayOf": "Day {{day}} of {{total}}"

@@ -1757,6 +1757,7 @@ export type Database = {
           pickup_at: string
           pickup_tz: string
           special_equipment: string[]
+          special_requests: string | null
           updated_at: string
           user_id: string
         }
@@ -1771,6 +1772,7 @@ export type Database = {
           pickup_at: string
           pickup_tz?: string
           special_equipment?: string[]
+          special_requests?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1785,6 +1787,7 @@ export type Database = {
           pickup_at?: string
           pickup_tz?: string
           special_equipment?: string[]
+          special_requests?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1990,6 +1993,14 @@ export type Database = {
       }
       set_user_leadership: {
         Args: { p_user_id: string; p_value: boolean }
+        Returns: undefined
+      }
+      update_accommodation_special_requests: {
+        Args: { p_accommodation_id: string; p_requests: string }
+        Returns: undefined
+      }
+      update_transport_request_special_requests: {
+        Args: { p_request_id: string; p_requests: string }
         Returns: undefined
       }
     }

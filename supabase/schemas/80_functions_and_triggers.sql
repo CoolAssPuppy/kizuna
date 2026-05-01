@@ -787,3 +787,82 @@ $$;
 
 revoke all on function public.delete_event_cascade(uuid) from public;
 grant execute on function public.delete_event_cascade(uuid) to authenticated;
+
+
+-- =====================================================================
+-- Per-user special-request edits on itinerary elements.
+-- =====================================================================
+-- The Itinerary edit dialog lets attendees attach a free-form note to
+-- their hotel room or transport request — "needs a crib in the room",
+-- "departing 30 min earlier", etc. RLS on the underlying tables is
+-- admin-only, but these SECURITY DEFINER helpers narrow the
+-- write surface to a single column and verify the caller actually
+-- owns the row.
+
+create or replace function public.update_accommodation_special_requests(
+  p_accommodation_id uuid,
+  p_requests text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+  if not (
+    public.is_admin()
+    or exists (
+      select 1 from public.accommodation_occupants ao
+      where ao.accommodation_id = p_accommodation_id
+        and ao.user_id = v_caller
+    )
+  ) then
+    raise exception 'not an occupant' using errcode = '42501';
+  end if;
+  update public.accommodations
+     set special_requests = nullif(trim(p_requests), '')
+   where id = p_accommodation_id;
+end
+$$;
+
+revoke all on function public.update_accommodation_special_requests(uuid, text) from public;
+grant execute on function public.update_accommodation_special_requests(uuid, text) to authenticated;
+
+
+create or replace function public.update_transport_request_special_requests(
+  p_request_id uuid,
+  p_requests text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+  if not (
+    public.is_admin()
+    or exists (
+      select 1 from public.transport_requests tr
+      where tr.id = p_request_id and tr.user_id = v_caller
+    )
+  ) then
+    raise exception 'not the requester' using errcode = '42501';
+  end if;
+  update public.transport_requests
+     set special_requests = nullif(trim(p_requests), '')
+   where id = p_request_id;
+end
+$$;
+
+revoke all on function public.update_transport_request_special_requests(uuid, text) from public;
+grant execute on function public.update_transport_request_special_requests(uuid, text) to authenticated;

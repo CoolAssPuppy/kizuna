@@ -32,6 +32,7 @@
     "functions:serve": "npm run functions:env && supabase functions serve --env-file supabase/.env",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
     "simulate:community": "bash scripts/with-doppler.sh tsx scripts/simulate-community.ts",
+    "seed:remote-users": "tsx scripts/seed-remote-users.ts",
     "prepare": "husky 2>/dev/null || true"
   },
   "dependencies": {

@@ -401,6 +401,14 @@ All three files are applied automatically by `npm run db:apply`. Every fictional
 
 Prerequisites in the chosen Doppler config: `SUPABASE_URL`, `SUPABASE_DB_PASSWORD` (find under Settings → Database in the Supabase dashboard), and optionally `SUPABASE_DB_REGION` (defaults to `us-east-1`). Delete this script once Phase 1 launch is settled.
 
+After resetting + re-seeding the remote DB, re-create the seeded auth users via the Admin API so they can actually sign in with the dev password:
+
+```bash
+npm run seed:remote-users -- stg     # or prd
+```
+
+Hosted Supabase rejects auth.users rows whose `encrypted_password` was inserted via raw SQL `crypt(...)`. The seed script uses `@supabase/supabase-js`'s Admin API and consumes `SUPABASE_URL` + `SUPABASE_SECRET_KEY` from the named Doppler config. Idempotent — existing users get their passwords reset; missing users are created.
+
 ## Testing
 
 | Layer                    | Tool                                      | Run                                                              |
