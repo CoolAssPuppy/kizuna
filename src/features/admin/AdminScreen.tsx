@@ -7,6 +7,8 @@ import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { type AppSupabaseClient, getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
+import type { Database } from '@/types/database.types';
+
 import { ConflictsPanel } from './ConflictsPanel';
 import { downloadCsv, rowsToCsv, type CsvRow } from './csv';
 import {
@@ -17,10 +19,14 @@ import {
   fetchSwagOrder,
   fetchTransportManifest,
 } from './reports';
+import { ShareReportButton } from './ShareReportButton';
+
+type ReportType = Database['public']['Enums']['report_type'];
 
 interface ReportConfig {
   key: string;
   filename: string;
+  reportType: ReportType;
   fetch: (client: AppSupabaseClient, eventId: string | null) => Promise<readonly CsvRow[]>;
 }
 
@@ -28,23 +34,37 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
   {
     key: 'registration',
     filename: 'registration-progress.csv',
+    reportType: 'full_registration',
     fetch: (c, eid) => (eid ? fetchRegistrationProgress(c, eid) : Promise.resolve([])),
   },
   {
     key: 'rooming',
     filename: 'rooming-list.csv',
+    reportType: 'rooming_list',
     fetch: (c, eid) => (eid ? fetchRoomingList(c, eid) : Promise.resolve([])),
   },
   {
     key: 'transport',
     filename: 'transport-manifest.csv',
+    reportType: 'transport_manifest',
     fetch: (c) => fetchTransportManifest(c),
   },
-  { key: 'dietary', filename: 'dietary-summary.csv', fetch: (c) => fetchDietarySummary(c) },
-  { key: 'swag', filename: 'swag-order.csv', fetch: (c) => fetchSwagOrder(c) },
+  {
+    key: 'dietary',
+    filename: 'dietary-summary.csv',
+    reportType: 'dietary_summary',
+    fetch: (c) => fetchDietarySummary(c),
+  },
+  {
+    key: 'swag',
+    filename: 'swag-order.csv',
+    reportType: 'swag_order',
+    fetch: (c) => fetchSwagOrder(c),
+  },
   {
     key: 'payments',
     filename: 'payment-reconciliation.csv',
+    reportType: 'payment_reconciliation',
     fetch: (c) => fetchPaymentReconciliation(c),
   },
 ];
@@ -55,9 +75,11 @@ type Tab = (typeof TABS)[number];
 interface ReportPanelProps {
   rows: ReadonlyArray<CsvRow>;
   filename: string;
+  reportType: ReportType;
+  eventId: string | null;
 }
 
-function ReportPanel({ rows, filename }: ReportPanelProps): JSX.Element {
+function ReportPanel({ rows, filename, reportType, eventId }: ReportPanelProps): JSX.Element {
   const { t } = useTranslation();
   if (rows.length === 0) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>;
@@ -65,7 +87,8 @@ function ReportPanel({ rows, filename }: ReportPanelProps): JSX.Element {
   const headers = Object.keys(rows[0]!);
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <ShareReportButton reportType={reportType} eventId={eventId} />
         <Button variant="outline" onClick={() => downloadCsv(filename, rowsToCsv(rows))}>
           {t('admin.exportCsv')}
         </Button>
@@ -108,7 +131,14 @@ function ActiveReport({ config, eventId }: ActiveReportProps): JSX.Element {
     queryKey: ['admin', config.key, eventId],
     queryFn: () => config.fetch(getSupabaseClient(), eventId),
   });
-  return <ReportPanel rows={query.data ?? []} filename={config.filename} />;
+  return (
+    <ReportPanel
+      rows={query.data ?? []}
+      filename={config.filename}
+      reportType={config.reportType}
+      eventId={eventId}
+    />
+  );
 }
 
 export function AdminScreen(): JSX.Element {

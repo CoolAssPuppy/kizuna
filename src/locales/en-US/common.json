@@ -276,6 +276,16 @@
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",
+    "share": {
+      "create": "Create share link",
+      "creating": "Creating link",
+      "created": "Share link created. Expires in 7 days.",
+      "copy": "Copy link",
+      "copied": "Link copied to clipboard.",
+      "copyFailed": "Could not copy. Select the link and copy it manually.",
+      "urlLabel": "Read-only share link",
+      "error": "Could not create share link: {{message}}"
+    },
     "conflicts": {
       "field": "Field",
       "kizunaValue": "Kizuna value",
@@ -287,6 +297,24 @@
       "noConflicts": "No open conflicts."
     },
     "blocked": "You do not have permission to view this page."
+  },
+  "shareReport": {
+    "eyebrow": "Kizuna shared report",
+    "loading": "Loading the latest data",
+    "notFound": "This share link does not exist.",
+    "expired": "This share link has expired. Ask the event team for a new one.",
+    "error": "Could not load this report. Please try again later.",
+    "empty": "No rows to display yet.",
+    "lastModified": "Last modified: {{value}}",
+    "expires": "Link expires: {{value}}",
+    "types": {
+      "rooming_list": "Rooming list",
+      "transport_manifest": "Transport manifest",
+      "dietary_summary": "Dietary summary",
+      "swag_order": "Swag order",
+      "full_registration": "Registration progress",
+      "payment_reconciliation": "Payment reconciliation"
+    }
   },
   "itinerary": {
     "title": "Your Itinerary",

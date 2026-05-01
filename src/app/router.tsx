@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom';
 
 import { AdminRoute } from '@/features/admin/AdminRoute';
+import { SharedReportScreen } from '@/features/admin/SharedReportScreen';
 import { useAuth } from '@/features/auth/AuthContext';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { SignInScreen } from '@/features/auth/SignInScreen';
@@ -113,6 +114,7 @@ export function AppRouter(): JSX.Element {
           </RequireAuth>
         }
       />
+      <Route path="/share/reports/:token" element={<SharedReportScreen />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

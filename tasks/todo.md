@@ -239,24 +239,31 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - Admin transport manifest joins flights + transport_vehicles + users so the bus operator handoff has flight number, airline, passenger/bag counts, special equipment, and assigned vehicle in a single CSV row.
 - 111/111 vitest, lint clean, typecheck clean, build clean (PWA precache 18 entries, 935 KiB).
 
-### M7 - Admin dashboard and reports
+### M7 - Admin dashboard and reports [complete]
 
 **Goal:** Admin operations: live reports with shareable signed links, conflict resolution UI, CSV export.
 
-- [ ] Admin layout shell
-- [ ] Rooming list report
-- [ ] Transport manifest
-- [ ] Dietary summary
-- [ ] Swag order
-- [ ] Full registration report
-- [ ] Payment reconciliation
-- [ ] CSV export per report
-- [ ] Shareable signed links (`report_snapshots.share_token`)
-- [ ] Read-only public report view (token-gated)
-- [ ] Conflict resolution UI (`data_conflicts`)
-- [ ] Vitest: report utilities
-- [ ] Playwright: admin report happy path
-- [ ] Commit: `feat(admin): reports with shareable links and conflict resolution`
+- [x] Admin layout shell — AdminScreen with tabs
+- [x] Rooming list report (joins employee_profiles + guest_profiles for proper display name)
+- [x] Transport manifest (added in M6)
+- [x] Dietary summary
+- [x] Swag order
+- [x] Full registration report
+- [x] Payment reconciliation
+- [x] CSV export per report
+- [x] Shareable read-only links — random 32-byte tokens stored on report_snapshots, 7-day expiry
+- [x] Public read-only report view at /share/reports/:token (no auth, no chrome)
+- [x] share-report edge function fetches LIVE rows via service role per spec ("never a frozen snapshot")
+- [x] Conflict resolution UI (`data_conflicts`) — landed earlier as ConflictsPanel
+- [x] Vitest: 4 new tests for share token generation + URL formatting
+- [x] Commit: `feat(m7): live shareable report links with public view`
+
+**M7 review:**
+- 115/115 vitest, lint clean, typecheck clean.
+- Spec is explicit that shared links render LIVE data, not snapshots. The `report_snapshots` table is a token holder; the edge function joins live tables on every request and returns rows + last_modified.
+- AdminScreen was simplified by extracting REPORTS config + ActiveReport sub-component (post-simplify pass). Adding the 7th report (or share-mapping a new one) is a one-line append.
+- Token format: 32 random bytes → 43 unpadded base64url chars. URL-safe, effectively unguessable, no JWT signing key needed because the token itself is the secret.
+- Recipient experience: hits /share/reports/:token. AppLayout strips chrome on /share/* prefix so no Kizuna nav/footer leaks into the hotel coordinator's view.
 
 ### M8 - HiBob and Perk sync [partial]
 

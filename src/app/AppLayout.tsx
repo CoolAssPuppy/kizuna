@@ -12,14 +12,18 @@ interface Props {
 
 /**
  * Routes that always render minimal chrome regardless of auth state.
- * Sign-in and the guest accept page are immersive flows.
+ * Sign-in, accept-invitation, and shared report links are immersive
+ * flows — the share recipient is a hotel/transport coordinator who
+ * has no app account and does not need our header or footer.
  */
 const ALWAYS_BARE_PATHS = new Set<string>(['/sign-in', '/accept-invitation']);
+const ALWAYS_BARE_PREFIXES = ['/share/'];
 
 export function AppLayout({ children }: Props): JSX.Element {
   const { pathname } = useLocation();
   const { status } = useAuth();
-  const alwaysBare = ALWAYS_BARE_PATHS.has(pathname);
+  const alwaysBare =
+    ALWAYS_BARE_PATHS.has(pathname) || ALWAYS_BARE_PREFIXES.some((p) => pathname.startsWith(p));
   const signedOut = status === 'unauthenticated';
 
   // Sign-in and accept-invitation always run bare. Otherwise: signed-in
