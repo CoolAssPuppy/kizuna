@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import type { Database } from '@/types/database.types';
 
 import {
@@ -47,6 +48,10 @@ export function AgendaAdminScreen(): JSX.Element {
     enabled: eventId !== null,
     queryFn: () => (eventId ? loadSessions(eventId) : Promise.resolve([])),
   });
+
+  useRealtimeInvalidation([
+    { table: 'sessions', invalidates: ['admin', 'agenda'] },
+  ]);
 
   const importMutation = useMutation({
     mutationFn: async (csv: string) => {

@@ -19,6 +19,7 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 
 import {
@@ -95,6 +96,10 @@ export function FeedScreen(): JSX.Element {
     enabled: eventId !== null,
     queryFn: () => (eventId ? fetchAllFeedItems(getSupabaseClient(), eventId) : Promise.resolve([])),
   });
+
+  useRealtimeInvalidation([
+    { table: 'feed_items', invalidates: ['admin', 'feed'] },
+  ]);
 
   const save = useMutation({
     mutationFn: async (draft: DraftItem) => {

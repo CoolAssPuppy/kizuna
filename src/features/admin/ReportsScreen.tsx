@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { type AppSupabaseClient, getSupabaseClient } from '@/lib/supabase';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
@@ -106,6 +107,17 @@ function ActiveReport({ config, eventId }: ActiveReportProps): JSX.Element {
     queryKey: ['admin', config.key, eventId],
     queryFn: () => config.fetch(getSupabaseClient(), eventId),
   });
+
+  // Reports re-issue the live SQL query whenever any contributing table
+  // changes. Listening on a generous set keeps every tab fresh; the
+  // queryKey carries config.key so only the active report invalidates.
+  useRealtimeInvalidation([
+    { table: 'registrations', invalidates: ['admin', config.key] },
+    { table: 'users', invalidates: ['admin', config.key] },
+    { table: 'flights', invalidates: ['admin', config.key] },
+    { table: 'transport_requests', invalidates: ['admin', config.key] },
+  ]);
+
   return (
     <ReportPanel
       rows={query.data ?? []}

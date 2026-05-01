@@ -15,6 +15,7 @@ import {
 
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 
 import { fetchAdminStats, type CategoryCount } from './api/stats';
 
@@ -41,6 +42,15 @@ export function StatsScreen(): JSX.Element {
     enabled: eventId !== null,
     queryFn: () => (eventId ? fetchAdminStats(getSupabaseClient(), eventId) : Promise.resolve(null)),
   });
+
+  // Stats roll up data from across the app, so any of these tables
+  // changing should invalidate the dashboard.
+  useRealtimeInvalidation([
+    { table: 'registrations', invalidates: ['admin', 'stats'] },
+    { table: 'users', invalidates: ['admin', 'stats'] },
+    { table: 'session_registrations', invalidates: ['admin', 'stats'] },
+    { table: 'document_acknowledgements', invalidates: ['admin', 'stats'] },
+  ]);
 
   if (isLoading) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.loading')}</p>;
