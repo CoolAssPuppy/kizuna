@@ -53,11 +53,13 @@ $$;
 
 
 -- channel_has_access: messages RLS gate. Phase 1 simple rules:
---   - 'general'              -> any authenticated user
---   - 'announcements'        -> any authenticated user (read), admins (write)
---   - 'guests'               -> guests and admins
---   - 'team:<dept>'          -> employees in that department, admins
---   - 'dm:<user_id>'         -> the two participants
+--   - 'general'                -> any authenticated user
+--   - 'announcements'          -> any authenticated user (read), admins (write)
+--   - 'guests'                 -> guests and admins
+--   - 'team:<dept>'            -> employees in that department, admins
+--   - 'dm:<uuid_a>:<uuid_b>'   -> the two participants. Both UUIDs lower
+--                                 case, sorted lexicographically so that
+--                                 each DM has exactly one canonical name.
 create or replace function public.channel_has_access(p_uid uuid, p_channel text)
 returns boolean
 language plpgsql
@@ -86,7 +88,9 @@ begin
   end if;
 
   if p_channel like 'dm:%' then
-    return p_uid::text = substr(p_channel, 4);
+    -- Channel is `dm:<uuid_a>:<uuid_b>` where both UUIDs are sorted.
+    -- Match on whole-string equality of either UUID against p_uid.
+    return p_uid::text = any(string_to_array(substr(p_channel, 4), ':'));
   end if;
 
   return false;
@@ -318,6 +322,10 @@ create policy accommodation_occupants_admin_write on public.accommodation_occupa
   with check (public.is_admin());
 
 
+-- transport_requests are admin-managed by design. Users create flights
+-- (manual_obs source), and the admin or a Postgres trigger derives a
+-- transport_request from that flight. There is intentionally no
+-- self-insert policy on this table.
 create policy transport_requests_self_read on public.transport_requests
   for select using (public.is_self_or_admin(user_id));
 

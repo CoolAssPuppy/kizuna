@@ -78,7 +78,7 @@ create table public.guest_profiles (
   relationship guest_relationship not null,
   payment_status guest_payment_status not null default 'pending',
   stripe_payment_id text,
-  fee_amount numeric(10, 2),
+  fee_amount numeric(10, 2) check (fee_amount is null or fee_amount >= 0),
   perk_profile_created boolean not null default false
 );
 

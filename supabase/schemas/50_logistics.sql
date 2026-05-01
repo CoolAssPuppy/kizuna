@@ -132,6 +132,8 @@ create table public.swag_items (
 comment on column public.swag_items.has_fit_options is
   'True for gender-cut items where fit_preference (fitted | relaxed) is collected.';
 
+create index swag_items_event_id_idx on public.swag_items(event_id);
+
 
 create table public.swag_selections (
   id uuid primary key default gen_random_uuid(),

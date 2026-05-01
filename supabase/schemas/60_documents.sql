@@ -57,3 +57,5 @@ comment on column public.document_acknowledgements.explicit_checkbox is
 
 create index document_acknowledgements_user_event_idx
   on public.document_acknowledgements(user_id, event_id);
+create index document_acknowledgements_document_id_idx
+  on public.document_acknowledgements(document_id);

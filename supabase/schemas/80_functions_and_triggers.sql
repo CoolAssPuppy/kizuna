@@ -167,6 +167,12 @@ begin
   from public.events e where e.id = v_session.event_id
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
+  -- For UPDATE (e.g. user toggles includes_guest), refresh the existing
+  -- row so the offline cache reflects the change.
+  update public.itinerary_items
+     set includes_guest = new.includes_guest
+   where source_id = new.session_id and user_id = new.user_id and item_type = 'session';
+
   return new;
 end
 $$;
@@ -174,6 +180,42 @@ $$;
 create trigger sync_itinerary_for_session_registration_aiud
   after insert or update or delete on public.session_registrations
   for each row execute function public.sync_itinerary_for_session_registration();
+
+
+-- When an admin edits a session (title, location, time), every user
+-- itinerary row pointing at that session needs to follow. Without this
+-- trigger the cache stays stale until the user deregisters and re-registers.
+create or replace function public.sync_itinerary_for_session()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_tz text;
+begin
+  if tg_op = 'DELETE' then
+    delete from public.itinerary_items
+     where source_id = old.id and item_type = 'session';
+    return old;
+  end if;
+
+  select time_zone into v_tz from public.events where id = new.event_id;
+
+  update public.itinerary_items
+     set title = new.title,
+         subtitle = new.location,
+         starts_at = new.starts_at,
+         ends_at = new.ends_at,
+         starts_tz = v_tz,
+         ends_tz = v_tz
+   where source_id = new.id and item_type = 'session';
+
+  return new;
+end
+$$;
+
+create trigger sync_itinerary_for_session_aud
+  after update or delete on public.sessions
+  for each row execute function public.sync_itinerary_for_session();
 
 
 create or replace function public.sync_itinerary_for_flight()

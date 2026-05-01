@@ -85,6 +85,7 @@ comment on table public.dinner_seating is
   'Admin-assigned table layouts for dinner sessions. Included in seating export.';
 
 create index dinner_seating_session_id_idx on public.dinner_seating(session_id);
+create index dinner_seating_user_id_idx on public.dinner_seating(user_id);
 
 
 -- itinerary_items: denormalised, materialised, single-table read for offline.
