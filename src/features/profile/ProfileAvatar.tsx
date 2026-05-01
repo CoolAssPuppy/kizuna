@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/features/auth/AuthContext';
+import { useSupabaseUpload } from '@/hooks/useSupabaseUpload';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -21,12 +22,41 @@ interface ProfileAvatarProps {
   size?: number;
 }
 
+/**
+ * Click-the-circle avatar uploader. Shares its upload mechanics with the
+ * rest of the app via `useSupabaseUpload`, but keeps the single-target
+ * "click image, pick file, see new image" flow rather than the multi-file
+ * drag-drop UI used elsewhere — for an avatar it's the right interaction.
+ */
 export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const upload = useSupabaseUpload({
+    bucketName: AVATAR_BUCKET,
+    ...(user ? { path: user.id } : {}),
+    maxFiles: 1,
+    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
+    upsert: true,
+    onUploadComplete: (paths) => {
+      const next = paths[0];
+      if (!next || !user) return;
+      void (async () => {
+        const client = getSupabaseClient();
+        await client
+          .from('employee_profiles')
+          .update({ avatar_url: next })
+          .eq('user_id', user.id);
+        const { data: signed } = await client.storage
+          .from(AVATAR_BUCKET)
+          .createSignedUrl(next, 60 * 60);
+        setAvatarUrl(signed?.signedUrl ?? null);
+        upload.setFiles([]);
+      })();
+    },
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -52,32 +82,19 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
     };
   }, [user]);
 
-  async function handleUpload(file: File): Promise<void> {
-    if (!user) return;
-    setBusy(true);
-    try {
-      const supabase = getSupabaseClient();
-      const path = `${user.id}/${Date.now()}-${file.name}`;
-      const upload = await supabase.storage
-        .from(AVATAR_BUCKET)
-        .upload(path, file, { upsert: true, contentType: file.type });
-      if (upload.error) return;
-      await supabase.from('employee_profiles').update({ avatar_url: path }).eq('user_id', user.id);
-      const { data: signed } = await supabase.storage
-        .from(AVATAR_BUCKET)
-        .createSignedUrl(path, 60 * 60);
-      setAvatarUrl(signed?.signedUrl ?? null);
-    } finally {
-      setBusy(false);
+  // When the picker resolves a single file, kick off the upload immediately.
+  useEffect(() => {
+    if (upload.files.length > 0 && !upload.loading && upload.successes.length === 0) {
+      void upload.onUpload();
     }
-  }
+  }, [upload]);
 
   return (
     <>
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        disabled={busy}
+        disabled={upload.loading}
         aria-label={t('header.uploadAvatar')}
         title={t('header.uploadAvatar')}
         className={cn(
@@ -95,11 +112,13 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
         <span
           className={cn(
             'absolute inset-0 flex items-center justify-center bg-black/50 text-white transition-opacity',
-            busy ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100',
+            upload.loading
+              ? 'opacity-100'
+              : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100',
           )}
           aria-hidden
         >
-          {busy ? (
+          {upload.loading ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
             <Camera className="h-5 w-5" />
@@ -114,7 +133,14 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
         className="hidden"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) void handleUpload(file);
+          if (!file || !user) return;
+          // Rename the file to a stable key per user so the upsert lands on
+          // the same object every time. Keeps the avatars bucket from
+          // accumulating one row per upload.
+          const ext = file.name.split('.').pop() ?? 'bin';
+          const renamed = new File([file], `avatar.${ext}`, { type: file.type });
+          (renamed as File & { errors: never[] }).errors = [];
+          upload.setFiles([Object.assign(renamed, { errors: [] as never[] })]);
           event.target.value = '';
         }}
       />

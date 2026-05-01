@@ -764,7 +764,22 @@
     "tooLarge": "File is too large. Limit is {{mb}} MB.",
     "unsupportedType": "That file type is not supported.",
     "success": "Uploaded.",
-    "uploading": "Uploading"
+    "uploading": "Uploading",
+    "uploadOne": "Upload file",
+    "uploadMany": "Upload {{count}} files",
+    "uploadFiles": "Upload",
+    "dragOr": "Drag and drop or",
+    "selectOne": "select file",
+    "selectMany": "select files",
+    "toUpload": "to upload",
+    "maxSize": "Maximum file size: {{size}}",
+    "tooLargeWithSize": "File is larger than {{limit}} (size: {{size}})",
+    "uploaded": "Uploaded",
+    "failedWithMessage": "Failed to upload: {{message}}",
+    "uploadedCount_one": "Successfully uploaded {{count}} file",
+    "uploadedCount_other": "Successfully uploaded {{count}} files",
+    "tooManyFiles_one": "You can upload at most {{max}} files; remove {{extra}} file.",
+    "tooManyFiles_other": "You can upload at most {{max}} files; remove {{extra}} files."
   },
   "adminDocuments": {
     "title": "Documents",

@@ -1,9 +1,9 @@
-import { Download, FileText, Loader2, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Download, FileText, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/toast';
+import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
+import { useSupabaseUpload } from '@/hooks/useSupabaseUpload';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
@@ -16,52 +16,29 @@ interface PdfUploaderProps {
 }
 
 /**
- * Drag-and-drop dropzone backed by the `documents` Storage bucket. Stores
- * the object name in `value`; consumer is responsible for resolving it to a
- * signed URL when displaying the document.
+ * PDF uploader backed by the Supabase UI Dropzone. Stores the resulting
+ * object name in `value`; the consumer resolves it to a signed URL for
+ * the inline iframe preview + open/download links.
  */
 export function PdfUploader({ value, onChange, label }: PdfUploaderProps): JSX.Element {
   const { t } = useTranslation();
-  const { show } = useToast();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
-  const [dragging, setDragging] = useState(false);
   const signedUrl = useStorageImage('documents', value);
 
-  async function uploadFile(file: File): Promise<void> {
-    if (file.type !== 'application/pdf') {
-      show(t('uploader.unsupportedType'), 'error');
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      show(t('uploader.tooLarge', { mb: Math.round(MAX_BYTES / 1024 / 1024) }), 'error');
-      return;
-    }
-    setBusy(true);
-    try {
-      const path = `${crypto.randomUUID()}.pdf`;
-      const { error } = await getSupabaseClient()
-        .storage.from('documents')
-        .upload(path, file, { contentType: 'application/pdf', upsert: false });
-      if (error) throw error;
-      onChange(path);
-      show(t('uploader.success'));
-    } catch (e) {
-      show((e as Error).message, 'error');
-    } finally {
-      setBusy(false);
-    }
-  }
+  const upload = useSupabaseUpload({
+    bucketName: 'documents',
+    maxFiles: 1,
+    maxFileSize: MAX_BYTES,
+    allowedMimeTypes: ['application/pdf'],
+    onUploadComplete: (paths) => {
+      const next = paths[0];
+      if (next) onChange(next);
+    },
+  });
 
-  async function clear(): Promise<void> {
+  function clear(): void {
     if (!value) return;
-    setBusy(true);
-    try {
-      await getSupabaseClient().storage.from('documents').remove([value]);
-    } finally {
-      onChange('');
-      setBusy(false);
-    }
+    onChange('');
+    void getSupabaseClient().storage.from('documents').remove([value]);
   }
 
   return (
@@ -100,8 +77,8 @@ export function PdfUploader({ value, onChange, label }: PdfUploaderProps): JSX.E
               type="button"
               size="icon"
               variant="ghost"
-              onClick={() => void clear()}
-              disabled={busy}
+              onClick={clear}
+              aria-label={t('uploader.remove')}
             >
               <X className="h-4 w-4" />
             </Button>
@@ -115,56 +92,11 @@ export function PdfUploader({ value, onChange, label }: PdfUploaderProps): JSX.E
           ) : null}
         </div>
       ) : (
-        <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragging(false);
-            const file = e.dataTransfer.files[0];
-            if (file) void uploadFile(file);
-          }}
-          className={`flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed bg-muted/30 px-4 py-8 text-center text-sm transition-colors ${
-            dragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/30'
-          }`}
-        >
-          {busy ? (
-            <Loader2 aria-hidden className="h-6 w-6 animate-spin text-muted-foreground" />
-          ) : (
-            <FileText aria-hidden className="h-6 w-6 text-muted-foreground" />
-          )}
-          <p className="text-muted-foreground">{t('uploader.dropOrClick')}</p>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => inputRef.current?.click()}
-            disabled={busy}
-            className="gap-2"
-          >
-            <Upload aria-hidden className="h-3.5 w-3.5" />
-            {t('uploader.choose')}
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            {t('uploader.limits', { mb: Math.round(MAX_BYTES / 1024 / 1024) })}
-          </p>
-        </div>
+        <Dropzone {...upload}>
+          <DropzoneEmptyState />
+          <DropzoneContent />
+        </Dropzone>
       )}
-
-      <input
-        ref={inputRef}
-        type="file"
-        accept="application/pdf"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) void uploadFile(file);
-          e.target.value = '';
-        }}
-      />
     </div>
   );
 }
