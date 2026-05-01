@@ -9,6 +9,7 @@ import { loadPersonalInfo } from '@/features/registration/api';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { GREETINGS } from './greetings';
+import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
 import { useEventStats } from './useEventStats';
 import { useHomeFeed, type FeedItem } from './useHomeFeed';
 
@@ -19,6 +20,9 @@ export function HomeScreen(): JSX.Element {
 
   const { data: feed } = useHomeFeed(eventId);
   const { data: stats } = useEventStats(eventId);
+  const editorial = useEditorialFeed(eventId);
+  const dynamicCount = feed?.length ?? 0;
+  const editorialCount = editorial.main.length;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">
@@ -29,9 +33,17 @@ export function HomeScreen(): JSX.Element {
           <header className="flex items-center justify-between">
             <h2 className="text-xl font-semibold tracking-tight">{t('home.feedTitle')}</h2>
             <span className="text-xs text-muted-foreground">
-              {feed ? `${feed.length} ${t('home.itemsLabel')}` : ''}
+              {dynamicCount + editorialCount} {t('home.itemsLabel')}
             </span>
           </header>
+
+          {editorial.main.length > 0 ? (
+            <ul className="space-y-3">
+              {editorial.main.map((item) => (
+                <EditorialRow key={item.id} item={item} />
+              ))}
+            </ul>
+          ) : null}
 
           {feed && feed.length > 0 ? (
             <ul className="space-y-3">
@@ -39,11 +51,13 @@ export function HomeScreen(): JSX.Element {
                 <FeedRow key={item.id} item={item} />
               ))}
             </ul>
-          ) : (
+          ) : null}
+
+          {editorialCount === 0 && dynamicCount === 0 ? (
             <p className="rounded-md border border-dashed p-6 text-sm text-muted-foreground">
               {t('home.feedEmpty')}
             </p>
-          )}
+          ) : null}
         </section>
 
         <aside className="space-y-4 lg:col-span-2">
@@ -66,16 +80,47 @@ export function HomeScreen(): JSX.Element {
             </dl>
           </CardShell>
 
-          <CardShell title={t('home.supaCupTitle')} description={t('home.supaCupSubtitle')}>
-            <img
-              src="/supacup-placeholder.png"
-              alt=""
-              className="aspect-[3/2] w-full rounded-md object-cover"
-            />
-          </CardShell>
+          {editorial.sidebar.map((item) => (
+            <SidebarFeedCard key={item.id} item={item} />
+          ))}
         </aside>
       </div>
     </main>
+  );
+}
+
+function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
+  const body = (
+    <article className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent">
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt=""
+          className="aspect-[3/1] w-full rounded-md object-cover"
+        />
+      ) : null}
+      <h3 className="text-base font-semibold">{item.title}</h3>
+      {item.subtitle ? (
+        <p className="text-sm text-muted-foreground">{item.subtitle}</p>
+      ) : null}
+      {item.body ? <p className="text-sm leading-relaxed">{item.body}</p> : null}
+    </article>
+  );
+  return item.link_url ? <li><a href={item.link_url}>{body}</a></li> : <li>{body}</li>;
+}
+
+function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
+  return (
+    <CardShell title={item.title} {...(item.subtitle ? { description: item.subtitle } : {})}>
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt=""
+          className="aspect-[3/2] w-full rounded-md object-cover"
+        />
+      ) : null}
+      {item.body ? <p className="pt-3 text-sm text-muted-foreground">{item.body}</p> : null}
+    </CardShell>
   );
 }
 

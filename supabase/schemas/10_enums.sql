@@ -85,3 +85,6 @@ create type notification_type as enum (
   'announcement',
   'checkin_reminder'
 );
+
+-- Home feed
+create type feed_location as enum ('main', 'sidebar');

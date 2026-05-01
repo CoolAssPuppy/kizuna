@@ -638,6 +638,65 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_items: {
+        Row: {
+          body: string | null
+          created_at: string
+          ends_displaying_at: string | null
+          event_id: string
+          id: string
+          image_url: string | null
+          link_url: string | null
+          location: Database["public"]["Enums"]["feed_location"]
+          occurs_at: string | null
+          position: number
+          starts_displaying_at: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          ends_displaying_at?: string | null
+          event_id: string
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          location?: Database["public"]["Enums"]["feed_location"]
+          occurs_at?: string | null
+          position?: number
+          starts_displaying_at?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          ends_displaying_at?: string | null
+          event_id?: string
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          location?: Database["public"]["Enums"]["feed_location"]
+          occurs_at?: string | null
+          position?: number
+          starts_displaying_at?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flights: {
         Row: {
           airline: string | null
@@ -1796,6 +1855,7 @@ export type Database = {
       document_audience: "all" | "employee" | "guest"
       event_type: "supafest" | "select" | "meetup"
       external_source_type: "hibob" | "perk"
+      feed_location: "main" | "sidebar"
       field_source_type: "hibob" | "perk" | "user_entered" | "admin_set"
       flight_direction: "inbound" | "outbound"
       flight_source_type: "perk_sync" | "perk_csv" | "manual_obs"
@@ -2003,6 +2063,7 @@ export const Constants = {
       document_audience: ["all", "employee", "guest"],
       event_type: ["supafest", "select", "meetup"],
       external_source_type: ["hibob", "perk"],
+      feed_location: ["main", "sidebar"],
       field_source_type: ["hibob", "perk", "user_entered", "admin_set"],
       flight_direction: ["inbound", "outbound"],
       flight_source_type: ["perk_sync", "perk_csv", "manual_obs"],

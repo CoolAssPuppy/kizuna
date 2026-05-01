@@ -203,6 +203,20 @@ create policy events_admin_write on public.events
   with check (public.is_admin());
 
 
+-- Feed items: anyone authenticated can read items inside their display
+-- window. Admins manage everything.
+create policy feed_items_authenticated_read on public.feed_items
+  for select using (
+    auth.role() = 'authenticated'
+    and (starts_displaying_at is null or starts_displaying_at <= now())
+    and (ends_displaying_at is null or ends_displaying_at > now())
+  );
+
+create policy feed_items_admin_write on public.feed_items
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+
 create policy sessions_authenticated_read on public.sessions
   for select using (auth.role() = 'authenticated');
 

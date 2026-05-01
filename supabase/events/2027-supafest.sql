@@ -78,6 +78,26 @@ Sample code of conduct content. Real content will replace this in production.',
     (v_event_id, 'Mountain hike',       'Sulphur Mountain summit', 'activity', 'opt_in', '2027-01-13 16:00:00+00', '2027-01-13 20:00:00+00', 'Sulphur Mountain',      false, 'Bring layers and water. Pace is moderate.', null),
     (v_event_id, 'Closing party',       null, 'social',   'all',           '2027-01-15 02:00:00+00', '2027-01-15 06:00:00+00', 'Hot springs lodge',     true,  'Send-off celebration.', null);
 
+  -- Editorial home-screen feed. Sample items demonstrating both
+  -- locations. The SupaCup card was previously hardcoded into the home
+  -- screen; it now lives here so admins can swap it out year-over-year.
+  insert into public.feed_items (event_id, location, position, title, subtitle, body, image_url) values
+    (v_event_id, 'sidebar', 0,
+     'Defending SupaCup champion',
+     'Tyler Shukert · Champion of Supafest 2026 — Da Nang',
+     null,
+     '/supacup-placeholder.png'),
+    (v_event_id, 'main', 0,
+     'Welcome to Supafest 2027',
+     'Five days in Banff, January 11-15',
+     'Hotel rooms are filling up. Book your travel through Perk by 15 December 2026.',
+     null),
+    (v_event_id, 'main', 1,
+     'New: opt-in breakouts',
+     'Pick the technical sessions that matter to you',
+     'The agenda has 14 breakout slots this year. Star the ones you want to attend in the agenda tab.',
+     null);
+
   -- Starter registrations + per-task rows for the dev employees so the
   -- wizard has data to resume from. Other users register on first visit.
   insert into public.registrations (user_id, event_id, status, completion_pct)

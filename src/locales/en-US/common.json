@@ -61,9 +61,7 @@
       "document": "Document",
       "task": "Registration",
       "announcement": "Announcement"
-    },
-    "supaCupTitle": "Defending SupaCup Champion",
-    "supaCupSubtitle": "Tyler Shukert · Champion of Supafest 2025 — Da Nang"
+    }
   },
   "welcome": {
     "title": "Welcome to {{eventName}}",
@@ -274,6 +272,7 @@
       "label": "Admin sections",
       "events": "Events",
       "agenda": "Agenda",
+      "feed": "Feed",
       "documents": "Documents",
       "stats": "Stats",
       "nudges": "Nudges",
@@ -333,6 +332,36 @@
     "documents": {
       "title": "Documents",
       "subtitle": "Versioned documents shown in registration and the documents tab."
+    },
+    "feed": {
+      "title": "Feed",
+      "subtitle": "Editorial items pinned to the home screen.",
+      "create": "New feed item",
+      "edit": "Edit feed item",
+      "save": "Save feed item",
+      "saving": "Saving",
+      "saved": "Feed item saved.",
+      "delete": "Delete",
+      "deleted": "Feed item removed.",
+      "deleteConfirm": "Remove this feed item from the home screen?",
+      "newItem": "Add item",
+      "empty": "Nothing here yet. Add an item.",
+      "alwaysOpen": "always",
+      "locations": {
+        "main": "Main feed",
+        "sidebar": "Sidebar"
+      },
+      "fields": {
+        "location": "Location",
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "body": "Body",
+        "image": "Image URL",
+        "link": "Link URL",
+        "occursAt": "Occurs at",
+        "startsDisplayingAt": "Starts displaying",
+        "endsDisplayingAt": "Stops displaying"
+      }
     },
     "stats": {
       "title": "Stats",

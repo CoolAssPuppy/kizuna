@@ -167,3 +167,35 @@ create index itinerary_items_user_event_starts_idx
 create unique index itinerary_items_dedup_uidx
   on public.itinerary_items(user_id, item_type, source_id)
   where source_id is not null;
+
+
+-- Editorial home-screen feed. Admins curate items here; users render them
+-- on the home screen alongside the dynamic feed (documents to sign, open
+-- registration tasks, recent notifications). Drag-to-reorder is backed by
+-- the `position` column.
+create table public.feed_items (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  location feed_location not null default 'main',
+  position int not null default 0,
+  title text not null,
+  subtitle text,
+  body text,
+  occurs_at timestamptz,
+  image_url text,
+  link_url text,
+  starts_displaying_at timestamptz,
+  ends_displaying_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.feed_items is
+  'Editorial home-screen content curated by admins. Display window optional; null bounds = always show.';
+comment on column public.feed_items.position is
+  'Sort order within (event_id, location). Drag-to-reorder rewrites this for the affected rows.';
+comment on column public.feed_items.occurs_at is
+  'Optional date+time the item references (e.g. SupaCup 2025 final). Distinct from starts_displaying_at, which controls visibility window.';
+
+create index feed_items_event_location_position_idx
+  on public.feed_items(event_id, location, position);

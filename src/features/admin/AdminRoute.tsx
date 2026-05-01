@@ -9,6 +9,7 @@ import { ComingSoon } from './ComingSoon';
 import { ConflictsScreen } from './ConflictsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { EventsListScreen } from './EventsListScreen';
+import { FeedScreen } from './FeedScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { StatsScreen } from './StatsScreen';
 
@@ -34,6 +35,7 @@ export function AdminRoute(): JSX.Element {
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />
         <Route path="agenda" element={<AgendaAdminScreen />} />
+        <Route path="feed" element={<FeedScreen />} />
         <Route
           path="documents"
           element={

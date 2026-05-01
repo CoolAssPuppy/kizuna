@@ -5,6 +5,7 @@ import {
   Calendar,
   CalendarRange,
   FileText,
+  Newspaper,
   Send,
   Users,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ interface NavSection {
 const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/events', icon: Calendar, labelKey: 'admin.nav.events' },
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
+  { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },
   { to: '/admin/nudges', icon: Send, labelKey: 'admin.nav.nudges' },
