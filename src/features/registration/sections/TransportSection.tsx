@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/features/auth/AuthContext';
@@ -27,31 +28,30 @@ const NEED_OPTIONS: ReadonlyArray<{ value: GroundTransportNeed; labelKey: string
 export function TransportSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data, isSuccess: hydrated } = useQuery({
+    queryKey: ['attendee_profile', 'ground_transport_need', user?.id ?? null],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await getSupabaseClient()
+        .from('attendee_profiles')
+        .select('ground_transport_need')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.ground_transport_need ?? ('none' satisfies GroundTransportNeed);
+    },
+  });
   const [need, setNeed] = useState<GroundTransportNeed | null>(null);
-  const [hydrated, setHydrated] = useState(false);
+  // Sync local state from the fetched value once. Subsequent edits
+  // are owned by the radio's onChange.
+  if (need === null && hydrated && data !== undefined) {
+    setNeed(data);
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'transport',
     toastSuccessKey: 'profile.toast.transportSaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    void (async () => {
-      const { data } = await getSupabaseClient()
-        .from('attendee_profiles')
-        .select('ground_transport_need')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if (cancelled) return;
-      setNeed(data?.ground_transport_need ?? 'none');
-      setHydrated(true);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user || need === null) return;

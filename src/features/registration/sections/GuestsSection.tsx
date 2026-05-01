@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Baby, Mail, Trash2 } from 'lucide-react';
+import { Baby, CreditCard, Mail, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -21,6 +21,8 @@ import {
   inviteGuest,
   listAdditionalGuests,
   listGuestInvitations,
+  removeAdditionalGuest,
+  renameAdditionalGuest,
 } from '@/features/guests/api';
 import type {
   AdditionalGuestRow,
@@ -76,6 +78,28 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
+  const removeMinor = useMutation({
+    mutationFn: (id: string) => removeAdditionalGuest(getSupabaseClient(), id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['additional-guests'] });
+      show(t('registration.guests.minorRemoved'));
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
+  const renameMinor = useMutation({
+    mutationFn: (args: { id: string; fullName: string }) =>
+      renameAdditionalGuest(getSupabaseClient(), args),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['additional-guests'] });
+      show(t('registration.guests.minorRenamed'));
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
+  const [renameTarget, setRenameTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
+
   const adultList = invitations ?? [];
   const minorList = minors ?? [];
   const total = computeTotal(adultList, minorList);
@@ -91,10 +115,6 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
         </Button>
       }
     >
-      <p className="rounded-md border bg-muted/30 px-4 py-3 text-sm">
-        {t('registration.guests.totalDue', { amount: CURRENCY_FMT.format(total) })}
-      </p>
-
       {adultList.length === 0 && minorList.length === 0 ? (
         <p className="rounded-md border border-dashed bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
           {t('registration.guests.empty')}
@@ -167,6 +187,36 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
                       </p>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      aria-label={t('registration.guests.renameMinor')}
+                      onClick={() => setRenameTarget({ id: minor.id, fullName: minor.full_name })}
+                    >
+                      <Pencil aria-hidden className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      aria-label={t('registration.guests.removeMinor')}
+                      onClick={() => {
+                        if (
+                          confirm(
+                            t('registration.guests.confirmRemoveMinor', { name: minor.full_name }),
+                          )
+                        ) {
+                          removeMinor.mutate(minor.id);
+                        }
+                      }}
+                    >
+                      <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -174,7 +224,29 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
         </div>
       )}
 
+      {total > 0 ? (
+        <div className="mt-4 flex flex-col gap-3 rounded-lg border bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-0.5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t('registration.guests.totalLabel')}
+            </p>
+            <p className="text-2xl font-semibold tracking-tight">{CURRENCY_FMT.format(total)}</p>
+            <p className="text-xs text-muted-foreground">{t('registration.guests.totalHint')}</p>
+          </div>
+          <Button type="button" className="gap-2" onClick={() => setPayOpen(true)}>
+            <CreditCard aria-hidden className="h-4 w-4" />
+            {t('registration.guests.payFees')}
+          </Button>
+        </div>
+      ) : null}
+
       <InviteDialog open={open} onClose={() => setOpen(false)} />
+      <RenameMinorDialog
+        target={renameTarget}
+        onClose={() => setRenameTarget(null)}
+        onSubmit={(payload) => renameMinor.mutate(payload)}
+      />
+      <PayFeesDialog open={payOpen} onClose={() => setPayOpen(false)} amount={total} />
     </CardShell>
   );
 }
@@ -357,6 +429,100 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
             </DialogFooter>
           </form>
         )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface RenameMinorDialogProps {
+  target: { id: string; fullName: string } | null;
+  onClose: () => void;
+  onSubmit: (payload: { id: string; fullName: string }) => void;
+}
+
+function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps): JSX.Element {
+  const { t } = useTranslation();
+  const [name, setName] = useState('');
+  // Sync local state when a new minor opens. Reads target?.fullName
+  // each render — when target changes we re-fill, when target is null
+  // the dialog closes and we leave the state alone.
+  const [lastId, setLastId] = useState<string | null>(null);
+  if (target && target.id !== lastId) {
+    setLastId(target.id);
+    setName(target.fullName);
+  }
+  return (
+    <Dialog
+      open={!!target}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('registration.guests.renameTitle')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="rename-name">{t('registration.guests.guestName')}</Label>
+          <Input id="rename-name" value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>
+            {t('actions.cancel')}
+          </Button>
+          <Button
+            disabled={!target || name.trim().length < 2}
+            onClick={() => {
+              if (target) {
+                onSubmit({ id: target.id, fullName: name.trim() });
+                onClose();
+              }
+            }}
+          >
+            {t('actions.save')}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+interface PayFeesDialogProps {
+  open: boolean;
+  onClose: () => void;
+  amount: number;
+}
+
+/**
+ * Stripe is gated on a real STRIPE_SECRET_KEY landing in Doppler. For
+ * the pre-launch staging window we render a placeholder dialog so the
+ * fee tally and the button shape are testable end-to-end. When Stripe
+ * lands, swap this for a redirect to create-stripe-checkout.
+ */
+function PayFeesDialog({ open, onClose, amount }: PayFeesDialogProps): JSX.Element {
+  const { t } = useTranslation();
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('registration.guests.payTitle')}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3 py-2">
+          <p className="text-sm">
+            {t('registration.guests.payAmount', { amount: CURRENCY_FMT.format(amount) })}
+          </p>
+          <p className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+            {t('registration.guests.stripePlaceholder')}
+          </p>
+        </div>
+        <DialogFooter>
+          <Button onClick={onClose}>{t('actions.close')}</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

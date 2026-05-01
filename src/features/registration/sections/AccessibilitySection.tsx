@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -32,30 +33,22 @@ const EMPTY: FormState = { needs: [], notes: '' };
 export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: loaded, isSuccess: hydrated } = useQuery({
+    queryKey: ['accessibility', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadAccessibility(getSupabaseClient(), user!.id),
+  });
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setValues({ needs: loaded?.needs ?? [], notes: loaded?.notes ?? '' });
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'accessibility',
     toastSuccessKey: 'profile.toast.accessibilitySaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const row = await loadAccessibility(getSupabaseClient(), user.id);
-      if (!active) return;
-      setValues({
-        needs: row?.needs ?? [],
-        notes: row?.notes ?? '',
-      });
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;

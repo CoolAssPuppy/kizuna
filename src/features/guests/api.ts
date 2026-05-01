@@ -40,6 +40,22 @@ export async function cancelGuestInvitation(
   if (error) throw error;
 }
 
+export async function renameAdditionalGuest(
+  client: AppSupabaseClient,
+  args: { id: string; fullName: string },
+): Promise<void> {
+  const { error } = await client
+    .from('additional_guests')
+    .update({ full_name: args.fullName })
+    .eq('id', args.id);
+  if (error) throw error;
+}
+
+export async function removeAdditionalGuest(client: AppSupabaseClient, id: string): Promise<void> {
+  const { error } = await client.from('additional_guests').delete().eq('id', id);
+  if (error) throw error;
+}
+
 interface InvokeContext {
   client: AppSupabaseClient;
 }
