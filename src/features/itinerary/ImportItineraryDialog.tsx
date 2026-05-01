@@ -1,4 +1,4 @@
-import { ClipboardPaste, Mail, Upload } from 'lucide-react';
+import { AlertTriangle, ClipboardPaste, Mail, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -60,10 +60,14 @@ export function ImportItineraryDialog({
   const [tab, setTab] = useState<SourceTab>('paste');
   const [pasted, setPasted] = useState('');
   const [busy, setBusy] = useState(false);
+  // Inline error message rendered directly in the dialog. Toasts alone
+  // were too easy to miss when the user is focused on the textarea.
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleParse(): Promise<void> {
     if (!pasted.trim() || !user) return;
     setBusy(true);
+    setErrorMessage(null);
     try {
       const result = await parseItineraryViaEdge(pasted.trim());
       const [flightCount, hotelCount, transferCount] = await Promise.all([
@@ -78,15 +82,24 @@ export function ImportItineraryDialog({
         result.car_services.length;
       const persisted = flightCount + hotelCount + transferCount;
       if (persisted === 0 && parsed === 0) {
-        show(t('itinerary.import.nothingFound'), 'error');
-      } else {
-        show(t('itinerary.import.success', { count: persisted }));
-        onImported();
-        onOpenChange(false);
-        setPasted('');
+        // Surface "we found nothing in this text" inline so the user
+        // can decide whether to refine the paste or pick a different
+        // booking confirmation.
+        setErrorMessage(t('itinerary.import.nothingFound'));
+        return;
       }
-    } catch {
-      show(t('itinerary.import.error'), 'error');
+      show(t('itinerary.import.success', { count: persisted }));
+      onImported();
+      onOpenChange(false);
+      setPasted('');
+      setErrorMessage(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // Render the underlying server message verbatim. The parse-itinerary
+      // edge function returns useful detail like "OPENAI_API_KEY missing"
+      // or "you must provide a model parameter"; hiding it behind a
+      // generic toast made debugging nearly impossible.
+      setErrorMessage(`${t('itinerary.import.error')} — ${message}`);
     } finally {
       setBusy(false);
     }
@@ -134,6 +147,15 @@ export function ImportItineraryDialog({
                 aria-label={t('itinerary.import.tabs.paste')}
               />
               <p className="text-xs text-muted-foreground">{t('itinerary.import.pasteHint')}</p>
+              {errorMessage ? (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+                >
+                  <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+                  <p className="break-words">{errorMessage}</p>
+                </div>
+              ) : null}
             </div>
           ) : (
             <ComingSoon kind={tab} />

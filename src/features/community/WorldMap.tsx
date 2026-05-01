@@ -1,10 +1,11 @@
-import { MapPin } from 'lucide-react';
+import { MapPin, Minus, Plus, RotateCcw } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 
 import { Avatar } from '@/components/Avatar';
+import { Button } from '@/components/ui/button';
 
 import { COUNTRIES } from './countries';
 import type { Profile } from './matching';
@@ -67,6 +68,19 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
   // to clipping at the map's edge.
   const [hovered, setHovered] = useState<{ userId: string; x: number; y: number } | null>(null);
   const hoveredPin = hovered ? (pins.find((p) => p.user.user_id === hovered.userId) ?? null) : null;
+  // ZoomableGroup expects center + zoom as controlled state. Default to
+  // a near-1x view; +/- buttons step in 1.5x increments and the scroll
+  // wheel handles fine-grained pinch zoom for free.
+  const DEFAULT_CENTER: [number, number] = [0, 20];
+  const DEFAULT_ZOOM = 1;
+  const [zoomState, setZoomState] = useState<{ center: [number, number]; zoom: number }>({
+    center: DEFAULT_CENTER,
+    zoom: DEFAULT_ZOOM,
+  });
+
+  function clampZoom(next: number): number {
+    return Math.max(1, Math.min(8, next));
+  }
 
   return (
     <section className="rounded-xl border bg-card p-4" aria-labelledby={titleId}>
@@ -104,7 +118,7 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
         </div>
       </header>
 
-      <div className="mt-3 aspect-[2/1] w-full overflow-hidden rounded-md bg-gradient-to-b from-muted/40 to-muted/10">
+      <div className="relative mt-3 aspect-[2/1] w-full overflow-hidden rounded-md bg-gradient-to-b from-muted/40 to-muted/10">
         <ComposableMap
           projection="geoEqualEarth"
           projectionConfig={{ scale: 160 }}
@@ -112,63 +126,105 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
           height={500}
           style={{ width: '100%', height: '100%' }}
         >
-          <Geographies geography={GEOGRAPHY_URL}>
-            {({ geographies }: { geographies: Array<{ rsmKey: string }> }) =>
-              geographies.map((geo) => (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  fill="hsl(var(--muted))"
-                  stroke="hsl(var(--border))"
-                  strokeWidth={0.4}
-                  style={{
-                    default: { outline: 'none' },
-                    hover: { outline: 'none', fill: 'hsl(var(--muted-foreground) / 0.2)' },
-                    pressed: { outline: 'none' },
-                  }}
-                />
-              ))
+          <ZoomableGroup
+            center={zoomState.center}
+            zoom={zoomState.zoom}
+            minZoom={1}
+            maxZoom={8}
+            onMoveEnd={(next: { coordinates: [number, number]; zoom: number }) =>
+              setZoomState({ center: next.coordinates, zoom: next.zoom })
             }
-          </Geographies>
-          {pins.map((pin) => {
-            const isHovered = hovered?.userId === pin.user.user_id;
-            return (
-              <Marker
-                key={pin.user.user_id}
-                coordinates={[pin.lon, pin.lat]}
-                onMouseEnter={(e: React.MouseEvent) =>
-                  setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
-                }
-                onMouseMove={(e: React.MouseEvent) =>
-                  setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
-                }
-                onMouseLeave={() => setHovered(null)}
-                style={{
-                  default: {
-                    transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',
-                    cursor: 'pointer',
-                  },
-                  hover: { cursor: 'pointer' },
-                  pressed: { cursor: 'pointer' },
-                }}
-              >
-                {/* Invisible 18px hit-target so the small dot is easy to hover. */}
-                <circle r={18} fill="transparent" />
-                <circle
-                  r={isHovered ? 11 : 9}
-                  fill="hsl(var(--primary))"
-                  fillOpacity={isHovered ? 0.35 : 0.2}
-                />
-                <circle
-                  r={isHovered ? 6 : 5}
-                  fill="hsl(var(--primary))"
-                  stroke="hsl(var(--background))"
-                  strokeWidth={2}
-                />
-              </Marker>
-            );
-          })}
+          >
+            <Geographies geography={GEOGRAPHY_URL}>
+              {({ geographies }: { geographies: Array<{ rsmKey: string }> }) =>
+                geographies.map((geo) => (
+                  <Geography
+                    key={geo.rsmKey}
+                    geography={geo}
+                    fill="hsl(var(--muted))"
+                    stroke="hsl(var(--border))"
+                    strokeWidth={0.4}
+                    style={{
+                      default: { outline: 'none' },
+                      hover: { outline: 'none', fill: 'hsl(var(--muted-foreground) / 0.2)' },
+                      pressed: { outline: 'none' },
+                    }}
+                  />
+                ))
+              }
+            </Geographies>
+            {pins.map((pin) => {
+              const isHovered = hovered?.userId === pin.user.user_id;
+              return (
+                <Marker
+                  key={pin.user.user_id}
+                  coordinates={[pin.lon, pin.lat]}
+                  onMouseEnter={(e: React.MouseEvent) =>
+                    setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
+                  }
+                  onMouseMove={(e: React.MouseEvent) =>
+                    setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
+                  }
+                  onMouseLeave={() => setHovered(null)}
+                  style={{
+                    default: {
+                      transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',
+                      cursor: 'pointer',
+                    },
+                    hover: { cursor: 'pointer' },
+                    pressed: { cursor: 'pointer' },
+                  }}
+                >
+                  {/* Invisible 18px hit-target so the small dot is easy to hover. */}
+                  <circle r={18} fill="transparent" />
+                  <circle
+                    r={isHovered ? 11 : 9}
+                    fill="hsl(var(--primary))"
+                    fillOpacity={isHovered ? 0.35 : 0.2}
+                  />
+                  <circle
+                    r={isHovered ? 6 : 5}
+                    fill="hsl(var(--primary))"
+                    stroke="hsl(var(--background))"
+                    strokeWidth={2}
+                  />
+                </Marker>
+              );
+            })}
+          </ZoomableGroup>
         </ComposableMap>
+        <div className="absolute bottom-2 right-2 flex flex-col gap-1">
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7"
+            aria-label={t('community.map.zoomIn')}
+            onClick={() => setZoomState((prev) => ({ ...prev, zoom: clampZoom(prev.zoom * 1.5) }))}
+          >
+            <Plus aria-hidden className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7"
+            aria-label={t('community.map.zoomOut')}
+            onClick={() => setZoomState((prev) => ({ ...prev, zoom: clampZoom(prev.zoom / 1.5) }))}
+          >
+            <Minus aria-hidden className="h-3 w-3" />
+          </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="secondary"
+            className="h-7 w-7"
+            aria-label={t('community.map.zoomReset')}
+            onClick={() => setZoomState({ center: DEFAULT_CENTER, zoom: DEFAULT_ZOOM })}
+          >
+            <RotateCcw aria-hidden className="h-3 w-3" />
+          </Button>
+        </div>
       </div>
       {hovered && hoveredPin
         ? createPortal(

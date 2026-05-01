@@ -199,7 +199,10 @@
     "map": {
       "title": "World map",
       "toggleHometown": "Hometowns",
-      "toggleCurrent": "Where they live now"
+      "toggleCurrent": "Where they live now",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomReset": "Reset zoom"
     },
     "matches": {
       "byHobby": "People who match your hobbies",
