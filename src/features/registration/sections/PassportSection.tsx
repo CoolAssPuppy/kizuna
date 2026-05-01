@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
+import { CountrySelect } from '@/components/CountrySelect';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -112,12 +113,12 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
 
       <div className="space-y-2">
         <Label htmlFor="issuing-country">{t('registration.passport.issuingCountry')}</Label>
-        <Input
+        <CountrySelect
           id="issuing-country"
-          required
-          maxLength={2}
           value={values.issuingCountry}
-          onChange={(e) => setValues((v) => ({ ...v, issuingCountry: e.target.value }))}
+          onChange={(next) => setValues((v) => ({ ...v, issuingCountry: next }))}
+          placeholderKey="registration.passport.issuingCountryPlaceholder"
+          required
         />
         <p className="text-xs text-muted-foreground">
           {t('registration.passport.issuingCountryHint')}

@@ -9,6 +9,7 @@
 // in dev mode and log a warning.
 
 import { getAdminClient } from '../_shared/supabaseClient.ts';
+import { dispatchSponsorPaymentSucceeded } from '../_shared/sponsorPaymentFanOut.ts';
 
 import { jsonResponse } from '../_shared/cors.ts';
 
@@ -74,7 +75,7 @@ Deno.serve(async (req) => {
   // fields we read.
   interface StripeIntent {
     id?: string;
-    metadata?: { guest_user_id?: string };
+    metadata?: { guest_user_id?: string; sponsor_user_id?: string };
   }
   interface StripeEvent {
     type?: string;
@@ -91,21 +92,28 @@ Deno.serve(async (req) => {
 
   const intent = event.data?.object;
   const guestUserId = intent?.metadata?.guest_user_id;
+  const sponsorUserId = intent?.metadata?.sponsor_user_id;
 
-  // Only payment_intent.* events with a guest_user_id in metadata are
-  // actionable. Anything else acks with 200 so Stripe doesn't retry.
-  if (guestUserId) {
-    if (event.type === 'payment_intent.succeeded') {
+  // Two distinct flows route through this webhook:
+  //   - guest_user_id: an accepted guest paying their own seat (legacy)
+  //   - sponsor_user_id: an employee paying for every invitation +
+  //     dependent in one bundled checkout. The fan-out helper flips
+  //     status='pending' → 'sent' and sends invite emails.
+  if (event.type === 'payment_intent.succeeded') {
+    if (sponsorUserId) {
+      await dispatchSponsorPaymentSucceeded(sponsorUserId);
+    }
+    if (guestUserId) {
       await admin
         .from('guest_profiles')
         .update({ payment_status: 'paid', stripe_payment_id: intent?.id ?? null })
         .eq('user_id', guestUserId);
-    } else if (event.type === 'payment_intent.payment_failed') {
-      await admin
-        .from('guest_profiles')
-        .update({ payment_status: 'failed' })
-        .eq('user_id', guestUserId);
     }
+  } else if (event.type === 'payment_intent.payment_failed' && guestUserId) {
+    await admin
+      .from('guest_profiles')
+      .update({ payment_status: 'failed' })
+      .eq('user_id', guestUserId);
   }
 
   return jsonResponse({ received: true });

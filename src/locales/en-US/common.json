@@ -61,9 +61,13 @@
     "needAccount": "Need to create a guest account?",
     "createAccount": "Create Account",
     "alreadyHaveAccount": "Already have an account?",
+    "forgotPassword": "Forgot password?",
+    "recoverySent": "Recovery email sent to {{email}}.",
     "errors": {
       "invalidCredentials": "That email and password do not match.",
       "weakPassword": "Password must be at least 8 characters.",
+      "emailRequired": "Enter your email first so we know where to send the recovery link.",
+      "recoveryFailed": "Could not send the recovery email. Try again in a moment.",
       "generic": "Could not complete sign-in. Try again."
     },
     "dev": {
@@ -356,7 +360,8 @@
       "passportNumber": "Passport Number",
       "passportNumberHint": "Encrypted before saving.",
       "issuingCountry": "Issuing Country",
-      "issuingCountryHint": "Two-letter ISO code (e.g. US, GB, CA).",
+      "issuingCountryPlaceholder": "Select an issuing country",
+      "issuingCountryHint": "The country whose authority issued the passport.",
       "expiryDate": "Expiry Date",
       "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
     },

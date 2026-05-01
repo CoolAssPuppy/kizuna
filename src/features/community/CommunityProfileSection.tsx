@@ -13,7 +13,9 @@ import { useSectionSubmit } from '@/features/registration/sections/useSectionSub
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadCommunityProfile, loadHobbyCatalog, saveCommunityProfile } from './api';
-import { COUNTRIES, isValidCountryCode } from './countries';
+import { CountrySelect } from '@/components/CountrySelect';
+
+import { isValidCountryCode } from './countries';
 
 interface FormState {
   bio: string;
@@ -263,27 +265,3 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   );
 }
 
-interface CountrySelectProps {
-  id: string;
-  value: string;
-  onChange: (next: string) => void;
-}
-
-function CountrySelect({ id, value, onChange }: CountrySelectProps): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <select
-      id={id}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      <option value="">{t('community.profile.country')}</option>
-      {COUNTRIES.map((c) => (
-        <option key={c.code} value={c.code}>
-          {c.name}
-        </option>
-      ))}
-    </select>
-  );
-}

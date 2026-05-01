@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/toast';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +22,7 @@ interface LocationState {
 
 export function SignInScreen(): JSX.Element {
   const { t } = useTranslation();
+  const { show } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const { signInWithSso, signInWithPassword, signUpWithPassword } = useAuth();
@@ -31,6 +33,33 @@ export function SignInScreen(): JSX.Element {
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+
+  /**
+   * Send a password-reset email via Supabase Auth. Mirrors the standard
+   * recovery flow: the link drops the guest at /reset-password where
+   * they set a new password and proceed.
+   */
+  async function handleForgotPassword(): Promise<void> {
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setErrorKey('auth.errors.emailRequired');
+      return;
+    }
+    setBusy(true);
+    setErrorKey(null);
+    try {
+      const redirectTo = `${window.location.origin}/reset-password`;
+      const { error } = await getSupabaseClient().auth.resetPasswordForEmail(trimmed, {
+        redirectTo,
+      });
+      if (error) throw error;
+      show(t('auth.recoverySent', { email: trimmed }));
+    } catch {
+      setErrorKey('auth.errors.recoveryFailed');
+    } finally {
+      setBusy(false);
+    }
+  }
 
   const isSignUp = mode === 'sign-up';
   const redirectTo = (location.state as LocationState | null)?.from ?? '/';
@@ -144,16 +173,28 @@ export function SignInScreen(): JSX.Element {
             <Button type="submit" disabled={busy} className="w-full" size="lg">
               {isSignUp ? t('auth.createAccount') : t('auth.signIn')}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.needAccount')}{' '}
-              <button
-                type="button"
-                onClick={() => setMode(isSignUp ? 'sign-in' : 'sign-up')}
-                className="font-medium text-primary hover:underline"
-              >
-                {isSignUp ? t('auth.signIn') : t('auth.createAccount')}
-              </button>
-            </p>
+            <div className="flex items-center justify-between text-sm">
+              <p className="text-muted-foreground">
+                {isSignUp ? t('auth.alreadyHaveAccount') : t('auth.needAccount')}{' '}
+                <button
+                  type="button"
+                  onClick={() => setMode(isSignUp ? 'sign-in' : 'sign-up')}
+                  className="font-medium text-primary hover:underline"
+                >
+                  {isSignUp ? t('auth.signIn') : t('auth.createAccount')}
+                </button>
+              </p>
+              {!isSignUp ? (
+                <button
+                  type="button"
+                  onClick={() => void handleForgotPassword()}
+                  disabled={busy}
+                  className="font-medium text-primary hover:underline disabled:opacity-50"
+                >
+                  {t('auth.forgotPassword')}
+                </button>
+              ) : null}
+            </div>
           </form>
         )}
 
