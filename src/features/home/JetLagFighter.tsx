@@ -1,8 +1,9 @@
-import { Plane, Sun } from 'lucide-react';
-import { useMemo } from 'react';
+import { Lightbulb } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CardShell } from '@/components/CardShell';
+import { Button } from '@/components/ui/button';
 
 import {
   jetLagDirection,
@@ -11,41 +12,25 @@ import {
   type JetLagDirection,
   type JetLagSeverity,
 } from './jetLag';
+import { pickJetLagTip } from './jetLagTips';
 
 interface Props {
   /** Event timezone (IANA name, e.g. America/Edmonton). */
   eventTimeZone: string;
 }
 
-const TIPS_BY_DIRECTION: Record<Exclude<JetLagDirection, 'none'>, string[]> = {
-  east: [
-    'home.jetLag.tips.eastSleepEarly',
-    'home.jetLag.tips.eastMorningLight',
-    'home.jetLag.tips.eastAvoidEveningCaffeine',
-    'home.jetLag.tips.melatoninLowDose',
-    'home.jetLag.tips.hydrate',
-    'home.jetLag.tips.mealAnchor',
-    'home.jetLag.tips.exerciseDaylight',
-  ],
-  west: [
-    'home.jetLag.tips.westSleepLate',
-    'home.jetLag.tips.westEveningLight',
-    'home.jetLag.tips.westMorningCaffeineOk',
-    'home.jetLag.tips.melatoninWest',
-    'home.jetLag.tips.hydrate',
-    'home.jetLag.tips.mealAnchor',
-    'home.jetLag.tips.exerciseDaylight',
-  ],
-};
-
 function browserTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 }
 
+/**
+ * Single-tip jet-lag card. Picks one tip from the curated pool on
+ * mount; "Show another" rotates with a fresh seed so users can browse
+ * advice without leaving the home screen. The previous list-of-seven
+ * layout was overwhelming and quickly stale on re-visits.
+ */
 export function JetLagFighter({ eventTimeZone }: Props): JSX.Element | null {
   const { t } = useTranslation();
-  // The browser tz is the right signal: it accounts for current location,
-  // DST, and any in-flight travel without round-tripping through the DB.
   const offset = useMemo(
     () => offsetHoursBetween(browserTimeZone(), eventTimeZone),
     [eventTimeZone],
@@ -54,8 +39,19 @@ export function JetLagFighter({ eventTimeZone }: Props): JSX.Element | null {
   if (direction === 'none') return null;
 
   const severity = jetLagSeverity(offset);
-  const tipKeys = TIPS_BY_DIRECTION[direction];
-  const Icon = direction === 'east' ? Sun : Plane;
+  return <JetLagBody direction={direction} offset={offset} severity={severity} t={t} />;
+}
+
+interface BodyProps {
+  direction: Exclude<JetLagDirection, 'none'>;
+  offset: number;
+  severity: JetLagSeverity;
+  t: ReturnType<typeof useTranslation>['t'];
+}
+
+function JetLagBody({ direction, offset, severity, t }: BodyProps): JSX.Element {
+  const [seed, setSeed] = useState<number>(() => Date.now());
+  const tip = pickJetLagTip(direction, seed);
 
   return (
     <CardShell
@@ -67,16 +63,21 @@ export function JetLagFighter({ eventTimeZone }: Props): JSX.Element | null {
       })}
     >
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Icon aria-hidden className="h-4 w-4" />
-          <span>{t('home.jetLag.intro')}</span>
+        <div className="flex items-start gap-3 rounded-md border bg-muted/30 p-3">
+          <Lightbulb aria-hidden className="mt-0.5 h-4 w-4 text-amber-500" />
+          <p className="text-sm leading-relaxed">{tip?.text ?? t('home.jetLag.intro')}</p>
         </div>
-        <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed">
-          {tipKeys.map((key) => (
-            <li key={key}>{t(key)}</li>
-          ))}
-        </ul>
-        <p className="text-xs text-muted-foreground">{t('home.jetLag.disclaimer')}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">{t('home.jetLag.disclaimer')}</p>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setSeed(Date.now() + Math.random())}
+          >
+            {t('home.jetLag.another')}
+          </Button>
+        </div>
       </div>
     </CardShell>
   );

@@ -218,7 +218,8 @@ export interface TransportManifestRow extends CsvRow {
   passenger_count: number;
   bag_count: number;
   special_equipment: string;
-  vehicle: string | null;
+  /** Vehicle name from transport_vehicles, or null when unassigned. */
+  assigned_transport: string | null;
   needs_review: boolean;
 }
 
@@ -259,7 +260,7 @@ export async function fetchTransportManifest(
       passenger_count: row.passenger_count,
       bag_count: row.bag_count,
       special_equipment: row.special_equipment.join(', '),
-      vehicle: vehicle?.vehicle_name ?? null,
+      assigned_transport: vehicle?.vehicle_name ?? null,
       needs_review: row.needs_review,
     };
   });
@@ -275,6 +276,12 @@ export interface RegistrationProgressRow extends CsvRow {
   status: string;
 }
 
+/**
+ * Split a single "Display Name" string into first/last on the first
+ * space. Used as the fallback when the joined row has no structured
+ * first_name / last_name columns (e.g. for guest_profiles where the
+ * registration form only collects full_name).
+ */
 function splitName(full: string): { first: string; last: string } {
   const trimmed = full.trim();
   if (!trimmed) return { first: '', last: '' };
@@ -287,6 +294,12 @@ export async function fetchRegistrationProgress(
   client: AppSupabaseClient,
   eventId: string,
 ): Promise<RegistrationProgressRow[]> {
+  // Read first_name and last_name as their own columns instead of
+  // splitting legal_name. Splitting on the first space corrupts compound
+  // names ("Anakin Solo Skywalker" -> "Anakin" / "Solo Skywalker") and
+  // leaves last_name blank for preferred-only rows ("Maya" -> "Maya" /
+  // ""). The structured columns are populated by the registration
+  // wizard + HiBob sync.
   const { data, error } = await client
     .from('registrations')
     .select(
@@ -294,7 +307,7 @@ export async function fetchRegistrationProgress(
       completion_pct, status,
       user:users!registrations_user_id_fkey (
         email, role, is_leadership,
-        employee_profiles ( preferred_name, legal_name ),
+        employee_profiles ( first_name, last_name, preferred_name, legal_name ),
         guest_profiles!guest_profiles_user_id_fkey ( full_name )
       )
     `,
@@ -308,13 +321,26 @@ export async function fetchRegistrationProgress(
       email: string;
       role: string;
       is_leadership: boolean;
-      employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
+      employee_profiles: Joined<{
+        first_name: string | null;
+        last_name: string | null;
+        preferred_name: string | null;
+        legal_name: string | null;
+      }>;
       guest_profiles: Joined<{ full_name: string }>;
     }>(row.user);
     const employee = flatJoin(u?.employee_profiles);
     const guest = flatJoin(u?.guest_profiles);
-    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
-    const { first, last } = splitName(fullName);
+    let first = employee?.first_name ?? '';
+    let last = employee?.last_name ?? '';
+    if (!first && !last) {
+      // Fallback for guest rows (no structured fields) and for any
+      // employee row whose first_name/last_name haven't been filled in.
+      const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+      const split = splitName(fullName);
+      first = split.first;
+      last = split.last;
+    }
     return {
       first_name: first,
       last_name: last,

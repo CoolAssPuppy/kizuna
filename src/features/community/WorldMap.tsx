@@ -1,5 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { useId, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 
@@ -60,7 +61,12 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
   const { t } = useTranslation();
   const titleId = useId();
   const pins = useMemo(() => pinsFor(people, mode), [people, mode]);
-  const [hovered, setHovered] = useState<string | null>(null);
+  // hovered tracks both the user_id (for the visual highlight on the
+  // pin) AND the screen coordinates of the cursor so the tooltip can
+  // render via portal at fixed coordinates — outside the SVG, immune
+  // to clipping at the map's edge.
+  const [hovered, setHovered] = useState<{ userId: string; x: number; y: number } | null>(null);
+  const hoveredPin = hovered ? (pins.find((p) => p.user.user_id === hovered.userId) ?? null) : null;
 
   return (
     <section className="rounded-xl border bg-card p-4" aria-labelledby={titleId}>
@@ -125,12 +131,17 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
             }
           </Geographies>
           {pins.map((pin) => {
-            const isHovered = hovered === pin.user.user_id;
+            const isHovered = hovered?.userId === pin.user.user_id;
             return (
               <Marker
                 key={pin.user.user_id}
                 coordinates={[pin.lon, pin.lat]}
-                onMouseEnter={() => setHovered(pin.user.user_id)}
+                onMouseEnter={(e: React.MouseEvent) =>
+                  setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
+                }
+                onMouseMove={(e: React.MouseEvent) =>
+                  setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
+                }
                 onMouseLeave={() => setHovered(null)}
                 style={{
                   default: {
@@ -154,12 +165,22 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
                   stroke="hsl(var(--background))"
                   strokeWidth={2}
                 />
-                {isHovered ? <PinTooltip person={pin.user} mode={mode} /> : null}
               </Marker>
             );
           })}
         </ComposableMap>
       </div>
+      {hovered && hoveredPin
+        ? createPortal(
+            <PinTooltip
+              person={hoveredPin.user}
+              mode={mode}
+              cursorX={hovered.x}
+              cursorY={hovered.y}
+            />,
+            document.body,
+          )
+        : null}
     </section>
   );
 }
@@ -167,15 +188,20 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
 interface TooltipProps {
   person: Profile;
   mode: 'hometown' | 'current';
+  /** clientX of the cursor — used to anchor the portal-rendered tooltip. */
+  cursorX: number;
+  /** clientY of the cursor. */
+  cursorY: number;
 }
 
 /**
- * Hover card for a pin. Rendered inside the SVG via foreignObject so it
- * stays anchored to the marker as the map scales. Avatar comes from the
- * shared <Avatar> which signs storage URLs on demand and falls back to
- * a tile when none exists.
+ * Hover card for a pin. Rendered into document.body via portal so it is
+ * never clipped by the SVG canvas when a marker sits near the map's
+ * edge. Position is fixed-coordinate from the cursor; the previous
+ * foreignObject implementation lived inside the SVG and silently
+ * vanished off-canvas for pins in the upper third of the map.
  */
-function PinTooltip({ person, mode }: TooltipProps): JSX.Element {
+function PinTooltip({ person, mode, cursorX, cursorY }: TooltipProps): JSX.Element {
   const fullName = `${person.first_name} ${person.last_name}`.trim();
   const initials = `${person.first_name.charAt(0)}${person.last_name.charAt(0)}`;
   const hometown = locationLabel({ city: person.hometown_city, country: person.hometown_country });
@@ -184,42 +210,48 @@ function PinTooltip({ person, mode }: TooltipProps): JSX.Element {
   const secondary = mode === 'hometown' ? current : hometown;
   const moved = hometown && current && hometown !== current;
 
+  // Card is 260x172. Anchor it slightly above and to the right of the
+  // cursor by default; if either edge would clip the viewport, flip
+  // to the opposite side. Renders fixed (not absolute) so page scroll
+  // doesn't drift the card.
+  const CARD_W = 260;
+  const CARD_H = 172;
+  const margin = 12;
+  let left = cursorX + 16;
+  let top = cursorY - CARD_H - 12;
+  if (left + CARD_W + margin > window.innerWidth) left = cursorX - CARD_W - 16;
+  if (top < margin) top = cursorY + 16;
+  if (left < margin) left = margin;
+
   return (
-    <foreignObject
-      x={-130}
-      y={-176}
-      width={260}
-      height={172}
-      style={{ overflow: 'visible', pointerEvents: 'none' }}
+    <div
+      className="kizuna-fade-in pointer-events-none fixed z-50"
+      style={{
+        left,
+        top,
+        width: CARD_W,
+        filter: 'drop-shadow(0 12px 24px rgba(15,23,42,0.18))',
+      }}
     >
-      <div
-        className="kizuna-fade-in flex h-full w-full flex-col items-center justify-end pb-3"
-        style={{ filter: 'drop-shadow(0 12px 24px rgba(15,23,42,0.18))' }}
-      >
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card/95 px-5 pb-4 pt-5 text-center backdrop-blur-md">
-          <div className="rounded-full bg-gradient-to-br from-primary to-sky-500 p-[2px]">
-            <div className="rounded-full bg-card p-[3px]">
-              <Avatar url={person.avatar_url} fallback={initials} size={64} />
-            </div>
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-card/95 px-5 pb-4 pt-5 text-center backdrop-blur-md">
+        <div className="rounded-full bg-gradient-to-br from-primary to-sky-500 p-[2px]">
+          <div className="rounded-full bg-card p-[3px]">
+            <Avatar url={person.avatar_url} fallback={initials} size={64} />
           </div>
-          <p className="text-sm font-semibold leading-tight">{fullName || person.email}</p>
-          {primary ? (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin aria-hidden className="h-3 w-3" />
-              <span>{primary}</span>
-            </div>
-          ) : null}
-          {moved && secondary ? (
-            <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
-              {mode === 'hometown' ? `Now ${secondary}` : `From ${secondary}`}
-            </p>
-          ) : null}
         </div>
-        <span
-          aria-hidden
-          className="mt-[-2px] h-2 w-2 rotate-45 border-b border-r border-border bg-card/95"
-        />
+        <p className="text-sm font-semibold leading-tight">{fullName || person.email}</p>
+        {primary ? (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin aria-hidden className="h-3 w-3" />
+            <span>{primary}</span>
+          </div>
+        ) : null}
+        {moved && secondary ? (
+          <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+            {mode === 'hometown' ? `Now ${secondary}` : `From ${secondary}`}
+          </p>
+        ) : null}
       </div>
-    </foreignObject>
+    </div>
   );
 }

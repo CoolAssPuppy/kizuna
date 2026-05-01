@@ -104,20 +104,14 @@
         "moderate": "moderate",
         "severe": "significant"
       },
-      "tips": {
-        "eastSleepEarly": "Three days before you leave, shift bedtime 30–60 minutes earlier each night so your circadian clock catches up before the flight.",
-        "eastMorningLight": "On arrival, get bright outdoor light in the morning and avoid bright light after sunset — light is the strongest zeitgeber for resetting your clock.",
-        "eastAvoidEveningCaffeine": "No caffeine after noon local time on the first three days — it has a 6-hour half-life and will keep you wired into the night.",
-        "melatoninLowDose": "0.3–0.5 mg of melatonin 30 minutes before your target bedtime for the first few nights helps the eastbound shift. Higher doses do not help and can backfire.",
-        "westSleepLate": "For two days before you leave, push bedtime 30–60 minutes later each night to pre-shift your clock westward.",
-        "westEveningLight": "On arrival, seek bright light in the late afternoon and evening; dim indoor light and screens in the morning to delay your circadian phase.",
-        "westMorningCaffeineOk": "Morning caffeine is fine and helpful for staying up to a westbound bedtime; keep it before 2 pm local.",
-        "melatoninWest": "Melatonin is less effective westbound. If you use it, take 0.3 mg in the second half of the local night to extend sleep, not before bed.",
-        "hydrate": "Cabin air sits below 20% humidity. Drink water on the plane and avoid alcohol — both meaningfully reduce sleep quality on arrival.",
-        "mealAnchor": "Eat your first three meals at the destination's mealtimes, not when your stomach demands. Meal timing is a circadian zeitgeber too.",
-        "exerciseDaylight": "30 minutes of moderate outdoor movement on day one accelerates re-entrainment by roughly half a day."
-      },
+      "another": "Show another tip",
       "disclaimer": "General guidance, not medical advice. Confirm with your doctor for any chronic-use plans."
+    },
+    "icebreaker": {
+      "title": "Get to know your teammate",
+      "subtitle": "A real fun fact from a fellow attendee. Take a guess, then reveal.",
+      "reveal": "Reveal the answer",
+      "tryAnother": "Try another"
     }
   },
   "welcome": {

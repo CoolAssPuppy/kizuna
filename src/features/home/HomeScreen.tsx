@@ -14,6 +14,7 @@ import { useStorageImage } from '@/lib/useStorageImage';
 
 import { GREETINGS } from './greetings';
 import { JetLagFighter } from './JetLagFighter';
+import { TeammateIcebreaker } from './TeammateIcebreaker';
 import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
 import { useEventStats } from './useEventStats';
 import { useHomeFeed, type FeedItem } from './useHomeFeed';
@@ -58,6 +59,7 @@ export function HomeScreen(): JSX.Element {
 
         <aside className="space-y-4 lg:col-span-2">
           {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
+          <TeammateIcebreaker />
           {event ? <JetLagFighter eventTimeZone={event.time_zone} /> : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>
             <dl className="grid grid-cols-1 gap-4">
