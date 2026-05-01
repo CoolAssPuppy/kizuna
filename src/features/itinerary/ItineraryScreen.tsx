@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { useOnlineStatus } from '@/lib/useOnlineStatus';
 import type { Database } from '@/types/database.types';
 
 import { CheckinCard } from './CheckinCard';
@@ -23,7 +22,6 @@ const localTimeZone =
 
 export function ItineraryScreen({ event }: Props): JSX.Element {
   const { t } = useTranslation();
-  const online = useOnlineStatus();
   const { data, isLoading, error, invalidate } = useItinerary({ eventId: event.id });
   const [importOpen, setImportOpen] = useState(false);
 
@@ -48,15 +46,6 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
       <ItineraryHero event={event} />
-
-      {!online ? (
-        <p
-          role="status"
-          className="inline-flex rounded-md bg-amber-100 px-3 py-1 text-xs font-medium text-amber-900 dark:bg-amber-500/15 dark:text-amber-200"
-        >
-          {t('itinerary.offline')}
-        </p>
-      ) : null}
 
       <CheckinCard eventId={event.id} />
 

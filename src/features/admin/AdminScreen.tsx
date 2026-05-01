@@ -15,13 +15,22 @@ import {
   fetchRegistrationProgress,
   fetchRoomingList,
   fetchSwagOrder,
+  fetchTransportManifest,
 } from './reports';
 
-type Tab = 'registration' | 'rooming' | 'dietary' | 'swag' | 'payments' | 'conflicts';
+type Tab =
+  | 'registration'
+  | 'rooming'
+  | 'transport'
+  | 'dietary'
+  | 'swag'
+  | 'payments'
+  | 'conflicts';
 
 const TABS: ReadonlyArray<Tab> = [
   'registration',
   'rooming',
+  'transport',
   'dietary',
   'swag',
   'payments',
@@ -91,6 +100,11 @@ export function AdminScreen(): JSX.Element {
     enabled: tab === 'rooming' && eventId !== null,
     queryFn: () => (eventId ? fetchRoomingList(supabase, eventId) : Promise.resolve([])),
   });
+  const transportQ = useQuery({
+    queryKey: ['admin', 'transport'],
+    enabled: tab === 'transport',
+    queryFn: () => fetchTransportManifest(supabase),
+  });
   const dietaryQ = useQuery({
     queryKey: ['admin', 'dietary'],
     enabled: tab === 'dietary',
@@ -139,6 +153,9 @@ export function AdminScreen(): JSX.Element {
       ) : null}
       {tab === 'rooming' ? (
         <ReportPanel rows={roomingQ.data ?? []} filename="rooming-list.csv" />
+      ) : null}
+      {tab === 'transport' ? (
+        <ReportPanel rows={transportQ.data ?? []} filename="transport-manifest.csv" />
       ) : null}
       {tab === 'dietary' ? (
         <ReportPanel rows={dietaryQ.data ?? []} filename="dietary-summary.csv" />

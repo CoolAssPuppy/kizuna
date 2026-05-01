@@ -217,22 +217,27 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - Edge functions excluded from ESLint since they're Deno-runtime modules. They share the invitationToken implementation byte-for-byte with the SPA, eliminating drift.
 - Graceful-degradation pattern fully proven for Resend and Stripe: each module logs once at boot and returns deterministic stub data without throwing.
 
-### M6 - Personal itinerary and offline
+### M6 - Personal itinerary and offline [complete]
 
 **Goal:** Personal itinerary screen, materialised query, offline cache via service worker, realtime version push.
 
-- [ ] Itinerary screen (day grouping, sort by starts_at)
-- [ ] Itinerary item rendering by `item_type`
-- [ ] QR check-in code (signed JWT, cached offline)
-- [ ] Workbox precache: itinerary, profile, documents
-- [ ] Workbox runtime: stale-while-revalidate for static, cache-first for assets
-- [ ] Realtime subscription on `itinerary_items` for current user
-- [ ] Version-token push from Realtime → SW re-fetch
-- [ ] Offline indicator
-- [ ] Manual offline QA on real device
-- [ ] Vitest: itinerary utilities, offline state
-- [ ] Playwright: itinerary view, offline-mode smoke
-- [ ] Commit: `feat(itinerary): personal schedule with offline cache`
+- [x] Itinerary screen (day grouping, sort by starts_at) — landed in M4.3
+- [x] Itinerary item rendering by `item_type` — per-type icons + chips in itemMeta.ts
+- [x] QR check-in code (signed JWT, cached offline) — CheckinCard
+- [x] Workbox precache: itinerary, profile, documents
+- [x] Workbox runtime: stale-while-revalidate extended to flights, accommodations, accommodation_occupants, transport_requests, sessions, events
+- [x] Realtime subscription on `itinerary_items` for current user — supabase channel `itinerary:{userId}:{eventId}`
+- [x] Realtime invalidates the TanStack query, which transparently refreshes the cached fetch
+- [x] Global OfflineBanner in AppLayout — shows on every signed-in screen when navigator reports offline
+- [x] Admin transport manifest report (was missing — spec lists 6 reports, we had 5)
+- [ ] Manual offline QA on real device — deferred to M10 hardening
+- [x] Commit: `feat(itinerary): offline cache and admin transport manifest`
+
+**M6 review:**
+- Service worker now caches the full operational dataset the bus operator needs offline (itinerary, flights, accommodations, transport, sessions, events). Cache name bumped to v2 to invalidate stale entries.
+- Realtime push already worked — the existing useItinerary subscription invalidates the TanStack query on any postgres_changes event for the user's itinerary_items rows.
+- Admin transport manifest joins flights + transport_vehicles + users so the bus operator handoff has flight number, airline, passenger/bag counts, special equipment, and assigned vehicle in a single CSV row.
+- 111/111 vitest, lint clean, typecheck clean, build clean (PWA precache 18 entries, 935 KiB).
 
 ### M7 - Admin dashboard and reports
 

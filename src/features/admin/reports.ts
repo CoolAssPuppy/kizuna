@@ -173,6 +173,60 @@ export async function fetchPaymentReconciliation(
   }));
 }
 
+export interface TransportManifestRow extends CsvRow {
+  direction: string;
+  pickup_datetime: string;
+  pickup_tz: string;
+  email: string;
+  flight_number: string | null;
+  airline: string | null;
+  origin: string | null;
+  destination: string | null;
+  passenger_count: number;
+  bag_count: number;
+  special_equipment: string;
+  vehicle: string | null;
+  needs_review: boolean;
+}
+
+export async function fetchTransportManifest(
+  client: AppSupabaseClient,
+): Promise<TransportManifestRow[]> {
+  const { data, error } = await client
+    .from('transport_requests')
+    .select(
+      `
+      direction, pickup_datetime, pickup_tz, passenger_count, bag_count,
+      special_equipment, needs_review,
+      users ( email ),
+      flights ( flight_number, airline, origin, destination ),
+      transport_vehicles ( vehicle_name )
+    `,
+    )
+    .order('pickup_datetime', { ascending: true });
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const flight = row.flights;
+    const vehicle = row.transport_vehicles;
+    return {
+      direction: row.direction,
+      pickup_datetime: row.pickup_datetime,
+      pickup_tz: row.pickup_tz,
+      email: row.users?.email ?? '',
+      flight_number: flight?.flight_number ?? null,
+      airline: flight?.airline ?? null,
+      origin: flight?.origin ?? null,
+      destination: flight?.destination ?? null,
+      passenger_count: row.passenger_count,
+      bag_count: row.bag_count,
+      special_equipment: row.special_equipment.join(', '),
+      vehicle: vehicle?.vehicle_name ?? null,
+      needs_review: row.needs_review,
+    };
+  });
+}
+
 export interface RegistrationProgressRow extends CsvRow {
   email: string;
   role: string;

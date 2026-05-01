@@ -27,18 +27,19 @@ export default defineConfig({
             },
           },
           {
-            // Itinerary + registration data: stale-while-revalidate so the
-            // offline cache always serves the last known good copy while
-            // a background fetch refreshes when connectivity returns.
+            // Operational data the bus has no signal for: itinerary,
+            // flights, hotel assignment, transport, registration, docs.
+            // Stale-while-revalidate serves the last good copy offline
+            // and a background fetch refreshes once connectivity returns.
             urlPattern: ({ url }) =>
-              url.pathname.startsWith('/rest/v1/itinerary_items') ||
-              url.pathname.startsWith('/rest/v1/registrations') ||
-              url.pathname.startsWith('/rest/v1/documents'),
+              /^\/rest\/v1\/(itinerary_items|registrations|documents|flights|accommodations|accommodation_occupants|transport_requests|sessions|events)/.test(
+                url.pathname,
+              ),
             handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'kizuna-data',
+              cacheName: 'kizuna-data-v2',
               expiration: {
-                maxEntries: 50,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24,
               },
             },
