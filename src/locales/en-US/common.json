@@ -733,6 +733,12 @@
     "timelineTitle": "Timeline",
     "loading": "Loading your itinerary",
     "empty": "Nothing on your itinerary yet. Add a flight or paste your booking confirmation to get started.",
+    "guestSync": {
+      "label": "Sync with my sponsor's itinerary",
+      "description": "When on, your itinerary mirrors the employee who invited you. Turn off to manage your own schedule.",
+      "enabled": "Now syncing with your sponsor's itinerary.",
+      "disabled": "Sync turned off. Your itinerary is your own again."
+    },
     "hero": {
       "eyebrow": "Get ready for",
       "live": "Happening now",

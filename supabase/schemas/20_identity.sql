@@ -102,8 +102,12 @@ create table public.guest_profiles (
   payment_status guest_payment_status not null default 'pending',
   stripe_payment_id text,
   fee_amount numeric(10, 2) check (fee_amount is null or fee_amount >= 0),
-  perk_profile_created boolean not null default false
+  perk_profile_created boolean not null default false,
+  syncs_with_sponsor boolean not null default false
 );
+
+comment on column public.guest_profiles.syncs_with_sponsor is
+  'When true, the guest sees the sponsoring employee''s itinerary instead of (or in addition to) their own. Cleared by the sponsor''s travel team if they want the guest to maintain a separate plan.';
 
 comment on table public.guest_profiles is
   'Each guest is tied to one sponsoring employee. Payment status reconciled by Stripe webhook.';

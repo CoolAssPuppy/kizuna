@@ -324,6 +324,20 @@ create policy itinerary_items_self_imported_update on public.itinerary_items
 create policy itinerary_items_self_imported_delete on public.itinerary_items
   for delete using (user_id = auth.uid() and source = 'self_imported');
 
+-- Guests who toggled syncs_with_sponsor=true on their guest_profiles
+-- can read every itinerary_items row owned by their sponsoring
+-- employee. The sponsor's items still belong to the sponsor — we just
+-- widen visibility, no row duplication.
+create policy itinerary_items_sponsor_read_for_synced_guest on public.itinerary_items
+  for select using (
+    exists (
+      select 1 from public.guest_profiles g
+      where g.user_id = auth.uid()
+        and g.sponsor_id = itinerary_items.user_id
+        and g.syncs_with_sponsor
+    )
+  );
+
 
 -- Registration
 create policy registrations_self_all on public.registrations

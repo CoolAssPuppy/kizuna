@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { Database } from '@/types/database.types';
 
 import { CheckinCard } from './CheckinCard';
+import { GuestSyncToggle } from './GuestSyncToggle';
 import { ImportItineraryDialog } from './ImportItineraryDialog';
 import { ItineraryHero } from './ItineraryHero';
 import { ItineraryTimeline } from './ItineraryTimeline';
@@ -48,6 +49,8 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
       <ItineraryHero event={event} />
 
       <CheckinCard eventId={event.id} />
+
+      <GuestSyncToggle onToggle={invalidate} />
 
       <section className="space-y-4">
         <header className="flex flex-row items-center justify-between gap-3">

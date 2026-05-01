@@ -907,6 +907,7 @@ export type Database = {
           relationship: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id: string
           stripe_payment_id: string | null
+          syncs_with_sponsor: boolean
           user_id: string
         }
         Insert: {
@@ -919,6 +920,7 @@ export type Database = {
           relationship: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id: string
           stripe_payment_id?: string | null
+          syncs_with_sponsor?: boolean
           user_id: string
         }
         Update: {
@@ -931,6 +933,7 @@ export type Database = {
           relationship?: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id?: string
           stripe_payment_id?: string | null
+          syncs_with_sponsor?: boolean
           user_id?: string
         }
         Relationships: [
