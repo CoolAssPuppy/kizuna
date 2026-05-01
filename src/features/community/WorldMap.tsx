@@ -23,9 +23,9 @@ interface Pin {
   lon: number;
 }
 
-// Public-domain world basemap copied from the world-atlas npm package
-// during install. Refresh with:
-//   cp node_modules/world-atlas/countries-110m.json public/world-110m.json
+// Public-domain world basemap from the world-atlas npm package. The
+// postinstall script in package.json copies it to public/ if it isn't
+// already vendored, so a fresh `npm install` is enough — no manual cp.
 const GEOGRAPHY_URL = '/world-110m.json';
 
 function pinsFor(people: Profile[], mode: Props['mode']): Pin[] {

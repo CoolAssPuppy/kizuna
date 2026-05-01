@@ -33,7 +33,8 @@
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
     "simulate:community": "bash scripts/with-doppler.sh tsx scripts/simulate-community.ts",
     "seed:remote-users": "tsx scripts/seed-remote-users.ts",
-    "prepare": "husky 2>/dev/null || true"
+    "prepare": "husky 2>/dev/null || true",
+    "postinstall": "test -f public/world-110m.json || cp node_modules/world-atlas/countries-110m.json public/world-110m.json"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.3",

@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: create-stripe-checkout
 //
 // Authenticated guest asks Kizuna to start a checkout session. Falls back

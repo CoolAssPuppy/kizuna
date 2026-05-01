@@ -433,9 +433,10 @@ Phase 1 ships locally. Production deploys land with M10:
 ## Documentation
 
 - [`CLAUDE.md`](./CLAUDE.md) — agent rules and architectural invariants
+- [`TECH_DEBT_AUDIT.md`](./TECH_DEBT_AUDIT.md) — current rolling audit of debt + status
+- [`docs/github-setup.md`](./docs/github-setup.md) — repo + CI setup checklist
 - [`tasks/todo.md`](./tasks/todo.md) — milestone tracker
 - [`tasks/lessons.md`](./tasks/lessons.md) — patterns we keep re-discovering
-- [`tasks/refactor-audit.md`](./tasks/refactor-audit.md) — the long-form audit driving P0 hardening work
 - [`supabase/schemas/README.md`](./supabase/schemas/README.md) — declarative schema workflow
 - [`supabase/tests/README.md`](./supabase/tests/README.md) — pgTAP conventions
 - [`supabase/email-templates/README.md`](./supabase/email-templates/README.md) — email template workflow

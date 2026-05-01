@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: stripe-webhook
 //
 // Receives payment_intent.succeeded / payment_intent.payment_failed events.
@@ -69,9 +68,21 @@ Deno.serve(async (req) => {
     console.warn('[kizuna] STRIPE_WEBHOOK_SECRET missing — skipping signature verification.');
   }
 
-  let event: { type?: string; data?: { object?: any } };
+  // Stripe webhook payloads are documented but the SDK shape only
+  // applies when we use `stripe.webhooks.constructEvent`. We sign-
+  // verify above and parse JSON ourselves; this is the narrow set of
+  // fields we read.
+  interface StripeIntent {
+    id?: string;
+    metadata?: { guest_user_id?: string };
+  }
+  interface StripeEvent {
+    type?: string;
+    data?: { object?: StripeIntent };
+  }
+  let event: StripeEvent;
   try {
-    event = JSON.parse(rawBody);
+    event = JSON.parse(rawBody) as StripeEvent;
   } catch {
     return jsonResponse({ error: 'invalid_json' }, { status: 400 });
   }
@@ -79,14 +90,14 @@ Deno.serve(async (req) => {
   const admin = getAdminClient();
 
   const intent = event.data?.object;
-  const guestUserId = intent?.metadata?.guest_user_id as string | undefined;
+  const guestUserId = intent?.metadata?.guest_user_id;
 
   if (event.type === 'payment_intent.succeeded' && guestUserId) {
     await admin
       .from('guest_profiles')
       .update({
         payment_status: 'paid',
-        stripe_payment_id: (intent.id as string | undefined) ?? null,
+        stripe_payment_id: intent?.id ?? null,
       })
       .eq('user_id', guestUserId);
   } else if (event.type === 'payment_intent.payment_failed' && guestUserId) {

@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: create-guest-invitation
 //
 // Authenticated employee asks Kizuna to invite a guest. The flow forks

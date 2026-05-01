@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: accept-guest-invitation
 //
 // Anonymous guest provides a token + chosen password. We:

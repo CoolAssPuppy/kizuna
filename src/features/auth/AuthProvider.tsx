@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 
 import { getSupabaseClient } from '@/lib/supabase';
@@ -75,30 +75,37 @@ export function AuthProvider({ children, ssoConfig = {} }: AuthProviderProps): J
     [supabase],
   );
 
-  useEffect(() => {
-    let active = true;
+  // Unmount guard ref. The effect flips it on cleanup so the
+  // syncSession callback (memoised below) can refuse to dispatch
+  // after we've torn down the provider.
+  const activeRef = useRef(true);
 
-    async function syncSession(session: Session | null): Promise<void> {
+  const syncSession = useCallback(
+    async (session: Session | null): Promise<void> => {
       if (!session) {
-        if (active) dispatch({ type: 'cleared' });
+        if (activeRef.current) dispatch({ type: 'cleared' });
         return;
       }
       const appUser = await loadAppUser(session.user.id);
-      if (!active) return;
+      if (!activeRef.current) return;
       dispatch({ type: 'session', user: appUser, supabaseUser: session.user });
-    }
+    },
+    [loadAppUser],
+  );
 
-    // onAuthStateChange fires INITIAL_SESSION on subscribe, so a manual
-    // getSession() here would race against it. Lean on the listener exclusively.
+  useEffect(() => {
+    activeRef.current = true;
+    // onAuthStateChange fires INITIAL_SESSION on subscribe, so a
+    // manual getSession() here would race against it. Lean on the
+    // listener exclusively.
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       void syncSession(session);
     });
-
     return () => {
-      active = false;
+      activeRef.current = false;
       subscription.subscription.unsubscribe();
     };
-  }, [supabase, loadAppUser]);
+  }, [supabase, syncSession]);
 
   const signInWithPassword = useCallback(
     async (email: string, password: string): Promise<void> => {

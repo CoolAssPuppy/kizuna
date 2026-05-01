@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -20,14 +19,34 @@ export interface UserScopedRepository<T extends keyof Tables, F> {
 }
 
 /**
+ * supabase-js's generic query builder requires a string-literal table
+ * name to infer row types through `.from()`. With a generic
+ * `T extends keyof Tables` the typegen collapses, so we widen the
+ * builder type to a permissive shape behind one helper. The unsafe
+ * disable lives in this single function — every public call site
+ * stays fully typed via `RowOf<T>` / `InsertOf<T>` on the wrapping
+ * createUserScopedRepository signature.
+ */
+type GenericPostgrestBuilder = {
+  select: (s: string) => GenericPostgrestBuilder;
+  upsert: (
+    values: unknown,
+    options?: { onConflict?: string },
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  eq: (col: string, val: string) => GenericPostgrestBuilder;
+  maybeSingle: () => Promise<{ data: unknown; error: { message: string } | null }>;
+};
+
+function userScopedTable<T extends keyof Tables>(
+  client: AppSupabaseClient,
+  table: T,
+): GenericPostgrestBuilder {
+  return client.from(table as never) as unknown as GenericPostgrestBuilder;
+}
+
+/**
  * Generic load/save pair for any table whose unique key is `user_id`.
  * Eliminates the duplicated load/save pair across registration sections.
- *
- * Note on the lint disables: supabase-js's typed query builder requires a
- * string-literal table name to fully infer the row type through `.from()`.
- * With a generic `T extends keyof Tables` the builder collapses to `any`,
- * which is why we silence the unsafe-* rules locally. The exposed API
- * preserves full row typing via `RowOf<T>` / `InsertOf<T>`.
  */
 export function createUserScopedRepository<T extends keyof Tables, F>({
   table,
@@ -36,16 +55,19 @@ export function createUserScopedRepository<T extends keyof Tables, F>({
 }: RepositoryConfig<T, F>): UserScopedRepository<T, F> {
   return {
     async load(client, userId): Promise<RowOf<T> | null> {
-      const builder: any = client.from(table as any);
-      const { data, error } = await builder.select(select).eq('user_id', userId).maybeSingle();
-      if (error) throw error;
+      const { data, error } = await userScopedTable(client, table)
+        .select(select)
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (error) throw new Error(error.message);
       return (data ?? null) as RowOf<T> | null;
     },
     async save(client, userId, values): Promise<void> {
       const payload = toInsert(userId, values);
-      const builder: any = client.from(table as any);
-      const { error } = await builder.upsert(payload, { onConflict: 'user_id' });
-      if (error) throw error;
+      const { error } = await userScopedTable(client, table).upsert(payload, {
+        onConflict: 'user_id',
+      });
+      if (error) throw new Error(error.message);
     },
   };
 }
