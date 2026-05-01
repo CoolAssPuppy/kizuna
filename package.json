@@ -31,6 +31,7 @@
     "functions:env": "doppler secrets download --project kizuna --config dev --no-file --format env > supabase/.env",
     "functions:serve": "npm run functions:env && supabase functions serve --env-file supabase/.env",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
+    "gen:og": "node scripts/generate-og.mjs",
     "simulate:community": "bash scripts/with-doppler.sh tsx scripts/simulate-community.ts",
     "seed:remote-users": "tsx scripts/seed-remote-users.ts",
     "prepare": "husky 2>/dev/null || true",
@@ -65,6 +66,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",

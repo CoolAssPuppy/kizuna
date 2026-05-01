@@ -1,0 +1,116 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d2a1e"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="leftGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3ECF8E"/>
+      <stop offset="100%" stop-color="#1F9C6A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#3ECF8E" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#3ECF8E" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.35"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Backdrop -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid overlay -->
+  <g stroke="#ffffff" stroke-opacity="0.04" stroke-width="1">
+    <line x1="0" y1="105" x2="1200" y2="105"/>
+    <line x1="0" y1="210" x2="1200" y2="210"/>
+    <line x1="0" y1="315" x2="1200" y2="315"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="525" x2="1200" y2="525"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Left half: glowing kanji on a green tile -->
+  <g transform="translate(60 65)">
+    <!-- Glow halo -->
+    <circle cx="240" cy="250" r="260" fill="url(#glow)"/>
+    <!-- Tile -->
+    <rect x="0" y="0" width="480" height="500" rx="48" ry="48" fill="url(#leftGrad)" filter="url(#softShadow)"/>
+    <!-- Kanji 絆 -->
+    <text x="240" y="345"
+          font-family="'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', 'Source Han Serif', serif"
+          font-size="320"
+          font-weight="700"
+          fill="#ffffff"
+          text-anchor="middle">絆</text>
+    <!-- Wordmark -->
+    <text x="240" y="448"
+          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="36"
+          font-weight="600"
+          fill="#ffffff"
+          fill-opacity="0.92"
+          letter-spacing="2"
+          text-anchor="middle">KIZUNA</text>
+  </g>
+
+  <!-- Right half: title + description + sub-line -->
+  <g transform="translate(620 0)">
+    <!-- Eyebrow tag -->
+    <g transform="translate(0 195)">
+      <rect x="0" y="0" width="200" height="38" rx="19" fill="#3ECF8E" fill-opacity="0.12" stroke="#3ECF8E" stroke-opacity="0.4" stroke-width="1.5"/>
+      <circle cx="22" cy="19" r="5" fill="#3ECF8E"/>
+      <text x="40" y="25"
+            font-family="-apple-system, 'Inter', system-ui, sans-serif"
+            font-size="14"
+            font-weight="600"
+            fill="#3ECF8E"
+            letter-spacing="2">SUPAFEST 2027</text>
+    </g>
+
+    <!-- Title -->
+    <text x="0" y="305"
+          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="76"
+          font-weight="700"
+          fill="#ffffff"
+          letter-spacing="-2">Kizuna</text>
+
+    <!-- Description -->
+    <text x="0" y="395"
+          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="36"
+          font-weight="500"
+          fill="#ffffff"
+          fill-opacity="0.85"
+          letter-spacing="-0.5">
+      <tspan x="0" dy="0">Building an enduring</tspan>
+      <tspan x="0" dy="48">bond among teammates</tspan>
+    </text>
+
+    <!-- Sub-line -->
+    <text x="0" y="528"
+          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-size="20"
+          font-weight="400"
+          fill="#ffffff"
+          fill-opacity="0.55">The community platform powering Supabase retreats</text>
+
+    <!-- Built on Supabase tag -->
+    <g transform="translate(0 560)">
+      <text x="0" y="14"
+            font-family="-apple-system, 'Inter', system-ui, sans-serif"
+            font-size="14"
+            font-weight="500"
+            fill="#3ECF8E"
+            letter-spacing="1">BUILT ON SUPABASE</text>
+    </g>
+  </g>
+</svg>
