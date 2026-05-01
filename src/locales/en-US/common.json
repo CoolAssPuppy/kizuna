@@ -123,6 +123,7 @@
       "emergency": "Emergency contact",
       "passport": "Passport",
       "guests": "Guests",
+      "dependents": "Dependents",
       "swag": "Swag",
       "transport": "Transport"
     },
@@ -137,6 +138,7 @@
       "dietarySaved": "Dietary preferences saved.",
       "passportSaved": "Passport details saved.",
       "guestsSaved": "Guests saved.",
+      "dependentsSaved": "Dependents saved.",
       "accessibilitySaved": "Accessibility preferences saved.",
       "swagSaved": "Swag selections saved.",
       "transportSaved": "Transport preference saved.",
@@ -185,6 +187,7 @@
       "emergencyContact": "Emergency Contact",
       "passport": "Passport",
       "guests": "Guests",
+      "dependents": "Dependents",
       "swag": "Swag",
       "transport": "Transport"
     },
@@ -263,14 +266,34 @@
       "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
     },
     "guests": {
-      "intro": "Add partners, kids, or anyone else travelling with you. Each guest results in a USD $950 fee for adults and $500 for children.",
-      "addGuest": "Add a Guest",
+      "intro": "Invite a partner or guest with their own login. They'll receive an email with a magic link to register and pay the guest fee.",
+      "invite": "Invite a guest",
+      "inviteTitle": "Invite a guest",
+      "inviteBody": "We'll email a single-use link valid for 7 days. Once they accept, they get their own Kizuna account and can complete the rest of registration themselves.",
+      "guestEmail": "Guest email",
+      "send": "Send invitation",
+      "sending": "Sending",
+      "invited": "Invitation sent to {{email}}",
+      "invitedAt": "Invited {{date}}",
+      "empty": "No guests invited yet. Start by sending an invitation.",
+      "cancel": "Cancel invitation",
+      "cancelled": "Invitation cancelled.",
+      "statuses": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "expired": "Expired",
+        "cancelled": "Cancelled"
+      }
+    },
+    "dependents": {
+      "intro": "Add kids or anyone else travelling with you who won't have their own login. Each dependent costs USD $500 for children and $950 for adults.",
+      "addGuest": "Add a dependent",
       "removeGuest": "Remove",
-      "fullName": "Full Name",
+      "fullName": "Full name",
       "age": "Age",
       "ageHint": "Used to calculate the fee tier and meal allowance.",
       "notes": "Notes",
-      "specialNeeds": "Special Needs",
+      "specialNeeds": "Special needs",
       "specialNeedsOptions": {
         "crib": "Crib",
         "high_chair": "High chair",
@@ -278,7 +301,7 @@
         "mobility": "Mobility",
         "other": "Other"
       },
-      "noGuests": "No guests to add? Continue."
+      "noGuests": "No dependents to add? Continue."
     },
     "swag": {
       "intro": "Tell us your t-shirt and shoe sizes so we can order the right gear ahead of time.",

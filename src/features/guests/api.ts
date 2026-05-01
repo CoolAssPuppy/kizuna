@@ -10,7 +10,7 @@ export async function listGuestInvitations(
     .from('guest_invitations')
     .select('*')
     .eq('sponsor_id', sponsorUserId)
-    .order('created_at', { ascending: false });
+    .order('sent_at', { ascending: false });
   if (error) throw error;
   return data ?? [];
 }

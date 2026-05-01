@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   Accessibility,
+  Baby,
   HeartPulse,
   IdCard,
   Plane,
@@ -15,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
+import { DependentsSection } from '@/features/registration/sections/DependentsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
 import { EmergencyContactSection } from '@/features/registration/sections/EmergencyContactSection';
 import { GuestsSection } from '@/features/registration/sections/GuestsSection';
@@ -35,6 +37,7 @@ type SectionId =
   | 'emergency'
   | 'passport'
   | 'guests'
+  | 'dependents'
   | 'swag'
   | 'transport';
 
@@ -81,6 +84,12 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     icon: Users,
     labelKey: 'profile.nav.guests',
     render: () => <GuestsSection mode={PROFILE_MODE} />,
+  },
+  {
+    id: 'dependents',
+    icon: Baby,
+    labelKey: 'profile.nav.dependents',
+    render: () => <DependentsSection mode={PROFILE_MODE} />,
   },
   {
     id: 'swag',
