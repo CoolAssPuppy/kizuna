@@ -45,7 +45,7 @@ function vehicle(overrides: Partial<VehicleOption> = {}): VehicleOption {
 
 describe('bucketByPickup', () => {
   it('returns an empty list when no rows are passed', () => {
-    expect(bucketByPickup([], 'origin')).toEqual([]);
+    expect(bucketByPickup([], 'origin', 'UTC')).toEqual([]);
   });
 
   it('places passengers within the same 30-min window in one bucket', () => {
@@ -54,7 +54,7 @@ describe('bucketByPickup', () => {
       passenger({ user_id: 'u-2', pickup_at: '2027-01-11T21:25:00.000Z' }),
       passenger({ user_id: 'u-3', pickup_at: '2027-01-11T22:00:00.000Z' }),
     ];
-    const windows = bucketByPickup(rows, 'origin');
+    const windows = bucketByPickup(rows, 'origin', 'UTC');
     expect(windows).toHaveLength(2);
     expect(windows[0]?.totalPassengers).toBe(2);
     expect(windows[1]?.totalPassengers).toBe(1);
@@ -66,7 +66,7 @@ describe('bucketByPickup', () => {
       passenger({ user_id: 'u-2', airline: 'Air Canada', flight_number: '101' }),
       passenger({ user_id: 'u-3', airline: 'WestJet', flight_number: '220' }),
     ];
-    const [win] = bucketByPickup(rows, 'origin');
+    const [win] = bucketByPickup(rows, 'origin', 'UTC');
     expect(win?.flights).toHaveLength(2);
     const ac = win!.flights.find((f) => f.flightNumber === '101');
     expect(ac?.passengers).toHaveLength(2);
@@ -77,7 +77,7 @@ describe('bucketByPickup', () => {
       passenger({ user_id: 'u-1', bag_count: 2 }),
       passenger({ user_id: 'u-2', bag_count: 3 }),
     ];
-    const [win] = bucketByPickup(rows, 'origin');
+    const [win] = bucketByPickup(rows, 'origin', 'UTC');
     expect(win?.totalBags).toBe(5);
     expect(win?.flights[0]?.totalBags).toBe(5);
   });
@@ -88,7 +88,7 @@ describe('bucketByPickup', () => {
       passenger({ user_id: 'u-1', pickup_at: '2027-01-11T21:29:59.000Z' }),
       passenger({ user_id: 'u-2', pickup_at: '2027-01-11T21:30:00.000Z' }),
     ];
-    expect(bucketByPickup(rows, 'origin')).toHaveLength(2);
+    expect(bucketByPickup(rows, 'origin', 'UTC')).toHaveLength(2);
   });
 });
 

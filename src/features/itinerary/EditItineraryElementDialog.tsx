@@ -68,23 +68,24 @@ export function EditItineraryElementDialog({ item, onClose }: Props): JSX.Elemen
     mutationFn: async () => {
       if (!item || !item.source_id) throw new Error('missing source row');
       const client = getSupabaseClient();
+      // Each item_type has its own SECURITY DEFINER RPC. Both share the
+      // same shape (caller-scoped write + error), so we pick the call and
+      // unwrap it once.
+      let result;
       if (item.item_type === 'accommodation') {
-        const { error } = await client.rpc('update_accommodation_special_requests', {
+        result = await client.rpc('update_accommodation_special_requests', {
           p_accommodation_id: item.source_id,
           p_requests: requests,
         });
-        if (error) throw error;
-        return;
-      }
-      if (item.item_type === 'transport') {
-        const { error } = await client.rpc('update_transport_request_special_requests', {
+      } else if (item.item_type === 'transport') {
+        result = await client.rpc('update_transport_request_special_requests', {
           p_request_id: item.source_id,
           p_requests: requests,
         });
-        if (error) throw error;
-        return;
+      } else {
+        throw new Error(`item_type ${item.item_type} is read-only`);
       }
-      throw new Error(`item_type ${item.item_type} is read-only`);
+      if (result.error) throw result.error;
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['itinerary'] });

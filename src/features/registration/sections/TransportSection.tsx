@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/features/auth/AuthContext';
@@ -8,6 +7,7 @@ import type { Database } from '@/types/database.types';
 
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 type GroundTransportNeed = Database['public']['Enums']['ground_transport_need'];
@@ -41,12 +41,10 @@ export function TransportSection({ mode }: SectionProps): JSX.Element {
       return data?.ground_transport_need ?? ('none' satisfies GroundTransportNeed);
     },
   });
-  const [need, setNeed] = useState<GroundTransportNeed | null>(null);
-  // Sync local state from the fetched value once. Subsequent edits
-  // are owned by the radio's onChange.
-  if (need === null && hydrated && data !== undefined) {
-    setNeed(data);
-  }
+  const [need, setNeed] = useHydratedFormState<
+    GroundTransportNeed | undefined,
+    GroundTransportNeed
+  >(hydrated, data, 'none', (loaded) => loaded ?? 'none');
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'transport',
@@ -54,7 +52,7 @@ export function TransportSection({ mode }: SectionProps): JSX.Element {
   });
 
   function handleSubmit(): void {
-    if (!user || need === null) return;
+    if (!user) return;
     void submit(async () => {
       const { error } = await getSupabaseClient()
         .from('attendee_profiles')
@@ -72,7 +70,6 @@ export function TransportSection({ mode }: SectionProps): JSX.Element {
       hydrated={hydrated}
       errorKey={errorKey}
       onSubmit={handleSubmit}
-      submitDisabled={need === null}
     >
       <div className="space-y-2">
         {NEED_OPTIONS.map((opt) => (

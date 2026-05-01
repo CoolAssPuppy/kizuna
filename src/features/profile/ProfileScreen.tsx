@@ -125,14 +125,15 @@ export function ProfileScreen(): JSX.Element {
   // Hide the Dependents tab when the user has no minor guests attached.
   // The section itself is read+write but only meaningful when there's
   // someone to edit; surfacing the empty state on every profile pollutes
-  // the nav for the 90% of attendees who travel solo.
+  // the nav for the 90% of attendees who travel solo. We share the same
+  // query key as the Guests + Dependents sections so a single network
+  // round-trip serves all three.
   const { data: minors } = useQuery({
-    queryKey: ['additional-guests', user?.id ?? null, 'count'],
+    queryKey: ['additional-guests', user?.id ?? null],
     enabled: !!user,
     queryFn: () => listAdditionalGuests(getSupabaseClient(), user!.id),
   });
   const hasMinors = (minors?.length ?? 0) > 0;
-
   const sections = hasMinors ? SECTIONS : SECTIONS.filter((s) => s.id !== 'dependents');
   const activeSection = sections.find((s) => s.id === active) ?? sections[0]!;
 

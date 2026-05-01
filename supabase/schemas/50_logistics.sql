@@ -29,11 +29,11 @@ create table public.flights (
 comment on column public.flights.origin is
   'IATA airport code (3 letters).';
 comment on column public.flights.destination is
-  'IATA airport code. Typically YYC for arrivals.';
+  'IATA airport code (3 letters). Per-event the active hub is events.airport_iata; arrivals match that, departures originate from it.';
 comment on column public.flights.departure_tz is
   'IANA timezone name for the origin airport (e.g. America/Los_Angeles). Drives local-time rendering.';
 comment on column public.flights.arrival_tz is
-  'IANA timezone name for the destination airport (e.g. America/Edmonton).';
+  'IANA timezone name for the destination airport. Sourced from the active event row when staging Perk imports.';
 comment on column public.flights.is_confirmed is
   'False = tentative. Excluded from transport manifests until confirmed.';
 
@@ -98,7 +98,11 @@ create table public.transport_vehicles (
   vehicle_name text not null,
   direction transport_direction not null,
   pickup_at timestamptz not null,
-  pickup_tz text not null default 'America/Edmonton',
+  -- IANA tz of the pickup wall-clock. Callers pass the active event's
+  -- time_zone so a Banff event uses America/Edmonton and (e.g.) a
+  -- Lisbon event uses Europe/Lisbon. No default — wrong default is
+  -- worse than a NOT NULL violation surfacing the bug at insert time.
+  pickup_tz text not null,
   capacity_passengers int not null check (capacity_passengers > 0),
   capacity_bags int not null check (capacity_bags >= 0),
   handles_special_equipment text[] not null default '{}',
@@ -121,7 +125,10 @@ create table public.transport_requests (
   flight_id uuid references public.flights(id) on delete set null,
   direction transport_direction not null,
   pickup_at timestamptz not null,
-  pickup_tz text not null default 'America/Edmonton',
+  -- IANA tz, mirrors transport_vehicles.pickup_tz: every caller (Perk
+  -- import, attendee profile screen, admin tool) supplies the active
+  -- event's time_zone explicitly.
+  pickup_tz text not null,
   passenger_count int not null check (passenger_count > 0),
   bag_count int not null default 0 check (bag_count >= 0),
   special_equipment text[] not null default '{}',

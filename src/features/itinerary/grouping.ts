@@ -56,9 +56,13 @@ export function groupItineraryByDay(
   items: ReadonlyArray<ItineraryItemRow>,
   timeZone: string,
 ): ItineraryDay[] {
+  // Compute the display timestamp once per item — bucketing and the
+  // intra-day sort both need it, and toLocalDateKey isn't free.
+  const dressed = items.map((item) => ({ item, when: displayTime(item, timeZone) }));
+
   const map = new Map<string, ItineraryItemRow[]>();
-  for (const item of items) {
-    const key = toLocalDateKey(displayTime(item, timeZone), timeZone);
+  for (const { item, when } of dressed) {
+    const key = toLocalDateKey(when, timeZone);
     const bucket = map.get(key);
     if (bucket) {
       bucket.push(item);
@@ -67,9 +71,10 @@ export function groupItineraryByDay(
     }
   }
 
+  const whenByItem = new Map(dressed.map(({ item, when }) => [item, when]));
   const days: ItineraryDay[] = [];
   for (const [date, dayItems] of map.entries()) {
-    dayItems.sort((a, b) => displayTime(a, timeZone).localeCompare(displayTime(b, timeZone)));
+    dayItems.sort((a, b) => (whenByItem.get(a) ?? '').localeCompare(whenByItem.get(b) ?? ''));
     days.push({ date, items: dayItems });
   }
   days.sort((a, b) => a.date.localeCompare(b.date));

@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@/components/ui/label';
@@ -8,16 +7,17 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
+import { loadAdditionalGuests } from '../api/additionalGuests';
 import {
   loadAdditionalGuestSwagSizes,
   loadSelfSwagSize,
   saveAdditionalGuestSwagSize,
   saveSelfSwagSize,
 } from '../api/swag';
-import { loadAdditionalGuests } from '../api/additionalGuests';
 import { EU_SHOE_SIZES, US_SHOE_SIZES, euToUs, type ShoeSizeSystem, toEu } from '../shoeSize';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
@@ -42,7 +42,14 @@ interface SizingState {
   shoeSystem: ShoeSizeSystem;
 }
 
-const EMPTY: SizingState = { tshirtSize: '', shoeSize: '', shoeSystem: 'us' };
+interface SwagFormState {
+  self: SizingState;
+  guests: AdditionalGuestRow[];
+  guestState: Record<string, SizingState>;
+}
+
+const EMPTY_SIZING: SizingState = { tshirtSize: '', shoeSize: '', shoeSystem: 'us' };
+const EMPTY: SwagFormState = { self: EMPTY_SIZING, guests: [], guestState: {} };
 
 function fromEu(eu: number | null, system: ShoeSizeSystem): string {
   if (eu === null || eu === undefined) return '';
@@ -67,28 +74,33 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
       return { own, list, guestSizes };
     },
   });
-  const [self, setSelf] = useState<SizingState>(EMPTY);
-  const [guests, setGuests] = useState<AdditionalGuestRow[]>([]);
-  const [guestState, setGuestState] = useState<Record<string, SizingState>>({});
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated && loaded) {
-    setSynced(true);
-    setSelf({
-      tshirtSize: loaded.own?.tshirt_size ?? '',
-      shoeSize: fromEu(loaded.own?.shoe_size_eu ?? null, 'us'),
-      shoeSystem: 'us',
-    });
-    setGuests(loaded.list);
-    const map: Record<string, SizingState> = {};
-    for (const guest of loaded.list) {
-      const sized = loaded.guestSizes.find((g) => g.additional_guest_id === guest.id);
-      map[guest.id] = {
+  const [form, setForm] = useHydratedFormState(hydrated, loaded, EMPTY, (data): SwagFormState => {
+    if (!data) return EMPTY;
+    const guestState: Record<string, SizingState> = {};
+    for (const guest of data.list) {
+      const sized = data.guestSizes.find((g) => g.additional_guest_id === guest.id);
+      guestState[guest.id] = {
         tshirtSize: sized?.tshirt_size ?? '',
         shoeSize: fromEu(sized?.shoe_size_eu ?? null, 'us'),
         shoeSystem: 'us',
       };
     }
-    setGuestState(map);
+    return {
+      self: {
+        tshirtSize: data.own?.tshirt_size ?? '',
+        shoeSize: fromEu(data.own?.shoe_size_eu ?? null, 'us'),
+        shoeSystem: 'us',
+      },
+      guests: data.list,
+      guestState,
+    };
+  });
+  const { self, guests, guestState } = form;
+  function setSelf(next: SizingState): void {
+    setForm((prev) => ({ ...prev, self: next }));
+  }
+  function setGuestSizing(id: string, next: SizingState): void {
+    setForm((prev) => ({ ...prev, guestState: { ...prev.guestState, [id]: next } }));
   }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
@@ -105,7 +117,7 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
         shoeSizeEu: parseShoe(self.shoeSize, self.shoeSystem),
       });
       for (const guest of guests) {
-        const s = guestState[guest.id] ?? EMPTY;
+        const s = guestState[guest.id] ?? EMPTY_SIZING;
         await saveAdditionalGuestSwagSize(client, guest.id, {
           tshirtSize: s.tshirtSize || null,
           shoeSizeEu: parseShoe(s.shoeSize, s.shoeSystem),
@@ -138,8 +150,8 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
             <SizingFieldset
               key={guest.id}
               title={`${guest.full_name} (${t(`registration.guests.brackets.${guest.age_bracket}`)})`}
-              value={guestState[guest.id] ?? EMPTY}
-              onChange={(next) => setGuestState((prev) => ({ ...prev, [guest.id]: next }))}
+              value={guestState[guest.id] ?? EMPTY_SIZING}
+              onChange={(next) => setGuestSizing(guest.id, next)}
               // Under-12 fits the youth t-shirt size grid; teens and
               // adults fit the standard adult grid. Bracket-based switch
               // replaces the previous numeric `age < 14` heuristic.

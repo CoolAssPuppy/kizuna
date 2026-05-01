@@ -92,19 +92,20 @@ Deno.serve(async (req) => {
   const intent = event.data?.object;
   const guestUserId = intent?.metadata?.guest_user_id;
 
-  if (event.type === 'payment_intent.succeeded' && guestUserId) {
-    await admin
-      .from('guest_profiles')
-      .update({
-        payment_status: 'paid',
-        stripe_payment_id: intent?.id ?? null,
-      })
-      .eq('user_id', guestUserId);
-  } else if (event.type === 'payment_intent.payment_failed' && guestUserId) {
-    await admin
-      .from('guest_profiles')
-      .update({ payment_status: 'failed' })
-      .eq('user_id', guestUserId);
+  // Only payment_intent.* events with a guest_user_id in metadata are
+  // actionable. Anything else acks with 200 so Stripe doesn't retry.
+  if (guestUserId) {
+    if (event.type === 'payment_intent.succeeded') {
+      await admin
+        .from('guest_profiles')
+        .update({ payment_status: 'paid', stripe_payment_id: intent?.id ?? null })
+        .eq('user_id', guestUserId);
+    } else if (event.type === 'payment_intent.payment_failed') {
+      await admin
+        .from('guest_profiles')
+        .update({ payment_status: 'failed' })
+        .eq('user_id', guestUserId);
+    }
   }
 
   return jsonResponse({ received: true });

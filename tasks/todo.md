@@ -299,6 +299,28 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - Channel routing matches the brief: employees with a slack_handle get a DM, everyone else gets email. The notification log row is written regardless of delivery outcome — admin audit needs both successes and failures.
 - Sender path duplicated between `send-notification` and `send-deadline-reminders`. Flagged for the post-M9 refactoring audit.
 
+### M9.5 - Tech debt + refactor sweep [complete]
+
+**Goal:** Run `/tech-debt-audit`, `/simplify`, and `/clean-and-refactor` against the M0–M9 stack, then address every finding so M10 starts on a clean baseline.
+
+- [x] tech-debt audit ran (32 findings) and all material items resolved
+- [x] /simplify pass: extract `useHydratedFormState` across 8 sections; extract `ImportRoomBlockDialog`, `testRoomBlock`, `lib/timezone.ts`
+- [x] /clean-and-refactor pass: 10 findings, all addressed
+- [x] Critical 1: `rephrase-icebreaker` edge function now requires an auth JWT before hitting OpenAI/cache
+- [x] Critical 2: `share-report.transport_manifest` scopes by `event_id` via registrations join — no cross-event leak
+- [x] High 3: pgTAP coverage for `update_accommodation_special_requests` + `update_transport_request_special_requests` RPCs (owner happy path, non-occupant rejection, anonymous rejection, whitespace-clears branch)
+- [x] High 4: replace module-level `WINDOW_TZ`/`WINDOW_TIME_FMT` with `event.time_zone`-driven factories; `transport_vehicles.pickup_tz` and `transport_requests.pickup_tz` defaults dropped
+- [x] High 5: hardcoded `YYC` route label replaced with `event.airport_iata`
+- [x] Medium 6: pgTAP coverage for `set_guest_invitation_fee_biu`
+- [x] Medium 7: pgTAP coverage for own-row-unpaid branch of `guard_guest_profile_completion`
+- [x] Medium 8: `TEST ROOM BLOCK` button gated on `import.meta.env.DEV`
+- [x] Low 9: `flights.destination` column comment generalised away from YYC
+- [x] Low 10: `transport_vehicles.pickup_tz` / `transport_requests.pickup_tz` defaults removed
+
+**Definition of done:**
+- typecheck/lint/test/build clean (314 vitest, 66 pgTAP)
+- single commit at sweep boundary
+
 ### M10 - Hardening and launch prep
 
 **Goal:** Production-ready quality bar.

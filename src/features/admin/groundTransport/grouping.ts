@@ -1,27 +1,31 @@
 import type { PassengerRow, VehicleOption } from '../api/groundTransport';
 
 export const WINDOW_MINUTES = 30;
-export const WINDOW_TZ = 'America/Edmonton';
-
-const WINDOW_START_FMT = new Intl.DateTimeFormat(undefined, {
-  weekday: 'short',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: WINDOW_TZ,
-});
 
 /**
- * Hour-and-minute formatter pinned to the event tz. Shared by window-end
- * labels, flight-time labels, and the vehicle dropdown so every clock face
- * on the Ground Transport Tool reads in MST/MDT.
+ * Build the window-start formatter ("Mon Jan 11 · 14:00") in the event
+ * timezone. We construct fresh formatters per render rather than caching
+ * a module-level instance so the timezone reads from the active event
+ * — no more "America/Edmonton" baked in.
  */
-export const WINDOW_TIME_FMT = new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit',
-  minute: '2-digit',
-  timeZone: WINDOW_TZ,
-});
+function windowStartFmt(timeZone: string): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone,
+  });
+}
+
+export function windowTimeFmt(timeZone: string): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone,
+  });
+}
 
 export interface FlightGroup {
   /** Stable key: airline|flight_number|pickup_at — same value across passengers on the same flight. */
@@ -56,9 +60,12 @@ export interface PickupWindow {
 export function bucketByPickup(
   rows: PassengerRow[],
   endpointField: 'origin' | 'destination',
+  timeZone: string,
 ): PickupWindow[] {
   if (rows.length === 0) return [];
   const slotMs = WINDOW_MINUTES * 60_000;
+  const startFmt = windowStartFmt(timeZone);
+  const timeFmt = windowTimeFmt(timeZone);
 
   const windowMap = new Map<string, PassengerRow[]>();
   for (const row of rows) {
@@ -74,10 +81,10 @@ export function bucketByPickup(
     .map(([startIso, passengers]): PickupWindow => {
       const start = new Date(startIso);
       const end = new Date(start.getTime() + slotMs);
-      const flights = groupByFlight(passengers, endpointField);
+      const flights = groupByFlight(passengers, endpointField, timeFmt);
       return {
         startIso,
-        label: `${WINDOW_START_FMT.format(start)}–${WINDOW_TIME_FMT.format(end)}`,
+        label: `${startFmt.format(start)}–${timeFmt.format(end)}`,
         totalPassengers: passengers.length,
         totalBags: passengers.reduce((s, p) => s + p.bag_count, 0),
         flights,
@@ -88,6 +95,7 @@ export function bucketByPickup(
 function groupByFlight(
   passengers: PassengerRow[],
   endpointField: 'origin' | 'destination',
+  timeFmt: Intl.DateTimeFormat,
 ): FlightGroup[] {
   const groups = new Map<string, PassengerRow[]>();
   for (const p of passengers) {
@@ -106,7 +114,7 @@ function groupByFlight(
         airline: head.airline ?? '—',
         flightNumber: head.flight_number ?? '—',
         endpoint: head[endpointField],
-        timeLabel: WINDOW_TIME_FMT.format(new Date(head.pickup_at)),
+        timeLabel: timeFmt.format(new Date(head.pickup_at)),
         totalBags: members.reduce((s, m) => s + m.bag_count, 0),
         passengers: members.sort((a, b) => a.full_name.localeCompare(b.full_name)),
       };

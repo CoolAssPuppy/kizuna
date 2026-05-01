@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -11,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { loadEmergencyContact, saveEmergencyContact } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
@@ -39,23 +39,18 @@ export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadEmergencyContact(getSupabaseClient(), user!.id),
   });
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setValues(
-      row
-        ? {
-            fullName: row.full_name,
-            relationship: row.relationship,
-            phonePrimary: row.phone_primary,
-            phoneSecondary: row.phone_secondary ?? '',
-            email: row.email ?? '',
-            notes: row.notes ?? '',
-          }
-        : EMPTY,
-    );
-  }
+  const [values, setValues] = useHydratedFormState(hydrated, row, EMPTY, (loaded) =>
+    loaded
+      ? {
+          fullName: loaded.full_name,
+          relationship: loaded.relationship,
+          phonePrimary: loaded.phone_primary,
+          phoneSecondary: loaded.phone_secondary ?? '',
+          email: loaded.email ?? '',
+          notes: loaded.notes ?? '',
+        }
+      : EMPTY,
+  );
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'emergency_contact',

@@ -23,7 +23,7 @@
 // is a waste of tokens.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
-import { getAdminClient } from '../_shared/supabaseClient.ts';
+import { getAdminClient, getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
@@ -40,6 +40,19 @@ const SYSTEM_PROMPT = `You rephrase a first-person fun fact into a "Which teamma
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
   if (preflight) return preflight;
+
+  // Require a valid Supabase JWT before we burn an OpenAI token or
+  // touch the cache. Without this an anonymous caller can submit
+  // arbitrary facts, drive cost, and pollute icebreaker_rephrasings.
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) {
+    return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
+  }
+  const userClient = getUserClient(authHeader);
+  const { data: userResult, error: userError } = await userClient.auth.getUser();
+  if (userError || !userResult.user) {
+    return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
+  }
 
   let body: { fact?: string };
   try {

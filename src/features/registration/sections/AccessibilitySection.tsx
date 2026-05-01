@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { loadAccessibility, saveAccessibility } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 import { toggleArrayMember } from './utils';
 
@@ -38,12 +38,10 @@ export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadAccessibility(getSupabaseClient(), user!.id),
   });
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setValues({ needs: loaded?.needs ?? [], notes: loaded?.notes ?? '' });
-  }
+  const [values, setValues] = useHydratedFormState(hydrated, loaded, EMPTY, (row) => ({
+    needs: row?.needs ?? [],
+    notes: row?.notes ?? '',
+  }));
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'accessibility',

@@ -88,7 +88,19 @@ const FETCHERS: Record<string, ReportFetcher> = {
     return { rows, lastModified };
   },
 
-  transport_manifest: async (client, _eventId) => {
+  transport_manifest: async (client, eventId) => {
+    // transport_requests has no event_id of its own — scope through
+    // the registrations table so a shareable link for Event A can't
+    // leak rows from Event B.
+    const eligibleUsers = await client
+      .from('registrations')
+      .select('user_id')
+      .eq('event_id', eventId);
+    if (eligibleUsers.error) throw eligibleUsers.error;
+    const userIds = (eligibleUsers.data ?? []).map((r) => r.user_id);
+    if (userIds.length === 0) {
+      return { rows: [], lastModified: null };
+    }
     const { data, error } = await client
       .from('transport_requests')
       .select(
@@ -100,6 +112,7 @@ const FETCHERS: Record<string, ReportFetcher> = {
         transport_vehicles ( vehicle_name )
       `,
       )
+      .in('user_id', userIds)
       .order('pickup_at');
     if (error) throw error;
     const rows = (data ?? []).map((r) => ({

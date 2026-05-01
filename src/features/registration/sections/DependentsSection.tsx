@@ -1,19 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { Checkbox } from '@/components/ui/checkbox';
-
 import { loadAdditionalGuests, saveAdditionalGuests } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 import { toggleArrayMember } from './utils';
 
@@ -43,20 +42,19 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadAdditionalGuests(getSupabaseClient(), user!.id),
   });
-  const [minors, setMinors] = useState<MinorEntry[]>([]);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setMinors(
-      (rows ?? []).map((row) => ({
+  const [minors, setMinors] = useHydratedFormState<typeof rows, MinorEntry[]>(
+    hydrated,
+    rows,
+    [],
+    (loaded) =>
+      (loaded ?? []).map((row) => ({
         id: row.id,
         fullName: row.full_name,
         ageBracketLabel: t(`registration.guests.brackets.${row.age_bracket}`),
         specialNeeds: row.special_needs,
         notes: row.notes ?? '',
       })),
-    );
-  }
+  );
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,

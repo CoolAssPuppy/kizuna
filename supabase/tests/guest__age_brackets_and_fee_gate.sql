@@ -3,14 +3,16 @@ set search_path to public, tap, extensions;
 --
 -- Covers:
 --   1. guest_fee_for_bracket() returns the launch tiers exactly.
---   2. set_guest_fee_amount() trigger stamps fee_amount on insert.
+--   2. set_guest_fee_amount() trigger stamps fee_amount on insert
+--      (additional_guests AND guest_invitations BIU triggers).
 --   3. additional_guests rejects age_bracket = 'adult'.
 --   4. guest_profiles rejects age_bracket != 'adult'.
 --   5. Gate blocks legal_name when the sponsor still has unpaid fees.
 --   6. Gate releases legal_name once every guest's payment_status is
 --      'paid' (or 'waived').
+--   7. Gate blocks the row's OWN unpaid status (not just siblings).
 begin;
-select plan(8);
+select plan(10);
 
 -- =====================================================================
 -- 1. Pricing
@@ -55,6 +57,30 @@ select is(
   (select fee_amount from public.additional_guests where id = '00000000-0000-0000-0000-000000001110'),
   200.00::numeric,
   'set_guest_fee_amount trigger stamps the bracket price on insert'
+);
+
+-- Same trigger fires on guest_invitations: passing in a wrong fee at
+-- the SQL boundary must be overwritten by the bracket price (covers
+-- set_guest_invitation_fee_biu specifically).
+insert into public.guest_invitations (
+  id, sponsor_id, guest_email, full_name, age_bracket, fee_amount, signed_token, expires_at
+) values (
+  '00000000-0000-0000-0000-000000001112',
+  '00000000-0000-0000-0000-000000001100',
+  'invitee-fee@example.com',
+  'Adult Invitee',
+  'adult',
+  -- Pass an under-quoted fee. The trigger should overwrite to the
+  -- adult bracket price ($950) before the row lands.
+  1.00,
+  'pgtap-token-1112',
+  now() + interval '7 days'
+);
+
+select is(
+  (select fee_amount from public.guest_invitations where id = '00000000-0000-0000-0000-000000001112'),
+  950.00::numeric,
+  'set_guest_invitation_fee_biu stamps adult bracket price on insert'
 );
 
 
@@ -186,6 +212,35 @@ select throws_ok(
   '23514',
   null,
   'guest_profiles rejects age_bracket != adult via CHECK constraint'
+);
+
+
+-- =====================================================================
+-- 7. Gate also blocks the row's OWN unpaid status (not just siblings).
+--    A new guest_profile inserted with payment_status='pending' and a
+--    legal_name set must fail even when no other sibling rows exist.
+-- =====================================================================
+insert into auth.users (id, email, aud, role)
+values ('00000000-0000-0000-0000-000000001160', 'own-unpaid@example.com', 'authenticated', 'authenticated');
+insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider) values
+  ('00000000-0000-0000-0000-000000001160', 'own-unpaid@example.com', 'guest', null, '00000000-0000-0000-0000-000000001100', 'email_password');
+
+prepare insert_self_unpaid as
+insert into public.guest_profiles (
+  user_id, sponsor_id, full_name, legal_name, relationship, fee_amount, payment_status
+) values (
+  '00000000-0000-0000-0000-000000001160',
+  '00000000-0000-0000-0000-000000001100',
+  'Own Unpaid', 'Own Unpaid Legal',
+  'partner',
+  950.00,
+  'pending'
+);
+select throws_ok(
+  'execute insert_self_unpaid',
+  '42501',
+  'guest_profile_locked_until_paid',
+  'gate blocks legal_name when the row''s own payment_status is pending'
 );
 
 select * from finish();

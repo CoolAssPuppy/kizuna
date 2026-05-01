@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { composeLegalName, loadPersonalInfo, savePersonalInfo } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
@@ -42,21 +43,16 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadPersonalInfo(getSupabaseClient(), user!.id),
   });
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setValues({
-      preferredName: row?.preferred_name ?? '',
-      firstName: row?.first_name ?? '',
-      middleInitial: row?.middle_initial ?? '',
-      lastName: row?.last_name ?? '',
-      alternateEmail: row?.alternate_email ?? '',
-      phoneNumber: row?.phone_number ?? '',
-      whatsapp: row?.whatsapp ?? '',
-      baseCity: row?.base_city ?? '',
-    });
-  }
+  const [values, setValues] = useHydratedFormState(hydrated, row, EMPTY, (loaded) => ({
+    preferredName: loaded?.preferred_name ?? '',
+    firstName: loaded?.first_name ?? '',
+    middleInitial: loaded?.middle_initial ?? '',
+    lastName: loaded?.last_name ?? '',
+    alternateEmail: loaded?.alternate_email ?? '',
+    phoneNumber: loaded?.phone_number ?? '',
+    whatsapp: loaded?.whatsapp ?? '',
+    baseCity: loaded?.base_city ?? '',
+  }));
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'personal_info',

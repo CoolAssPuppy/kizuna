@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -12,6 +11,7 @@ import { loadPassportMetadata, savePassport } from '../api';
 import { isExpiryRiskyForEvent } from '../expiryWarning';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
@@ -37,19 +37,14 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadPassportMetadata(getSupabaseClient(), user!.id),
   });
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setValues({
-      passportName: meta?.passport_name ?? '',
-      // The number is encrypted at rest and never returned. Leave blank
-      // so the user must re-enter it when correcting any field.
-      passportNumber: '',
-      issuingCountry: meta?.issuing_country ?? '',
-      expiryDate: meta?.expiry_date ?? '',
-    });
-  }
+  const [values, setValues] = useHydratedFormState(hydrated, meta, EMPTY, (row) => ({
+    passportName: row?.passport_name ?? '',
+    // The number is encrypted at rest and never returned. Leave blank so
+    // the user must re-enter it when correcting any field.
+    passportNumber: '',
+    issuingCountry: row?.issuing_country ?? '',
+    expiryDate: row?.expiry_date ?? '',
+  }));
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'passport',

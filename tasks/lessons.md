@@ -215,3 +215,19 @@
 **Why:** The npm-distributed package lags the official one. Mixing the two leads to `command not found: supabase` confusion or version mismatch on `db diff`.
 
 **How to apply:** README prerequisites list. CI installs via the official Supabase setup action when we add migration deploys later.
+
+## 2026-05-01 - Don't bake an event timezone into module-level constants
+
+**Rule:** Helpers that format timestamps (`Intl.DateTimeFormat`) take a `timeZone` argument and build the formatter per call (or per render via `useMemo`). Don't export a module-level `WINDOW_TZ = 'America/Edmonton'` constant.
+
+**Why:** Phase 1 ships from Banff but Phase 2 will run from a different city. A module-level constant pretends one timezone fits every event, and the only way to reuse the screen for a Lisbon event is to grep-and-replace strings. Threading `event.time_zone` through the call sites makes the timezone an explicit input, not a hidden assumption.
+
+**How to apply:** Read the active event's `time_zone` (and `airport_iata`) from `useActiveEvent()` and pass it down as a prop. Schema columns (`transport_vehicles.pickup_tz`, `transport_requests.pickup_tz`) drop their `default 'America/Edmonton'` so a missing value surfaces as a NOT NULL violation at insert time instead of silently writing the wrong zone. The Ground Transport Tool now does both.
+
+## 2026-05-01 - SECURITY DEFINER RPCs need admin readback in pgTAP
+
+**Rule:** When a pgTAP test verifies a SECURITY DEFINER RPC's write, perform the readback with `reset role` (postgres) so RLS doesn't hide the row from the very user who just wrote it.
+
+**Why:** A SECURITY DEFINER function bypasses RLS for the write but the surrounding test session still runs as `authenticated <user>`. RLS on the target table can return zero rows on the readback even though the write landed. The first cut of the special_requests test failed for this reason — `lives_ok` reported success and `select special_requests` reported NULL.
+
+**How to apply:** In pgTAP: `set local role authenticated; ... call RPC ... reset role; select <column> from <table>` for the assertion. Then `set local role authenticated;` again before the next negative-path test.

@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -12,6 +11,7 @@ import { loadDietary, saveDietary } from '../api';
 import type { DietaryRow } from '../types';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useHydratedFormState } from './useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 import { toggleArrayMember } from './utils';
 
@@ -56,22 +56,17 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
     enabled: !!user,
     queryFn: () => loadDietary(getSupabaseClient(), user!.id),
   });
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [synced, setSynced] = useState(false);
-  if (!synced && hydrated) {
-    setSynced(true);
-    setValues(
-      row
-        ? {
-            restrictions: row.restrictions,
-            allergies: row.allergies,
-            alcoholFree: row.alcohol_free,
-            severity: row.severity,
-            notes: row.notes ?? '',
-          }
-        : EMPTY,
-    );
-  }
+  const [values, setValues] = useHydratedFormState(hydrated, row, EMPTY, (loaded) =>
+    loaded
+      ? {
+          restrictions: loaded.restrictions,
+          allergies: loaded.allergies,
+          alcoholFree: loaded.alcohol_free,
+          severity: loaded.severity,
+          notes: loaded.notes ?? '',
+        }
+      : EMPTY,
+  );
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'dietary',

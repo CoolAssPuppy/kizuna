@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
+import { zonedWallTimeToUtcIso } from '@/lib/timezone';
 import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 
@@ -33,8 +34,7 @@ import {
   bucketByPickup,
   flightCohortVehicles,
   rankVehiclesForPassenger,
-  WINDOW_TIME_FMT,
-  WINDOW_TZ,
+  windowTimeFmt,
   type VehicleStat,
 } from './groundTransport/grouping';
 
@@ -73,9 +73,12 @@ export function GroundTransportToolScreen(): JSX.Element {
   // render would defeat their dependency arrays.
   const passengers = useMemo(() => passengersQ.data ?? [], [passengersQ.data]);
   const vehicles = useMemo(() => vehiclesQ.data ?? [], [vehiclesQ.data]);
+  const eventTz = event?.time_zone ?? 'UTC';
+  const eventAirport = event?.airport_iata ?? '';
+  const timeFmt = useMemo(() => windowTimeFmt(eventTz), [eventTz]);
   const windows = useMemo(
-    () => bucketByPickup(passengers, direction === 'arrival' ? 'origin' : 'destination'),
-    [passengers, direction],
+    () => bucketByPickup(passengers, direction === 'arrival' ? 'origin' : 'destination', eventTz),
+    [passengers, direction, eventTz],
   );
 
   const vehicleStats: VehicleStat[] = useMemo(() => {
@@ -131,8 +134,10 @@ export function GroundTransportToolScreen(): JSX.Element {
           assigning={assignMutation.isPending}
           onAssign={(args) => assignMutation.mutate(args)}
           direction={direction}
+          airportCode={eventAirport}
+          timeFmt={timeFmt}
         />
-        <VehicleSidebar vehicleStats={vehicleStats} direction={direction} />
+        <VehicleSidebar vehicleStats={vehicleStats} direction={direction} timeFmt={timeFmt} />
       </div>
 
       <NewVehicleDialog
@@ -141,6 +146,7 @@ export function GroundTransportToolScreen(): JSX.Element {
         eventId={event.id}
         defaultDate={event.start_date}
         direction={direction}
+        timeZone={eventTz}
         onCreated={() => {
           void qc.invalidateQueries({ queryKey: ['admin', 'gt', 'vehicles', eventId, direction] });
         }}
@@ -194,6 +200,8 @@ interface PassengerLaneProps {
   assigning: boolean;
   onAssign: (args: AssignVehicleArgs) => void;
   direction: TransportDirection;
+  airportCode: string;
+  timeFmt: Intl.DateTimeFormat;
 }
 
 function PassengerLane({
@@ -204,6 +212,8 @@ function PassengerLane({
   assigning,
   onAssign,
   direction,
+  airportCode,
+  timeFmt,
 }: PassengerLaneProps): JSX.Element {
   const { t } = useTranslation();
 
@@ -242,8 +252,8 @@ function PassengerLane({
                     {group.airline} {group.flightNumber}
                     <span className="ml-2 text-xs font-normal text-muted-foreground">
                       {direction === 'arrival'
-                        ? `${group.endpoint} → YYC`
-                        : `YYC → ${group.endpoint}`}{' '}
+                        ? `${group.endpoint} → ${airportCode}`
+                        : `${airportCode} → ${group.endpoint}`}{' '}
                       · {group.timeLabel}
                     </span>
                   </p>
@@ -264,6 +274,7 @@ function PassengerLane({
                       assigning={assigning}
                       onAssign={onAssign}
                       direction={direction}
+                      timeFmt={timeFmt}
                     />
                   ))}
                 </ul>
@@ -283,6 +294,7 @@ interface PassengerRowCardProps {
   assigning: boolean;
   onAssign: (args: AssignVehicleArgs) => void;
   direction: TransportDirection;
+  timeFmt: Intl.DateTimeFormat;
 }
 
 function PassengerRowCard({
@@ -292,6 +304,7 @@ function PassengerRowCard({
   assigning,
   onAssign,
   direction,
+  timeFmt,
 }: PassengerRowCardProps): JSX.Element {
   const { t } = useTranslation();
   const cohort = useMemo(
@@ -347,7 +360,7 @@ function PassengerRowCard({
             const showFull = remaining <= 0 && passenger.assigned_vehicle_id !== vehicle.id;
             const label = t('admin.groundTransport.vehicleLabel', {
               name: vehicle.vehicle_name,
-              time: WINDOW_TIME_FMT.format(new Date(vehicle.pickup_at)),
+              time: timeFmt.format(new Date(vehicle.pickup_at)),
               assigned,
               capacity: vehicle.capacity_passengers,
             });
@@ -371,9 +384,10 @@ function PassengerRowCard({
 interface VehicleSidebarProps {
   vehicleStats: ReadonlyArray<VehicleStat>;
   direction: TransportDirection;
+  timeFmt: Intl.DateTimeFormat;
 }
 
-function VehicleSidebar({ vehicleStats, direction }: VehicleSidebarProps): JSX.Element {
+function VehicleSidebar({ vehicleStats, direction, timeFmt }: VehicleSidebarProps): JSX.Element {
   const { t } = useTranslation();
   return (
     <aside className="space-y-3">
@@ -388,7 +402,12 @@ function VehicleSidebar({ vehicleStats, direction }: VehicleSidebarProps): JSX.E
       ) : (
         <ul className="space-y-2">
           {vehicleStats.map(({ vehicle, assigned }) => (
-            <VehicleSidebarRow key={vehicle.id} vehicle={vehicle} assigned={assigned} />
+            <VehicleSidebarRow
+              key={vehicle.id}
+              vehicle={vehicle}
+              assigned={assigned}
+              timeFmt={timeFmt}
+            />
           ))}
         </ul>
       )}
@@ -402,9 +421,10 @@ function VehicleSidebar({ vehicleStats, direction }: VehicleSidebarProps): JSX.E
 interface VehicleSidebarRowProps {
   vehicle: VehicleOption;
   assigned: number;
+  timeFmt: Intl.DateTimeFormat;
 }
 
-function VehicleSidebarRow({ vehicle, assigned }: VehicleSidebarRowProps): JSX.Element {
+function VehicleSidebarRow({ vehicle, assigned, timeFmt }: VehicleSidebarRowProps): JSX.Element {
   const ratio = assigned / vehicle.capacity_passengers;
   const tone = capacityTone(ratio);
   return (
@@ -416,7 +436,7 @@ function VehicleSidebarRow({ vehicle, assigned }: VehicleSidebarRowProps): JSX.E
         </span>
       </div>
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
-        {WINDOW_TIME_FMT.format(new Date(vehicle.pickup_at))}
+        {timeFmt.format(new Date(vehicle.pickup_at))}
       </p>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
         <div
@@ -435,6 +455,8 @@ interface NewVehicleDialogProps {
   /** ISO date (YYYY-MM-DD) seeded into the pickup-date field. */
   defaultDate: string;
   direction: TransportDirection;
+  /** IANA tz name from the active event (e.g. "America/Edmonton"). */
+  timeZone: string;
   onCreated: () => void;
 }
 
@@ -444,6 +466,7 @@ function NewVehicleDialog({
   eventId,
   defaultDate,
   direction,
+  timeZone,
   onCreated,
 }: NewVehicleDialogProps): JSX.Element {
   const { t } = useTranslation();
@@ -459,18 +482,18 @@ function NewVehicleDialog({
     if (!name.trim() || busy) return;
     setBusy(true);
     try {
-      // Build a UTC ISO from the local-Mountain date+time picker. The Date
-      // constructor parses 'YYYY-MM-DDTHH:mm' as LOCAL time, which would
-      // pick up whichever timezone the admin's machine is in — wrong for
-      // a Mountain-time event. zonedWallTimeToUtcIso anchors the wall-clock
-      // value to WINDOW_TZ so MST/MDT and any future DST changes are handled.
-      const pickupAtIso = zonedWallTimeToUtcIso(pickupDate, pickupTime, WINDOW_TZ);
+      // Build a UTC ISO from the local-event date+time picker. Using `new
+      // Date('YYYY-MM-DDTHH:mm')` parses as the admin's LOCAL time, which is
+      // wrong for an event in a different zone. zonedWallTimeToUtcIso anchors
+      // the wall-clock value to the event's tz so MST/MDT and DST shifts are
+      // handled correctly.
+      const pickupAtIso = zonedWallTimeToUtcIso(pickupDate, pickupTime, timeZone);
       await createVehicle(getSupabaseClient(), {
         eventId,
         vehicleName: name.trim(),
         direction,
         pickupAtIso,
-        pickupTz: WINDOW_TZ,
+        pickupTz: timeZone,
         capacityPassengers: pax,
         capacityBags: bags,
       });
@@ -567,45 +590,4 @@ function capacityTone(ratio: number): string {
   if (ratio >= 1) return 'bg-destructive';
   if (ratio >= 0.8) return 'bg-amber-500';
   return 'bg-primary';
-}
-
-/**
- * Combine a YYYY-MM-DD date and HH:mm time interpreted as wall-clock in
- * the given IANA timezone, returning a UTC ISO string.
- *
- * Browsers do not expose a "build a Date in tz X" constructor, so we
- * compute the offset numerically for the requested instant: format the
- * UTC-equivalent timestamp in the target zone, read back what wall time
- * the host thinks that is, and shift by the difference. One iteration is
- * enough because the offset is constant within each DST regime (Calgary
- * never has more than one transition in a single day).
- */
-function zonedWallTimeToUtcIso(date: string, time: string, timeZone: string): string {
-  const wallMs = Date.parse(`${date}T${time}:00Z`);
-  const offsetMs = tzOffsetMs(wallMs, timeZone);
-  return new Date(wallMs - offsetMs).toISOString();
-}
-
-/** Offset of `timeZone` relative to UTC at the supplied instant, in milliseconds. */
-function tzOffsetMs(utcMs: number, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    hour12: false,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).formatToParts(new Date(utcMs));
-  const lookup = (type: string): string => parts.find((p) => p.type === type)?.value ?? '0';
-  const asUtc = Date.UTC(
-    Number(lookup('year')),
-    Number(lookup('month')) - 1,
-    Number(lookup('day')),
-    Number(lookup('hour')) % 24,
-    Number(lookup('minute')),
-    Number(lookup('second')),
-  );
-  return asUtc - utcMs;
 }
