@@ -256,7 +256,10 @@
     "themes": {
       "light": "Light",
       "dark": "Dark",
-      "barbie": "Barbie"
+      "barbie": "Barbie",
+      "supa": "Supa",
+      "hermione": "Hermione",
+      "kirk": "Kirk"
     },
     "language": "Language",
     "languages": {

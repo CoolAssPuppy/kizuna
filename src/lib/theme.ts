@@ -7,9 +7,16 @@
  * matching CSS variable definitions.
  */
 
-export type ThemeId = 'light' | 'dark' | 'barbie';
+export type ThemeId = 'light' | 'dark' | 'barbie' | 'supa' | 'hermione' | 'kirk';
 
-export const SUPPORTED_THEMES: ReadonlyArray<ThemeId> = ['light', 'dark', 'barbie'];
+export const SUPPORTED_THEMES: ReadonlyArray<ThemeId> = [
+  'light',
+  'dark',
+  'barbie',
+  'supa',
+  'hermione',
+  'kirk',
+];
 export const DEFAULT_THEME: ThemeId = 'light';
 export const THEME_STORAGE_KEY = 'kizuna.theme';
 
