@@ -164,6 +164,14 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - exactOptionalPropertyTypes lessons captured in api.ts (conditional spread for id field)
 - Each step hydrates from DB before allowing submit — prevents accidental empty overwrites
 
+**M4.1 — Section unification (post-M4 dedup) [complete]:**
+- Collapsed each registration domain into a single `Section` component used by both wizard and profile.
+- New layer at `src/features/registration/sections/`: SectionChrome (mode-aware shell), useSectionSubmit (busy/error + toast vs markTaskComplete branching), and 7 sections (PersonalInfo, Dietary, EmergencyContact, Passport, Children, Swag, Transport).
+- Deleted 7 *Step.tsx files and 3 *Card.tsx files.
+- Bug fix that prompted the refactor: profile `EmergencyContactCard` and `DietaryCard` only rendered a subset of fields, so saving from profile silently nulled phone_secondary, notes, allergies, and severity. The unified Section captures the full schema.
+- EditProfileScreen now mirrors all 7 wizard steps, delivering on "registration steps all need to be reflected in profile".
+- 105/105 vitest, lint clean, typecheck clean.
+
 ### M5 - Guest invitation, payment, lifecycle [complete]
 
 **Goal:** Guest invitation lifecycle with signed tokens, Stripe checkout, webhook reconciliation.

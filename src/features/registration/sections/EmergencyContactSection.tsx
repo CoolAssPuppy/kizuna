@@ -7,14 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadEmergencyContact, markTaskComplete, saveEmergencyContact } from './api';
-import { StepShell } from './StepShell';
-import type { RegistrationBundle } from './types';
-
-interface Props {
-  bundle: RegistrationBundle;
-  onComplete: () => void;
-}
+import { loadEmergencyContact, saveEmergencyContact } from '../api';
+import { SectionChrome } from './SectionChrome';
+import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
   fullName: string;
@@ -34,13 +30,16 @@ const EMPTY: FormState = {
   notes: '',
 };
 
-export function EmergencyContactStep({ bundle, onComplete }: Props): JSX.Element {
+export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [values, setValues] = useState<FormState>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: 'emergency_contact',
+    toastSuccessKey: 'profile.toast.emergencyContactSaved',
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -67,35 +66,29 @@ export function EmergencyContactStep({ bundle, onComplete }: Props): JSX.Element
     };
   }, [user]);
 
-  async function handleSubmit(): Promise<void> {
+  function handleSubmit(): void {
     if (!user) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
-      await saveEmergencyContact(getSupabaseClient(), user.id, {
+    void submit(() =>
+      saveEmergencyContact(getSupabaseClient(), user.id, {
         full_name: values.fullName,
         relationship: values.relationship,
         phone_primary: values.phonePrimary,
         phone_secondary: values.phoneSecondary.trim() || null,
         email: values.email.trim() || null,
         notes: values.notes.trim() || null,
-      });
-      await markTaskComplete(getSupabaseClient(), bundle.registration.id, 'emergency_contact');
-      onComplete();
-    } catch {
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
+      }),
+    );
   }
 
   return (
-    <StepShell
+    <SectionChrome
+      mode={mode}
       title={t('registration.steps.emergencyContact')}
-      onSubmit={() => void handleSubmit()}
+      {...(mode.kind === 'profile' ? { description: t('profile.cards.emergencyContact') } : {})}
       busy={busy}
+      hydrated={hydrated}
       errorKey={errorKey}
-      submitDisabled={!hydrated}
+      onSubmit={handleSubmit}
     >
       <div className="space-y-2">
         <Label htmlFor="ec-full-name">{t('registration.emergencyContact.fullName')}</Label>
@@ -164,6 +157,6 @@ export function EmergencyContactStep({ bundle, onComplete }: Props): JSX.Element
           onChange={(e) => setValues((v) => ({ ...v, notes: e.target.value }))}
         />
       </div>
-    </StepShell>
+    </SectionChrome>
   );
 }

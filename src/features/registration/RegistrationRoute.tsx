@@ -3,39 +3,31 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 
-import { DietaryStep } from './DietaryStep';
-import { EmergencyContactStep } from './EmergencyContactStep';
-import { PassportStep } from './PassportStep';
-import { PersonalInfoStep } from './PersonalInfoStep';
 import { RegistrationLayout } from './RegistrationLayout';
-import { SwagStep } from './SwagStep';
-import { TransportStep } from './TransportStep';
+import { DietarySection } from './sections/DietarySection';
+import { EmergencyContactSection } from './sections/EmergencyContactSection';
+import { PassportSection } from './sections/PassportSection';
+import { PersonalInfoSection } from './sections/PersonalInfoSection';
+import { SwagSection } from './sections/SwagSection';
+import { TransportSection } from './sections/TransportSection';
+import type { SectionMode } from './sections/types';
 import { useRegistration } from './useRegistration';
-import type { RegistrationBundle } from './types';
 import { findStepByPath, nextPendingStep, WIZARD_STEPS } from './wizardSteps';
 
-function StepRouter({
-  bundle,
-  onComplete,
-  stepPath,
-}: {
-  bundle: RegistrationBundle;
-  onComplete: () => void;
-  stepPath: string;
-}): JSX.Element {
+function StepRouter({ mode, stepPath }: { mode: SectionMode; stepPath: string }): JSX.Element {
   switch (stepPath) {
     case 'personal-info':
-      return <PersonalInfoStep bundle={bundle} onComplete={onComplete} />;
+      return <PersonalInfoSection mode={mode} />;
     case 'passport':
-      return <PassportStep bundle={bundle} onComplete={onComplete} />;
+      return <PassportSection mode={mode} />;
     case 'emergency-contact':
-      return <EmergencyContactStep bundle={bundle} onComplete={onComplete} />;
+      return <EmergencyContactSection mode={mode} />;
     case 'dietary':
-      return <DietaryStep bundle={bundle} onComplete={onComplete} />;
+      return <DietarySection mode={mode} />;
     case 'swag':
-      return <SwagStep bundle={bundle} onComplete={onComplete} />;
+      return <SwagSection mode={mode} />;
     case 'transport':
-      return <TransportStep bundle={bundle} onComplete={onComplete} />;
+      return <TransportSection mode={mode} />;
     default:
       return <Navigate to="/registration" replace />;
   }
@@ -107,9 +99,15 @@ export function RegistrationRoute(): JSX.Element {
     }
   }
 
+  const wizardMode: SectionMode = {
+    kind: 'wizard',
+    bundle,
+    onComplete: handleStepComplete,
+  };
+
   return (
     <RegistrationLayout bundle={bundle} stepIndex={stepIndex}>
-      <StepRouter bundle={bundle} onComplete={handleStepComplete} stepPath={stepPath} />
+      <StepRouter mode={wizardMode} stepPath={stepPath} />
     </RegistrationLayout>
   );
 }

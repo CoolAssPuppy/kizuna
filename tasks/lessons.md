@@ -152,6 +152,14 @@
 
 **How to apply:** Use `scripts/db-apply.sh` (wraps the four steps idempotently). The package.json `db:apply` script calls it.
 
+## 2026-04-30 - One Section per registration domain, two render modes
+
+**Rule:** Each registration domain (personal info, dietary, etc.) lives in exactly one component — `XyzSection` — that takes a `mode` discriminated union for wizard vs profile. There are no mirrored Step/Card pairs.
+
+**Why:** The earlier pattern had `XyzStep.tsx` (wizard) and `XyzCard.tsx` (profile) for each domain. They drifted: profile cards rendered fewer fields than wizard steps, so saving from profile silently overwrote wizard-collected fields with null. The user reported it as "duplication, eliminate it" but the underlying defect was data loss.
+
+**How to apply:** New domains go through `src/features/registration/sections/` only. Use `SectionChrome` for the mode-aware shell (StepShell vs CardShell) and `useSectionSubmit` for the post-save side effects (markTaskComplete + advance vs toast). Both wizard and profile mount the same Section component.
+
 ## 2026-04-30 - Supabase CLI is a system install, not an npm dep
 
 **Rule:** Don't add `supabase` to `package.json` devDependencies. Install via `brew install supabase/tap/supabase` (or system equivalent) and document it in README prerequisites.

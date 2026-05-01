@@ -10,20 +10,15 @@ import { getSupabaseClient } from '@/lib/supabase';
 import {
   loadSwagCatalogue,
   loadSwagSelections,
-  markTaskComplete,
   saveSwagSelections,
   type SwagSelectionInput,
-} from './api';
-import { StepShell } from './StepShell';
-import type { RegistrationBundle } from './types';
+} from '../api';
+import { SectionChrome } from './SectionChrome';
+import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 import type { Database } from '@/types/database.types';
 
 type SwagItemRow = Database['public']['Tables']['swag_items']['Row'];
-
-interface Props {
-  bundle: RegistrationBundle;
-  onComplete: () => void;
-}
 
 interface SelectionState {
   optedIn: boolean;
@@ -33,15 +28,18 @@ interface SelectionState {
 
 const EMPTY_SELECTION: SelectionState = { optedIn: true, size: '', fitPreference: '' };
 
-export function SwagStep({ bundle, onComplete }: Props): JSX.Element {
+export function SwagSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: event } = useActiveEvent();
   const [catalogue, setCatalogue] = useState<SwagItemRow[]>([]);
   const [selections, setSelections] = useState<Record<string, SelectionState>>({});
   const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: 'swag',
+    toastSuccessKey: 'profile.toast.swagSaved',
+  });
 
   useEffect(() => {
     if (!user || !event) return;
@@ -72,11 +70,16 @@ export function SwagStep({ bundle, onComplete }: Props): JSX.Element {
     };
   }, [user, event]);
 
-  async function handleSubmit(): Promise<void> {
+  function update(itemId: string, patch: Partial<SelectionState>): void {
+    setSelections((prev) => ({
+      ...prev,
+      [itemId]: { ...(prev[itemId] ?? EMPTY_SELECTION), ...patch },
+    }));
+  }
+
+  function handleSubmit(): void {
     if (!user) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
+    void submit(() => {
       const payload: SwagSelectionInput[] = catalogue.map((item) => {
         const sel = selections[item.id] ?? EMPTY_SELECTION;
         return {
@@ -91,30 +94,18 @@ export function SwagStep({ bundle, onComplete }: Props): JSX.Element {
               : null,
         };
       });
-      await saveSwagSelections(getSupabaseClient(), user.id, payload);
-      await markTaskComplete(getSupabaseClient(), bundle.registration.id, 'swag');
-      onComplete();
-    } catch {
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  function update(itemId: string, patch: Partial<SelectionState>): void {
-    setSelections((prev) => ({
-      ...prev,
-      [itemId]: { ...(prev[itemId] ?? EMPTY_SELECTION), ...patch },
-    }));
+      return saveSwagSelections(getSupabaseClient(), user.id, payload);
+    });
   }
 
   return (
-    <StepShell
+    <SectionChrome
+      mode={mode}
       title={t('registration.steps.swag')}
-      onSubmit={() => void handleSubmit()}
       busy={busy}
+      hydrated={hydrated}
       errorKey={errorKey}
-      submitDisabled={!hydrated}
+      onSubmit={handleSubmit}
     >
       {catalogue.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('registration.swag.noCatalogue')}</p>
@@ -182,6 +173,6 @@ export function SwagStep({ bundle, onComplete }: Props): JSX.Element {
           </fieldset>
         );
       })}
-    </StepShell>
+    </SectionChrome>
   );
 }

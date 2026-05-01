@@ -1,8 +1,14 @@
 import { useTranslation } from 'react-i18next';
 
-import { DietaryCard } from './DietaryCard';
-import { EmergencyContactCard } from './EmergencyContactCard';
-import { PersonalInfoCard } from './PersonalInfoCard';
+import { ChildrenSection } from '@/features/registration/sections/ChildrenSection';
+import { DietarySection } from '@/features/registration/sections/DietarySection';
+import { EmergencyContactSection } from '@/features/registration/sections/EmergencyContactSection';
+import { PassportSection } from '@/features/registration/sections/PassportSection';
+import { PersonalInfoSection } from '@/features/registration/sections/PersonalInfoSection';
+import { SwagSection } from '@/features/registration/sections/SwagSection';
+import { TransportSection } from '@/features/registration/sections/TransportSection';
+
+const PROFILE_MODE = { kind: 'profile' } as const;
 
 export function EditProfileScreen(): JSX.Element {
   const { t } = useTranslation();
@@ -15,9 +21,13 @@ export function EditProfileScreen(): JSX.Element {
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <PersonalInfoCard />
-        <EmergencyContactCard />
-        <DietaryCard />
+        <PersonalInfoSection mode={PROFILE_MODE} />
+        <EmergencyContactSection mode={PROFILE_MODE} />
+        <DietarySection mode={PROFILE_MODE} />
+        <PassportSection mode={PROFILE_MODE} />
+        <ChildrenSection mode={PROFILE_MODE} />
+        <SwagSection mode={PROFILE_MODE} />
+        <TransportSection mode={PROFILE_MODE} />
       </div>
     </main>
   );

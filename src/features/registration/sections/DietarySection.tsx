@@ -7,9 +7,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadDietary, markTaskComplete, saveDietary } from './api';
-import { StepShell } from './StepShell';
-import type { DietaryRow, RegistrationBundle } from './types';
+import { loadDietary, saveDietary } from '../api';
+import type { DietaryRow } from '../types';
+import { SectionChrome } from './SectionChrome';
+import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 
 const RESTRICTION_OPTIONS = [
   'vegan',
@@ -27,11 +29,6 @@ const SEVERITY_OPTIONS: ReadonlyArray<DietaryRow['severity']> = [
   'intolerance',
   'allergy',
 ];
-
-interface DietaryStepProps {
-  bundle: RegistrationBundle;
-  onComplete: () => void;
-}
 
 interface FormState {
   restrictions: string[];
@@ -53,13 +50,16 @@ function toggle(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export function DietaryStep({ bundle, onComplete }: DietaryStepProps): JSX.Element {
+export function DietarySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [values, setValues] = useState<FormState>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: 'dietary',
+    toastSuccessKey: 'profile.toast.dietarySaved',
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -85,34 +85,28 @@ export function DietaryStep({ bundle, onComplete }: DietaryStepProps): JSX.Eleme
     };
   }, [user]);
 
-  async function handleSubmit(): Promise<void> {
+  function handleSubmit(): void {
     if (!user) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
-      await saveDietary(getSupabaseClient(), user.id, {
+    void submit(() =>
+      saveDietary(getSupabaseClient(), user.id, {
         restrictions: values.restrictions,
         allergies: values.allergies,
         alcohol_free: values.alcoholFree,
         severity: values.severity,
         notes: values.notes.trim() || null,
-      });
-      await markTaskComplete(getSupabaseClient(), bundle.registration.id, 'dietary');
-      onComplete();
-    } catch {
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
+      }),
+    );
   }
 
   return (
-    <StepShell
+    <SectionChrome
+      mode={mode}
       title={t('registration.steps.dietary')}
-      onSubmit={() => void handleSubmit()}
+      {...(mode.kind === 'profile' ? { description: t('profile.cards.dietary') } : {})}
       busy={busy}
+      hydrated={hydrated}
       errorKey={errorKey}
-      submitDisabled={!hydrated}
+      onSubmit={handleSubmit}
     >
       <fieldset className="space-y-2">
         <legend className="text-sm font-medium">{t('registration.dietary.restrictions')}</legend>
@@ -187,6 +181,6 @@ export function DietaryStep({ bundle, onComplete }: DietaryStepProps): JSX.Eleme
           onChange={(e) => setValues((v) => ({ ...v, notes: e.target.value }))}
         />
       </div>
-    </StepShell>
+    </SectionChrome>
   );
 }

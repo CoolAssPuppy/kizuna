@@ -8,17 +8,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadChildren, saveChildren } from './api';
-import { StepShell } from './StepShell';
-import type { RegistrationBundle } from './types';
+import { loadChildren, saveChildren } from '../api';
+import { SectionChrome } from './SectionChrome';
+import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 
 const SPECIAL_NEEDS_OPTIONS = ['crib', 'high_chair', 'allergy', 'mobility', 'other'] as const;
-
-interface Props {
-  /** Reserved for future task-marking when 'children' enters registration_task_key. */
-  bundle?: RegistrationBundle;
-  onComplete: () => void;
-}
 
 interface ChildEntry {
   id?: string;
@@ -34,13 +29,17 @@ function toggle(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
 
-export function ChildrenStep({ bundle: _bundle, onComplete }: Props): JSX.Element {
+export function ChildrenSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [children, setChildren] = useState<ChildEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  // No `children` task in registration_task_key yet (Phase 2 enum extension).
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: null,
+    toastSuccessKey: 'profile.toast.childrenSaved',
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -68,12 +67,10 @@ export function ChildrenStep({ bundle: _bundle, onComplete }: Props): JSX.Elemen
     setChildren((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
   }
 
-  async function handleSubmit(): Promise<void> {
+  function handleSubmit(): void {
     if (!user) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
-      await saveChildren(
+    void submit(() =>
+      saveChildren(
         getSupabaseClient(),
         user.id,
         children.map((c) => ({
@@ -83,26 +80,19 @@ export function ChildrenStep({ bundle: _bundle, onComplete }: Props): JSX.Elemen
           special_needs: c.specialNeeds,
           notes: c.notes.trim() || null,
         })),
-      );
-      // Children step uses the dietary task slot in registration_tasks for
-      // Phase 1 — there's no dedicated children task_key in the enum yet.
-      // Skip task marking until we add 'children' to registration_task_key.
-      onComplete();
-    } catch {
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
+      ),
+    );
   }
 
   return (
-    <StepShell
+    <SectionChrome
+      mode={mode}
       title={t('registration.steps.children')}
-      subtitle={t('registration.children.intro')}
-      onSubmit={() => void handleSubmit()}
+      description={t('registration.children.intro')}
       busy={busy}
+      hydrated={hydrated}
       errorKey={errorKey}
-      submitDisabled={!hydrated}
+      onSubmit={handleSubmit}
     >
       {children.length === 0 ? (
         <p className="text-sm text-muted-foreground">{t('registration.children.noChildren')}</p>
@@ -172,6 +162,6 @@ export function ChildrenStep({ bundle: _bundle, onComplete }: Props): JSX.Elemen
       >
         {t('registration.children.addChild')}
       </Button>
-    </StepShell>
+    </SectionChrome>
   );
 }

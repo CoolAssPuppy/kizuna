@@ -7,15 +7,11 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadPassportMetadata, markTaskComplete, savePassport } from './api';
-import { isExpiryRiskyForEvent } from './expiryWarning';
-import { StepShell } from './StepShell';
-import type { RegistrationBundle } from './types';
-
-interface Props {
-  bundle: RegistrationBundle;
-  onComplete: () => void;
-}
+import { loadPassportMetadata, savePassport } from '../api';
+import { isExpiryRiskyForEvent } from '../expiryWarning';
+import { SectionChrome } from './SectionChrome';
+import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
   passportName: string;
@@ -31,14 +27,17 @@ const EMPTY: FormState = {
   expiryDate: '',
 };
 
-export function PassportStep({ bundle, onComplete }: Props): JSX.Element {
+export function PassportSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: event } = useActiveEvent();
   const [values, setValues] = useState<FormState>(EMPTY);
   const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: 'passport',
+    toastSuccessKey: 'profile.toast.passportSaved',
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -48,8 +47,8 @@ export function PassportStep({ bundle, onComplete }: Props): JSX.Element {
       if (!active) return;
       setValues({
         passportName: meta?.passport_name ?? '',
-        // The number is encrypted; we never read it back. Leave empty so the
-        // user must re-enter when correcting.
+        // The number is encrypted at rest and never returned. Leave blank
+        // so the user must re-enter it when correcting any field.
         passportNumber: '',
         issuingCountry: meta?.issuing_country ?? '',
         expiryDate: meta?.expiry_date ?? '',
@@ -61,36 +60,29 @@ export function PassportStep({ bundle, onComplete }: Props): JSX.Element {
     };
   }, [user]);
 
-  async function handleSubmit(): Promise<void> {
+  function handleSubmit(): void {
     if (!user) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
-      await savePassport(getSupabaseClient(), user.id, {
+    void submit(() =>
+      savePassport(getSupabaseClient(), user.id, {
         passportName: values.passportName,
         passportNumber: values.passportNumber,
         issuingCountry: values.issuingCountry.toUpperCase(),
         expiryDate: values.expiryDate,
-      });
-      await markTaskComplete(getSupabaseClient(), bundle.registration.id, 'passport');
-      onComplete();
-    } catch {
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
+      }),
+    );
   }
 
   const showWarning = isExpiryRiskyForEvent(values.expiryDate, event?.end_date);
 
   return (
-    <StepShell
+    <SectionChrome
+      mode={mode}
       title={t('registration.steps.passport')}
-      subtitle={t('registration.passport.intro')}
-      onSubmit={() => void handleSubmit()}
+      description={t('registration.passport.intro')}
       busy={busy}
+      hydrated={hydrated}
       errorKey={errorKey}
-      submitDisabled={!hydrated}
+      onSubmit={handleSubmit}
     >
       <div className="space-y-2">
         <Label htmlFor="passport-name">{t('registration.passport.passportName')}</Label>
@@ -145,6 +137,6 @@ export function PassportStep({ bundle, onComplete }: Props): JSX.Element {
           </p>
         ) : null}
       </div>
-    </StepShell>
+    </SectionChrome>
   );
 }

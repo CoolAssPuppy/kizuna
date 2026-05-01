@@ -105,6 +105,10 @@
       "personalInfoSaved": "Personal info saved.",
       "emergencyContactSaved": "Emergency contact saved.",
       "dietarySaved": "Dietary preferences saved.",
+      "passportSaved": "Passport details saved.",
+      "childrenSaved": "Guests saved.",
+      "swagSaved": "Swag selections saved.",
+      "transportSaved": "Transport preference saved.",
       "error": "Something went wrong. Please try again."
     }
   },
