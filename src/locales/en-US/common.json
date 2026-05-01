@@ -318,7 +318,17 @@
     },
     "agenda": {
       "title": "Agenda",
-      "subtitle": "Sessions, speakers, and the daily schedule."
+      "subtitle": "Sessions, speakers, and the daily schedule.",
+      "downloadBlank": "Download blank template",
+      "downloadCurrent": "Export current agenda",
+      "import": "Import CSV",
+      "importing": "Importing",
+      "imported_one": "Imported {{count}} session.",
+      "imported_other": "Imported {{count}} sessions.",
+      "errorRow": "Row {{row}}",
+      "currentSessions_one": "Current schedule ({{count}} session)",
+      "currentSessions_other": "Current schedule ({{count}} sessions)",
+      "empty": "No sessions yet. Import a CSV or add them via the admin agenda viewer."
     },
     "documents": {
       "title": "Documents",
@@ -369,6 +379,19 @@
       "noConflicts": "No open conflicts."
     },
     "blocked": "You do not have permission to view this page."
+  },
+  "agenda": {
+    "title": "Agenda",
+    "subtitle": "Browse the schedule. Star the sessions you want to attend.",
+    "loading": "Loading the agenda",
+    "empty": "No sessions yet. Check back as the schedule lands.",
+    "noFavorites": "You have not starred any sessions yet.",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "filters": {
+      "all": "All ({{count}})",
+      "favorites": "My picks ({{count}})"
+    }
   },
   "shareReport": {
     "eyebrow": "Kizuna shared report",

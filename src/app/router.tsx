@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { AdminRoute } from '@/features/admin/AdminRoute';
 import { SharedReportScreen } from '@/features/admin/SharedReportScreen';
+import { AgendaRoute } from '@/features/agenda/AgendaRoute';
 import { useAuth } from '@/features/auth/AuthContext';
 import { RequireAuth } from '@/features/auth/RequireAuth';
 import { SignInScreen } from '@/features/auth/SignInScreen';
@@ -79,6 +80,14 @@ export function AppRouter(): JSX.Element {
         element={
           <RequireAuth>
             <ItineraryRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/agenda"
+        element={
+          <RequireAuth>
+            <AgendaRoute />
           </RequireAuth>
         }
       />

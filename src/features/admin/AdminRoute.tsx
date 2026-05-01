@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { useIsAdmin } from '@/features/auth/hooks';
 
 import { AdminLayout } from './AdminLayout';
+import { AgendaAdminScreen } from './AgendaAdminScreen';
 import { ComingSoon } from './ComingSoon';
 import { ConflictsScreen } from './ConflictsScreen';
 import { EventEditScreen } from './EventEditScreen';
@@ -31,12 +32,7 @@ export function AdminRoute(): JSX.Element {
         <Route path="events" element={<EventsListScreen />} />
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />
-        <Route
-          path="agenda"
-          element={
-            <ComingSoon titleKey="admin.agenda.title" subtitleKey="admin.agenda.subtitle" />
-          }
-        />
+        <Route path="agenda" element={<AgendaAdminScreen />} />
         <Route
           path="documents"
           element={
