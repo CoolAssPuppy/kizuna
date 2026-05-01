@@ -237,10 +237,20 @@ export async function fetchTransportManifest(
 }
 
 export interface RegistrationProgressRow extends CsvRow {
+  first_name: string;
+  last_name: string;
   email: string;
   role: string;
   completion_pct: number;
   status: string;
+}
+
+function splitName(full: string): { first: string; last: string } {
+  const trimmed = full.trim();
+  if (!trimmed) return { first: '', last: '' };
+  const idx = trimmed.indexOf(' ');
+  if (idx === -1) return { first: trimmed, last: '' };
+  return { first: trimmed.slice(0, idx), last: trimmed.slice(idx + 1) };
 }
 
 export async function fetchRegistrationProgress(
@@ -252,7 +262,11 @@ export async function fetchRegistrationProgress(
     .select(
       `
       completion_pct, status,
-      user:users!registrations_user_id_fkey ( email, role )
+      user:users!registrations_user_id_fkey (
+        email, role,
+        employee_profiles ( preferred_name, legal_name ),
+        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+      )
     `,
     )
     .eq('event_id', eventId)
@@ -260,8 +274,20 @@ export async function fetchRegistrationProgress(
   if (error) throw error;
 
   return (data ?? []).map((row) => {
-    const u = flatJoin<{ email: string; role: string }>(row.user);
+    const u = flatJoin<{
+      email: string;
+      role: string;
+      employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
+      guest_profiles: Joined<{ full_name: string }>;
+    }>(row.user);
+    const employee = flatJoin(u?.employee_profiles);
+    const guest = flatJoin(u?.guest_profiles);
+    const fullName =
+      employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+    const { first, last } = splitName(fullName);
     return {
+      first_name: first,
+      last_name: last,
       email: u?.email ?? '',
       role: u?.role ?? '',
       completion_pct: row.completion_pct,

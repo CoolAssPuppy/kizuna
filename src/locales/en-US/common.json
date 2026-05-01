@@ -136,7 +136,9 @@
     "back": "Back",
     "submit": "Submit",
     "agree": "I Agree",
-    "close": "Close"
+    "close": "Close",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "registration": {
     "title": "Registration",
@@ -164,7 +166,7 @@
       "baseCityHint": "Where you are travelling from."
     },
     "dietary": {
-      "restrictions": "Dietary Restrictions",
+      "restrictions": "Dietary restrictions",
       "restrictionsHint": "Select all that apply.",
       "restrictionOptions": {
         "vegan": "Vegan",
@@ -327,7 +329,42 @@
       "errorRow": "Row {{row}}",
       "currentSessions_one": "Current schedule ({{count}} session)",
       "currentSessions_other": "Current schedule ({{count}} sessions)",
-      "empty": "No sessions yet. Import a CSV or add them via the admin agenda viewer."
+      "empty": "No sessions yet. Import a CSV or add them via the admin agenda viewer.",
+      "addSession": "Add session",
+      "editSession": "Edit session",
+      "saveSession": "Save session",
+      "saving": "Saving",
+      "saved": "Session saved.",
+      "deleted": "Session removed.",
+      "deleteConfirm": "Remove this session from the agenda?",
+      "fields": {
+        "title": "Title",
+        "subtitle": "Subtitle",
+        "type": "Type",
+        "audience": "Audience",
+        "startsAt": "Starts at",
+        "endsAt": "Ends at",
+        "location": "Location",
+        "capacity": "Capacity",
+        "speakerEmail": "Speaker email",
+        "abstract": "Abstract",
+        "mandatory": "Auto-add to every relevant attendee's itinerary"
+      },
+      "types": {
+        "keynote": "Keynote",
+        "breakout": "Breakout",
+        "workshop": "Workshop",
+        "dinner": "Dinner",
+        "activity": "Activity",
+        "transport": "Transport",
+        "social": "Social"
+      },
+      "audiences": {
+        "all": "Everyone",
+        "employees_only": "Employees only",
+        "guests_only": "Guests only",
+        "opt_in": "Opt-in only"
+      }
     },
     "documents": {
       "title": "Documents",
@@ -407,7 +444,7 @@
       },
       "tenure": {
         "title": "Years attended",
-        "subtitle": "How many prior Supafests this person has attended."
+        "subtitle": "Distribution of prior Supafest attendance, from first-timers on the left to veterans on the right."
       },
       "accessibility": {
         "title": "Accessibility needs",
@@ -423,12 +460,18 @@
       "subtitle": "Live reports for hotel, transport, kitchen, and finance."
     },
     "tabs": {
-      "registration": "Registration Progress",
-      "rooming": "Rooming List",
-      "transport": "Transport Manifest",
-      "dietary": "Dietary Summary",
-      "swag": "Swag Order",
+      "registration": "Registration progress",
+      "rooming": "Rooming list",
+      "transport": "Transport manifest",
+      "dietary": "Dietary summary",
+      "swag": "Swag order",
       "payments": "Payments"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{total}}",
+      "range": "{{from}}–{{to}} of {{total}}"
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",

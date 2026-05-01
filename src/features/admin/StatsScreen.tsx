@@ -119,7 +119,7 @@ export function StatsScreen(): JSX.Element {
           title={t('admin.stats.tenure.title')}
           subtitle={t('admin.stats.tenure.subtitle')}
         >
-          <BarVertical data={stats.yearsAttended} />
+          <BarDistribution data={stats.yearsAttended} />
         </ChartCard>
 
         <ChartCard
@@ -186,6 +186,35 @@ function BarVertical({ data }: { data: CategoryCount[] }): JSX.Element {
           cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
         />
         <Bar dataKey="count" fill={PALETTE[0]} radius={[0, 4, 4, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+function BarDistribution({ data }: { data: CategoryCount[] }): JSX.Element {
+  if (data.length === 0) return <Empty />;
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 24 }} barCategoryGap={1}>
+        <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+        <XAxis
+          dataKey="name"
+          stroke="hsl(var(--muted-foreground))"
+          fontSize={11}
+          interval={0}
+          tickFormatter={(v: string) => v}
+        />
+        <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+        <Tooltip
+          contentStyle={{
+            background: 'hsl(var(--popover))',
+            border: '1px solid hsl(var(--border))',
+            borderRadius: 6,
+            fontSize: 12,
+          }}
+          cursor={{ fill: 'hsl(var(--muted) / 0.5)' }}
+        />
+        <Bar dataKey="count" fill={PALETTE[0]} radius={[2, 2, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

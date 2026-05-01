@@ -34,13 +34,11 @@ type Audience = DocumentRow['applies_to'];
 interface Draft {
   title: string;
   document_key: DocumentKey;
-  version: number;
   applies_to: Audience;
   content_type: DocumentContentType;
   body: string;
   pdf_path: string;
   notion_url: string;
-  display_order: number;
   is_active: boolean;
   requires_acknowledgement: boolean;
   requires_scroll: boolean;
@@ -55,19 +53,26 @@ const DOCUMENT_KEYS: ReadonlyArray<DocumentKey> = [
   'toc',
 ];
 
+const DOCUMENT_KEY_LABELS: Record<DocumentKey, string> = {
+  waiver: 'Waiver',
+  code_of_conduct: 'Code of conduct',
+  expense_policy: 'Expense policy',
+  booking_process: 'Booking process',
+  livestream: 'Livestream',
+  toc: 'Terms and conditions',
+};
+
 const AUDIENCES: ReadonlyArray<Audience> = ['all', 'employee', 'guest'];
 const CONTENT_TYPES: ReadonlyArray<DocumentContentType> = ['markdown', 'pdf', 'notion'];
 
 const EMPTY_DRAFT: Draft = {
   title: '',
   document_key: 'waiver',
-  version: 1,
   applies_to: 'all',
   content_type: 'markdown',
   body: '',
   pdf_path: '',
   notion_url: '',
-  display_order: 100,
   is_active: true,
   requires_acknowledgement: true,
   requires_scroll: true,
@@ -77,13 +82,11 @@ function rowToDraft(row: DocumentRow): Draft {
   return {
     title: row.title,
     document_key: row.document_key,
-    version: row.version,
     applies_to: row.applies_to,
     content_type: row.content_type,
     body: row.body ?? '',
     pdf_path: row.pdf_path ?? '',
     notion_url: row.notion_url ?? '',
-    display_order: row.display_order,
     is_active: row.is_active,
     requires_acknowledgement: row.requires_acknowledgement,
     requires_scroll: row.requires_scroll,
@@ -122,13 +125,11 @@ export function DocumentDialog({
         event_id: eventId,
         title: draft.title,
         document_key: draft.document_key,
-        version: draft.version,
         applies_to: draft.applies_to,
         content_type: draft.content_type,
         body: draft.content_type === 'markdown' ? draft.body : null,
         pdf_path: draft.content_type === 'pdf' ? draft.pdf_path : null,
         notion_url: draft.content_type === 'notion' ? draft.notion_url : null,
-        display_order: draft.display_order,
         is_active: draft.is_active,
         requires_acknowledgement: draft.requires_acknowledgement,
         requires_scroll: draft.requires_scroll,
@@ -183,23 +184,10 @@ export function DocumentDialog({
               >
                 {DOCUMENT_KEYS.map((key) => (
                   <option key={key} value={key}>
-                    {key.replace(/_/g, ' ')}
+                    {DOCUMENT_KEY_LABELS[key]}
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="doc-version">{t('adminDocuments.fields.version')}</Label>
-              <Input
-                id="doc-version"
-                type="number"
-                min={1}
-                value={draft.version}
-                onChange={(e) =>
-                  setDraft({ ...draft, version: Math.max(1, Number(e.target.value)) })
-                }
-              />
             </div>
 
             <div className="space-y-1.5">
@@ -207,9 +195,10 @@ export function DocumentDialog({
               <select
                 id="doc-audience"
                 value={draft.applies_to}
-                onChange={(e) =>
-                  setDraft({ ...draft, applies_to: e.target.value as Audience })
-                }
+                onChange={(e) => {
+                  const next = AUDIENCES.find((a) => a === e.target.value);
+                  if (next) setDraft({ ...draft, applies_to: next });
+                }}
                 className="h-10 w-full rounded-md border bg-background px-3 text-sm"
               >
                 {AUDIENCES.map((a) => (
@@ -218,20 +207,6 @@ export function DocumentDialog({
                   </option>
                 ))}
               </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="doc-display-order">
-                {t('adminDocuments.fields.displayOrder')}
-              </Label>
-              <Input
-                id="doc-display-order"
-                type="number"
-                value={draft.display_order}
-                onChange={(e) =>
-                  setDraft({ ...draft, display_order: Number(e.target.value) })
-                }
-              />
             </div>
 
             <div className="space-y-1.5 md:col-span-2">

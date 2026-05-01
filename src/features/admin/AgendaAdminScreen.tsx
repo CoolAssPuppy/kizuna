@@ -1,14 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Download, Upload } from 'lucide-react';
+import { Download, FileDown, Pencil, Plus, Trash2, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
-import { mediumDateFormatter } from '@/lib/formatters';
+import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
-import type { Database } from '@/types/database.types';
 
 import {
   agendaToCsv,
@@ -16,18 +15,23 @@ import {
   importAgendaCsv,
   sessionsToCsvRows,
 } from './agendaCsv';
+import {
+  type SessionRow,
+  createSession,
+  deleteSession,
+  fetchAllSessions,
+  updateSession,
+} from './api/sessions';
 import { downloadCsv } from './csv';
+import { SessionDialog } from './SessionDialog';
+import {
+  type SessionDraft,
+  emptySessionDraft,
+  rowToDraft,
+} from './sessionDraft';
 
-type SessionRow = Database['public']['Tables']['sessions']['Row'];
-
-async function loadSessions(eventId: string): Promise<SessionRow[]> {
-  const { data, error } = await getSupabaseClient()
-    .from('sessions')
-    .select('*')
-    .eq('event_id', eventId)
-    .order('starts_at', { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+function toIso(value: string): string {
+  return new Date(value).toISOString();
 }
 
 export function AgendaAdminScreen(): JSX.Element {
@@ -37,6 +41,7 @@ export function AgendaAdminScreen(): JSX.Element {
   const queryClient = useQueryClient();
   const { show } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editing, setEditing] = useState<SessionDraft | null>(null);
   const [importStatus, setImportStatus] = useState<{
     imported: number;
     errors: { row: number; message: string }[];
@@ -45,7 +50,7 @@ export function AgendaAdminScreen(): JSX.Element {
   const { data: sessions } = useQuery({
     queryKey: ['admin', 'agenda', eventId],
     enabled: eventId !== null,
-    queryFn: () => (eventId ? loadSessions(eventId) : Promise.resolve([])),
+    queryFn: () => (eventId ? fetchAllSessions(getSupabaseClient(), eventId) : Promise.resolve([])),
   });
 
   const importMutation = useMutation({
@@ -64,6 +69,46 @@ export function AgendaAdminScreen(): JSX.Element {
         show(t('admin.agenda.imported', { count: result.imported }));
         await queryClient.invalidateQueries({ queryKey: ['admin', 'agenda'] });
       }
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
+  const save = useMutation({
+    mutationFn: async (draft: SessionDraft) => {
+      if (!eventId) throw new Error('No active event');
+      const capacity = draft.capacity.trim()
+        ? Number.parseInt(draft.capacity.trim(), 10)
+        : null;
+      const payload = {
+        event_id: eventId,
+        title: draft.title,
+        subtitle: draft.subtitle.trim() || null,
+        type: draft.type,
+        audience: draft.audience,
+        starts_at: toIso(draft.starts_at),
+        ends_at: toIso(draft.ends_at),
+        location: draft.location.trim() || null,
+        capacity: Number.isFinite(capacity ?? NaN) ? capacity : null,
+        is_mandatory: draft.is_mandatory,
+        abstract: draft.abstract.trim() || null,
+        speaker_email: draft.speaker_email.trim().toLowerCase() || null,
+      };
+      if (draft.id) return updateSession(getSupabaseClient(), draft.id, payload);
+      return createSession(getSupabaseClient(), payload);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'agenda'] });
+      setEditing(null);
+      show(t('admin.agenda.saved'));
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => deleteSession(getSupabaseClient(), id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'agenda'] });
+      show(t('admin.agenda.deleted'));
     },
     onError: (err: Error) => show(err.message, 'error'),
   });
@@ -93,40 +138,45 @@ export function AgendaAdminScreen(): JSX.Element {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight">{t('admin.agenda.title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('admin.agenda.subtitle')}</p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold tracking-tight">{t('admin.agenda.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('admin.agenda.subtitle')}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 self-start">
+          <IconAction
+            icon={<FileDown aria-hidden className="h-3.5 w-3.5" />}
+            label={t('admin.agenda.downloadBlank')}
+            onClick={handleDownloadBlank}
+          />
+          <IconAction
+            icon={<Download aria-hidden className="h-3.5 w-3.5" />}
+            label={t('admin.agenda.downloadCurrent')}
+            onClick={handleDownloadCurrent}
+          />
+          <IconAction
+            icon={<Upload aria-hidden className="h-3.5 w-3.5" />}
+            label={importMutation.isPending ? t('admin.agenda.importing') : t('admin.agenda.import')}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={importMutation.isPending}
+          />
+          <Button size="sm" onClick={() => setEditing(emptySessionDraft())} className="gap-2">
+            <Plus aria-hidden className="h-4 w-4" />
+            {t('admin.agenda.addSession')}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = '';
+            }}
+          />
+        </div>
       </header>
-
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-4">
-        <Button variant="outline" onClick={handleDownloadBlank} className="gap-2">
-          <Download aria-hidden className="h-4 w-4" />
-          {t('admin.agenda.downloadBlank')}
-        </Button>
-        <Button variant="outline" onClick={handleDownloadCurrent} className="gap-2">
-          <Download aria-hidden className="h-4 w-4" />
-          {t('admin.agenda.downloadCurrent')}
-        </Button>
-        <Button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={importMutation.isPending}
-          className="gap-2"
-        >
-          <Upload aria-hidden className="h-4 w-4" />
-          {importMutation.isPending ? t('admin.agenda.importing') : t('admin.agenda.import')}
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,text/csv"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-            e.target.value = '';
-          }}
-        />
-      </div>
 
       {importStatus ? (
         <div className="space-y-2 rounded-md border p-4 text-sm">
@@ -152,17 +202,14 @@ export function AgendaAdminScreen(): JSX.Element {
         {sessions && sessions.length > 0 ? (
           <ul className="divide-y rounded-md border">
             {sessions.map((s) => (
-              <li key={s.id} className="px-4 py-3 text-sm">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-medium">{s.title}</span>
-                  <span className="tabular-nums text-xs text-muted-foreground">
-                    {mediumDateFormatter.format(new Date(s.starts_at))}
-                  </span>
-                </div>
-                {s.subtitle ? (
-                  <p className="text-xs text-muted-foreground">{s.subtitle}</p>
-                ) : null}
-              </li>
+              <SessionListItem
+                key={s.id}
+                session={s}
+                onEdit={() => setEditing(rowToDraft(s))}
+                onDelete={() => {
+                  if (confirm(t('admin.agenda.deleteConfirm'))) remove.mutate(s.id);
+                }}
+              />
             ))}
           </ul>
         ) : (
@@ -171,6 +218,84 @@ export function AgendaAdminScreen(): JSX.Element {
           </p>
         )}
       </div>
+
+      <SessionDialog
+        draft={editing}
+        onClose={() => setEditing(null)}
+        onSave={(d) => save.mutate(d)}
+        saving={save.isPending}
+      />
     </section>
+  );
+}
+
+interface IconActionProps {
+  icon: JSX.Element;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+function IconAction({ icon, label, onClick, disabled }: IconActionProps): JSX.Element {
+  return (
+    <Button
+      type="button"
+      size="sm"
+      variant="outline"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+      className="h-8 w-8 p-0"
+    >
+      {icon}
+    </Button>
+  );
+}
+
+interface SessionListItemProps {
+  session: SessionRow;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function SessionListItem({ session, onEdit, onDelete }: SessionListItemProps): JSX.Element {
+  const { t } = useTranslation();
+  return (
+    <li className="group flex items-start gap-3 px-4 py-3 text-sm hover:bg-muted/30">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="flex flex-1 flex-col items-start gap-0.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
+      >
+        <div className="flex flex-wrap items-baseline justify-between gap-2 self-stretch">
+          <span className="font-medium">{session.title}</span>
+          <span className="tabular-nums text-xs text-muted-foreground">
+            {mediumDateTimeFormatter.format(new Date(session.starts_at))}
+          </span>
+        </div>
+        {session.subtitle ? (
+          <p className="text-xs text-muted-foreground">{session.subtitle}</p>
+        ) : null}
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          {t(`admin.agenda.types.${session.type}`)} · {t(`admin.agenda.audiences.${session.audience}`)}
+          {session.location ? ` · ${session.location}` : ''}
+        </p>
+      </button>
+      <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onEdit} aria-label={t('actions.edit')}>
+          <Pencil aria-hidden className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8"
+          onClick={onDelete}
+          aria-label={t('actions.delete')}
+        >
+          <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
+        </Button>
+      </div>
+    </li>
   );
 }

@@ -35,6 +35,21 @@ function asEntries(map: Map<string, number>): CategoryCount[] {
     .sort((a, b) => b.count - a.count);
 }
 
+/**
+ * Convert a numeric-keyed distribution (e.g. years attended) into a sorted,
+ * gap-filled series so a histogram renders as a continuous distribution
+ * across the x-axis instead of a sparse jagged set of bars.
+ */
+function asNumericDistribution(map: Map<string, number>): CategoryCount[] {
+  if (map.size === 0) return [];
+  const max = Math.max(...Array.from(map.keys()).map((k) => Number.parseInt(k, 10)));
+  const out: CategoryCount[] = [];
+  for (let i = 0; i <= max; i++) {
+    out.push({ name: `${i}`, count: map.get(`${i}`) ?? 0 });
+  }
+  return out;
+}
+
 export async function fetchAdminStats(
   client: AppSupabaseClient,
   eventId: string,
@@ -119,7 +134,7 @@ export async function fetchAdminStats(
     allergies: asEntries(allergiesMap),
     alcoholFreeShare: { freeOf: alcoholFreeCount, total: dietaryTotal },
     paymentStatus: asEntries(paymentsMap),
-    yearsAttended: asEntries(yearsMap),
+    yearsAttended: asNumericDistribution(yearsMap),
     accessibilityNeeds: asEntries(accessibilityMap),
   };
 }
