@@ -1,0 +1,1104 @@
+{
+  "app": {
+    "name": "Kizuna",
+    "tagline": "Pysyvä side",
+    "offline": "Olet offline-tilassa. Ohjelmasi, huoneesi ja kuljetustietosi on tallennettu välimuistiin ja ovat yhä luettavissa.",
+    "loading": "Ladataan",
+    "loadingEvent": "Ladataan tapahtuman tietoja",
+    "noEvent": "Ei aktiivista tapahtumaa juuri nyt. Tarkista pian uudelleen."
+  },
+  "common": {
+    "back": "Takaisin",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "delete": "Poista",
+    "confirm": "Vahvista"
+  },
+  "roles": {
+    "super_admin": "Pääylläpitäjä",
+    "admin": "Ylläpitäjä",
+    "employee": "Työntekijä",
+    "guest": "Vieras",
+    "leadership": "Johto"
+  },
+  "nav": {
+    "home": "Etusivu",
+    "itinerary": "Ohjelma",
+    "agenda": "Aikataulu",
+    "registration": "Ilmoittautuminen",
+    "documents": "Asiakirjat",
+    "community": "Yhteisö",
+    "admin": "Hallinta",
+    "allEvents": "Kaikki tapahtumat",
+    "signOut": "Kirjaudu ulos",
+    "menu": "Valikko",
+    "openMenu": "Avaa valikko",
+    "closeMenu": "Sulje valikko"
+  },
+  "events": {
+    "title": "Kaikki tapahtumat",
+    "subtitle": "Vaihda, mitä tapahtumaa sovellus näyttää. Aktiivinen tapahtuma näkyy oletuksena.",
+    "create": "Uusi tapahtuma",
+    "empty": "Tapahtumia ei ole vielä määritetty.",
+    "active": "Aktiivinen",
+    "past": "Mennyt",
+    "viewing": "Tarkastellaan",
+    "view": "Näytä",
+    "currentlyViewing": "Tällä hetkellä tarkasteltavana",
+    "switched": "Näytetään nyt tämä tapahtuma.",
+    "cleared": "Palattiin aktiiviseen tapahtumaan."
+  },
+  "auth": {
+    "signIn": "Kirjaudu sisään",
+    "signUp": "Rekisteröidy",
+    "signOut": "Kirjaudu ulos",
+    "email": "Sähköposti",
+    "password": "Salasana",
+    "continueWithSso": "Jatka kertakirjautumisella",
+    "checkingSession": "Tarkistetaan istuntoasi",
+    "signedInAs": "Kirjautunut tunnuksella {{email}}",
+    "signInTitle": "Tervetuloa Takaisin",
+    "signInSubtitle": "Käytä kertakirjautumista, jos olet Supabase-tiimiläinen. Käytä kutsusähköpostiasi ja salasanaasi, jos olet vieras.",
+    "guestTab": "Vieras",
+    "employeeTab": "Työntekijä",
+    "needAccount": "Pitääkö luoda vieraslitili?",
+    "createAccount": "Luo Tili",
+    "alreadyHaveAccount": "Onko sinulla jo tili?",
+    "forgotPassword": "Unohditko salasanasi?",
+    "recoverySent": "Palautusviesti lähetetty osoitteeseen {{email}}.",
+    "errors": {
+      "invalidCredentials": "Sähköposti ja salasana eivät täsmää.",
+      "weakPassword": "Salasanassa on oltava vähintään 8 merkkiä.",
+      "emailRequired": "Anna sähköpostiosoitteesi ensin, jotta tiedämme, minne palautuslinkki lähetetään.",
+      "recoveryFailed": "Palautusviestiä ei voitu lähettää. Yritä hetken kuluttua uudelleen.",
+      "generic": "Sisäänkirjautumista ei voitu suorittaa loppuun. Yritä uudelleen."
+    },
+    "dev": {
+      "header": "Kehittäjän Sisäänkirjautumisen Pikavalinnat",
+      "subtitle": "Vain testausta varten.",
+      "asEmployee": "Esiinny työntekijänä",
+      "asAdmin": "Esiinny ylläpitäjänä"
+    }
+  },
+  "home": {
+    "feedTitle": "Sinun Syötteesi",
+    "itemsLabel": "kohdetta",
+    "feedEmpty": "Mitään ei odota sinua.",
+    "factsTitle": "Faktoja Tapahtumastamme",
+    "factsSubtitle": "Eläköön Tiimi 18 -legenda.",
+    "facts": {
+      "employees": "Työntekijät",
+      "guests": "Vieraat",
+      "registrationsStarted": "Ilmoittautumiset käynnissä",
+      "registrationsComplete": "Ilmoittautumiset valmiina",
+      "documentsSigned": "Allekirjoitetut asiakirjat"
+    },
+    "kinds": {
+      "document": "Asiakirja",
+      "task": "Ilmoittautuminen",
+      "announcement": "Ilmoitus"
+    },
+    "jetLag": {
+      "title": "Aikaerorasituksen torjuja",
+      "subtitle": "{{offset}} tuntia {{direction}} nykyisestä asuinpaikastasi. Odota {{severity}} aikaerorasitusta.",
+      "intro": "Mitä tutkimukset sanovat toimivan.",
+      "directions": {
+        "east": "itään",
+        "west": "länteen"
+      },
+      "severities": {
+        "mild": "lievää",
+        "moderate": "kohtalaista",
+        "severe": "merkittävää"
+      },
+      "another": "Näytä toinen vinkki",
+      "disclaimer": "Yleisiä ohjeita, ei lääketieteellistä neuvontaa. Vahvista lääkärisi kanssa kaikki pitkäaikaiset suunnitelmat."
+    },
+    "icebreaker": {
+      "title": "Tutustu tiimikaveriisi",
+      "subtitle": "Aito hauska fakta toiselta osallistujalta. Arvaa ensin, sitten paljasta.",
+      "reveal": "Paljasta vastaus",
+      "tryAnother": "Kokeile toista"
+    }
+  },
+  "welcome": {
+    "title": "Tervetuloa tapahtumaan {{eventName}}",
+    "loading": "Ladataan tapahtumaasi",
+    "greeting": "Hei {{name}}, tervetuloa takaisin.",
+    "tiles": {
+      "registration": "Suorita tapahtuman ilmoittautuminen vaihe vaiheelta.",
+      "itinerary": "Lentosi, kuljetuksesi, huoneesi ja sessiosi.",
+      "documents": "Vastuuvapauslauseke, käytösohjeet ja matkaohjeet.",
+      "consent": "Tarkista ja vahvista uudelleen mahdolliset odottavat asiakirjat.",
+      "consentTitle": "Odottavat Asiakirjat",
+      "admin": "Reaaliaikaiset raportit, ristiriitojen ratkaisu ja toiminta."
+    }
+  },
+  "errors": {
+    "boundary": {
+      "title": "Jokin Meni Pieleen",
+      "description": "Tapahtui odottamaton virhe. Lataa sivu uudelleen yrittääksesi uudelleen.",
+      "reload": "Lataa uudelleen"
+    },
+    "notFound": {
+      "title": "Sivua Ei Löydy",
+      "description": "Etsimääsi sivua ei ole olemassa.",
+      "goHome": "Mene Etusivulle"
+    }
+  },
+  "header": {
+    "uploadAvatar": "Lataa Profiilikuvasi",
+    "avatarMenu": "Avaa tilivalikko",
+    "editProfile": "Muokkaa Profiilia"
+  },
+  "profile": {
+    "title": "Profiili",
+    "nav": {
+      "label": "Profiilin osiot",
+      "personal": "Henkilötiedot",
+      "community": "Yhteisö",
+      "dietary": "Ruokavalio",
+      "accessibility": "Esteettömyys",
+      "emergency": "Hätäyhteyshenkilö",
+      "passport": "Passi",
+      "guests": "Vieraat",
+      "dependents": "Huollettavat",
+      "swag": "Tuotelahjat",
+      "transport": "Kuljetus"
+    },
+    "cards": {
+      "personalInfo": "Nimi, nimikylttinimi ja kaupunki, jota kutsut kodiksi.",
+      "emergencyContact": "Keneen meidän tulisi ottaa yhteyttä, jos jotain tapahtuu.",
+      "dietary": "Rajoitukset ja huomiot keittiölle."
+    },
+    "subjectSelector": {
+      "label": "Aktiivinen kohde",
+      "heading": "Täytetään puolesta",
+      "yourself": "Itsesi"
+    },
+    "toast": {
+      "personalInfoSaved": "Henkilötiedot tallennettu.",
+      "emergencyContactSaved": "Hätäyhteyshenkilö tallennettu.",
+      "dietarySaved": "Ruokavaliotoiveet tallennettu.",
+      "passportSaved": "Passin tiedot tallennettu.",
+      "dependentsSaved": "Huollettavat tallennettu.",
+      "accessibilitySaved": "Esteettömyystoiveet tallennettu.",
+      "swagSaved": "Tuotelahjavalinnat tallennettu.",
+      "transportSaved": "Kuljetustoive tallennettu.",
+      "error": "Jokin meni pieleen. Yritä uudelleen."
+    }
+  },
+  "community": {
+    "title": "Yhteisö",
+    "subtitle": "Etsi ihmisiä, jaa tarinoita ja tapaa muita osallistujia.",
+    "editProfile": "Muokkaa profiilia",
+    "noProfileYet": "Luo yhteisöprofiilisi, jotta muut voivat löytää sinut.",
+    "profile": {
+      "title": "Yhteisöprofiili",
+      "description": "Näkyy muille osallistujille, jotta ihmiset voivat ottaa sinuun yhteyttä.",
+      "bio": "Esittely",
+      "bioPlaceholder": "Muutama lause sinusta.",
+      "funFact": "Hauska fakta (jäänmurtaja)",
+      "funFactPlaceholder": "Jotain, mitä vieras ei koskaan arvaisi.",
+      "hobbies": "Harrastukset",
+      "hobbiesPlaceholder": "Kirjoita lisätäksesi harrastuksen ja paina Enter.",
+      "removeHobby": "Poista {{hobby}}",
+      "hometownCity": "Kotikaupunki",
+      "currentCity": "Missä asut nyt (kaupunki)",
+      "country": "Maa",
+      "saved": "Yhteisöprofiili tallennettu."
+    },
+    "map": {
+      "title": "Maailmankartta",
+      "toggleHometown": "Kotikaupungit",
+      "toggleCurrent": "Missä he asuvat nyt",
+      "zoomIn": "Lähennä",
+      "zoomOut": "Loitonna",
+      "zoomReset": "Nollaa zoomaus"
+    },
+    "matches": {
+      "byHobby": "Ihmiset, joilla on samoja harrastuksia",
+      "byHometown": "Ihmiset kotikaupungistasi",
+      "byCurrent": "Ihmiset nykyisessä kaupungissasi",
+      "empty": "Ei vielä osumia. Lisää muutama harrastus ja kotikaupunki yhteisöprofiiliisi.",
+      "matchedHobbies": "Yhteiset harrastukset",
+      "name": "Nimi",
+      "email": "Sähköposti"
+    },
+    "channels": {
+      "title": "Yhteisön kanavat",
+      "newChannel": "Aloita kanava",
+      "newChannelTitle": "Aloita yhteisön kanava",
+      "newChannelName": "Nimi",
+      "newChannelDescription": "Kuvaus",
+      "newChannelCreate": "Luo kanava",
+      "lastMessage": "Viimeinen viesti",
+      "noMessagesYet": "Ei vielä viestejä.",
+      "typing_one": "{{name}} kirjoittaa…",
+      "typing_other": "{{count}} ihmistä kirjoittaa…",
+      "openChannel": "Avaa {{name}}",
+      "send": "Lähetä",
+      "messageInputPlaceholder": "iMessage",
+      "imagePicker": "Lisää kuva",
+      "broadcast": "Ilmoita kaikille kanaville",
+      "broadcastConfirmTitle": "Lähetetäänkö jokaiselle kanavalle?",
+      "broadcastConfirmBody": "Tämä lähettää viestin jokaiselle aktiiviselle kanavalle.",
+      "broadcastConfirm": "Lähetä kaikille",
+      "broadcastSuccess": "Lähetetty {{count}} kanavalle.",
+      "deleteMessage": "Poista viesti",
+      "edited": "muokattu"
+    }
+  },
+  "footer": {
+    "tagline": "Kizuna · Pysyvä side.",
+    "poweredBy": "Rakennettu Supabasen päälle",
+    "theme": "Teema",
+    "themes": {
+      "light": "Vaalea",
+      "dark": "Tumma",
+      "barbie": "Barbie",
+      "supa": "Supa",
+      "hermione": "Hermione",
+      "kirk": "Kirk"
+    },
+    "language": "Kieli",
+    "languages": {
+      "en-US": "Englanti (Yhdysvallat)",
+      "fr-FR": "Ranska (Ranska)",
+      "it-IT": "Italia (Italia)",
+      "de-DE": "Saksa (Saksa)",
+      "es-ES": "Espanja (Espanja)",
+      "pt-PT": "Portugali (Portugali)",
+      "pt-BR": "Portugali (Brasilia)",
+      "fi-FI": "Suomi (Suomi)"
+    },
+    "rights": "Toiminnassa Supabasen avulla. Rakennettu Kizunalla."
+  },
+  "actions": {
+    "save": "Tallenna",
+    "cancel": "Peruuta",
+    "next": "Seuraava",
+    "back": "Takaisin",
+    "submit": "Lähetä",
+    "agree": "Hyväksyn",
+    "close": "Sulje",
+    "edit": "Muokkaa",
+    "delete": "Poista"
+  },
+  "registration": {
+    "title": "Ilmoittautuminen",
+    "stepLabel": "Vaihe {{current}} / {{total}}",
+    "progress": "{{percent}} % valmiina",
+    "saveAndContinue": "Tallenna ja Jatka",
+    "saving": "Tallennetaan",
+    "errorSaving": "Muutoksiasi ei voitu tallentaa. Yritä uudelleen.",
+    "steps": {
+      "personalInfo": "Henkilötiedot",
+      "dietary": "Ruokavalio",
+      "accessibility": "Esteettömyys",
+      "emergencyContact": "Hätäyhteyshenkilö",
+      "passport": "Passi",
+      "guests": "Vieraat",
+      "dependents": "Huollettavat",
+      "swag": "Tuotelahjat",
+      "transport": "Kuljetus"
+    },
+    "personalInfo": {
+      "preferredName": "Toivottu Nimi",
+      "preferredNameHint": "Miten nimesi näkyy nimikyltissäsi.",
+      "firstName": "Etunimi",
+      "middleInitial": "Toinen",
+      "lastName": "Sukunimi",
+      "legalNameHint": "Täsmälleen kuten passissasi lukee. Käytämme tätä matkustusasiakirjoissa ja illallisten istumajärjestyksessä.",
+      "alternateEmail": "Vaihtoehtoinen Sähköposti",
+      "phoneNumber": "Puhelinnumero",
+      "whatsapp": "WhatsApp",
+      "baseCity": "Nykyinen Kaupunki",
+      "baseCityHint": "Mistä matkustat."
+    },
+    "dietary": {
+      "restrictions": "Ruokavaliorajoitukset",
+      "restrictionsHint": "Valitse kaikki sopivat.",
+      "restrictionOptions": {
+        "vegan": "Vegaani",
+        "vegetarian": "Kasvissyöjä",
+        "halal": "Halal",
+        "kosher": "Kosher",
+        "gluten_free": "Gluteeniton",
+        "dairy_free": "Maidoton"
+      },
+      "allergies": "Allergiat",
+      "allergiesHint": "Valitse kaikki sopivat.",
+      "allergyOptions": {
+        "nuts": "Pähkinät",
+        "shellfish": "Äyriäiset",
+        "dairy": "Maitotuotteet",
+        "eggs": "Kananmunat",
+        "soy": "Soija",
+        "wheat": "Vehnä",
+        "sesame": "Seesami"
+      },
+      "alcoholFree": "Älkää tarjotko minulle alkoholia",
+      "severity": "Vakavuus",
+      "severityHint": "Anafylaktiset riskit ilmoitetaan keittiölle.",
+      "severityOptions": {
+        "preference": "Mieltymys",
+        "intolerance": "Intoleranssi",
+        "allergy": "Allergia (anafylaktinen riski)"
+      },
+      "notes": "Mitä muuta keittiömme tulisi tietää"
+    },
+    "accessibility": {
+      "intro": "Kerro meille tarvitsemistasi mukautuksista. Pidämme tämän vain tapahtumatiimin tiedossa.",
+      "needs": "Tarvittavat Mukautukset",
+      "needsHint": "Valitse kaikki sopivat.",
+      "needsOptions": {
+        "mobility": "Liikkuminen",
+        "vision": "Näkö",
+        "hearing": "Kuulo",
+        "neurodivergent": "Neurokirjon piirteet",
+        "chronic_condition": "Krooninen sairaus",
+        "other": "Muu"
+      },
+      "notes": "Yksityiskohdat",
+      "notesHint": "Mitä meidän tulisi tietää etukäteen — hiljaiset huoneet, ruokavaliotarpeet, jotka on jo katettu yllä, huoneen järjestelytoiveet."
+    },
+    "emergencyContact": {
+      "firstName": "Etunimi",
+      "lastName": "Sukunimi",
+      "relationship": "Suhde",
+      "phonePrimary": "Ensisijainen Puhelin",
+      "phonePrimaryHint": "Sisällytä maatunnus.",
+      "phoneSecondary": "Toissijainen Puhelin (valinnainen)",
+      "email": "Sähköposti (valinnainen)",
+      "notes": "Huomiot (valinnainen)"
+    },
+    "passport": {
+      "intro": "Passitietosi salataan tallennustilassa eivätkä koskaan ole ylläpitäjien nähtävillä.",
+      "passportName": "Nimi Kuten Passissa",
+      "passportNumber": "Passin Numero",
+      "passportNumberHint": "Salataan ennen tallennusta.",
+      "issuingCountry": "Myöntäjämaa",
+      "issuingCountryPlaceholder": "Valitse myöntäjämaa",
+      "issuingCountryHint": "Maa, jonka viranomainen myönsi passin.",
+      "expiryDate": "Voimassaolopäivä",
+      "expiryWarning": "Tämä passi vanhenee ennen tapahtuman päättymistä. Käytä passia, joka on voimassa vähintään kuusi kuukautta matkasi jälkeen."
+    },
+    "guests": {
+      "intro": "Kutsu mukanasi tulevat ihmiset. Aikuiset (18+) saavat oman kirjautumisen ja sähköpostin. Lapset kulkevat ilmoittautumisesi mukana ilman sähköpostia. Kokonaismaksu veloitetaan sinulta.",
+      "invite": "Kutsu vieras",
+      "inviteTitle": "Kutsu vieras",
+      "inviteBody": "Lähetämme kertakäyttöisen linkin, joka on voimassa 7 päivää. Kun he hyväksyvät, he saavat oman Kizuna-tilin ja voivat suorittaa loput ilmoittautumisesta itse.",
+      "bracketIntro": "Kuinka vanha kutsumasi vieras on? Maksu sisältyy sinun Stripe-maksuun, ei heidän.",
+      "brackets": {
+        "under_12": "Alle 12",
+        "teen": "12–17",
+        "adult": "18 ja yli"
+      },
+      "bracketHints": {
+        "under_12": "Lisätään ilmoittautumiseesi. Ei sähköpostia tai kirjautumista.",
+        "teen": "Lisätään ilmoittautumiseesi. Ei sähköpostia tai kirjautumista.",
+        "adult": "Lähetetään sähköpostikutsu omalla kirjautumisella."
+      },
+      "detailsIntroAdult": "Kerro meille heidän nimensä ja sähköpostinsa. He saavat kertakäyttöisen kutsulinkin, joka on voimassa 7 päivää.",
+      "detailsIntroMinor": "Kerro meille heidän nimensä. Voit muokata ruokavaliotarpeita ja muita tietoja heidän profiilistaan myöhemmin.",
+      "guestName": "Koko nimi",
+      "namePlaceholder": "Marisa Skywalker",
+      "firstName": "Etunimi",
+      "firstNamePlaceholder": "Marisa",
+      "lastName": "Sukunimi",
+      "lastNamePlaceholder": "Skywalker",
+      "guestEmail": "Vieraan sähköposti",
+      "emailPlaceholder": "guest@example.com",
+      "send": "Lähetä kutsu",
+      "addMinor": "Lisää ilmoittautumiseesi",
+      "sending": "Lähetetään",
+      "invited": "Kutsu lähetetty osoitteeseen {{email}}",
+      "minorAdded": "{{name}} lisätty ilmoittautumiseesi.",
+      "invitedAt": "Kutsuttu {{date}}",
+      "empty": "Ei vielä vieraita. Lisää aloittaaksesi.",
+      "totalDue": "Vieraiden kokonaismaksut: {{amount}}",
+      "totalLabel": "Vieraiden kokonaismaksut",
+      "totalHint": "Veloitetaan kortiltasi yhdessä tapahtumassa. Profiilit valmistuvat, kun Stripe vahvistaa.",
+      "payFees": "Maksa vieraiden maksut",
+      "payTitle": "Maksa vieraiden maksusi",
+      "payAmount": "{{amount}} maksettavaa",
+      "payHint": "Avaamme Stripe Checkoutin tässä ikkunassa. Kun maksu vahvistuu, jokainen aikuiskutsu lähtee ja huollettavat avataan.",
+      "payNow": "Maksa nyt",
+      "paying": "Avataan kassa",
+      "renameTitle": "Nimeä huollettava uudelleen",
+      "renameMinor": "Nimeä uudelleen",
+      "removeMinor": "Poista huollettava",
+      "minorRemoved": "Huollettava poistettu.",
+      "minorRenamed": "Huollettava nimetty uudelleen.",
+      "confirmRemoveMinor": "Poistetaanko {{name}} ilmoittautumisestasi? Hänen maksunsa vähennetään summasta.",
+      "cancel": "Peruuta kutsu",
+      "cancelled": "Kutsu peruutettu.",
+      "editInvitation": "Muokkaa kutsua",
+      "editInvitationTitle": "Muokkaa kutsua",
+      "editInvitationHint": "Voit muokata nimeä ja sähköpostia, kunnes vieras hyväksyy. Hyväksymisen jälkeen he päivittävät oman profiilinsa.",
+      "invitationUpdated": "Kutsu päivitetty.",
+      "statuses": {
+        "pending": "Odottaa",
+        "sent": "Lähetetty",
+        "accepted": "Hyväksytty",
+        "expired": "Vanhentunut",
+        "cancelled": "Peruutettu"
+      }
+    },
+    "dependents": {
+      "intro": "Lisää lapset tai kuka tahansa muu mukanasi matkustava, jolla ei ole omaa kirjautumista. Jokainen huollettava maksaa 500 USD lapsille ja 950 USD aikuisille.",
+      "addGuest": "Lisää huollettava",
+      "removeGuest": "Poista",
+      "fullName": "Koko nimi",
+      "age": "Ikä",
+      "ageHint": "Käytetään maksutason ja ruokarahan laskemiseen.",
+      "notes": "Huomiot",
+      "specialNeeds": "Erityistarpeet",
+      "specialNeedsOptions": {
+        "crib": "Pinnasänky",
+        "high_chair": "Syöttötuoli",
+        "allergy": "Allergia",
+        "mobility": "Liikkuminen",
+        "other": "Muu"
+      },
+      "noGuests": "Eikö huollettavia lisättäväksi? Jatka."
+    },
+    "swag": {
+      "intro": "Kerro meille T-paidan ja kengän kokosi, jotta voimme tilata oikeat varusteet etukäteen.",
+      "yourSizes": "Sinun kokosi",
+      "guestsHeading": "Lisävieraiden koot",
+      "tshirtSize": "T-paidan koko",
+      "shoeSize": "Kengän koko",
+      "shoeSizeHint": "Valitse järjestelmä, jonka tunnet — tallennamme kaiken EU-kokoina.",
+      "shoeSystem": {
+        "us": "US",
+        "eu": "EU"
+      },
+      "age_one": "{{age}}-vuotias",
+      "age_other": "{{age}}-vuotias"
+    },
+    "transport": {
+      "intro": "Kerro meille, mille matkaosuuksille haluat lentokenttäkuljetuksen. Käytämme tätä kuljetuslistan rakentamiseen.",
+      "options": {
+        "none": "Järjestän oman kuljetuksen molemmille matkaosuuksille.",
+        "arrival": "Tarvitsen kyydin lentokentältä vain saapuessa.",
+        "departure": "Tarvitsen kyydin lentokentälle vain lähtiessä.",
+        "both": "Tarvitsen kyydit sekä saapumiseen että lähtöön."
+      }
+    }
+  },
+  "admin": {
+    "title": "Hallinta",
+    "subtitle": "Reaaliaikaiset toimintatiedot.",
+    "comingSoon": "Tulossa pian. Tämä osio on rakenteilla.",
+    "loading": "Ladataan",
+    "nav": {
+      "label": "Hallinnan osiot",
+      "agenda": "Aikataulu",
+      "groundTransport": "Maakuljetustyökalu",
+      "roomAssignment": "Huoneiden Jakotyökalu",
+      "feed": "Syöte",
+      "documents": "Asiakirjat",
+      "stats": "Tilastot",
+      "nudges": "Muistutukset",
+      "reports": "Raportit",
+      "conflicts": "Ristiriidat"
+    },
+    "groundTransport": {
+      "title": "Maakuljetustyökalu",
+      "subtitle": "Lennot ryhmitellään 30 minuutin noutoaikoihin ja sitten yhteisten lentojen mukaan. Anna jokaiselle matkustajalle ajoneuvo.",
+      "tabs": {
+        "arrival": "Saapuminen",
+        "departure": "Lähtö"
+      },
+      "empty": "Ei vielä lentoja tälle matkaosuudelle. Ne ilmestyvät, kun matkustustiedot synkronoituvat.",
+      "noEvent": "Valitse ensin aktiivinen tapahtuma.",
+      "unassigned": "Ei jaettu",
+      "needsReview": "Ohjelma muuttunut",
+      "needsReviewHint": "Tämän matkustajan lento muuttui ajoneuvon jakamisen jälkeen. Valitse uusi ajoneuvo.",
+      "newVehicle": "Uusi ajoneuvo",
+      "newVehicleTitle": "Lisää maakuljetusajoneuvo",
+      "createVehicle": "Lisää ajoneuvo",
+      "vehicleCreated": "Ajoneuvo lisätty.",
+      "vehicleName": "Ajoneuvon nimi",
+      "vehicleNamePlaceholder": "esim. Bussi A",
+      "vehicleDirection": "Suunta",
+      "vehiclePickupDate": "Noutopäivä",
+      "vehiclePickupTime": "Noutoaika (Mountain)",
+      "capacityPax": "Matkustajakapasiteetti",
+      "capacityBags": "Laukkukapasiteetti",
+      "vehiclesHeader": "Ajoneuvot",
+      "noVehicles": "Ei vielä ajoneuvoja. Klikkaa Uusi ajoneuvo lisätäksesi ensimmäisen.",
+      "windowSummary": "{{passengers}} matkustajaa · {{bags}} laukkua",
+      "flightSummary": "{{passengers}} matkustajaa · {{bags}} laukkua",
+      "full": "(täynnä)",
+      "vehicleLabel": "{{name}} · {{time}} · {{assigned}}/{{capacity}}",
+      "suggested": "Paras vastaavuus",
+      "noVehiclesForLeg": "Ei ajoneuvoja tälle matkaosuudelle. Lisää yksi aloittaaksesi jakamisen."
+    },
+    "roomAssignment": {
+      "title": "Huoneiden Jakotyökalu",
+      "subtitle": "Tuo huoneet hotellisi varauserästä ja jaa osallistujat johtotason, perhekoon ja ilmoittautumisjärjestyksen mukaan.",
+      "noEvent": "Valitse ensin aktiivinen tapahtuma.",
+      "empty": "Ei vielä tuotuja huoneita. Klikkaa Tuo huone-erä ladataksesi hotellitaulukkosi.",
+      "importBlock": "Tuo huone-erä",
+      "importTitle": "Tuo hotellin huone-erä",
+      "hotelName": "Hotellin nimi",
+      "checkIn": "Sisäänkirjautuminen",
+      "checkOut": "Uloskirjautuminen",
+      "csv": "Huone-CSV",
+      "csvHint": "Vaaditut otsikot: room_number (ja vähintään description). Valinnaiset: size_sqm tai size_sqft, is_suite, capacity.",
+      "tab": {
+        "paste": "Liitä erä",
+        "upload": "Lataa CSV-tiedostosta"
+      },
+      "fileLabel": "Valitse CSV-tiedosto",
+      "fileHint": "Samat otsikot kuin liittämispolulla. Tiedoston sisältö ladataan tekstialueeseen, jotta voit tarkistaa ennen tuontia.",
+      "fileLoaded": "Ladattu {{bytes}} tavua ({{rows}} huonetta).",
+      "testBlock": "TEST ROOM BLOCK",
+      "import": "Tuo huoneet",
+      "importing": "Tuodaan",
+      "imported": "Tuotu {{inserted}} huonetta ({{warnings}} varoitusta).",
+      "errorLine": "Rivi {{line}}",
+      "summaryHeader": "Erän yhteenveto",
+      "totalRooms": "Huoneita yhteensä",
+      "suites": "Sviittejä",
+      "assignedOf": "Asukkaat",
+      "unassigned": "Ei jaettu",
+      "suiteTag": "Sviitti",
+      "capacityLabel": "{{occupied}} / {{capacity}} käytössä",
+      "sizeLabel": "{{sqm}} m²",
+      "addOccupant": "Lisää asukas",
+      "removeOccupant": "Poista asukas",
+      "assignPlaceholder": "+ Jaa osallistuja",
+      "autoAssign": "Automaattijako",
+      "autoAssigning": "Automaattijaetaan",
+      "autoAssignDone": "Automaattijaettu {{assigned}} osallistujaa ({{unplaced}} sijoittamatonta).",
+      "comingSoon": "Tämä työkalu on rakenteilla. Pidä kiinni."
+    },
+    "events": {
+      "title": "Tapahtumat",
+      "subtitle": "Jokainen Kizuna-tapahtuma. Menneet ja tulevat.",
+      "create": "Uusi tapahtuma",
+      "edit": "Muokkaa tapahtumaa",
+      "save": "Tallenna tapahtuma",
+      "saving": "Tallennetaan",
+      "saved": "Tapahtuma tallennettu.",
+      "delete": "Poista tapahtuma",
+      "deleted": "Tapahtuma poistettu.",
+      "deleteConfirm": "Poistetaanko tämä tapahtuma kovapoistolla ja kaikki tapahtumakohtaiset rivit (sessiot, ilmoittautumiset, majoitukset, kuljetus, ohjelma, asiakirjat)? Henkilökohtaiset profiilitiedot säilyvät. Tätä ei voi peruuttaa.",
+      "cascading": "Poistetaan",
+      "active": "Aktiivinen",
+      "past": "Mennyt",
+      "empty": "Ei vielä tapahtumia. Luo ensimmäinen aloittaaksesi.",
+      "formHint": "Muokkaa perustietoja täällä. Kutsut ovat seuraavalla välilehdellä.",
+      "fields": {
+        "name": "Nimi",
+        "subtitle": "Alaotsikko",
+        "type": "Tyyppi",
+        "location": "Sijainti",
+        "timeZone": "Aikavyöhyke (IANA)",
+        "startDate": "Alkamispäivä",
+        "endDate": "Päättymispäivä",
+        "regOpensAt": "Ilmoittautuminen avautuu",
+        "regClosesAt": "Ilmoittautuminen sulkeutuu",
+        "heroImage": "Pääkuvan URL",
+        "logo": "Logon URL"
+      },
+      "flags": {
+        "title": "Näkyvyys ja tila",
+        "isActive": "Aktiivinen tapahtuma",
+        "isActiveHint": "Vain yksi supafest-tapahtuma voi olla kerralla aktiivinen. Aktiiviset tapahtumat ohjaavat tervetuloruutua.",
+        "inviteAll": "Kutsu kaikki työntekijät automaattisesti",
+        "inviteAllHint": "Kun käytössä, jokainen aktiivinen työntekijä näkee tämän tapahtuman. Muutoin kutsut on lisättävä yksi kerrallaan."
+      }
+    },
+    "agenda": {
+      "title": "Aikataulu",
+      "subtitle": "Sessiot, puhujat ja päivittäinen aikataulu.",
+      "downloadBlank": "Lataa tyhjä malli",
+      "downloadCurrent": "Vie nykyinen aikataulu",
+      "import": "Tuo CSV",
+      "importing": "Tuodaan",
+      "imported_one": "Tuotu {{count}} sessio.",
+      "imported_other": "Tuotu {{count}} sessiota.",
+      "errorRow": "Rivi {{row}}",
+      "currentSessions_one": "Nykyinen aikataulu ({{count}} sessio)",
+      "currentSessions_other": "Nykyinen aikataulu ({{count}} sessiota)",
+      "empty": "Ei vielä sessioita. Tuo CSV tai lisää ne hallinnan aikataulukatselijan kautta.",
+      "addSession": "Lisää sessio",
+      "editSession": "Muokkaa sessiota",
+      "saveSession": "Tallenna sessio",
+      "saving": "Tallennetaan",
+      "saved": "Sessio tallennettu.",
+      "deleted": "Sessio poistettu.",
+      "deleteConfirm": "Poistetaanko tämä sessio aikataulusta?",
+      "fields": {
+        "title": "Otsikko",
+        "subtitle": "Alaotsikko",
+        "type": "Tyyppi",
+        "audience": "Yleisö",
+        "startsAt": "Alkaa",
+        "endsAt": "Päättyy",
+        "location": "Sijainti",
+        "capacity": "Kapasiteetti",
+        "speakerEmail": "Puhujan sähköposti",
+        "abstract": "Tiivistelmä",
+        "mandatory": "Lisää automaattisesti jokaisen olennaisen osallistujan ohjelmaan"
+      },
+      "types": {
+        "keynote": "Pääpuhe",
+        "breakout": "Ryhmäsessio",
+        "workshop": "Työpaja",
+        "dinner": "Illallinen",
+        "activity": "Aktiviteetti",
+        "transport": "Kuljetus",
+        "social": "Seurustelu"
+      },
+      "audiences": {
+        "all": "Kaikki",
+        "employees_only": "Vain työntekijät",
+        "guests_only": "Vain vieraat",
+        "opt_in": "Vain ilmoittautuneille"
+      }
+    },
+    "documents": {
+      "title": "Asiakirjat",
+      "subtitle": "Versioidut asiakirjat näkyvät ilmoittautumisessa ja asiakirjat-välilehdellä."
+    },
+    "feed": {
+      "title": "Syöte",
+      "subtitle": "Toimitukselliset kohteet kiinnitettyinä etusivulle.",
+      "create": "Lisää syötekohde",
+      "edit": "Muokkaa syötekohdetta",
+      "save": "Tallenna syötekohde",
+      "saving": "Tallennetaan",
+      "saved": "Syötekohde tallennettu.",
+      "delete": "Poista",
+      "deleted": "Syötekohde poistettu.",
+      "deleteConfirm": "Poistetaanko tämä syötekohde etusivulta?",
+      "newItem": "Lisää syötekohde",
+      "empty": "Ei vielä mitään täällä. Lisää kohde.",
+      "alwaysOpen": "aina",
+      "noItems": "Ei vielä syötekohteita. Käytä Lisää syötekohde julkaistaksesi ensimmäisen.",
+      "locations": {
+        "main": "Päasyöte",
+        "sidebar": "Sivupalkki"
+      },
+      "fields": {
+        "location": "Sijainti",
+        "title": "Otsikko",
+        "subtitle": "Alaotsikko",
+        "body": "Sisältö",
+        "image": "Kuva",
+        "link": "Linkin URL",
+        "occursAt": "Tapahtuu",
+        "startsDisplayingAt": "Alkaa näkyä",
+        "endsDisplayingAt": "Lopettaa näkymisen"
+      }
+    },
+    "stats": {
+      "title": "Tilastot",
+      "subtitle": "Osallistujamäärä, ruokavaliojakauma, ilmoittautumissuppilo, maakohtainen erittely.",
+      "empty": "Ei vielä tietoja.",
+      "funnel": {
+        "title": "Ilmoittautumissuppilo",
+        "subtitle": "Miten osallistujat etenevät ilmoittautumisessa.",
+        "invited": "Kutsuttu",
+        "started": "Aloitettu",
+        "complete": "Valmis",
+        "cancelled": "Peruutettu"
+      },
+      "role": {
+        "title": "Roolin mukaan",
+        "subtitle": "Aktiiviset tilit jaettuna rooleittain."
+      },
+      "country": {
+        "title": "Kotimaa",
+        "subtitle": "Top 12 maata työntekijämäärän mukaan."
+      },
+      "department": {
+        "title": "Osaston mukaan",
+        "subtitle": "Jakauma organisaatiossa."
+      },
+      "dietary": {
+        "title": "Ruokavaliorajoitukset",
+        "subtitle": "Vegaani, kasvissyöjä, halal, kosher, gluteeniton, maidoton."
+      },
+      "allergies": {
+        "title": "Allergiat",
+        "subtitle": "Pähkinät, äyriäiset, maitotuotteet, kananmunat, soija, vehnä, seesami, muut."
+      },
+      "alcoholFree": {
+        "title": "Alkoholiton",
+        "subtitle": "Niiden osallistujien osuus, jotka eivät halua alkoholia.",
+        "label": "alkoholiton"
+      },
+      "payments": {
+        "title": "Vieraiden maksut",
+        "subtitle": "Odottava, maksettu, peruttu, hyvitetty, epäonnistunut."
+      },
+      "tenure": {
+        "title": "Osallistumisvuodet",
+        "subtitle": "Aiempien Supafest-osallistumisten jakauma, ensikertalaisista vasemmalla veteraaneihin oikealla."
+      },
+      "accessibility": {
+        "title": "Esteettömyystarpeet",
+        "subtitle": "Liikkuminen, näkö, kuulo, neurokirjon piirteet, krooninen, muut."
+      }
+    },
+    "nudges": {
+      "title": "Muistutukset",
+      "subtitle": "Manuaaliset muistutukset, määräaikamuistutukset ja koko tarkastusloki.",
+      "send": "Lähetä muistutus",
+      "sendCta": "Lähetä",
+      "sending": "Lähetetään",
+      "sent": "Lähetetty {{delivered}} / {{attempted}}.",
+      "empty": "Muistutuksia ei ole vielä lähetetty.",
+      "clearUser": "Tyhjennä",
+      "userPlaceholder": "Hae sähköpostilla",
+      "fields": {
+        "channel": "Kanava",
+        "type": "Tyyppi",
+        "audience": "Yleisö",
+        "subject": "Aihe",
+        "body": "Sisältö"
+      },
+      "channels": {
+        "in_app": "Sovelluksessa",
+        "email": "Sähköposti",
+        "slack": "Slack"
+      },
+      "types": {
+        "announcement": "Ilmoitus",
+        "nudge": "Muistutus",
+        "deadline_reminder": "Määräaikamuistutus",
+        "flight_update": "Lennon päivitys",
+        "room_assignment": "Huoneen jako",
+        "checkin_reminder": "Sisäänkirjautumisen muistutus"
+      },
+      "audiences": {
+        "all_employees": "Kaikki työntekijät",
+        "all_guests": "Kaikki vieraat",
+        "user": "Tietty käyttäjä"
+      }
+    },
+    "reports": {
+      "title": "Raportit",
+      "subtitle": "Reaaliaikaiset raportit hotellille, kuljetukselle, keittiölle ja taloudelle."
+    },
+    "tabs": {
+      "registration": "Ilmoittautumisen edistyminen",
+      "rooming": "Huonelista",
+      "transport": "Kuljetuslista",
+      "dietary": "Ruokavalioyhteenveto",
+      "swag": "Tuotelahjatilaus",
+      "payments": "Maksut"
+    },
+    "pagination": {
+      "prev": "Edellinen",
+      "next": "Seuraava",
+      "pageOf": "Sivu {{page}} / {{total}}",
+      "range": "{{from}}–{{to}} / {{total}}"
+    },
+    "exportCsv": "Vie CSV",
+    "noRows": "Ei rivejä näytettäväksi.",
+    "share": {
+      "create": "Luo jakolinkki",
+      "creating": "Luodaan linkkiä",
+      "created": "Jakolinkki luotu. Vanhenee 7 päivän kuluttua.",
+      "copy": "Kopioi linkki",
+      "copied": "Linkki kopioitu leikepöydälle.",
+      "copyFailed": "Kopiointi ei onnistunut. Valitse linkki ja kopioi se manuaalisesti.",
+      "urlLabel": "Vain luku -jakolinkki",
+      "error": "Jakolinkkiä ei voitu luoda: {{message}}"
+    },
+    "conflicts": {
+      "title": "Tietoristiriidat",
+      "subtitle": "Kun ulkoiset lähteet ovat eri mieltä Kizunan kanssa, jokainen ero ilmestyy tähän tarkasteltavaksi.",
+      "field": "Kenttä",
+      "kizunaValue": "Kizunan arvo",
+      "externalValue": "Ulkoinen arvo",
+      "external": "Ulkoinen lähde",
+      "detectedAt": "Havaittu",
+      "acceptKizuna": "Säilytä Kizunan Arvo",
+      "acceptExternal": "Käytä Ulkoista Arvoa",
+      "noConflicts": "Ei avoimia ristiriitoja."
+    },
+    "blocked": "Sinulla ei ole oikeutta tarkastella tätä sivua."
+  },
+  "agenda": {
+    "title": "Aikataulu",
+    "subtitle": "Selaa aikataulua. Tähtäytä sessiot, joihin haluat osallistua.",
+    "loading": "Ladataan aikataulua",
+    "empty": "Ei vielä sessioita. Tarkista pian, kun aikataulu valmistuu.",
+    "noFavorites": "Et ole vielä tähtäyttänyt yhtään sessiota.",
+    "favorite": "Lisää suosikkeihin",
+    "unfavorite": "Poista suosikeista",
+    "filters": {
+      "all": "Kaikki ({{count}})",
+      "favorites": "Omat valintani ({{count}})"
+    },
+    "allDays": "Kaikki päivät",
+    "dayFilterLabel": "Suodata päivän mukaan"
+  },
+  "shareReport": {
+    "eyebrow": "Kizunan jaettu raportti",
+    "loading": "Ladataan uusinta tietoa",
+    "notFound": "Tätä jakolinkkiä ei ole olemassa.",
+    "expired": "Tämä jakolinkki on vanhentunut. Pyydä tapahtumatiimiltä uusi.",
+    "error": "Tätä raporttia ei voitu ladata. Yritä myöhemmin uudelleen.",
+    "empty": "Ei vielä rivejä näytettäväksi.",
+    "lastModified": "Viimeksi muokattu: {{value}}",
+    "expires": "Linkki vanhenee: {{value}}",
+    "types": {
+      "rooming_list": "Huonelista",
+      "transport_manifest": "Kuljetuslista",
+      "dietary_summary": "Ruokavalioyhteenveto",
+      "swag_order": "Tuotelahjatilaus",
+      "full_registration": "Ilmoittautumisen edistyminen",
+      "payment_reconciliation": "Maksujen täsmäytys"
+    }
+  },
+  "notifications": {
+    "title": "Ilmoitukset",
+    "toggle_one": "Ilmoitukset, {{count}} lukematonta",
+    "toggle_other": "Ilmoitukset, {{count}} lukematonta",
+    "toggle_zero": "Ilmoitukset, ei lukemattomia",
+    "markAllRead": "Merkitse kaikki luetuiksi",
+    "empty": "Ei vielä mitään. Ilmoitamme, kun jotain on."
+  },
+  "itinerary": {
+    "title": "Sinun Ohjelmasi",
+    "subtitle": "Tapahtuman aikataulusi.",
+    "timelineTitle": "Aikajana",
+    "loading": "Ladataan ohjelmaasi",
+    "empty": {
+      "title": "Ohjelmassasi ei ole vielä mitään",
+      "body": "Klikkaa Lisää Ohjelmaan liittääksesi vahvistussähköpostin tai ladataksesi varauksen PDF:n — me jäsennämme sen puolestasi."
+    },
+    "edit": {
+      "title": "Muokkaa ohjelmakohdetta",
+      "editableHint": "Lisää erikoistoive alle — kaikki muut tiedot ovat järjestelmän hallinnassa.",
+      "readOnlyHint": "Tämä kohde on vain luettavissa. Tiedot hallitsee tapahtuman ylläpitäjä.",
+      "titleField": "Otsikko",
+      "subtitleField": "Tiedot",
+      "startsAt": "Alkaa",
+      "endsAt": "Päättyy",
+      "specialRequests": "Erikoistoiveet",
+      "specialRequestsPlaceholder": "Pinnasänky, esteettömyys, ruokavalio, mitä tahansa muuta tiimimme tulisi tietää.",
+      "specialRequestsHint": "Näkyy vain tapahtumatuotannolle. Tallenna päivittääksesi.",
+      "save": "Tallenna",
+      "saving": "Tallennetaan",
+      "saved": "Erikoistoive tallennettu."
+    },
+    "day": {
+      "today": "Tänään",
+      "dayOf": "Päivä {{day}} / {{total}}"
+    },
+    "nowNext": {
+      "live": "Tapahtumassa nyt",
+      "upcoming": "Seuraavaksi",
+      "endsIn": "päättyy {{gap}}",
+      "startsIn": "alkaa {{gap}}",
+      "inMinutes_one": "{{count}} min kuluttua",
+      "inMinutes_other": "{{count}} min kuluttua",
+      "inHours_one": "{{count}} t kuluttua",
+      "inHours_other": "{{count}} t kuluttua",
+      "inDays_one": "{{count}} päivän kuluttua",
+      "inDays_other": "{{count}} päivän kuluttua"
+    },
+    "guestSync": {
+      "label": "Synkronoi sponsorini ohjelman kanssa",
+      "description": "Kun käytössä, ohjelmasi peilaa sinut kutsuneen työntekijän ohjelmaa. Ota pois käytöstä hallinnoidaksesi omaa aikatauluasi.",
+      "enabled": "Synkronoidaan nyt sponsorisi ohjelman kanssa.",
+      "disabled": "Synkronointi pois päältä. Ohjelmasi on taas omasi."
+    },
+    "hero": {
+      "eyebrow": "Valmistaudu tapahtumaan",
+      "live": "Tapahtumassa nyt",
+      "countdownLabel": "Lähtölaskenta tapahtuman alkuun",
+      "days": "Päivää",
+      "hours": "Tuntia",
+      "minutes": "Minuuttia"
+    },
+    "import": {
+      "cta": "Lisää Ohjelmaan",
+      "title": "Lisää Ohjelmaasi",
+      "subtitle": "Liitä vahvistussähköposti, lataa PDF tai välitä varauksesi. Me jäsennämme sen puolestasi.",
+      "tabs": {
+        "paste": "Liitä teksti",
+        "upload": "Lataa tiedosto",
+        "email": "Välitä sähköposti"
+      },
+      "pastePlaceholder": "Liitä lento-, hotelli- tai kuljetusvahvistuksesi tähän…",
+      "pasteHint": "Toimii parhaiten vahvistussähköpostin koko tekstillä.",
+      "parse": "Jäsennä ja Lisää",
+      "parsing": "Jäsennetään ohjelmaasi",
+      "success": "Tuotu {{count}} kohdetta ohjelmaasi.",
+      "nothingFound": "Emme löytäneet mitään tuotavaa. Yritä liittää enemmän tekstiä.",
+      "error": "Emme voineet jäsentää tätä juuri nyt. Yritä uudelleen tai tuo manuaalisesti.",
+      "uploadDropTitle": "Pudota PDF tai klikkaa valitaksesi",
+      "uploadDropHint": "Varaus-PDF:t lentoyhtiöiltä, hotelleilta ja matkatoimistoilta. Poimimme tekstin laitteellasi — tiedosto ei poistu selaimestasi.",
+      "uploadReading": "Luetaan {{name}}…",
+      "uploadReady": "Valmis: {{name}} ({{count}} merkkiä)",
+      "uploadError": "Tiedostoa ei voitu lukea. Käytä Liitä teksti tai kokeile toista vientiä.",
+      "uploadInvalidType": "Valitse PDF.",
+      "emailComingSoonTitle": "Sähköpostin välittäminen tulee pian",
+      "emailComingSoonHint": "Välitä osoitteeseen itinerary@kizuna.dev, kun se on käytössä."
+    },
+    "checkin": {
+      "title": "Sisäänkirjautuminen",
+      "subtitle": "Näytä tämä koodi rekisteröinnissä vahvistaaksesi saapumisesi.",
+      "noToken": "Sisäänkirjautumiskoodisi ilmestyy tähän, kun ilmoittautumisesi on hyväksytty."
+    },
+    "itemTypes": {
+      "session": "Sessio",
+      "flight": "Lento",
+      "transport": "Kuljetus",
+      "accommodation": "Majoitus",
+      "announcement": "Ilmoitus",
+      "reminder": "Muistutus"
+    },
+    "conflict": "Päällekkäin toisen kohteen kanssa päivässäsi",
+    "withGuest": "Vieraasi kanssa"
+  },
+  "guests": {
+    "invitationTitle": "Sinut on Kutsuttu Supafestiin",
+    "invitationSubtitle": "Aseta salasana hyväksyäksesi vieraskutsusi. Linkki vanhenee seitsemän päivän kuluttua siitä, kun {{sponsor}} lähetti sen.",
+    "createPassword": "Luo Salasana",
+    "passwordHint": "Vähintään 8 merkkiä.",
+    "acceptAndContinue": "Hyväksy Kutsu",
+    "accepting": "Tilisi luominen",
+    "errors": {
+      "missingToken": "Tästä kutsulinkistä puuttuu token. Pyydä {{sponsor}}-henkilöä lähettämään uudelleen.",
+      "expired": "Tämä kutsu on vanhentunut. Pyydä sinut kutsunutta työntekijää lähettämään uusi.",
+      "badSignature": "Tämä kutsulinkki ei ole kelvollinen. Käytä alkuperäistä sähköpostilinkkiä.",
+      "generic": "Emme voineet hyväksyä kutsuasi. Yritä uudelleen tai ota yhteyttä tukeen."
+    },
+    "checkout": {
+      "title": "Vahvista Paikkasi",
+      "subtitle": "Veloitamme kiinteän maksun, joka kattaa majoituksesi, ateriasi ja aktiviteettisi koko Supafestin ajan.",
+      "adultFee": "950 USD",
+      "childFee": "500 USD",
+      "payNow": "Maksa Nyt",
+      "redirecting": "Siirrytään kassalle"
+    }
+  },
+  "documents": {
+    "tabTitle": "Asiakirjat",
+    "addDocument": "Lisää Asiakirja",
+    "createTitle": "Lisää Asiakirja",
+    "createSubtitle": "Luonnokset julkaistaan välittömästi kaikille tässä tapahtumassa.",
+    "documentKey": "Tyyppi",
+    "documentTitle": "Otsikko",
+    "documentBody": "Sisältö (Markdown)",
+    "documentBodyHint": "Markdown tuettu.",
+    "requiresAcknowledgement": "Vaatii jokaisen osallistujan lukevan ja allekirjoittavan",
+    "publish": "Julkaise Asiakirja",
+    "publishing": "Julkaistaan",
+    "createSuccess": "Asiakirja julkaistu.",
+    "readAndSign": "Lue ja Allekirjoita",
+    "signed": "Allekirjoitettu",
+    "signSubtitle": "Lue alla oleva asiakirja. Kirjoita koko virallinen nimesi allekirjoittaaksesi, kun pääset loppuun.",
+    "fullNameLabel": "Sinun Koko Virallinen Nimesi",
+    "signButton": "Allekirjoita",
+    "signing": "Allekirjoitetaan",
+    "signSuccess": "Kiitos. Vahvistuksesi on tallessa.",
+    "signFailure": "Emme voineet tallentaa allekirjoitustasi. Yritä uudelleen.",
+    "compliance": "Allekirjoittanut {{signed}} / {{total}}",
+    "complianceTitle": "Vaatimustenmukaisuus",
+    "complianceSubtitle": "Kuka on ja kuka ei ole allekirjoittanut kutakin vaadittua asiakirjaa.",
+    "consentTitle": "Tarkista Seuraavat",
+    "scrollToContinue": "Vieritä loppuun jatkaaksesi",
+    "explicitCheckboxLabel": "Olen lukenut ja hyväksyn asiakirjan {{title}}",
+    "agreeAndContinue": "Hyväksyn ja Jatkan",
+    "savingAcknowledgement": "Tallennetaan vahvistustasi",
+    "acknowledgedOn": "Vahvistettu {{date}}",
+    "version": "Versio {{version}}",
+    "versionBumped": "Tämä asiakirja on päivitetty. Lue uudelleen ja vahvista.",
+    "noDocuments": "Ei näytettäviä asiakirjoja.",
+    "errorSaving": "Emme voineet tallentaa vahvistustasi. Yritä uudelleen.",
+    "contentType": {
+      "label": "Sisältötyyppi",
+      "markdown": "Markdown",
+      "pdf": "PDF",
+      "notion": "Notion-linkki"
+    },
+    "pdf": {
+      "label": "PDF-tiedosto",
+      "openInNewTab": "Avaa PDF uudessa välilehdessä",
+      "download": "Lataa PDF",
+      "loading": "Ladataan PDF:ää",
+      "unavailable": "Tämä PDF ei ole juuri nyt saatavilla."
+    },
+    "notion": {
+      "label": "Notion-URL",
+      "hint": "Liitä julkinen Notion-linkki. Näytämme painikkeen, joka avaa sen; sisällön tuonti tulee myöhemmässä vaiheessa.",
+      "open": "Avaa Notionissa"
+    }
+  },
+  "uploader": {
+    "dropOrClick": "Pudota tiedosto tähän tai klikkaa valitaksesi",
+    "choose": "Valitse tiedosto",
+    "remove": "Poista",
+    "limits": "Enintään {{mb}} Mt",
+    "tooLarge": "Tiedosto on liian suuri. Raja on {{mb}} Mt.",
+    "unsupportedType": "Tätä tiedostotyyppiä ei tueta.",
+    "success": "Ladattu.",
+    "uploading": "Ladataan",
+    "uploadOne": "Lataa tiedosto",
+    "uploadMany": "Lataa {{count}} tiedostoa",
+    "uploadFiles": "Lataa",
+    "dragOr": "Vedä ja pudota tai",
+    "selectOne": "valitse tiedosto",
+    "selectMany": "valitse tiedostot",
+    "toUpload": "ladataksesi",
+    "maxSize": "Suurin tiedostokoko: {{size}}",
+    "tooLargeWithSize": "Tiedosto on suurempi kuin {{limit}} (koko: {{size}})",
+    "uploaded": "Ladattu",
+    "failedWithMessage": "Lataus epäonnistui: {{message}}",
+    "uploadedCount_one": "Onnistuneesti ladattu {{count}} tiedosto",
+    "uploadedCount_other": "Onnistuneesti ladattu {{count}} tiedostoa",
+    "tooManyFiles_one": "Voit ladata enintään {{max}} tiedostoa; poista {{extra}} tiedosto.",
+    "tooManyFiles_other": "Voit ladata enintään {{max}} tiedostoa; poista {{extra}} tiedostoa."
+  },
+  "adminDocuments": {
+    "title": "Asiakirjat",
+    "subtitle": "Versioidut asiakirjat näkyvät ilmoittautumisessa ja asiakirjat-välilehdellä.",
+    "newDocument": "Lisää asiakirja",
+    "edit": "Muokkaa asiakirjaa",
+    "create": "Lisää asiakirja",
+    "save": "Tallenna asiakirja",
+    "saving": "Tallennetaan",
+    "saved": "Asiakirja tallennettu.",
+    "delete": "Poista",
+    "deleteConfirm": "Poistetaanko tämä asiakirja? Vahvistukset säilyvät tarkastuslokissa.",
+    "deleted": "Asiakirja poistettu.",
+    "empty": "Ei vielä asiakirjoja. Käytä Lisää asiakirja julkaistaksesi ensimmäisen.",
+    "fields": {
+      "title": "Otsikko",
+      "documentKey": "Tyyppi",
+      "appliesTo": "Koskee",
+      "isActive": "Aktiivinen",
+      "requiresAcknowledgement": "Vaatii vahvistuksen",
+      "requiresScroll": "Vaadi vierittäminen loppuun ennen vahvistamista"
+    },
+    "keys": {
+      "waiver": "Vastuuvapauslauseke",
+      "code_of_conduct": "Käytösohjeet",
+      "expense_policy": "Kulukäytäntö",
+      "booking_process": "Varausprosessi",
+      "livestream": "Suoratoisto",
+      "toc": "Käyttöehdot"
+    },
+    "appliesTo": {
+      "all": "Kaikki",
+      "employee": "Vain työntekijät",
+      "guest": "Vain vieraat"
+    },
+    "previewMarkdown": "Esikatselu",
+    "writeMarkdown": "Kirjoita"
+  }
+}

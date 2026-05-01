@@ -1,0 +1,1104 @@
+{
+  "app": {
+    "name": "Kizuna",
+    "tagline": "Um laço duradouro",
+    "offline": "Está sem ligação à internet. O seu itinerário, quarto e detalhes de transporte estão em cache e continuam disponíveis para leitura.",
+    "loading": "A carregar",
+    "loadingEvent": "A carregar os detalhes do evento",
+    "noEvent": "Não há nenhum evento ativo de momento. Volte em breve."
+  },
+  "common": {
+    "back": "Voltar",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar"
+  },
+  "roles": {
+    "super_admin": "Super administrador",
+    "admin": "Administrador",
+    "employee": "Colaborador",
+    "guest": "Convidado",
+    "leadership": "Liderança"
+  },
+  "nav": {
+    "home": "Início",
+    "itinerary": "Itinerário",
+    "agenda": "Programa",
+    "registration": "Inscrição",
+    "documents": "Documentos",
+    "community": "Comunidade",
+    "admin": "Administração",
+    "allEvents": "Todos os eventos",
+    "signOut": "Terminar sessão",
+    "menu": "Menu",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu"
+  },
+  "events": {
+    "title": "Todos os eventos",
+    "subtitle": "Mude o evento que a aplicação está a mostrar. O evento ativo aplica-se por predefinição.",
+    "create": "Novo evento",
+    "empty": "Ainda não há eventos configurados.",
+    "active": "Ativo",
+    "past": "Anterior",
+    "viewing": "A visualizar",
+    "view": "Ver",
+    "currentlyViewing": "A visualizar atualmente",
+    "switched": "A mostrar este evento agora.",
+    "cleared": "Voltou ao evento ativo."
+  },
+  "auth": {
+    "signIn": "Iniciar sessão",
+    "signUp": "Criar conta",
+    "signOut": "Terminar sessão",
+    "email": "Email",
+    "password": "Palavra-passe",
+    "continueWithSso": "Continuar com início de sessão único",
+    "checkingSession": "A verificar a sua sessão",
+    "signedInAs": "Sessão iniciada como {{email}}",
+    "signInTitle": "Bem-vindo de Volta",
+    "signInSubtitle": "Use o início de sessão único se for colega da Supabase. Use o seu email de convite e palavra-passe se for convidado.",
+    "guestTab": "Convidado",
+    "employeeTab": "Colaborador",
+    "needAccount": "Precisa de criar uma conta de convidado?",
+    "createAccount": "Criar Conta",
+    "alreadyHaveAccount": "Já tem uma conta?",
+    "forgotPassword": "Esqueceu-se da palavra-passe?",
+    "recoverySent": "Email de recuperação enviado para {{email}}.",
+    "errors": {
+      "invalidCredentials": "Esse email e palavra-passe não correspondem.",
+      "weakPassword": "A palavra-passe tem de ter pelo menos 8 caracteres.",
+      "emailRequired": "Introduza primeiro o seu email para sabermos para onde enviar a ligação de recuperação.",
+      "recoveryFailed": "Não foi possível enviar o email de recuperação. Tente novamente daqui a um momento.",
+      "generic": "Não foi possível concluir o início de sessão. Tente novamente."
+    },
+    "dev": {
+      "header": "Atalhos de Início de Sessão para Programadores",
+      "subtitle": "Apenas para fins de teste.",
+      "asEmployee": "Fingir que é um colaborador",
+      "asAdmin": "Fingir que é um administrador"
+    }
+  },
+  "home": {
+    "feedTitle": "O Seu Feed",
+    "itemsLabel": "itens",
+    "feedEmpty": "Nada à sua espera.",
+    "factsTitle": "Factos Sobre o Nosso Evento",
+    "factsSubtitle": "Glória à lenda da Equipa 18.",
+    "facts": {
+      "employees": "Colaboradores",
+      "guests": "Convidados",
+      "registrationsStarted": "Inscrições em curso",
+      "registrationsComplete": "Inscrições concluídas",
+      "documentsSigned": "Documentos assinados"
+    },
+    "kinds": {
+      "document": "Documento",
+      "task": "Inscrição",
+      "announcement": "Anúncio"
+    },
+    "jetLag": {
+      "title": "Combatente do jet lag",
+      "subtitle": "{{offset}} horas a {{direction}} do sítio onde vive agora. Espere um jet lag {{severity}}.",
+      "intro": "O que a ciência diz que funciona.",
+      "directions": {
+        "east": "este",
+        "west": "oeste"
+      },
+      "severities": {
+        "mild": "ligeiro",
+        "moderate": "moderado",
+        "severe": "significativo"
+      },
+      "another": "Mostrar outra dica",
+      "disclaimer": "Orientação geral, não é aconselhamento médico. Confirme com o seu médico para qualquer plano de uso prolongado."
+    },
+    "icebreaker": {
+      "title": "Conheça o seu colega",
+      "subtitle": "Um facto curioso real de outro participante. Tente adivinhar e depois revele.",
+      "reveal": "Revelar a resposta",
+      "tryAnother": "Experimentar outro"
+    }
+  },
+  "welcome": {
+    "title": "Bem-vindo a {{eventName}}",
+    "loading": "A carregar o seu evento",
+    "greeting": "Olá {{name}}, bem-vindo de volta.",
+    "tiles": {
+      "registration": "Termine a sua inscrição no evento passo a passo.",
+      "itinerary": "Os seus voos, transferências, quarto e sessões.",
+      "documents": "Termo de responsabilidade, código de conduta e orientações de viagem.",
+      "consent": "Reveja e reconfirme quaisquer documentos pendentes.",
+      "consentTitle": "Documentos Pendentes",
+      "admin": "Relatórios em direto, resolução de conflitos e operações."
+    }
+  },
+  "errors": {
+    "boundary": {
+      "title": "Algo Correu Mal",
+      "description": "Ocorreu um erro inesperado. Recarregue a página para tentar novamente.",
+      "reload": "Recarregar"
+    },
+    "notFound": {
+      "title": "Página Não Encontrada",
+      "description": "A página que procura não existe.",
+      "goHome": "Ir para o Início"
+    }
+  },
+  "header": {
+    "uploadAvatar": "Carregar o Seu Avatar",
+    "avatarMenu": "Abrir menu da conta",
+    "editProfile": "Editar Perfil"
+  },
+  "profile": {
+    "title": "Perfil",
+    "nav": {
+      "label": "Secções do perfil",
+      "personal": "Informações pessoais",
+      "community": "Comunidade",
+      "dietary": "Alimentação",
+      "accessibility": "Acessibilidade",
+      "emergency": "Contacto de emergência",
+      "passport": "Passaporte",
+      "guests": "Convidados",
+      "dependents": "Dependentes",
+      "swag": "Brindes",
+      "transport": "Transporte"
+    },
+    "cards": {
+      "personalInfo": "Nome, nome no crachá e a cidade onde vive.",
+      "emergencyContact": "Quem devemos contactar se algo acontecer.",
+      "dietary": "Restrições e notas para a cozinha."
+    },
+    "subjectSelector": {
+      "label": "Sujeito ativo",
+      "heading": "A preencher por",
+      "yourself": "Si próprio"
+    },
+    "toast": {
+      "personalInfoSaved": "Informações pessoais guardadas.",
+      "emergencyContactSaved": "Contacto de emergência guardado.",
+      "dietarySaved": "Preferências alimentares guardadas.",
+      "passportSaved": "Detalhes do passaporte guardados.",
+      "dependentsSaved": "Dependentes guardados.",
+      "accessibilitySaved": "Preferências de acessibilidade guardadas.",
+      "swagSaved": "Seleções de brindes guardadas.",
+      "transportSaved": "Preferência de transporte guardada.",
+      "error": "Algo correu mal. Por favor, tente novamente."
+    }
+  },
+  "community": {
+    "title": "Comunidade",
+    "subtitle": "Encontre pessoas, partilhe histórias e conheça os outros participantes.",
+    "editProfile": "Editar perfil",
+    "noProfileYet": "Configure o seu perfil de comunidade para que outros o possam encontrar.",
+    "profile": {
+      "title": "Perfil de comunidade",
+      "description": "Visível para outros participantes para que possam ligar-se a si.",
+      "bio": "Biografia",
+      "bioPlaceholder": "Algumas frases sobre si.",
+      "funFact": "Facto curioso (quebra-gelo)",
+      "funFactPlaceholder": "Algo que um estranho nunca adivinharia.",
+      "hobbies": "Passatempos",
+      "hobbiesPlaceholder": "Escreva para adicionar um passatempo e prima Enter.",
+      "removeHobby": "Remover {{hobby}}",
+      "hometownCity": "Cidade natal",
+      "currentCity": "Onde vive agora (cidade)",
+      "country": "País",
+      "saved": "Perfil de comunidade guardado."
+    },
+    "map": {
+      "title": "Mapa-mundo",
+      "toggleHometown": "Cidades natais",
+      "toggleCurrent": "Onde vivem agora",
+      "zoomIn": "Aumentar",
+      "zoomOut": "Diminuir",
+      "zoomReset": "Repor zoom"
+    },
+    "matches": {
+      "byHobby": "Pessoas que partilham os seus passatempos",
+      "byHometown": "Pessoas da sua cidade natal",
+      "byCurrent": "Pessoas na sua cidade atual",
+      "empty": "Ainda sem correspondências. Adicione alguns passatempos e uma cidade natal ao seu perfil de comunidade.",
+      "matchedHobbies": "Passatempos em comum",
+      "name": "Nome",
+      "email": "Email"
+    },
+    "channels": {
+      "title": "Canais da comunidade",
+      "newChannel": "Iniciar um canal",
+      "newChannelTitle": "Iniciar um canal de comunidade",
+      "newChannelName": "Nome",
+      "newChannelDescription": "Descrição",
+      "newChannelCreate": "Criar canal",
+      "lastMessage": "Última mensagem",
+      "noMessagesYet": "Ainda sem mensagens.",
+      "typing_one": "{{name}} está a escrever…",
+      "typing_other": "{{count}} pessoas estão a escrever…",
+      "openChannel": "Abrir {{name}}",
+      "send": "Enviar",
+      "messageInputPlaceholder": "iMessage",
+      "imagePicker": "Adicionar imagem",
+      "broadcast": "Notificar todos os canais",
+      "broadcastConfirmTitle": "Enviar para todos os canais?",
+      "broadcastConfirmBody": "Isto vai publicar a mensagem em todos os canais ativos.",
+      "broadcastConfirm": "Enviar para todos",
+      "broadcastSuccess": "Enviado para {{count}} canais.",
+      "deleteMessage": "Eliminar mensagem",
+      "edited": "editada"
+    }
+  },
+  "footer": {
+    "tagline": "Kizuna · Um laço duradouro.",
+    "poweredBy": "Construído na Supabase",
+    "theme": "Tema",
+    "themes": {
+      "light": "Claro",
+      "dark": "Escuro",
+      "barbie": "Barbie",
+      "supa": "Supa",
+      "hermione": "Hermione",
+      "kirk": "Kirk"
+    },
+    "language": "Idioma",
+    "languages": {
+      "en-US": "Inglês (Estados Unidos)",
+      "fr-FR": "Francês (França)",
+      "it-IT": "Italiano (Itália)",
+      "de-DE": "Alemão (Alemanha)",
+      "es-ES": "Espanhol (Espanha)",
+      "pt-PT": "Português (Portugal)",
+      "pt-BR": "Português (Brasil)",
+      "fi-FI": "Finlandês (Finlândia)"
+    },
+    "rights": "Com tecnologia Supabase. Construído com Kizuna."
+  },
+  "actions": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "next": "Seguinte",
+    "back": "Voltar",
+    "submit": "Submeter",
+    "agree": "Concordo",
+    "close": "Fechar",
+    "edit": "Editar",
+    "delete": "Eliminar"
+  },
+  "registration": {
+    "title": "Inscrição",
+    "stepLabel": "Passo {{current}} de {{total}}",
+    "progress": "{{percent}}% concluído",
+    "saveAndContinue": "Guardar e Continuar",
+    "saving": "A guardar",
+    "errorSaving": "Não foi possível guardar as suas alterações. Por favor, tente novamente.",
+    "steps": {
+      "personalInfo": "Informações Pessoais",
+      "dietary": "Alimentação",
+      "accessibility": "Acessibilidade",
+      "emergencyContact": "Contacto de Emergência",
+      "passport": "Passaporte",
+      "guests": "Convidados",
+      "dependents": "Dependentes",
+      "swag": "Brindes",
+      "transport": "Transporte"
+    },
+    "personalInfo": {
+      "preferredName": "Nome Preferido",
+      "preferredNameHint": "Como o seu nome aparece no crachá.",
+      "firstName": "Primeiro Nome",
+      "middleInitial": "Meio",
+      "lastName": "Apelido",
+      "legalNameHint": "Exatamente como está impresso no seu passaporte. Usamos isto para documentos de viagem e para a planta dos lugares no jantar.",
+      "alternateEmail": "Email Alternativo",
+      "phoneNumber": "Número de Telemóvel",
+      "whatsapp": "WhatsApp",
+      "baseCity": "Cidade Atual",
+      "baseCityHint": "De onde está a viajar."
+    },
+    "dietary": {
+      "restrictions": "Restrições alimentares",
+      "restrictionsHint": "Selecione todas as que se aplicam.",
+      "restrictionOptions": {
+        "vegan": "Vegano",
+        "vegetarian": "Vegetariano",
+        "halal": "Halal",
+        "kosher": "Kosher",
+        "gluten_free": "Sem glúten",
+        "dairy_free": "Sem lacticínios"
+      },
+      "allergies": "Alergias",
+      "allergiesHint": "Selecione todas as que se aplicam.",
+      "allergyOptions": {
+        "nuts": "Frutos secos",
+        "shellfish": "Marisco",
+        "dairy": "Lacticínios",
+        "eggs": "Ovos",
+        "soy": "Soja",
+        "wheat": "Trigo",
+        "sesame": "Sésamo"
+      },
+      "alcoholFree": "Por favor, não me sirvam álcool",
+      "severity": "Gravidade",
+      "severityHint": "Os riscos de anafilaxia são sinalizados à cozinha.",
+      "severityOptions": {
+        "preference": "Preferência",
+        "intolerance": "Intolerância",
+        "allergy": "Alergia (risco de anafilaxia)"
+      },
+      "notes": "Algo mais que a nossa cozinha deva saber"
+    },
+    "accessibility": {
+      "intro": "Diga-nos quais as adaptações de que necessita. Vamos guardar isto apenas com a equipa do evento.",
+      "needs": "Adaptações Necessárias",
+      "needsHint": "Selecione todas as que se aplicam.",
+      "needsOptions": {
+        "mobility": "Mobilidade",
+        "vision": "Visão",
+        "hearing": "Audição",
+        "neurodivergent": "Neurodivergente",
+        "chronic_condition": "Condição crónica",
+        "other": "Outra"
+      },
+      "notes": "Especificidades",
+      "notesHint": "Algo que devamos saber com antecedência: salas tranquilas, necessidades alimentares já abrangidas acima, pedidos quanto à disposição do quarto."
+    },
+    "emergencyContact": {
+      "firstName": "Primeiro Nome",
+      "lastName": "Apelido",
+      "relationship": "Relação",
+      "phonePrimary": "Telefone Principal",
+      "phonePrimaryHint": "Inclua o indicativo do país.",
+      "phoneSecondary": "Telefone Secundário (opcional)",
+      "email": "Email (opcional)",
+      "notes": "Notas (opcional)"
+    },
+    "passport": {
+      "intro": "Os detalhes do seu passaporte são encriptados em repouso e nunca ficam visíveis para os administradores.",
+      "passportName": "Nome Tal Como Impresso no Passaporte",
+      "passportNumber": "Número do Passaporte",
+      "passportNumberHint": "Encriptado antes de ser guardado.",
+      "issuingCountry": "País Emissor",
+      "issuingCountryPlaceholder": "Selecione um país emissor",
+      "issuingCountryHint": "O país cuja autoridade emitiu o passaporte.",
+      "expiryDate": "Data de Validade",
+      "expiryWarning": "Este passaporte caduca antes do fim do evento. Por favor, use um passaporte válido por pelo menos seis meses após a sua viagem."
+    },
+    "guests": {
+      "intro": "Convide as pessoas que vêm consigo. Os adultos (18+) recebem o seu próprio acesso e email. As crianças vão na sua inscrição sem necessidade de email. A taxa total é-lhe cobrada a si.",
+      "invite": "Convidar um convidado",
+      "inviteTitle": "Convidar um convidado",
+      "inviteBody": "Vamos enviar por email uma ligação de utilização única válida por 7 dias. Assim que aceitarem, recebem a sua própria conta Kizuna e podem completar o resto da inscrição.",
+      "bracketIntro": "Que idade tem o convidado que está a convidar? A taxa é incluída no seu checkout do Stripe, não no dele.",
+      "brackets": {
+        "under_12": "Menos de 12",
+        "teen": "12 a 17",
+        "adult": "18 ou mais"
+      },
+      "bracketHints": {
+        "under_12": "Adicionado à sua inscrição. Sem email nem acesso.",
+        "teen": "Adicionado à sua inscrição. Sem email nem acesso.",
+        "adult": "Recebe um convite por email com o próprio acesso."
+      },
+      "detailsIntroAdult": "Diga-nos o nome e o email da pessoa. Vai receber uma ligação de convite de utilização única válida por 7 dias.",
+      "detailsIntroMinor": "Diga-nos o nome da pessoa. Pode editar necessidades alimentares e outros detalhes a partir do perfil dela mais tarde.",
+      "guestName": "Nome completo",
+      "namePlaceholder": "Marisa Skywalker",
+      "firstName": "Primeiro nome",
+      "firstNamePlaceholder": "Marisa",
+      "lastName": "Apelido",
+      "lastNamePlaceholder": "Skywalker",
+      "guestEmail": "Email do convidado",
+      "emailPlaceholder": "convidado@exemplo.com",
+      "send": "Enviar convite",
+      "addMinor": "Adicionar à sua inscrição",
+      "sending": "A enviar",
+      "invited": "Convite enviado para {{email}}",
+      "minorAdded": "{{name}} adicionado à sua inscrição.",
+      "invitedAt": "Convidado em {{date}}",
+      "empty": "Ainda sem convidados. Adicione um para começar.",
+      "totalDue": "Total de taxas de convidados: {{amount}}",
+      "totalLabel": "Total de taxas de convidados",
+      "totalHint": "Cobrado ao seu cartão numa única transação. Os perfis ficam concluídos assim que o Stripe processar.",
+      "payFees": "Pagar taxas de convidados",
+      "payTitle": "Pague as suas taxas de convidados",
+      "payAmount": "{{amount}} a pagar",
+      "payHint": "Abrimos um Checkout do Stripe nesta janela. Assim que o pagamento for processado, todos os convites para adultos são enviados e os dependentes ficam desbloqueados.",
+      "payNow": "Pagar agora",
+      "paying": "A abrir o checkout",
+      "renameTitle": "Renomear dependente",
+      "renameMinor": "Renomear",
+      "removeMinor": "Remover dependente",
+      "minorRemoved": "Dependente removido.",
+      "minorRenamed": "Dependente renomeado.",
+      "confirmRemoveMinor": "Remover {{name}} da sua inscrição? A taxa é descontada do total.",
+      "cancel": "Cancelar convite",
+      "cancelled": "Convite cancelado.",
+      "editInvitation": "Editar convite",
+      "editInvitationTitle": "Editar convite",
+      "editInvitationHint": "Pode editar o nome e o email até o convidado aceitar. Depois de aceite, é a pessoa que atualiza o próprio perfil.",
+      "invitationUpdated": "Convite atualizado.",
+      "statuses": {
+        "pending": "Pendente",
+        "sent": "Enviado",
+        "accepted": "Aceite",
+        "expired": "Caducado",
+        "cancelled": "Cancelado"
+      }
+    },
+    "dependents": {
+      "intro": "Adicione crianças ou qualquer outra pessoa que viaje consigo e que não vá ter o seu próprio acesso. Cada dependente custa 500 USD para crianças e 950 USD para adultos.",
+      "addGuest": "Adicionar um dependente",
+      "removeGuest": "Remover",
+      "fullName": "Nome completo",
+      "age": "Idade",
+      "ageHint": "Usada para calcular o escalão da taxa e o subsídio de refeição.",
+      "notes": "Notas",
+      "specialNeeds": "Necessidades especiais",
+      "specialNeedsOptions": {
+        "crib": "Berço",
+        "high_chair": "Cadeira alta",
+        "allergy": "Alergia",
+        "mobility": "Mobilidade",
+        "other": "Outra"
+      },
+      "noGuests": "Não tem dependentes a adicionar? Continuar."
+    },
+    "swag": {
+      "intro": "Diga-nos os seus tamanhos de t-shirt e de calçado para podermos encomendar o equipamento certo com antecedência.",
+      "yourSizes": "Os seus tamanhos",
+      "guestsHeading": "Tamanhos para convidados adicionais",
+      "tshirtSize": "Tamanho de t-shirt",
+      "shoeSize": "Tamanho de calçado",
+      "shoeSizeHint": "Escolha o sistema que conhece. Guardamos tudo como UE.",
+      "shoeSystem": {
+        "us": "EUA",
+        "eu": "UE"
+      },
+      "age_one": "{{age}} ano",
+      "age_other": "{{age}} anos"
+    },
+    "transport": {
+      "intro": "Diga-nos para que troços gostaria de ter transferência do aeroporto. Usamos isto para construir o manifesto da shuttle.",
+      "options": {
+        "none": "Vou tratar do meu próprio transporte para os dois troços.",
+        "arrival": "Preciso de transporte do aeroporto apenas à chegada.",
+        "departure": "Preciso de transporte para o aeroporto apenas à partida.",
+        "both": "Preciso de transporte tanto à chegada como à partida."
+      }
+    }
+  },
+  "admin": {
+    "title": "Administração",
+    "subtitle": "Dados operacionais em direto.",
+    "comingSoon": "Em breve. Esta secção está em construção.",
+    "loading": "A carregar",
+    "nav": {
+      "label": "Secções de administração",
+      "agenda": "Programa",
+      "groundTransport": "Ferramenta de Transporte Terrestre",
+      "roomAssignment": "Ferramenta de Atribuição de Quartos",
+      "feed": "Feed",
+      "documents": "Documentos",
+      "stats": "Estatísticas",
+      "nudges": "Lembretes",
+      "reports": "Relatórios",
+      "conflicts": "Conflitos"
+    },
+    "groundTransport": {
+      "title": "Ferramenta de Transporte Terrestre",
+      "subtitle": "Voos agrupados em janelas de recolha de 30 minutos e depois por voo partilhado. Atribua cada passageiro a um veículo.",
+      "tabs": {
+        "arrival": "Chegada",
+        "departure": "Partida"
+      },
+      "empty": "Ainda sem voos para este troço. Vão aparecer à medida que os dados de viagem sincronizam.",
+      "noEvent": "Selecione primeiro um evento ativo.",
+      "unassigned": "Por atribuir",
+      "needsReview": "O itinerário mudou",
+      "needsReviewHint": "O voo deste passageiro mudou depois de um veículo ter sido atribuído. Escolha um novo veículo.",
+      "newVehicle": "Novo veículo",
+      "newVehicleTitle": "Adicionar veículo de transporte terrestre",
+      "createVehicle": "Adicionar veículo",
+      "vehicleCreated": "Veículo adicionado.",
+      "vehicleName": "Nome do veículo",
+      "vehicleNamePlaceholder": "p. ex. Shuttle A",
+      "vehicleDirection": "Direção",
+      "vehiclePickupDate": "Data de recolha",
+      "vehiclePickupTime": "Hora de recolha (Mountain)",
+      "capacityPax": "Capacidade de passageiros",
+      "capacityBags": "Capacidade de bagagem",
+      "vehiclesHeader": "Veículos",
+      "noVehicles": "Ainda sem veículos. Clique em Novo veículo para adicionar o primeiro.",
+      "windowSummary": "{{passengers}} passageiros · {{bags}} malas",
+      "flightSummary": "{{passengers}} passageiros · {{bags}} malas",
+      "full": "(cheio)",
+      "vehicleLabel": "{{name}} · {{time}} · {{assigned}}/{{capacity}}",
+      "suggested": "Melhor correspondência",
+      "noVehiclesForLeg": "Sem veículos para este troço. Adicione um para começar a atribuir."
+    },
+    "roomAssignment": {
+      "title": "Ferramenta de Atribuição de Quartos",
+      "subtitle": "Importe quartos do bloco do seu hotel e depois atribua participantes por escalão de liderança, dimensão da família e ordem de inscrição.",
+      "noEvent": "Selecione primeiro um evento ativo.",
+      "empty": "Ainda sem quartos importados. Clique em Importar bloco de quartos para carregar a folha do hotel.",
+      "importBlock": "Importar bloco de quartos",
+      "importTitle": "Importar um bloco de quartos de hotel",
+      "hotelName": "Nome do hotel",
+      "checkIn": "Check-in",
+      "checkOut": "Check-out",
+      "csv": "CSV de quartos",
+      "csvHint": "Cabeçalhos obrigatórios: room_number (e, no mínimo, description). Opcionais: size_sqm ou size_sqft, is_suite, capacity.",
+      "tab": {
+        "paste": "Colar um bloco",
+        "upload": "Carregar a partir de CSV"
+      },
+      "fileLabel": "Escolha um ficheiro CSV",
+      "fileHint": "Os mesmos cabeçalhos que para colar. O conteúdo do ficheiro é carregado na caixa de texto para que possa rever antes de importar.",
+      "fileLoaded": "Carregados {{bytes}} bytes ({{rows}} quartos).",
+      "testBlock": "BLOCO DE QUARTOS DE TESTE",
+      "import": "Importar quartos",
+      "importing": "A importar",
+      "imported": "Importados {{inserted}} quartos ({{warnings}} aviso(s)).",
+      "errorLine": "Linha {{line}}",
+      "summaryHeader": "Resumo do bloco",
+      "totalRooms": "Total de quartos",
+      "suites": "Suítes",
+      "assignedOf": "Ocupantes",
+      "unassigned": "Por atribuir",
+      "suiteTag": "Suíte",
+      "capacityLabel": "{{occupied}} de {{capacity}} ocupados",
+      "sizeLabel": "{{sqm}} m²",
+      "addOccupant": "Adicionar ocupante",
+      "removeOccupant": "Remover ocupante",
+      "assignPlaceholder": "+ Atribuir participante",
+      "autoAssign": "Atribuir automaticamente",
+      "autoAssigning": "A atribuir automaticamente",
+      "autoAssignDone": "Atribuídos automaticamente {{assigned}} participantes ({{unplaced}} por colocar).",
+      "comingSoon": "Esta ferramenta está a ser construída. Aguarde."
+    },
+    "events": {
+      "title": "Eventos",
+      "subtitle": "Todos os eventos no Kizuna. Passados e futuros.",
+      "create": "Novo evento",
+      "edit": "Editar evento",
+      "save": "Guardar evento",
+      "saving": "A guardar",
+      "saved": "Evento guardado.",
+      "delete": "Eliminar evento",
+      "deleted": "Evento eliminado.",
+      "deleteConfirm": "Eliminar definitivamente este evento e todas as linhas associadas (sessões, inscrições, alojamento, transporte, itinerário, documentos)? Os dados de perfil pessoal mantêm-se. Esta ação não pode ser anulada.",
+      "cascading": "A eliminar",
+      "active": "Ativo",
+      "past": "Anterior",
+      "empty": "Ainda sem eventos. Crie o primeiro para começar.",
+      "formHint": "Edite o básico aqui. Os convites estão no separador seguinte.",
+      "fields": {
+        "name": "Nome",
+        "subtitle": "Subtítulo",
+        "type": "Tipo",
+        "location": "Localização",
+        "timeZone": "Fuso horário (IANA)",
+        "startDate": "Data de início",
+        "endDate": "Data de fim",
+        "regOpensAt": "Inscrições abrem",
+        "regClosesAt": "Inscrições fecham",
+        "heroImage": "URL da imagem principal",
+        "logo": "URL do logótipo"
+      },
+      "flags": {
+        "title": "Visibilidade e estado",
+        "isActive": "Evento ativo",
+        "isActiveHint": "Apenas um evento Supafest pode estar ativo de cada vez. Os eventos ativos alimentam o ecrã de boas-vindas.",
+        "inviteAll": "Convidar todos os colaboradores automaticamente",
+        "inviteAllHint": "Quando ativo, todos os colaboradores ativos veem este evento. Caso contrário, os convites têm de ser adicionados um a um."
+      }
+    },
+    "agenda": {
+      "title": "Programa",
+      "subtitle": "Sessões, oradores e o programa diário.",
+      "downloadBlank": "Transferir modelo em branco",
+      "downloadCurrent": "Exportar programa atual",
+      "import": "Importar CSV",
+      "importing": "A importar",
+      "imported_one": "Importada {{count}} sessão.",
+      "imported_other": "Importadas {{count}} sessões.",
+      "errorRow": "Linha {{row}}",
+      "currentSessions_one": "Programa atual ({{count}} sessão)",
+      "currentSessions_other": "Programa atual ({{count}} sessões)",
+      "empty": "Ainda sem sessões. Importe um CSV ou adicione-as através do visualizador de programa de administração.",
+      "addSession": "Adicionar sessão",
+      "editSession": "Editar sessão",
+      "saveSession": "Guardar sessão",
+      "saving": "A guardar",
+      "saved": "Sessão guardada.",
+      "deleted": "Sessão removida.",
+      "deleteConfirm": "Remover esta sessão do programa?",
+      "fields": {
+        "title": "Título",
+        "subtitle": "Subtítulo",
+        "type": "Tipo",
+        "audience": "Público",
+        "startsAt": "Começa às",
+        "endsAt": "Termina às",
+        "location": "Localização",
+        "capacity": "Capacidade",
+        "speakerEmail": "Email do orador",
+        "abstract": "Resumo",
+        "mandatory": "Adicionar automaticamente ao itinerário de cada participante relevante"
+      },
+      "types": {
+        "keynote": "Keynote",
+        "breakout": "Breakout",
+        "workshop": "Workshop",
+        "dinner": "Jantar",
+        "activity": "Atividade",
+        "transport": "Transporte",
+        "social": "Convívio"
+      },
+      "audiences": {
+        "all": "Todos",
+        "employees_only": "Apenas colaboradores",
+        "guests_only": "Apenas convidados",
+        "opt_in": "Apenas por adesão"
+      }
+    },
+    "documents": {
+      "title": "Documentos",
+      "subtitle": "Documentos com versões mostrados na inscrição e no separador de documentos."
+    },
+    "feed": {
+      "title": "Feed",
+      "subtitle": "Itens editoriais fixados no ecrã inicial.",
+      "create": "Adicionar item ao feed",
+      "edit": "Editar item do feed",
+      "save": "Guardar item do feed",
+      "saving": "A guardar",
+      "saved": "Item do feed guardado.",
+      "delete": "Eliminar",
+      "deleted": "Item do feed removido.",
+      "deleteConfirm": "Remover este item do feed do ecrã inicial?",
+      "newItem": "Adicionar item ao feed",
+      "empty": "Ainda nada aqui. Adicione um item.",
+      "alwaysOpen": "sempre",
+      "noItems": "Ainda sem itens no feed. Use Adicionar item ao feed para publicar o primeiro.",
+      "locations": {
+        "main": "Feed principal",
+        "sidebar": "Barra lateral"
+      },
+      "fields": {
+        "location": "Localização",
+        "title": "Título",
+        "subtitle": "Subtítulo",
+        "body": "Corpo",
+        "image": "Imagem",
+        "link": "URL da ligação",
+        "occursAt": "Ocorre em",
+        "startsDisplayingAt": "Começa a mostrar",
+        "endsDisplayingAt": "Deixa de mostrar"
+      }
+    },
+    "stats": {
+      "title": "Estatísticas",
+      "subtitle": "Presenças, mistura alimentar, funil de inscrição, distribuição por país.",
+      "empty": "Ainda sem dados.",
+      "funnel": {
+        "title": "Funil de inscrição",
+        "subtitle": "Como os participantes estão a progredir na inscrição.",
+        "invited": "Convidados",
+        "started": "Iniciaram",
+        "complete": "Concluíram",
+        "cancelled": "Cancelaram"
+      },
+      "role": {
+        "title": "Por função",
+        "subtitle": "Contas ativas divididas por função."
+      },
+      "country": {
+        "title": "País de origem",
+        "subtitle": "Top 12 de países por número de colaboradores."
+      },
+      "department": {
+        "title": "Por departamento",
+        "subtitle": "Distribuição pela organização."
+      },
+      "dietary": {
+        "title": "Restrições alimentares",
+        "subtitle": "Vegano, vegetariano, halal, kosher, sem glúten, sem lacticínios."
+      },
+      "allergies": {
+        "title": "Alergias",
+        "subtitle": "Frutos secos, marisco, lacticínios, ovos, soja, trigo, sésamo, outras."
+      },
+      "alcoholFree": {
+        "title": "Sem álcool",
+        "subtitle": "Percentagem de participantes que preferem não consumir álcool.",
+        "label": "sem álcool"
+      },
+      "payments": {
+        "title": "Pagamentos de convidados",
+        "subtitle": "Pendentes, pagos, dispensados, reembolsados, falhados."
+      },
+      "tenure": {
+        "title": "Anos de presença",
+        "subtitle": "Distribuição da presença em Supafests anteriores, dos novatos à esquerda aos veteranos à direita."
+      },
+      "accessibility": {
+        "title": "Necessidades de acessibilidade",
+        "subtitle": "Mobilidade, visão, audição, neurodivergente, crónica, outras."
+      }
+    },
+    "nudges": {
+      "title": "Lembretes",
+      "subtitle": "Lembretes manuais, recordatórios de prazos e o registo de auditoria completo.",
+      "send": "Enviar lembrete",
+      "sendCta": "Enviar",
+      "sending": "A enviar",
+      "sent": "Enviados {{delivered}} de {{attempted}}.",
+      "empty": "Ainda não foram enviados lembretes.",
+      "clearUser": "Limpar",
+      "userPlaceholder": "Pesquisar por email",
+      "fields": {
+        "channel": "Canal",
+        "type": "Tipo",
+        "audience": "Público",
+        "subject": "Assunto",
+        "body": "Corpo"
+      },
+      "channels": {
+        "in_app": "Na aplicação",
+        "email": "Email",
+        "slack": "Slack"
+      },
+      "types": {
+        "announcement": "Anúncio",
+        "nudge": "Lembrete",
+        "deadline_reminder": "Recordatório de prazo",
+        "flight_update": "Atualização de voo",
+        "room_assignment": "Atribuição de quarto",
+        "checkin_reminder": "Recordatório de check-in"
+      },
+      "audiences": {
+        "all_employees": "Todos os colaboradores",
+        "all_guests": "Todos os convidados",
+        "user": "Utilizador específico"
+      }
+    },
+    "reports": {
+      "title": "Relatórios",
+      "subtitle": "Relatórios em direto para hotel, transporte, cozinha e finanças."
+    },
+    "tabs": {
+      "registration": "Progresso da inscrição",
+      "rooming": "Lista de quartos",
+      "transport": "Manifesto de transporte",
+      "dietary": "Resumo alimentar",
+      "swag": "Encomenda de brindes",
+      "payments": "Pagamentos"
+    },
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Seguinte",
+      "pageOf": "Página {{page}} de {{total}}",
+      "range": "{{from}}–{{to}} de {{total}}"
+    },
+    "exportCsv": "Exportar CSV",
+    "noRows": "Sem linhas para mostrar.",
+    "share": {
+      "create": "Criar ligação de partilha",
+      "creating": "A criar ligação",
+      "created": "Ligação de partilha criada. Caduca em 7 dias.",
+      "copy": "Copiar ligação",
+      "copied": "Ligação copiada para a área de transferência.",
+      "copyFailed": "Não foi possível copiar. Selecione a ligação e copie manualmente.",
+      "urlLabel": "Ligação de partilha só de leitura",
+      "error": "Não foi possível criar a ligação de partilha: {{message}}"
+    },
+    "conflicts": {
+      "title": "Conflitos de dados",
+      "subtitle": "Quando fontes externas discordam do Kizuna, cada discrepância chega aqui para revisão.",
+      "field": "Campo",
+      "kizunaValue": "Valor no Kizuna",
+      "externalValue": "Valor externo",
+      "external": "Fonte externa",
+      "detectedAt": "Detetado",
+      "acceptKizuna": "Manter Valor do Kizuna",
+      "acceptExternal": "Usar Valor Externo",
+      "noConflicts": "Sem conflitos abertos."
+    },
+    "blocked": "Não tem permissão para ver esta página."
+  },
+  "agenda": {
+    "title": "Programa",
+    "subtitle": "Veja o programa. Marque com estrela as sessões a que quer assistir.",
+    "loading": "A carregar o programa",
+    "empty": "Ainda sem sessões. Volte à medida que o programa for ficando definido.",
+    "noFavorites": "Ainda não marcou nenhuma sessão como favorita.",
+    "favorite": "Adicionar aos favoritos",
+    "unfavorite": "Remover dos favoritos",
+    "filters": {
+      "all": "Todas ({{count}})",
+      "favorites": "As minhas escolhas ({{count}})"
+    },
+    "allDays": "Todos os dias",
+    "dayFilterLabel": "Filtrar por dia"
+  },
+  "shareReport": {
+    "eyebrow": "Relatório partilhado do Kizuna",
+    "loading": "A carregar os dados mais recentes",
+    "notFound": "Esta ligação de partilha não existe.",
+    "expired": "Esta ligação de partilha caducou. Peça uma nova à equipa do evento.",
+    "error": "Não foi possível carregar este relatório. Por favor, tente novamente mais tarde.",
+    "empty": "Ainda sem linhas para mostrar.",
+    "lastModified": "Última modificação: {{value}}",
+    "expires": "A ligação caduca: {{value}}",
+    "types": {
+      "rooming_list": "Lista de quartos",
+      "transport_manifest": "Manifesto de transporte",
+      "dietary_summary": "Resumo alimentar",
+      "swag_order": "Encomenda de brindes",
+      "full_registration": "Progresso da inscrição",
+      "payment_reconciliation": "Reconciliação de pagamentos"
+    }
+  },
+  "notifications": {
+    "title": "Notificações",
+    "toggle_one": "Notificações, {{count}} por ler",
+    "toggle_other": "Notificações, {{count}} por ler",
+    "toggle_zero": "Notificações, nenhuma por ler",
+    "markAllRead": "Marcar todas como lidas",
+    "empty": "Ainda nada. Avisamos quando houver."
+  },
+  "itinerary": {
+    "title": "O Seu Itinerário",
+    "subtitle": "O seu programa para o evento.",
+    "timelineTitle": "Cronologia",
+    "loading": "A carregar o seu itinerário",
+    "empty": {
+      "title": "Ainda nada no seu itinerário",
+      "body": "Clique em Adicionar ao Itinerário para colar um email de confirmação ou carregar um PDF de reserva. Nós tratamos da estrutura por si."
+    },
+    "edit": {
+      "title": "Editar elemento do itinerário",
+      "editableHint": "Adicione um pedido especial abaixo. Todos os outros detalhes são geridos pelo sistema.",
+      "readOnlyHint": "Este item é só de leitura. Os detalhes são geridos pelo seu administrador do evento.",
+      "titleField": "Título",
+      "subtitleField": "Detalhes",
+      "startsAt": "Começa",
+      "endsAt": "Termina",
+      "specialRequests": "Pedidos especiais",
+      "specialRequestsPlaceholder": "Berço, acessibilidade, alimentação, qualquer coisa que a nossa equipa deva saber.",
+      "specialRequestsHint": "Visível apenas para a equipa de operações do evento. Guarde para atualizar.",
+      "save": "Guardar",
+      "saving": "A guardar",
+      "saved": "Pedido especial guardado."
+    },
+    "day": {
+      "today": "Hoje",
+      "dayOf": "Dia {{day}} de {{total}}"
+    },
+    "nowNext": {
+      "live": "A acontecer agora",
+      "upcoming": "A seguir",
+      "endsIn": "termina {{gap}}",
+      "startsIn": "começa {{gap}}",
+      "inMinutes_one": "em {{count}} min",
+      "inMinutes_other": "em {{count}} min",
+      "inHours_one": "em {{count}} h",
+      "inHours_other": "em {{count}} h",
+      "inDays_one": "em {{count}} dia",
+      "inDays_other": "em {{count}} dias"
+    },
+    "guestSync": {
+      "label": "Sincronizar com o itinerário do meu padrinho",
+      "description": "Quando ativo, o seu itinerário espelha o do colaborador que o convidou. Desligue para gerir o seu próprio programa.",
+      "enabled": "A sincronizar com o itinerário do seu padrinho.",
+      "disabled": "Sincronização desligada. O seu itinerário volta a ser seu."
+    },
+    "hero": {
+      "eyebrow": "Prepare-se para",
+      "live": "A acontecer agora",
+      "countdownLabel": "Contagem decrescente até ao início do evento",
+      "days": "Dias",
+      "hours": "Horas",
+      "minutes": "Minutos"
+    },
+    "import": {
+      "cta": "Adicionar ao Itinerário",
+      "title": "Adicionar ao Seu Itinerário",
+      "subtitle": "Cole um email de confirmação, carregue um PDF ou reencaminhe a sua reserva. Nós tratamos da estrutura por si.",
+      "tabs": {
+        "paste": "Colar texto",
+        "upload": "Carregar ficheiro",
+        "email": "Reencaminhar email"
+      },
+      "pastePlaceholder": "Cole aqui a confirmação do voo, hotel ou transferência…",
+      "pasteHint": "Funciona melhor com o texto completo do email de confirmação.",
+      "parse": "Processar e Adicionar",
+      "parsing": "A processar o seu itinerário",
+      "success": "Importados {{count}} item(ns) para o seu itinerário.",
+      "nothingFound": "Não conseguimos encontrar nada para importar. Tente colar mais texto.",
+      "error": "Não foi possível processar agora. Tente novamente ou importe manualmente.",
+      "uploadDropTitle": "Largue um PDF ou clique para escolher",
+      "uploadDropHint": "PDFs de reserva de companhias aéreas, hotéis e agências de viagens. Extraímos o texto no seu dispositivo. O ficheiro nunca sai do seu navegador.",
+      "uploadReading": "A ler {{name}}…",
+      "uploadReady": "Pronto: {{name}} ({{count}} caracteres)",
+      "uploadError": "Não foi possível ler esse ficheiro. Use Colar texto ou tente outra exportação.",
+      "uploadInvalidType": "Por favor, escolha um PDF.",
+      "emailComingSoonTitle": "O reencaminhamento por email vem em breve",
+      "emailComingSoonHint": "Reencaminhe para itinerary@kizuna.dev assim que tivermos tudo ligado."
+    },
+    "checkin": {
+      "title": "Check-In",
+      "subtitle": "Mostre este código na receção para confirmar a sua chegada.",
+      "noToken": "O seu código de check-in vai aparecer aqui assim que a sua inscrição for aprovada."
+    },
+    "itemTypes": {
+      "session": "Sessão",
+      "flight": "Voo",
+      "transport": "Transporte",
+      "accommodation": "Alojamento",
+      "announcement": "Anúncio",
+      "reminder": "Lembrete"
+    },
+    "conflict": "Sobrepõe-se a outro item do seu dia",
+    "withGuest": "Com o seu convidado"
+  },
+  "guests": {
+    "invitationTitle": "Está Convidado para o Supafest",
+    "invitationSubtitle": "Defina uma palavra-passe para aceitar o seu convite. A ligação caduca sete dias depois de {{sponsor}} a ter enviado.",
+    "createPassword": "Criar uma Palavra-passe",
+    "passwordHint": "Pelo menos 8 caracteres.",
+    "acceptAndContinue": "Aceitar Convite",
+    "accepting": "A configurar a sua conta",
+    "errors": {
+      "missingToken": "Falta o token a esta ligação de convite. Peça a {{sponsor}} para reenviar.",
+      "expired": "Este convite caducou. Peça ao colaborador padrinho que envie um novo.",
+      "badSignature": "Esta ligação de convite não é válida. Por favor, use a ligação do email original.",
+      "generic": "Não foi possível aceitar o seu convite. Tente novamente ou contacte o suporte."
+    },
+    "checkout": {
+      "title": "Confirme o Seu Lugar",
+      "subtitle": "Cobramos uma taxa fixa que cobre o alojamento, refeições e atividades durante todo o Supafest.",
+      "adultFee": "950 USD",
+      "childFee": "500 USD",
+      "payNow": "Pagar Agora",
+      "redirecting": "A levá-lo para o checkout"
+    }
+  },
+  "documents": {
+    "tabTitle": "Documentos",
+    "addDocument": "Adicionar Documento",
+    "createTitle": "Adicionar um Documento",
+    "createSubtitle": "Os rascunhos são publicados imediatamente para todos neste evento.",
+    "documentKey": "Tipo",
+    "documentTitle": "Título",
+    "documentBody": "Corpo (Markdown)",
+    "documentBodyHint": "Suporte para Markdown.",
+    "requiresAcknowledgement": "Requer que cada participante leia e assine",
+    "publish": "Publicar Documento",
+    "publishing": "A publicar",
+    "createSuccess": "Documento publicado.",
+    "readAndSign": "Ler e Assinar",
+    "signed": "Assinado",
+    "signSubtitle": "Leia o documento abaixo. Escreva o seu nome legal completo para assinar quando chegar ao fim.",
+    "fullNameLabel": "O Seu Nome Legal Completo",
+    "signButton": "Assinar",
+    "signing": "A assinar",
+    "signSuccess": "Obrigado. A sua confirmação está registada.",
+    "signFailure": "Não foi possível registar a sua assinatura. Tente novamente.",
+    "compliance": "Assinado por {{signed}} de {{total}}",
+    "complianceTitle": "Conformidade",
+    "complianceSubtitle": "Quem assinou e quem ainda não assinou cada documento obrigatório.",
+    "consentTitle": "Por Favor, Reveja o Seguinte",
+    "scrollToContinue": "Desça até ao fim para continuar",
+    "explicitCheckboxLabel": "Li e concordo com o {{title}}",
+    "agreeAndContinue": "Concordo e Continuo",
+    "savingAcknowledgement": "A registar a sua confirmação",
+    "acknowledgedOn": "Confirmado em {{date}}",
+    "version": "Versão {{version}}",
+    "versionBumped": "Este documento foi atualizado. Por favor, releia e confirme.",
+    "noDocuments": "Sem documentos para mostrar.",
+    "errorSaving": "Não foi possível registar a sua confirmação. Por favor, tente novamente.",
+    "contentType": {
+      "label": "Tipo de conteúdo",
+      "markdown": "Markdown",
+      "pdf": "PDF",
+      "notion": "Ligação Notion"
+    },
+    "pdf": {
+      "label": "Ficheiro PDF",
+      "openInNewTab": "Abrir PDF num novo separador",
+      "download": "Transferir PDF",
+      "loading": "A carregar PDF",
+      "unavailable": "Este PDF não está disponível neste momento."
+    },
+    "notion": {
+      "label": "URL do Notion",
+      "hint": "Cole uma ligação pública do Notion. Vamos mostrar um botão que a abre. A integração completa chega numa fase posterior.",
+      "open": "Abrir no Notion"
+    }
+  },
+  "uploader": {
+    "dropOrClick": "Largue um ficheiro aqui ou clique para escolher",
+    "choose": "Escolher ficheiro",
+    "remove": "Remover",
+    "limits": "Até {{mb}} MB",
+    "tooLarge": "O ficheiro é demasiado grande. O limite é de {{mb}} MB.",
+    "unsupportedType": "Esse tipo de ficheiro não é suportado.",
+    "success": "Carregado.",
+    "uploading": "A carregar",
+    "uploadOne": "Carregar ficheiro",
+    "uploadMany": "Carregar {{count}} ficheiros",
+    "uploadFiles": "Carregar",
+    "dragOr": "Arraste e largue ou",
+    "selectOne": "selecione o ficheiro",
+    "selectMany": "selecione os ficheiros",
+    "toUpload": "para carregar",
+    "maxSize": "Tamanho máximo do ficheiro: {{size}}",
+    "tooLargeWithSize": "O ficheiro é maior do que {{limit}} (tamanho: {{size}})",
+    "uploaded": "Carregado",
+    "failedWithMessage": "Falha no carregamento: {{message}}",
+    "uploadedCount_one": "Carregado com sucesso {{count}} ficheiro",
+    "uploadedCount_other": "Carregados com sucesso {{count}} ficheiros",
+    "tooManyFiles_one": "Pode carregar no máximo {{max}} ficheiros; remova {{extra}} ficheiro.",
+    "tooManyFiles_other": "Pode carregar no máximo {{max}} ficheiros; remova {{extra}} ficheiros."
+  },
+  "adminDocuments": {
+    "title": "Documentos",
+    "subtitle": "Documentos com versões mostrados na inscrição e no separador de documentos.",
+    "newDocument": "Adicionar documento",
+    "edit": "Editar documento",
+    "create": "Adicionar documento",
+    "save": "Guardar documento",
+    "saving": "A guardar",
+    "saved": "Documento guardado.",
+    "delete": "Eliminar",
+    "deleteConfirm": "Eliminar este documento? As confirmações vão manter-se no registo de auditoria.",
+    "deleted": "Documento eliminado.",
+    "empty": "Ainda sem documentos. Use Adicionar documento para publicar o primeiro.",
+    "fields": {
+      "title": "Título",
+      "documentKey": "Tipo",
+      "appliesTo": "Aplica-se a",
+      "isActive": "Ativo",
+      "requiresAcknowledgement": "Requer confirmação",
+      "requiresScroll": "Exigir descer até ao fim antes de confirmar"
+    },
+    "keys": {
+      "waiver": "Termo de responsabilidade",
+      "code_of_conduct": "Código de conduta",
+      "expense_policy": "Política de despesas",
+      "booking_process": "Processo de reserva",
+      "livestream": "Transmissão em direto",
+      "toc": "Termos e condições"
+    },
+    "appliesTo": {
+      "all": "Todos",
+      "employee": "Apenas colaboradores",
+      "guest": "Apenas convidados"
+    },
+    "previewMarkdown": "Pré-visualizar",
+    "writeMarkdown": "Escrever"
+  }
+}

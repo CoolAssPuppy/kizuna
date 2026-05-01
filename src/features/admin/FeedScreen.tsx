@@ -296,7 +296,13 @@ interface FeedDialogProps {
   saving: boolean;
 }
 
-function FeedDialog({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.Element {
+function FeedDialog(props: FeedDialogProps): JSX.Element {
+  // Re-mount when a different draft opens so initial state reflects it.
+  const key = props.draft === null ? 'closed' : (props.draft.id ?? 'new');
+  return <FeedDialogInner key={key} {...props} />;
+}
+
+function FeedDialogInner({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.Element {
   const { t } = useTranslation();
   const open = draft !== null;
   // Hold a local working copy so typing into fields isn't blocked on parent renders.
@@ -307,7 +313,6 @@ function FeedDialog({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.El
       open={open}
       onOpenChange={(next) => {
         if (!next) onClose();
-        else if (draft) setState(draft);
       }}
     >
       <DialogContent>

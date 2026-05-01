@@ -263,7 +263,14 @@
     },
     "language": "Language",
     "languages": {
-      "en-US": "English (United States)"
+      "en-US": "English (United States)",
+      "fr-FR": "French (France)",
+      "it-IT": "Italian (Italy)",
+      "de-DE": "German (Germany)",
+      "es-ES": "Spanish (Spain)",
+      "pt-PT": "Portuguese (Portugal)",
+      "pt-BR": "Portuguese (Brazil)",
+      "fi-FI": "Finnish (Finland)"
     },
     "rights": "Powered by Supabase. Built with Kizuna."
   },
