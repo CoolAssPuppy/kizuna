@@ -41,6 +41,14 @@ function userScopedTable<T extends keyof Tables>(
   client: AppSupabaseClient,
   table: T,
 ): GenericPostgrestBuilder {
+  // The `as never` + `as unknown as` cast is the workaround for
+  // supabase/postgres-js typegen on dynamic table-name generics: the
+  // PostgrestQueryBuilder return type collapses to `never` when `table`
+  // is `T extends keyof Tables` rather than a string literal, so the
+  // chained .select/.upsert/.eq inference dies. The cast shoves us back
+  // onto the GenericPostgrestBuilder shape (defined above) which is
+  // structurally accurate for the methods we actually call. Single
+  // ring-fenced spot — every other api/* module is fully typed.
   return client.from(table as never) as unknown as GenericPostgrestBuilder;
 }
 

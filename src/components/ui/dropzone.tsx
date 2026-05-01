@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
  * mechanics.
  */
 
-export function formatBytes(bytes: number, decimals = 2): string {
+function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0 || Number.isNaN(bytes)) return '0 bytes';
   const k = 1000;
   const dm = decimals < 0 ? 0 : decimals;

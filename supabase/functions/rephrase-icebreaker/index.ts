@@ -54,6 +54,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
   }
 
+  // Hard cap: a fact is one short sentence. 2KB is generous and keeps an
+  // attacker from forcing a full GPT prompt window of work. (F007)
+  const contentLength = Number(req.headers.get('Content-Length') ?? '0');
+  if (Number.isFinite(contentLength) && contentLength > 2 * 1024) {
+    return jsonResponse({ error: 'payload_too_large' }, { status: 413 });
+  }
+
   let body: { fact?: string };
   try {
     body = await req.json();

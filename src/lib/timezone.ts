@@ -16,7 +16,7 @@ export function zonedWallTimeToUtcIso(date: string, time: string, timeZone: stri
 }
 
 /** Offset of `timeZone` relative to UTC at the supplied instant, in milliseconds. */
-export function tzOffsetMs(utcMs: number, timeZone: string): number {
+function tzOffsetMs(utcMs: number, timeZone: string): number {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
     hour12: false,

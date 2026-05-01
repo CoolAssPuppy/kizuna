@@ -1770,7 +1770,7 @@ export type Database = {
           needs_review?: boolean
           passenger_count: number
           pickup_at: string
-          pickup_tz?: string
+          pickup_tz: string
           special_equipment?: string[]
           special_requests?: string | null
           updated_at?: string
@@ -1838,7 +1838,7 @@ export type Database = {
           id?: string
           notes?: string | null
           pickup_at: string
-          pickup_tz?: string
+          pickup_tz: string
           provider?: string | null
           vehicle_name: string
         }
@@ -2025,7 +2025,12 @@ export type Database = {
       flight_source_type: "perk_sync" | "perk_csv" | "manual_obs"
       ground_transport_need: "none" | "arrival" | "departure" | "both"
       guest_age_bracket: "under_12" | "teen" | "adult"
-      guest_invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      guest_invitation_status:
+        | "pending"
+        | "sent"
+        | "accepted"
+        | "expired"
+        | "cancelled"
       guest_payment_status:
         | "pending"
         | "paid"
@@ -2240,7 +2245,13 @@ export const Constants = {
       flight_source_type: ["perk_sync", "perk_csv", "manual_obs"],
       ground_transport_need: ["none", "arrival", "departure", "both"],
       guest_age_bracket: ["under_12", "teen", "adult"],
-      guest_invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      guest_invitation_status: [
+        "pending",
+        "sent",
+        "accepted",
+        "expired",
+        "cancelled",
+      ],
       guest_payment_status: ["pending", "paid", "waived", "refunded", "failed"],
       guest_relationship: ["partner", "family", "friend", "other"],
       itinerary_item_type: [

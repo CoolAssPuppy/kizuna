@@ -1,5 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
+import { reportError } from '@/lib/errorReporter';
+
 import { ErrorFallback } from './ErrorFallback';
 
 interface ErrorBoundaryProps {
@@ -18,8 +20,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // TODO(M10): pipe to error reporting service (Sentry / edge function).
-    console.error('ErrorBoundary caught', error, errorInfo);
+    reportError(error, { source: 'react_error_boundary', componentStack: errorInfo.componentStack });
   }
 
   private readonly handleReload = (): void => {

@@ -40,6 +40,33 @@ export async function cancelGuestInvitation(
   if (error) throw error;
 }
 
+export interface UpdateGuestInvitationArgs {
+  id: string;
+  fullName: string;
+  guestEmail: string;
+}
+
+/**
+ * Sponsor edits a pending or already-sent invitation. Once the guest has
+ * accepted (status='accepted') the row points at a real auth user — the
+ * sponsor stops being authoritative for name/email and the call site
+ * blocks edits before this fires. RLS narrows the row scope to the
+ * sponsor anyway.
+ */
+export async function updateGuestInvitation(
+  client: AppSupabaseClient,
+  args: UpdateGuestInvitationArgs,
+): Promise<void> {
+  const { error } = await client
+    .from('guest_invitations')
+    .update({
+      full_name: args.fullName,
+      guest_email: args.guestEmail.toLowerCase(),
+    })
+    .eq('id', args.id);
+  if (error) throw error;
+}
+
 export async function renameAdditionalGuest(
   client: AppSupabaseClient,
   args: { id: string; fullName: string },

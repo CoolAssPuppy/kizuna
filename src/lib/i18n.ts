@@ -7,8 +7,8 @@ import enCommon from '@/locales/en-US/common.json';
 export const SUPPORTED_LOCALES = ['en-US'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
-export const DEFAULT_LOCALE: SupportedLocale = 'en-US';
-export const NAMESPACES = ['common'] as const;
+const DEFAULT_LOCALE: SupportedLocale = 'en-US';
+const NAMESPACES = ['common'] as const;
 
 void i18n
   .use(LanguageDetector)

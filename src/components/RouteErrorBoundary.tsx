@@ -3,6 +3,7 @@ import { Component, type ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { reportError } from '@/lib/errorReporter';
 
 interface Props {
   children: ReactNode;
@@ -30,7 +31,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, info: { componentStack?: string | null }): void {
-    console.error('[kizuna] route error', error, info.componentStack);
+    reportError(error, { source: 'route_error_boundary', componentStack: info.componentStack ?? null });
   }
 
   override render(): ReactNode {

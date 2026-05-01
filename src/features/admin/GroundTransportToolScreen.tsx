@@ -1,22 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Bus, Plane, Plus, Sparkles } from 'lucide-react';
+import { AlertTriangle, Bus, Plane, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
-import { zonedWallTimeToUtcIso } from '@/lib/timezone';
 import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 
@@ -24,9 +14,7 @@ import {
   type AssignVehicleArgs,
   type PassengerRow,
   type TransportDirection,
-  type VehicleOption,
   assignVehicle,
-  createVehicle,
   fetchPassengers,
   fetchVehicleOptions,
 } from './api/groundTransport';
@@ -37,6 +25,8 @@ import {
   windowTimeFmt,
   type VehicleStat,
 } from './groundTransport/grouping';
+import { NewVehicleDialog } from './groundTransport/NewVehicleDialog';
+import { VehicleSidebar } from './groundTransport/VehicleSidebar';
 
 export function GroundTransportToolScreen(): JSX.Element {
   const { t } = useTranslation();
@@ -381,213 +371,3 @@ function PassengerRowCard({
   );
 }
 
-interface VehicleSidebarProps {
-  vehicleStats: ReadonlyArray<VehicleStat>;
-  direction: TransportDirection;
-  timeFmt: Intl.DateTimeFormat;
-}
-
-function VehicleSidebar({ vehicleStats, direction, timeFmt }: VehicleSidebarProps): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <aside className="space-y-3">
-      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        <Sparkles aria-hidden className="h-3 w-3" />
-        {t('admin.groundTransport.vehiclesHeader')}
-      </h3>
-      {vehicleStats.length === 0 ? (
-        <p className="rounded-md border border-dashed bg-muted/20 p-3 text-xs text-muted-foreground">
-          {t('admin.groundTransport.noVehiclesForLeg')}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {vehicleStats.map(({ vehicle, assigned }) => (
-            <VehicleSidebarRow
-              key={vehicle.id}
-              vehicle={vehicle}
-              assigned={assigned}
-              timeFmt={timeFmt}
-            />
-          ))}
-        </ul>
-      )}
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70">
-        {t(`admin.groundTransport.tabs.${direction}`)}
-      </p>
-    </aside>
-  );
-}
-
-interface VehicleSidebarRowProps {
-  vehicle: VehicleOption;
-  assigned: number;
-  timeFmt: Intl.DateTimeFormat;
-}
-
-function VehicleSidebarRow({ vehicle, assigned, timeFmt }: VehicleSidebarRowProps): JSX.Element {
-  const ratio = assigned / vehicle.capacity_passengers;
-  const tone = capacityTone(ratio);
-  return (
-    <li className="space-y-2 rounded-lg border bg-card p-3">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="font-medium">{vehicle.vehicle_name}</p>
-        <span className="text-xs text-muted-foreground">
-          {assigned}/{vehicle.capacity_passengers}
-        </span>
-      </div>
-      <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
-        {timeFmt.format(new Date(vehicle.pickup_at))}
-      </p>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={cn('h-full', tone)}
-          style={{ width: `${Math.min(100, Math.round(ratio * 100))}%` }}
-        />
-      </div>
-    </li>
-  );
-}
-
-interface NewVehicleDialogProps {
-  open: boolean;
-  onOpenChange: (next: boolean) => void;
-  eventId: string;
-  /** ISO date (YYYY-MM-DD) seeded into the pickup-date field. */
-  defaultDate: string;
-  direction: TransportDirection;
-  /** IANA tz name from the active event (e.g. "America/Edmonton"). */
-  timeZone: string;
-  onCreated: () => void;
-}
-
-function NewVehicleDialog({
-  open,
-  onOpenChange,
-  eventId,
-  defaultDate,
-  direction,
-  timeZone,
-  onCreated,
-}: NewVehicleDialogProps): JSX.Element {
-  const { t } = useTranslation();
-  const { show } = useToast();
-  const [name, setName] = useState('');
-  const [pickupDate, setPickupDate] = useState(defaultDate);
-  const [pickupTime, setPickupTime] = useState('14:00');
-  const [pax, setPax] = useState(12);
-  const [bags, setBags] = useState(12);
-  const [busy, setBusy] = useState(false);
-
-  async function handleCreate(): Promise<void> {
-    if (!name.trim() || busy) return;
-    setBusy(true);
-    try {
-      // Build a UTC ISO from the local-event date+time picker. Using `new
-      // Date('YYYY-MM-DDTHH:mm')` parses as the admin's LOCAL time, which is
-      // wrong for an event in a different zone. zonedWallTimeToUtcIso anchors
-      // the wall-clock value to the event's tz so MST/MDT and DST shifts are
-      // handled correctly.
-      const pickupAtIso = zonedWallTimeToUtcIso(pickupDate, pickupTime, timeZone);
-      await createVehicle(getSupabaseClient(), {
-        eventId,
-        vehicleName: name.trim(),
-        direction,
-        pickupAtIso,
-        pickupTz: timeZone,
-        capacityPassengers: pax,
-        capacityBags: bags,
-      });
-      onCreated();
-      onOpenChange(false);
-      setName('');
-      setPickupDate(defaultDate);
-      setPickupTime('14:00');
-      setPax(12);
-      setBags(12);
-    } catch (err) {
-      show(err instanceof Error ? err.message : 'Error', 'error');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('admin.groundTransport.newVehicleTitle')}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="vehicle-name">{t('admin.groundTransport.vehicleName')}</Label>
-            <Input
-              id="vehicle-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('admin.groundTransport.vehicleNamePlaceholder')}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="vehicle-date">{t('admin.groundTransport.vehiclePickupDate')}</Label>
-              <Input
-                id="vehicle-date"
-                type="date"
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="vehicle-time">{t('admin.groundTransport.vehiclePickupTime')}</Label>
-              <Input
-                id="vehicle-time"
-                type="time"
-                value={pickupTime}
-                onChange={(e) => setPickupTime(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="vehicle-pax">{t('admin.groundTransport.capacityPax')}</Label>
-              <Input
-                id="vehicle-pax"
-                type="number"
-                min={1}
-                value={pax}
-                onChange={(e) => setPax(Math.max(1, Number(e.target.value)))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="vehicle-bags">{t('admin.groundTransport.capacityBags')}</Label>
-              <Input
-                id="vehicle-bags"
-                type="number"
-                min={0}
-                value={bags}
-                onChange={(e) => setBags(Math.max(0, Number(e.target.value)))}
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={busy}>
-            {t('common.cancel')}
-          </Button>
-          <Button onClick={() => void handleCreate()} disabled={busy || name.trim().length < 2}>
-            {t('admin.groundTransport.createVehicle')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-/**
- * Capacity bar colour: red when full, amber once 80% loaded, primary otherwise.
- */
-function capacityTone(ratio: number): string {
-  if (ratio >= 1) return 'bg-destructive';
-  if (ratio >= 0.8) return 'bg-amber-500';
-  return 'bg-primary';
-}

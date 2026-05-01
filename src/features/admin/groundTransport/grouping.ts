@@ -1,6 +1,6 @@
 import type { PassengerRow, VehicleOption } from '../api/groundTransport';
 
-export const WINDOW_MINUTES = 30;
+const WINDOW_MINUTES = 30;
 
 /**
  * Build the window-start formatter ("Mon Jan 11 · 14:00") in the event

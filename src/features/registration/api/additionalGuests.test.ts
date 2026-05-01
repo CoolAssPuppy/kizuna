@@ -20,7 +20,9 @@ function makeClient(opts: {
   // The save flow per row chains .update(...).eq('id', ...). The eq()
   // call is what triggers the actual UPDATE, so we record the patch
   // payload in the update spy and resolve eq() with success.
-  const update = opts.updateSpy ?? vi.fn();
+  // Vitest 4 narrowed Mock to Procedure | Constructable. Coerce so the
+  // call sites that record the patch stay callable.
+  const update = (opts.updateSpy ?? vi.fn()) as unknown as (patch: Record<string, unknown>) => void;
   return {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),

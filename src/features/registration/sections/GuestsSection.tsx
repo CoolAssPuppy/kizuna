@@ -5,46 +5,36 @@ import { useTranslation } from 'react-i18next';
 
 import { CardShell } from '@/components/CardShell';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import {
   cancelGuestInvitation,
-  inviteGuest,
   listAdditionalGuests,
   listGuestInvitations,
   removeAdditionalGuest,
   renameAdditionalGuest,
+  updateGuestInvitation,
 } from '@/features/guests/api';
-import type { GuestAgeBracket, GuestInvitationRow } from '@/features/guests/types';
-import { GUEST_FEE_FOR_BRACKET } from '@/features/guests/types';
+import type { GuestInvitationRow } from '@/features/guests/types';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import { computeGuestFeeTotal } from './guestFees';
+import { CURRENCY_FMT } from './guests/currency';
+import { EditInvitationDialog } from './guests/EditInvitationDialog';
+import { InviteGuestDialog } from './guests/InviteGuestDialog';
+import { PayFeesDialog } from './guests/PayFeesDialog';
+import { RenameMinorDialog } from './guests/RenameMinorDialog';
 import type { SectionProps } from './types';
 
 const STATUS_TONE: Record<GuestInvitationRow['status'], string> = {
   pending: 'bg-amber-500/10 text-amber-700',
+  sent: 'bg-blue-500/10 text-blue-700',
   accepted: 'bg-primary/10 text-primary',
   expired: 'bg-muted text-muted-foreground',
   cancelled: 'bg-muted text-muted-foreground',
 };
-
-const CURRENCY_FMT = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-});
 
 export function GuestsSection(_props: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -52,6 +42,9 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [editTarget, setEditTarget] = useState<GuestInvitationRow | null>(null);
+  const [payOpen, setPayOpen] = useState(false);
 
   const { data: invitations } = useQuery({
     queryKey: ['guest-invitations', user?.id ?? null],
@@ -94,8 +87,15 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
-  const [renameTarget, setRenameTarget] = useState<{ id: string; fullName: string } | null>(null);
-  const [payOpen, setPayOpen] = useState(false);
+  const editInvite = useMutation({
+    mutationFn: (args: { id: string; fullName: string; guestEmail: string }) =>
+      updateGuestInvitation(getSupabaseClient(), args),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['guest-invitations'] });
+      show(t('registration.guests.invitationUpdated'));
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
 
   const adultList = invitations ?? [];
   const minorList = minors ?? [];
@@ -120,50 +120,73 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
         <div className="space-y-4">
           {adultList.length > 0 && (
             <ul className="space-y-2">
-              {adultList.map((inv) => (
-                <li
-                  key={inv.id}
-                  className="flex flex-wrap items-start justify-between gap-3 rounded-md border bg-card p-3"
-                >
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="truncate text-sm font-medium">
-                      {inv.full_name}
-                      <span className="ml-1 text-xs text-muted-foreground">
-                        · {inv.guest_email}
-                      </span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t('registration.guests.invitedAt', {
-                        date: mediumDateFormatter.format(new Date(inv.sent_at)),
-                      })}
-                      {' · '}
-                      {CURRENCY_FMT.format(Number(inv.fee_amount))}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
-                        STATUS_TONE[inv.status],
-                      )}
-                    >
-                      {t(`registration.guests.statuses.${inv.status}`)}
-                    </span>
-                    {inv.status === 'pending' ? (
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        aria-label={t('registration.guests.cancel')}
-                        onClick={() => cancel.mutate(inv.id)}
+              {adultList.map((inv) => {
+                // Editable while the row hasn't become an account yet.
+                // Cancellable from pending or sent (sponsor can rescind
+                // before the guest accepts).
+                const editable =
+                  inv.status === 'pending' ||
+                  inv.status === 'sent' ||
+                  inv.status === 'expired' ||
+                  inv.status === 'cancelled';
+                const cancellable = inv.status === 'pending' || inv.status === 'sent';
+                return (
+                  <li
+                    key={inv.id}
+                    className="flex flex-wrap items-start justify-between gap-3 rounded-md border bg-card p-3"
+                  >
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <p className="truncate text-sm font-medium">
+                        {inv.full_name}
+                        <span className="ml-1 text-xs text-muted-foreground">
+                          · {inv.guest_email}
+                        </span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {t('registration.guests.invitedAt', {
+                          date: mediumDateFormatter.format(new Date(inv.sent_at)),
+                        })}
+                        {' · '}
+                        {CURRENCY_FMT.format(Number(inv.fee_amount))}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          'rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+                          STATUS_TONE[inv.status],
+                        )}
                       >
-                        <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
-                    ) : null}
-                  </div>
-                </li>
-              ))}
+                        {t(`registration.guests.statuses.${inv.status}`)}
+                      </span>
+                      {editable ? (
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          aria-label={t('registration.guests.editInvitation')}
+                          onClick={() => setEditTarget(inv)}
+                        >
+                          <Pencil aria-hidden className="h-3.5 w-3.5" />
+                        </Button>
+                      ) : null}
+                      {cancellable ? (
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          aria-label={t('registration.guests.cancel')}
+                          onClick={() => cancel.mutate(inv.id)}
+                        >
+                          <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
+                        </Button>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
           {minorList.length > 0 && (
@@ -237,306 +260,18 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
         </div>
       ) : null}
 
-      <InviteDialog open={open} onClose={() => setOpen(false)} />
+      <InviteGuestDialog open={open} onClose={() => setOpen(false)} />
       <RenameMinorDialog
         target={renameTarget}
         onClose={() => setRenameTarget(null)}
         onSubmit={(payload) => renameMinor.mutate(payload)}
       />
+      <EditInvitationDialog
+        target={editTarget}
+        onClose={() => setEditTarget(null)}
+        onSubmit={(payload) => editInvite.mutate(payload)}
+      />
       <PayFeesDialog open={payOpen} onClose={() => setPayOpen(false)} amount={total} />
     </CardShell>
-  );
-}
-
-interface InviteDialogProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-type Step = 'bracket' | 'details';
-
-function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
-  const { t } = useTranslation();
-  const { show } = useToast();
-  const { user } = useAuth();
-  const queryClient = useQueryClient();
-  const [step, setStep] = useState<Step>('bracket');
-  const [bracket, setBracket] = useState<GuestAgeBracket | null>(null);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-
-  const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-
-  function reset(): void {
-    setStep('bracket');
-    setBracket(null);
-    setFirstName('');
-    setLastName('');
-    setEmail('');
-  }
-
-  const invite = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('No user');
-      if (!bracket) throw new Error('No bracket');
-      return inviteGuest(
-        { client: getSupabaseClient() },
-        {
-          ageBracket: bracket,
-          fullName,
-          ...(bracket === 'adult' ? { guestEmail: email.trim() } : {}),
-        },
-      );
-    },
-    onSuccess: async (result) => {
-      await queryClient.invalidateQueries({
-        queryKey: result.kind === 'adult' ? ['guest-invitations'] : ['additional-guests'],
-      });
-      show(
-        result.kind === 'adult'
-          ? t('registration.guests.invited', { email })
-          : t('registration.guests.minorAdded', { name: fullName }),
-      );
-      reset();
-      onClose();
-    },
-    onError: (err: Error) => show(err.message, 'error'),
-  });
-
-  const namesValid = firstName.trim().length >= 1 && lastName.trim().length >= 1;
-  const adultDetailsValid =
-    bracket === 'adult' ? namesValid && email.trim().includes('@') : namesValid;
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) {
-          reset();
-          onClose();
-        }
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('registration.guests.inviteTitle')}</DialogTitle>
-        </DialogHeader>
-        {step === 'bracket' ? (
-          <div className="space-y-3 py-2">
-            <p className="text-sm text-muted-foreground">{t('registration.guests.bracketIntro')}</p>
-            <div className="space-y-2">
-              {(['adult', 'teen', 'under_12'] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => {
-                    setBracket(option);
-                    setStep('details');
-                  }}
-                  className="flex w-full items-center justify-between rounded-md border bg-card px-4 py-3 text-left transition-colors hover:bg-accent hover:text-accent-foreground"
-                >
-                  <span className="space-y-0.5">
-                    <span className="block text-sm font-medium">
-                      {t(`registration.guests.brackets.${option}`)}
-                    </span>
-                    <span className="block text-xs text-muted-foreground">
-                      {t(`registration.guests.bracketHints.${option}`)}
-                    </span>
-                  </span>
-                  <span className="text-sm font-semibold">
-                    {CURRENCY_FMT.format(GUEST_FEE_FOR_BRACKET[option])}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              invite.mutate();
-            }}
-          >
-            <div className="space-y-3 py-2">
-              <p className="text-sm text-muted-foreground">
-                {bracket === 'adult'
-                  ? t('registration.guests.detailsIntroAdult')
-                  : t('registration.guests.detailsIntroMinor')}
-              </p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="invite-first-name">{t('registration.guests.firstName')}</Label>
-                  <Input
-                    id="invite-first-name"
-                    required
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder={t('registration.guests.firstNamePlaceholder')}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="invite-last-name">{t('registration.guests.lastName')}</Label>
-                  <Input
-                    id="invite-last-name"
-                    required
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder={t('registration.guests.lastNamePlaceholder')}
-                  />
-                </div>
-              </div>
-              {bracket === 'adult' ? (
-                <div className="space-y-1.5">
-                  <Label htmlFor="invite-email">{t('registration.guests.guestEmail')}</Label>
-                  <Input
-                    id="invite-email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder={t('registration.guests.emailPlaceholder')}
-                  />
-                </div>
-              ) : null}
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setStep('bracket')}>
-                {t('actions.back')}
-              </Button>
-              <Button type="submit" disabled={invite.isPending || !adultDetailsValid}>
-                {invite.isPending
-                  ? t('registration.guests.sending')
-                  : bracket === 'adult'
-                    ? t('registration.guests.send')
-                    : t('registration.guests.addMinor')}
-              </Button>
-            </DialogFooter>
-          </form>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-interface RenameMinorDialogProps {
-  target: { id: string; fullName: string } | null;
-  onClose: () => void;
-  onSubmit: (payload: { id: string; fullName: string }) => void;
-}
-
-function splitFullName(full: string): { first: string; last: string } {
-  const trimmed = full.trim();
-  if (!trimmed) return { first: '', last: '' };
-  const idx = trimmed.lastIndexOf(' ');
-  if (idx === -1) return { first: trimmed, last: '' };
-  return { first: trimmed.slice(0, idx).trim(), last: trimmed.slice(idx + 1).trim() };
-}
-
-function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps): JSX.Element {
-  const { t } = useTranslation();
-  const [first, setFirst] = useState('');
-  const [last, setLast] = useState('');
-  // Re-fill when a new minor opens. We split the stored full_name on
-  // the LAST space so middle names ride along on the first-name field;
-  // round-trip is full_name = `${first} ${last}`.trim().
-  const [lastId, setLastId] = useState<string | null>(null);
-  if (target && target.id !== lastId) {
-    setLastId(target.id);
-    const split = splitFullName(target.fullName);
-    setFirst(split.first);
-    setLast(split.last);
-  }
-  const valid = first.trim().length >= 1 && last.trim().length >= 1;
-  return (
-    <Dialog
-      open={!!target}
-      onOpenChange={(next) => {
-        if (!next) onClose();
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('registration.guests.renameTitle')}</DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="rename-first">{t('registration.guests.firstName')}</Label>
-            <Input
-              id="rename-first"
-              value={first}
-              onChange={(e) => setFirst(e.target.value)}
-              placeholder={t('registration.guests.firstNamePlaceholder')}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="rename-last">{t('registration.guests.lastName')}</Label>
-            <Input
-              id="rename-last"
-              value={last}
-              onChange={(e) => setLast(e.target.value)}
-              placeholder={t('registration.guests.lastNamePlaceholder')}
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            {t('actions.cancel')}
-          </Button>
-          <Button
-            disabled={!target || !valid}
-            onClick={() => {
-              if (target) {
-                onSubmit({ id: target.id, fullName: `${first.trim()} ${last.trim()}`.trim() });
-                onClose();
-              }
-            }}
-          >
-            {t('actions.save')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-interface PayFeesDialogProps {
-  open: boolean;
-  onClose: () => void;
-  amount: number;
-}
-
-/**
- * Stripe is gated on a real STRIPE_SECRET_KEY landing in Doppler. For
- * the pre-launch staging window we render a placeholder dialog so the
- * fee tally and the button shape are testable end-to-end. When Stripe
- * lands, swap this for a redirect to create-stripe-checkout.
- */
-function PayFeesDialog({ open, onClose, amount }: PayFeesDialogProps): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (!next) onClose();
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('registration.guests.payTitle')}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3 py-2">
-          <p className="text-sm">
-            {t('registration.guests.payAmount', { amount: CURRENCY_FMT.format(amount) })}
-          </p>
-          <p className="rounded-md border border-dashed bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-            {t('registration.guests.stripePlaceholder')}
-          </p>
-        </div>
-        <DialogFooter>
-          <Button onClick={onClose}>{t('actions.close')}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
