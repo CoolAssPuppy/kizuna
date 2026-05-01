@@ -1,24 +1,13 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": [
-    "src/main.tsx",
-    "src/app/router.tsx",
-    "scripts/*.ts",
-    "tests/e2e/**/*.spec.ts",
-    "src/**/*.test.{ts,tsx}",
-    "src/test/**/*.ts"
-  ],
+  "entry": ["src/app/router.tsx", "scripts/*.ts", "tests/e2e/**/*.spec.ts", "src/test/**/*.ts"],
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["supabase/functions/**", "src/types/database.types.ts"],
+  "ignore": ["src/types/database.types.ts"],
   "ignoreDependencies": [
     "@typescript-eslint/eslint-plugin",
     "@typescript-eslint/parser",
     "eslint-plugin-react",
     "lint-staged",
-    "world-atlas",
-    "autoprefixer",
-    "postcss",
-    "prettier-plugin-tailwindcss",
-    "@vitest/coverage-v8"
+    "world-atlas"
   ]
 }

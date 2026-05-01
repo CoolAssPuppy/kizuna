@@ -43,20 +43,19 @@ export async function updateEvent(
   return data;
 }
 
-export async function deleteEvent(client: AppSupabaseClient, id: string): Promise<void> {
-  const { error } = await client.from('events').delete().eq('id', id);
-  if (error) throw error;
-}
-
 /**
  * Hard-delete an event and every event-scoped row that references it
  * (sessions, registrations, accommodations, transport, itinerary,
  * documents, etc.). User-scoped data (employee_profiles,
  * additional_guests, swag_sizes, attendee_profiles) survives because
- * those describe the person, not the event. Routes through the admin-
- * guarded delete_event_cascade SECURITY DEFINER function.
+ * those describe the person, not the event.
+ *
+ * Routes through the admin-guarded delete_event_cascade SECURITY
+ * DEFINER function. The previous direct `.delete()` path silently
+ * failed for non-admins via RLS instead of returning a typed error;
+ * that path is gone.
  */
-export async function deleteEventCascade(client: AppSupabaseClient, id: string): Promise<void> {
+export async function deleteEvent(client: AppSupabaseClient, id: string): Promise<void> {
   const { error } = await client.rpc('delete_event_cascade', { p_event_id: id });
   if (error) throw error;
 }

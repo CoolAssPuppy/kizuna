@@ -120,7 +120,7 @@ create table public.transport_requests (
   user_id uuid not null references public.users(id) on delete cascade,
   flight_id uuid references public.flights(id) on delete set null,
   direction transport_direction not null,
-  pickup_datetime timestamptz not null,
+  pickup_at timestamptz not null,
   pickup_tz text not null default 'America/Edmonton',
   passenger_count int not null check (passenger_count > 0),
   bag_count int not null default 0 check (bag_count >= 0),
@@ -130,7 +130,7 @@ create table public.transport_requests (
   updated_at timestamptz not null default now()
 );
 
-comment on column public.transport_requests.pickup_datetime is
+comment on column public.transport_requests.pickup_at is
   'Calculated from linked flight arrival + buffer. Updated by trigger when flight changes.';
 comment on column public.transport_requests.needs_review is
   'Set true when linked flight is updated. Must be cleared by admin before manifest export.';

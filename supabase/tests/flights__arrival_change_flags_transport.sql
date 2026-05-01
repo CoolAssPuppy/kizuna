@@ -28,7 +28,7 @@ values ('00000000-0000-0000-0000-0000000000f1',
         '2027-04-01 13:00:00+00', 'America/Edmonton',
         'manual_obs', 'Air Canada', '123');
 
-insert into public.transport_requests (id, user_id, flight_id, direction, pickup_datetime, pickup_tz, passenger_count, assigned_vehicle_id, needs_review)
+insert into public.transport_requests (id, user_id, flight_id, direction, pickup_at, pickup_tz, passenger_count, assigned_vehicle_id, needs_review)
 values ('00000000-0000-0000-0000-0000000000c1',
         '00000000-0000-0000-0000-000000000020',
         '00000000-0000-0000-0000-0000000000f1',

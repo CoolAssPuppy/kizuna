@@ -250,7 +250,7 @@ export async function assignVehicle(
     user_id: args.userId,
     flight_id: args.flightId,
     direction: args.direction,
-    pickup_datetime: args.pickupAtIso,
+    pickup_at: args.pickupAtIso,
     pickup_tz: args.pickupTz,
     passenger_count: 1,
     bag_count: 1,

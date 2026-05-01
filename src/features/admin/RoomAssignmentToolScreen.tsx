@@ -1,6 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crown, Hotel, Plus, Sparkles, Upload, UserMinus, Users, Wand2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  ClipboardPaste,
+  Crown,
+  FileUp,
+  FlaskConical,
+  Hotel,
+  Plus,
+  Sparkles,
+  Upload,
+  UserMinus,
+  Users,
+  Wand2,
+} from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +34,7 @@ import { cn } from '@/lib/utils';
 
 import {
   assignOccupant,
+  assignOccupantsBulk,
   fetchAssignableAttendees,
   fetchRooms,
   importRoomBlock,
@@ -113,10 +126,10 @@ export function RoomAssignmentToolScreen(): JSX.Element {
         })),
         unassignedAttendees,
       );
-      const client = getSupabaseClient();
-      for (const a of result.assignments) {
-        await assignOccupant(client, a);
-      }
+      // Single round trip rather than 60 sequential inserts. Same RLS,
+      // same constraint check (accommodation_occupants.unique
+      // (accommodation_id, user_id) catches double-assignment).
+      await assignOccupantsBulk(getSupabaseClient(), result.assignments);
       return result;
     },
     onSuccess: (result) => {
@@ -391,6 +404,8 @@ interface ImportDialogProps {
   onImported: () => void;
 }
 
+type ImportTab = 'paste' | 'upload';
+
 function ImportRoomBlockDialog({
   open,
   onOpenChange,
@@ -405,15 +420,26 @@ function ImportRoomBlockDialog({
   const [hotelName, setHotelName] = useState(defaultHotel);
   const [checkIn, setCheckIn] = useState(defaultCheckIn);
   const [checkOut, setCheckOut] = useState(defaultCheckOut);
+  const [tab, setTab] = useState<ImportTab>('paste');
   const [csvText, setCsvText] = useState('');
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<ReadonlyArray<{ line: number; message: string }>>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function reset(): void {
     setHotelName(defaultHotel);
     setCheckIn(defaultCheckIn);
     setCheckOut(defaultCheckOut);
+    setTab('paste');
     setCsvText('');
+    setErrors([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  async function handleFileUpload(file: File): Promise<void> {
+    const text = await file.text();
+    setCsvText(text);
+    setTab('paste');
     setErrors([]);
   }
 
@@ -487,18 +513,70 @@ function ImportRoomBlockDialog({
               />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="csv-text">{t('admin.roomAssignment.csv')}</Label>
-            <Textarea
-              id="csv-text"
-              rows={10}
-              value={csvText}
-              onChange={(e) => setCsvText(e.target.value)}
-              placeholder="room_number,description,size_sqm,is_suite&#10;101,Mountain-view king,32,false&#10;201,Two-bedroom suite,68,true"
-              className="font-mono text-xs"
-            />
-            <p className="text-xs text-muted-foreground">{t('admin.roomAssignment.csvHint')}</p>
+          <div role="tablist" className="inline-flex gap-1 rounded-lg border p-1">
+            {(['paste', 'upload'] as const).map((id) => {
+              const active = tab === id;
+              const Icon = id === 'paste' ? ClipboardPaste : FileUp;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setTab(id)}
+                  className={cn(
+                    'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
+                    active
+                      ? 'bg-secondary text-secondary-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  <Icon aria-hidden className="h-4 w-4" />
+                  {t(`admin.roomAssignment.tab.${id}`)}
+                </button>
+              );
+            })}
           </div>
+
+          {tab === 'paste' ? (
+            <div className="space-y-2">
+              <Label htmlFor="csv-text">{t('admin.roomAssignment.csv')}</Label>
+              <Textarea
+                id="csv-text"
+                rows={10}
+                value={csvText}
+                onChange={(e) => setCsvText(e.target.value)}
+                placeholder="room_number,description,size_sqm,is_suite&#10;101,Mountain-view king,32,false&#10;201,Two-bedroom suite,68,true"
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">{t('admin.roomAssignment.csvHint')}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="csv-file">{t('admin.roomAssignment.fileLabel')}</Label>
+              <input
+                ref={fileInputRef}
+                id="csv-file"
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleFileUpload(file);
+                }}
+                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:text-secondary-foreground hover:file:bg-accent"
+              />
+              <p className="text-xs text-muted-foreground">{t('admin.roomAssignment.fileHint')}</p>
+              {csvText ? (
+                <p className="text-xs text-muted-foreground">
+                  {t('admin.roomAssignment.fileLoaded', {
+                    bytes: csvText.length,
+                    rows: csvText.split('\n').filter((l) => l.trim()).length - 1,
+                  })}
+                </p>
+              ) : null}
+            </div>
+          )}
+
           {errors.length > 0 ? (
             <ul className="space-y-1 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
               {errors.map((err, idx) => (
@@ -509,25 +587,90 @@ function ImportRoomBlockDialog({
             </ul>
           ) : null}
         </div>
-        <DialogFooter>
+        <DialogFooter className="sm:justify-between">
+          {/* Bottom-left: temporary purple "TEST ROOM BLOCK" filler so
+              admins can demo the tool without typing 60 rooms by hand.
+              Drop this button before the real launch. */}
           <Button
+            type="button"
             variant="outline"
+            className="border-purple-500 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
             onClick={() => {
-              reset();
-              onOpenChange(false);
+              setCsvText(buildTestRoomBlockCsv());
+              setTab('paste');
+              setErrors([]);
             }}
-            disabled={busy}
           >
-            {t('common.cancel')}
+            <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
+            {t('admin.roomAssignment.testBlock')}
           </Button>
-          <Button
-            onClick={() => void handleImport()}
-            disabled={busy || hotelName.trim().length < 2 || csvText.trim().length === 0}
-          >
-            {busy ? t('admin.roomAssignment.importing') : t('admin.roomAssignment.import')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                reset();
+                onOpenChange(false);
+              }}
+              disabled={busy}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              onClick={() => void handleImport()}
+              disabled={busy || hotelName.trim().length < 2 || csvText.trim().length === 0}
+            >
+              {busy ? t('admin.roomAssignment.importing') : t('admin.roomAssignment.import')}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
+}
+
+/**
+ * Deterministic 60-room block covering five typologies (standard king,
+ * standard double, family, suite, accessible). Used to seed the dialog
+ * for demos and manual testing without typing 60 rows. Removed when
+ * the demo phase ends.
+ */
+function buildTestRoomBlockCsv(): string {
+  const lines = ['room_number,description,size_sqm,is_suite'];
+  // 30 standard king rooms (28-32 sqm)
+  for (let i = 0; i < 30; i += 1) {
+    const num = 100 + i;
+    const sqm = 28 + (i % 5);
+    lines.push(`${num},Standard king with mountain view,${sqm},false`);
+  }
+  // 12 standard double-double rooms (32-38 sqm)
+  for (let i = 0; i < 12; i += 1) {
+    const num = 200 + i;
+    const sqm = 32 + (i % 7);
+    lines.push(`${num},Standard double-double,${sqm},false`);
+  }
+  // 8 family rooms (45-55 sqm) — non-suite but family-typed via description
+  for (let i = 0; i < 8; i += 1) {
+    const num = 300 + i;
+    const sqm = 45 + (i % 11);
+    lines.push(`${num},Family suite with separate kids' nook,${sqm},false`);
+  }
+  // 6 suites (60-90 sqm)
+  const suites = [
+    [400, 'One-bedroom executive suite', 60],
+    [401, 'One-bedroom executive suite', 62],
+    [402, 'Two-bedroom suite with terrace', 75],
+    [403, 'Two-bedroom suite with terrace', 78],
+    [404, 'Penthouse suite', 88],
+    [405, 'Penthouse suite', 92],
+  ] as const;
+  for (const [num, desc, sqm] of suites) {
+    lines.push(`${num},${desc},${sqm},true`);
+  }
+  // 4 accessible rooms (35-40 sqm)
+  for (let i = 0; i < 4; i += 1) {
+    const num = 500 + i;
+    const sqm = 35 + i;
+    lines.push(`${num},Accessible king with roll-in shower,${sqm},false`);
+  }
+  return lines.join('\n');
 }

@@ -303,15 +303,15 @@ begin
   ) values (
     new.user_id, v_event_id, 'transport', 'assigned', new.id,
     case new.direction when 'arrival' then 'Airport pickup' else 'Airport drop-off' end,
-    'Pickup at ' || to_char(new.pickup_datetime at time zone new.pickup_tz, 'HH24:MI'),
-    new.pickup_datetime, new.pickup_tz
+    'Pickup at ' || to_char(new.pickup_at at time zone new.pickup_tz, 'HH24:MI'),
+    new.pickup_at, new.pickup_tz
   )
   on conflict (user_id, item_type, source_id) where source_id is not null do nothing;
 
   update public.itinerary_items
   set title = case new.direction when 'arrival' then 'Airport pickup' else 'Airport drop-off' end,
-      subtitle = 'Pickup at ' || to_char(new.pickup_datetime at time zone new.pickup_tz, 'HH24:MI'),
-      starts_at = new.pickup_datetime,
+      subtitle = 'Pickup at ' || to_char(new.pickup_at at time zone new.pickup_tz, 'HH24:MI'),
+      starts_at = new.pickup_at,
       starts_tz = new.pickup_tz
   where source_id = new.id and item_type = 'transport';
 

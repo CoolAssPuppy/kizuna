@@ -1727,7 +1727,7 @@ export type Database = {
           id: string
           needs_review: boolean
           passenger_count: number
-          pickup_datetime: string
+          pickup_at: string
           pickup_tz: string
           special_equipment: string[]
           updated_at: string
@@ -1741,7 +1741,7 @@ export type Database = {
           id?: string
           needs_review?: boolean
           passenger_count: number
-          pickup_datetime: string
+          pickup_at: string
           pickup_tz?: string
           special_equipment?: string[]
           updated_at?: string
@@ -1755,7 +1755,7 @@ export type Database = {
           id?: string
           needs_review?: boolean
           passenger_count?: number
-          pickup_datetime?: string
+          pickup_at?: string
           pickup_tz?: string
           special_equipment?: string[]
           updated_at?: string

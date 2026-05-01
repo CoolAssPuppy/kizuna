@@ -218,6 +218,25 @@ export async function assignOccupant(
   if (error) throw error;
 }
 
+/**
+ * Bulk version of assignOccupant. Used by the auto-assign mutation —
+ * a 60-room block + 60 attendees would otherwise generate 60 sequential
+ * round trips. One round trip via bulk insert is the correct path.
+ */
+export async function assignOccupantsBulk(
+  client: AppSupabaseClient,
+  rows: ReadonlyArray<{ accommodationId: string; userId: string; isPrimary: boolean }>,
+): Promise<void> {
+  if (rows.length === 0) return;
+  const payload = rows.map((r) => ({
+    accommodation_id: r.accommodationId,
+    user_id: r.userId,
+    is_primary: r.isPrimary,
+  }));
+  const { error } = await client.from('accommodation_occupants').insert(payload);
+  if (error) throw error;
+}
+
 export async function removeOccupant(
   client: AppSupabaseClient,
   args: { accommodationId: string; userId: string },

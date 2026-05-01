@@ -208,7 +208,7 @@ export async function fetchPaymentReconciliation(
 
 export interface TransportManifestRow extends CsvRow {
   direction: string;
-  pickup_datetime: string;
+  pickup_at: string;
   pickup_tz: string;
   email: string;
   flight_number: string | null;
@@ -230,14 +230,14 @@ export async function fetchTransportManifest(
     .from('transport_requests')
     .select(
       `
-      direction, pickup_datetime, pickup_tz, passenger_count, bag_count,
+      direction, pickup_at, pickup_tz, passenger_count, bag_count,
       special_equipment, needs_review,
       users ( email ),
       flights ( flight_number, airline, origin, destination ),
       transport_vehicles ( vehicle_name )
     `,
     )
-    .order('pickup_datetime', { ascending: true });
+    .order('pickup_at', { ascending: true });
   if (error) throw error;
 
   return (data ?? []).map((row) => {
@@ -250,7 +250,7 @@ export async function fetchTransportManifest(
     const vehicle = flatJoin<{ vehicle_name: string }>(row.transport_vehicles);
     return {
       direction: row.direction,
-      pickup_datetime: row.pickup_datetime,
+      pickup_at: row.pickup_at,
       pickup_tz: row.pickup_tz,
       email: flatJoin<{ email: string }>(row.users)?.email ?? '',
       flight_number: flight?.flight_number ?? null,

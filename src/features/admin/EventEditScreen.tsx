@@ -13,7 +13,6 @@ import type { Database } from '@/types/database.types';
 import {
   createEvent,
   deleteEvent,
-  deleteEventCascade,
   fetchEventById,
   updateEvent,
   type EventInsert,
@@ -132,27 +131,7 @@ export function EventEditScreen(): JSX.Element {
   const remove = useMutation({
     mutationFn: async () => {
       if (!eventId || isNew) return;
-      // Default delete: relies on FK cascades for event-owned rows.
-      // Equivalent to deleteEventCascade today, kept distinct for the
-      // case where an admin wants the lighter-weight client-side path.
       await deleteEvent(getSupabaseClient(), eventId);
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['all-events'] });
-      show(t('admin.events.deleted'));
-      navigate('/all-events');
-    },
-    onError: (err: Error) => show(err.message, 'error'),
-  });
-
-  // Stronger cascade: routes through the admin-guarded RPC. Returns a
-  // typed error if the caller isn't an admin (vs the silent permission
-  // failure the direct DELETE would surface). Same destructive scope —
-  // every event-scoped row is hard-deleted, user-scoped data survives.
-  const removeCascade = useMutation({
-    mutationFn: async () => {
-      if (!eventId || isNew) return;
-      await deleteEventCascade(getSupabaseClient(), eventId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['all-events'] });
@@ -293,29 +272,16 @@ export function EventEditScreen(): JSX.Element {
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           {!isNew ? (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  if (confirm(t('admin.events.deleteConfirm'))) remove.mutate();
-                }}
-              >
-                {t('admin.events.delete')}
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                disabled={removeCascade.isPending}
-                onClick={() => {
-                  if (confirm(t('admin.events.cascadeConfirm'))) removeCascade.mutate();
-                }}
-              >
-                {removeCascade.isPending
-                  ? t('admin.events.cascading')
-                  : t('admin.events.cascadeDelete')}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={remove.isPending}
+              onClick={() => {
+                if (confirm(t('admin.events.deleteConfirm'))) remove.mutate();
+              }}
+            >
+              {remove.isPending ? t('admin.events.cascading') : t('admin.events.delete')}
+            </Button>
           ) : (
             <span />
           )}

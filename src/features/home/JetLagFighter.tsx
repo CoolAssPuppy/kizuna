@@ -82,5 +82,3 @@ function JetLagBody({ direction, offset, severity, t }: BodyProps): JSX.Element 
     </CardShell>
   );
 }
-
-export type { JetLagDirection, JetLagSeverity };

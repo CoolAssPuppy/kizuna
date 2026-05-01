@@ -93,18 +93,18 @@ const FETCHERS: Record<string, ReportFetcher> = {
       .from('transport_requests')
       .select(
         `
-        direction, pickup_datetime, pickup_tz, passenger_count, bag_count,
+        direction, pickup_at, pickup_tz, passenger_count, bag_count,
         special_equipment, needs_review, updated_at,
         users ( email ),
         flights ( flight_number, airline, origin, destination ),
         transport_vehicles ( vehicle_name )
       `,
       )
-      .order('pickup_datetime');
+      .order('pickup_at');
     if (error) throw error;
     const rows = (data ?? []).map((r) => ({
       direction: r.direction,
-      pickup_datetime: r.pickup_datetime,
+      pickup_at: r.pickup_at,
       pickup_tz: r.pickup_tz,
       email: r.users?.email ?? '',
       flight_number: r.flights?.flight_number ?? null,

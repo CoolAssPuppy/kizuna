@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: sync-hibob
 //
 // Admin-triggered. Pulls the HiBob directory, diffs against the current
@@ -220,8 +219,26 @@ async function fetchDirectory(config: DirectoryConfig): Promise<HiBobPerson[]> {
   if (!response.ok) {
     throw new Error(`hibob ${response.status}`);
   }
-  const body = (await response.json()) as { employees?: any[] };
-  return (body.employees ?? []).map((e: any) => {
+  // Trust HiBob to send a stable shape; document the keys we read so
+  // a regen catches drift. The boundary cast lives here, the rest of
+  // the file stays strictly typed.
+  interface RawEmployee {
+    id?: string;
+    email?: string;
+    firstName?: string;
+    surname?: string;
+    displayName?: string;
+    fullName?: string;
+    work?: {
+      title?: string;
+      department?: string;
+      startDate?: string;
+      custom?: Record<string, unknown>;
+    };
+    address?: { country?: string };
+  }
+  const body = (await response.json()) as { employees?: RawEmployee[] };
+  return (body.employees ?? []).map((e) => {
     const teamCustom = config.teamFieldId ? e.work?.custom?.[config.teamFieldId] : null;
     return {
       id: e.id ?? '',

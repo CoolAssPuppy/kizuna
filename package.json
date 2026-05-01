@@ -8,9 +8,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "if command -v doppler >/dev/null 2>&1; then doppler run -- vite; else vite; fi",
-    "build": "if command -v doppler >/dev/null 2>&1; then doppler run -- sh -c 'tsc -b && vite build'; else sh -c 'tsc -b && vite build'; fi",
-    "preview": "if command -v doppler >/dev/null 2>&1; then doppler run -- vite preview; else vite preview; fi",
+    "dev": "bash scripts/with-doppler.sh vite",
+    "build": "bash scripts/with-doppler.sh sh -c 'tsc -b && vite build'",
+    "preview": "bash scripts/with-doppler.sh vite preview",
     "typecheck": "tsc -b --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -20,8 +20,8 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
-    "test:e2e": "if command -v doppler >/dev/null 2>&1; then doppler run -- playwright test; else playwright test; fi",
-    "test:e2e:ui": "if command -v doppler >/dev/null 2>&1; then doppler run -- playwright test --ui; else playwright test --ui; fi",
+    "test:e2e": "bash scripts/with-doppler.sh playwright test",
+    "test:e2e:ui": "bash scripts/with-doppler.sh playwright test --ui",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
@@ -31,7 +31,7 @@
     "functions:env": "doppler secrets download --project kizuna --config dev --no-file --format env > supabase/.env",
     "functions:serve": "npm run functions:env && supabase functions serve --env-file supabase/.env",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
-    "simulate:community": "if command -v doppler >/dev/null 2>&1; then doppler run -- tsx scripts/simulate-community.ts; else tsx scripts/simulate-community.ts; fi",
+    "simulate:community": "bash scripts/with-doppler.sh tsx scripts/simulate-community.ts",
     "prepare": "husky 2>/dev/null || true"
   },
   "dependencies": {

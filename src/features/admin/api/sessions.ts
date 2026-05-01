@@ -2,8 +2,8 @@ import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
 export type SessionRow = Database['public']['Tables']['sessions']['Row'];
-export type SessionInsert = Database['public']['Tables']['sessions']['Insert'];
-export type SessionUpdate = Database['public']['Tables']['sessions']['Update'];
+type SessionInsert = Database['public']['Tables']['sessions']['Insert'];
+type SessionUpdate = Database['public']['Tables']['sessions']['Update'];
 export type SessionType = Database['public']['Enums']['session_type'];
 export type SessionAudience = Database['public']['Enums']['session_audience'];
 

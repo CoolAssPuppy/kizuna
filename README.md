@@ -195,7 +195,7 @@ That runs `doppler secrets download` into `supabase/.env` (so `OPENAI_API_KEY` a
 | `npm run test`                                | Vitest in watch mode                                                 |
 | `npm run test:run`                            | Vitest single run (used in CI)                                       |
 | `npm run test:coverage`                       | Vitest with coverage report                                          |
-| `npm run test:e2e`                            | Playwright end-to-end                                                |
+| `npm run test:e2e`                            | Playwright end-to-end (local only — not part of CI)                  |
 | `npm run db:start`                            | Start local Supabase stack                                           |
 | `npm run db:stop`                             | Stop local Supabase stack                                            |
 | `npm run db:reset`                            | Reset DB — drops state and reapplies init scripts                    |
@@ -403,14 +403,14 @@ Prerequisites in the chosen Doppler config: `SUPABASE_URL`, `SUPABASE_DB_PASSWOR
 
 ## Testing
 
-| Layer                    | Tool                                      | Run                |
-| ------------------------ | ----------------------------------------- | ------------------ |
-| Unit & component         | Vitest + React Testing Library + jest-dom | `npm run test:run` |
-| End-to-end               | Playwright (Chrome + mobile Pixel 7)      | `npm run test:e2e` |
-| Database (RLS, triggers) | pgTAP                                     | `npm run db:test`  |
-| Network mocking          | MSW                                       | imported per-test  |
+| Layer                    | Tool                                      | Run                                                              |
+| ------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
+| Unit & component         | Vitest + React Testing Library + jest-dom | `npm run test:run`                                               |
+| End-to-end               | Playwright (Chrome + mobile Pixel 7)      | `npm run test:e2e` (local only — see CI note in Common commands) |
+| Database (RLS, triggers) | pgTAP                                     | `npm run db:test`                                                |
+| Network mocking          | MSW                                       | imported per-test                                                |
 
-Vitest currently ships **52 files / 260 tests**. pgTAP ships **14 files / 51 assertions** covering RLS (including the admin-read policy on attendee_profiles), leadership-flag guard, channel ownership, passport encryption, registration completion trigger, itinerary materialisation, channel access control, the flight-change cascade that unassigns vehicles, and the guest age-bracket pricing + payment gate. The repo follows a strict TDD bias: tests for pure helpers go in before the component or feature that consumes them.
+Test counts move every commit, so the badge of truth is CI rather than this README. Vitest covers pure helpers, API wrappers, and component smoke paths. pgTAP covers RLS (including the admin-read policy on attendee_profiles), leadership-flag guard, channel ownership, passport encryption, registration completion trigger, itinerary materialisation, channel access control, the flight-change cascade that unassigns vehicles, the guest age-bracket pricing + payment gate, and the delete-event cascade. The repo follows a strict TDD bias: tests for pure helpers go in before the component or feature that consumes them.
 
 The project also enforces a no-`useEffect` discipline for data fetching and state derivation. See `~/.claude/skills/no-use-effect/SKILL.md` and `tasks/lessons.md` for the rule and the five replacement patterns.
 
