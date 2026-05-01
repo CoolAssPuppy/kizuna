@@ -169,6 +169,11 @@ create policy emergency_contacts_self_all on public.emergency_contacts
   with check (public.is_self_or_admin(user_id));
 
 
+create policy accessibility_preferences_self_all on public.accessibility_preferences
+  for all using (public.is_self_or_admin(user_id))
+  with check (public.is_self_or_admin(user_id));
+
+
 -- Events: every authenticated user can read; only admins write.
 create policy events_authenticated_read on public.events
   for select using (auth.role() = 'authenticated');

@@ -33,6 +33,7 @@ declare
     'profile_field_responses',
     'passport_details',
     'dietary_preferences',
+    'accessibility_preferences',
     'flights',
     'accommodations',
     'transport_requests',

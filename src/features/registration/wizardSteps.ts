@@ -25,6 +25,7 @@ export const WIZARD_STEPS: ReadonlyArray<WizardStep> = [
     path: 'emergency-contact',
   },
   { taskKey: 'dietary', i18nKey: 'registration.steps.dietary', path: 'dietary' },
+  { taskKey: 'accessibility', i18nKey: 'registration.steps.accessibility', path: 'accessibility' },
   { taskKey: 'swag', i18nKey: 'registration.steps.swag', path: 'swag' },
   { taskKey: 'transport', i18nKey: 'registration.steps.transport', path: 'transport' },
 ];

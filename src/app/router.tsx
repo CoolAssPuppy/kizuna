@@ -13,7 +13,6 @@ import { NotFound } from '@/features/errors/NotFound';
 import { AcceptInvitationScreen } from '@/features/guests/AcceptInvitationScreen';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { ItineraryRoute } from '@/features/itinerary/ItineraryRoute';
-import { EditProfileScreen } from '@/features/profile/EditProfileScreen';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
 import { RegistrationRoute } from '@/features/registration/RegistrationRoute';
 import { WelcomeScreen } from '@/features/welcome/WelcomeScreen';
@@ -39,14 +38,6 @@ export function AppRouter(): JSX.Element {
         element={
           <RequireAuth>
             <ProfileScreen />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/profile/edit"
-        element={
-          <RequireAuth>
-            <EditProfileScreen />
           </RequireAuth>
         }
       />

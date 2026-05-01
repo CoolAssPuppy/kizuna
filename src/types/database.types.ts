@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      accessibility_preferences: {
+        Row: {
+          needs: string[]
+          notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          needs?: string[]
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          needs?: string[]
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accessibility_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accommodation_occupants: {
         Row: {
           accommodation_id: string
@@ -1720,6 +1749,7 @@ export type Database = {
         | "passport"
         | "emergency_contact"
         | "dietary"
+        | "accessibility"
         | "swag"
         | "transport"
         | "guest"
@@ -1923,6 +1953,7 @@ export const Constants = {
         "passport",
         "emergency_contact",
         "dietary",
+        "accessibility",
         "swag",
         "transport",
         "guest",

@@ -67,13 +67,6 @@ export function HeaderUserMenu(): JSX.Element {
             }}
           />
           <MenuItem
-            label={t('header.editProfile')}
-            onClick={() => {
-              setOpen(false);
-              navigate('/profile/edit');
-            }}
-          />
-          <MenuItem
             label={t('auth.signOut')}
             onClick={() => void signOut()}
             variant="destructive"

@@ -127,6 +127,20 @@ comment on table public.additional_guests is
 create index additional_guests_sponsor_id_idx on public.additional_guests(sponsor_id);
 
 
+-- Accessibility preferences. Captures any accommodations the attendee
+-- needs (mobility aids, sensory needs, dietary aside, etc.) so the events
+-- team can plan room layouts, signage, and on-site support.
+create table public.accessibility_preferences (
+  user_id uuid primary key references public.users(id) on delete cascade,
+  needs text[] not null default '{}',
+  notes text,
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.accessibility_preferences is
+  'Per-attendee accessibility requirements. needs is a free-form array of tags (mobility, vision, hearing, neurodivergent, other). notes carries any specifics the events team should know.';
+
+
 -- Emergency contacts. One required for every attendee.
 create table public.emergency_contacts (
   id uuid primary key default gen_random_uuid(),

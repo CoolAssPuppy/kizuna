@@ -92,10 +92,7 @@
     "editProfile": "Edit Profile"
   },
   "profile": {
-    "title": "Your Profile",
-    "subtitle": "Quick links to everything you can do here.",
-    "editTitle": "Edit Profile",
-    "editSubtitle": "",
+    "title": "Profile",
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",
       "emergencyContact": "Who we should reach out to if something happens.",
@@ -107,6 +104,7 @@
       "dietarySaved": "Dietary preferences saved.",
       "passportSaved": "Passport details saved.",
       "guestsSaved": "Guests saved.",
+      "accessibilitySaved": "Accessibility preferences saved.",
       "swagSaved": "Swag selections saved.",
       "transportSaved": "Transport preference saved.",
       "error": "Something went wrong. Please try again."
@@ -148,6 +146,7 @@
     "steps": {
       "personalInfo": "Personal Info",
       "dietary": "Dietary",
+      "accessibility": "Accessibility",
       "emergencyContact": "Emergency Contact",
       "passport": "Passport",
       "guests": "Guests",
@@ -176,6 +175,21 @@
         "allergy": "Allergy (anaphylactic risk)"
       },
       "notes": "Anything else our kitchen should know"
+    },
+    "accessibility": {
+      "intro": "Tell us about any accommodations you need. We'll keep this with the events team only.",
+      "needs": "Accommodations Needed",
+      "needsHint": "Select any that apply.",
+      "needsOptions": {
+        "mobility": "Mobility",
+        "vision": "Vision",
+        "hearing": "Hearing",
+        "neurodivergent": "Neurodivergent",
+        "chronic_condition": "Chronic condition",
+        "other": "Other"
+      },
+      "notes": "Specifics",
+      "notesHint": "Anything we should know in advance — quiet rooms, dietary needs already covered above, room layout requests."
     },
     "emergencyContact": {
       "fullName": "Full Name",

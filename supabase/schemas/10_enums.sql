@@ -23,6 +23,7 @@ create type registration_task_key as enum (
   'passport',
   'emergency_contact',
   'dietary',
+  'accessibility',
   'swag',
   'transport',
   'guest',

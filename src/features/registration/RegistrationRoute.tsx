@@ -4,6 +4,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 
 import { RegistrationLayout } from './RegistrationLayout';
+import { AccessibilitySection } from './sections/AccessibilitySection';
 import { DietarySection } from './sections/DietarySection';
 import { EmergencyContactSection } from './sections/EmergencyContactSection';
 import { PassportSection } from './sections/PassportSection';
@@ -24,6 +25,8 @@ function StepRouter({ mode, stepPath }: { mode: SectionMode; stepPath: string })
       return <EmergencyContactSection mode={mode} />;
     case 'dietary':
       return <DietarySection mode={mode} />;
+    case 'accessibility':
+      return <AccessibilitySection mode={mode} />;
     case 'swag':
       return <SwagSection mode={mode} />;
     case 'transport':

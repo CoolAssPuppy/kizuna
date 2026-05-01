@@ -124,11 +124,11 @@ export function UserAvatar(): JSX.Element {
             role="menuitem"
             onClick={() => {
               setMenuOpen(false);
-              navigate('/profile/edit');
+              navigate('/profile');
             }}
             className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-accent"
           >
-            {t('header.editProfile')}
+            {t('profile.title')}
           </button>
           <button
             type="button"
