@@ -121,7 +121,7 @@ export function EventEditScreen(): JSX.Element {
       return updateEvent(getSupabaseClient(), eventId, payload);
     },
     onSuccess: async (saved) => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'events'] });
+      await queryClient.invalidateQueries({ queryKey: ['all-events'] });
       show(t('admin.events.saved'));
       navigate(`/admin/events/${saved.id}`);
     },
@@ -134,9 +134,9 @@ export function EventEditScreen(): JSX.Element {
       await deleteEvent(getSupabaseClient(), eventId);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'events'] });
+      await queryClient.invalidateQueries({ queryKey: ['all-events'] });
       show(t('admin.events.deleted'));
-      navigate('/admin/events');
+      navigate('/all-events');
     },
     onError: (err: Error) => show(err.message, 'error'),
   });
