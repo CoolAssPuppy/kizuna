@@ -2,6 +2,11 @@
 // 1200x630. Run via `node scripts/generate-og.mjs` whenever the SVG
 // changes. We commit the PNG so the OG crawler doesn't have to render
 // at request time.
+//
+// Inter is loaded from assets/fonts so the OG render matches the
+// site (tailwind.config.ts: sans = Inter, system-ui, sans-serif).
+// System fonts stay enabled so the CJK kanji 絆 still resolves via
+// Hiragino on macOS / Noto on Linux.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { Resvg } from '@resvg/resvg-js';
@@ -11,7 +16,13 @@ const resvg = new Resvg(svg, {
   fitTo: { mode: 'width', value: 1200 },
   font: {
     loadSystemFonts: true,
-    defaultFontFamily: 'Hiragino Mincho ProN',
+    fontFiles: [
+      'assets/fonts/Inter-Regular.otf',
+      'assets/fonts/Inter-Medium.otf',
+      'assets/fonts/Inter-SemiBold.otf',
+      'assets/fonts/Inter-Bold.otf',
+    ],
+    defaultFontFamily: 'Inter',
   },
 });
 const pngBuffer = resvg.render().asPng();

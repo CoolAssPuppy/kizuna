@@ -52,7 +52,7 @@
           text-anchor="middle">絆</text>
     <!-- Wordmark -->
     <text x="240" y="448"
-          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-family="Inter"
           font-size="36"
           font-weight="600"
           fill="#ffffff"
@@ -68,7 +68,7 @@
       <rect x="0" y="0" width="200" height="38" rx="19" fill="#3ECF8E" fill-opacity="0.12" stroke="#3ECF8E" stroke-opacity="0.4" stroke-width="1.5"/>
       <circle cx="22" cy="19" r="5" fill="#3ECF8E"/>
       <text x="40" y="25"
-            font-family="-apple-system, 'Inter', system-ui, sans-serif"
+            font-family="Inter"
             font-size="14"
             font-weight="600"
             fill="#3ECF8E"
@@ -77,7 +77,7 @@
 
     <!-- Title -->
     <text x="0" y="305"
-          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-family="Inter"
           font-size="76"
           font-weight="700"
           fill="#ffffff"
@@ -85,7 +85,7 @@
 
     <!-- Description -->
     <text x="0" y="395"
-          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-family="Inter"
           font-size="36"
           font-weight="500"
           fill="#ffffff"
@@ -97,7 +97,7 @@
 
     <!-- Sub-line -->
     <text x="0" y="528"
-          font-family="-apple-system, 'Inter', system-ui, sans-serif"
+          font-family="Inter"
           font-size="20"
           font-weight="400"
           fill="#ffffff"
@@ -106,7 +106,7 @@
     <!-- Built on Supabase tag -->
     <g transform="translate(0 560)">
       <text x="0" y="14"
-            font-family="-apple-system, 'Inter', system-ui, sans-serif"
+            font-family="Inter"
             font-size="14"
             font-weight="500"
             fill="#3ECF8E"
