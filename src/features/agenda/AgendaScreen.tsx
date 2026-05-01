@@ -67,6 +67,7 @@ function groupByDay(sessions: AgendaSession[], timeZone: string): Day[] {
 export function AgendaScreen({ event }: Props): JSX.Element {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<FilterMode>('all');
+  const [dayFilter, setDayFilter] = useState<string>('all');
   const { data, isLoading, error, toggleFavorite } = useAgenda(event.id);
 
   if (isLoading) {
@@ -88,8 +89,14 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   }
 
   const sessions = data ?? [];
-  const visible = filter === 'favorites' ? sessions.filter((s) => s.is_favorite) : sessions;
+  const filteredByMode =
+    filter === 'favorites' ? sessions.filter((s) => s.is_favorite) : sessions;
+  const allDays = groupByDay(sessions, event.time_zone);
+  const visible = dayFilter === 'all'
+    ? filteredByMode
+    : filteredByMode.filter((s) => dayKey(s.starts_at, event.time_zone) === dayFilter);
   const days = groupByDay(visible, event.time_zone);
+  const now = Date.now();
 
   return (
     <main className="mx-auto w-full max-w-5xl space-y-8 px-6 py-10">
@@ -98,19 +105,36 @@ export function AgendaScreen({ event }: Props): JSX.Element {
         <p className="text-sm text-muted-foreground">{t('agenda.subtitle')}</p>
       </header>
 
-      <div role="tablist" className="inline-flex rounded-md border p-1">
-        <FilterTab
-          active={filter === 'all'}
-          onClick={() => setFilter('all')}
-          label={t('agenda.filters.all', { count: sessions.length })}
-        />
-        <FilterTab
-          active={filter === 'favorites'}
-          onClick={() => setFilter('favorites')}
-          label={t('agenda.filters.favorites', {
-            count: sessions.filter((s) => s.is_favorite).length,
-          })}
-        />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div role="tablist" className="inline-flex rounded-md border p-1">
+          <FilterTab
+            active={filter === 'all'}
+            onClick={() => setFilter('all')}
+            label={t('agenda.filters.all', { count: sessions.length })}
+          />
+          <FilterTab
+            active={filter === 'favorites'}
+            onClick={() => setFilter('favorites')}
+            label={t('agenda.filters.favorites', {
+              count: sessions.filter((s) => s.is_favorite).length,
+            })}
+          />
+        </div>
+        {allDays.length > 1 ? (
+          <select
+            value={dayFilter}
+            onChange={(e) => setDayFilter(e.target.value)}
+            className="h-9 rounded-md border bg-background px-3 text-sm"
+            aria-label={t('agenda.dayFilterLabel')}
+          >
+            <option value="all">{t('agenda.allDays')}</option>
+            {allDays.map((day) => (
+              <option key={day.iso} value={day.iso}>
+                {day.heading}
+              </option>
+            ))}
+          </select>
+        ) : null}
       </div>
 
       {days.length === 0 ? (
@@ -130,6 +154,7 @@ export function AgendaScreen({ event }: Props): JSX.Element {
                     key={session.id}
                     session={session}
                     timeZone={event.time_zone}
+                    isPast={new Date(session.ends_at).getTime() < now}
                     onToggleFavorite={() => toggleFavorite(session)}
                     favoriteLabel={t(
                       session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite',
@@ -171,6 +196,7 @@ function FilterTab({ active, onClick, label }: FilterTabProps): JSX.Element {
 interface SessionCardProps {
   session: AgendaSession;
   timeZone: string;
+  isPast: boolean;
   onToggleFavorite: () => void;
   favoriteLabel: string;
 }
@@ -178,12 +204,18 @@ interface SessionCardProps {
 function SessionCard({
   session,
   timeZone,
+  isPast,
   onToggleFavorite,
   favoriteLabel,
 }: SessionCardProps): JSX.Element {
   const Icon = session.is_favorite ? Star : StarOff;
   return (
-    <li className="rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary/40">
+    <li
+      className={cn(
+        'rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary/40',
+        isPast && 'opacity-50',
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1 space-y-1">
           <p className="text-xs font-medium tabular-nums text-muted-foreground">

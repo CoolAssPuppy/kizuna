@@ -95,6 +95,17 @@
   },
   "profile": {
     "title": "Profile",
+    "nav": {
+      "label": "Profile sections",
+      "personal": "Personal info",
+      "dietary": "Dietary",
+      "accessibility": "Accessibility",
+      "emergency": "Emergency contact",
+      "passport": "Passport",
+      "guests": "Guests",
+      "swag": "Swag",
+      "transport": "Transport"
+    },
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",
       "emergencyContact": "Who we should reach out to if something happens.",
@@ -250,14 +261,18 @@
       "noGuests": "No guests to add? Continue."
     },
     "swag": {
-      "noCatalogue": "Swag will appear here once the event organisers publish the catalogue.",
-      "optIn": "I'd like this",
-      "size": "Size",
-      "fitPreference": "Fit",
-      "fitOptions": {
-        "fitted": "Fitted",
-        "relaxed": "Relaxed"
-      }
+      "intro": "Tell us your t-shirt and shoe sizes so we can order the right gear ahead of time.",
+      "yourSizes": "Your sizes",
+      "guestsHeading": "Sizes for additional guests",
+      "tshirtSize": "T-shirt size",
+      "shoeSize": "Shoe size",
+      "shoeSizeHint": "Pick the system you know — we store everything as EU.",
+      "shoeSystem": {
+        "us": "US",
+        "eu": "EU"
+      },
+      "age_one": "{{age}} year old",
+      "age_other": "{{age}} years old"
     },
     "transport": {
       "intro": "Tell us how you plan to arrive and depart so we can build the airport shuttle manifest.",
@@ -510,7 +525,9 @@
     "filters": {
       "all": "All ({{count}})",
       "favorites": "My picks ({{count}})"
-    }
+    },
+    "allDays": "All days",
+    "dayFilterLabel": "Filter by day"
   },
   "shareReport": {
     "eyebrow": "Kizuna shared report",

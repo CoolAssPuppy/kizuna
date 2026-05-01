@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Download, FileDown, Pencil, Plus, Trash2, Upload } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 import {
   agendaToCsv,
@@ -34,6 +35,40 @@ function toIso(value: string): string {
   return new Date(value).toISOString();
 }
 
+function sessionDayKey(iso: string, timeZone: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone,
+  }).format(new Date(iso));
+}
+
+function sessionDayHeading(iso: string, timeZone: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+    timeZone,
+  }).format(new Date(iso));
+}
+
+interface DayBucket {
+  iso: string;
+  heading: string;
+}
+
+function groupSessionsByDay(sessions: ReadonlyArray<SessionRow>, timeZone: string): DayBucket[] {
+  const seen = new Map<string, string>();
+  for (const s of sessions) {
+    const key = sessionDayKey(s.starts_at, timeZone);
+    if (!seen.has(key)) seen.set(key, sessionDayHeading(s.starts_at, timeZone));
+  }
+  return Array.from(seen.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([iso, heading]) => ({ iso, heading }));
+}
+
 export function AgendaAdminScreen(): JSX.Element {
   const { t } = useTranslation();
   const { data: event } = useActiveEvent();
@@ -42,6 +77,7 @@ export function AgendaAdminScreen(): JSX.Element {
   const { show } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editing, setEditing] = useState<SessionDraft | null>(null);
+  const [dayFilter, setDayFilter] = useState<string>('all');
   const [importStatus, setImportStatus] = useState<{
     imported: number;
     errors: { row: number; message: string }[];
@@ -52,6 +88,19 @@ export function AgendaAdminScreen(): JSX.Element {
     enabled: eventId !== null,
     queryFn: () => (eventId ? fetchAllSessions(getSupabaseClient(), eventId) : Promise.resolve([])),
   });
+
+  const timeZone = event?.time_zone ?? 'UTC';
+  const dayBuckets = useMemo(() => groupSessionsByDay(sessions ?? [], timeZone), [
+    sessions,
+    timeZone,
+  ]);
+  const visibleSessions = useMemo(
+    () =>
+      dayFilter === 'all'
+        ? sessions ?? []
+        : (sessions ?? []).filter((s) => sessionDayKey(s.starts_at, timeZone) === dayFilter),
+    [sessions, dayFilter, timeZone],
+  );
 
   const importMutation = useMutation({
     mutationFn: async (csv: string) => {
@@ -196,15 +245,33 @@ export function AgendaAdminScreen(): JSX.Element {
       ) : null}
 
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-          {t('admin.agenda.currentSessions', { count: sessions?.length ?? 0 })}
-        </h3>
-        {sessions && sessions.length > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            {t('admin.agenda.currentSessions', { count: visibleSessions.length })}
+          </h3>
+          {dayBuckets.length > 1 ? (
+            <select
+              value={dayFilter}
+              onChange={(e) => setDayFilter(e.target.value)}
+              className="h-9 rounded-md border bg-background px-3 text-sm"
+              aria-label={t('agenda.dayFilterLabel')}
+            >
+              <option value="all">{t('agenda.allDays')}</option>
+              {dayBuckets.map((day) => (
+                <option key={day.iso} value={day.iso}>
+                  {day.heading}
+                </option>
+              ))}
+            </select>
+          ) : null}
+        </div>
+        {visibleSessions.length > 0 ? (
           <ul className="divide-y rounded-md border">
-            {sessions.map((s) => (
+            {visibleSessions.map((s) => (
               <SessionListItem
                 key={s.id}
                 session={s}
+                isPast={new Date(s.ends_at).getTime() < Date.now()}
                 onEdit={() => setEditing(rowToDraft(s))}
                 onDelete={() => {
                   if (confirm(t('admin.agenda.deleteConfirm'))) remove.mutate(s.id);
@@ -255,14 +322,20 @@ function IconAction({ icon, label, onClick, disabled }: IconActionProps): JSX.El
 
 interface SessionListItemProps {
   session: SessionRow;
+  isPast: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-function SessionListItem({ session, onEdit, onDelete }: SessionListItemProps): JSX.Element {
+function SessionListItem({ session, isPast, onEdit, onDelete }: SessionListItemProps): JSX.Element {
   const { t } = useTranslation();
   return (
-    <li className="group flex items-start gap-3 px-4 py-3 text-sm hover:bg-muted/30">
+    <li
+      className={cn(
+        'group flex items-start gap-3 px-4 py-3 text-sm hover:bg-muted/30',
+        isPast && 'opacity-50',
+      )}
+    >
       <button
         type="button"
         onClick={onEdit}

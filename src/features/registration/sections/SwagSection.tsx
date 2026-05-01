@@ -1,39 +1,67 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/features/auth/AuthContext';
-import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
+import type { Database } from '@/types/database.types';
 
 import {
-  loadSwagCatalogue,
-  loadSwagSelections,
-  saveSwagSelections,
-  type SwagSelectionInput,
-} from '../api';
+  loadAdditionalGuestSwagSizes,
+  loadSelfSwagSize,
+  saveAdditionalGuestSwagSize,
+  saveSelfSwagSize,
+} from '../api/swag';
+import { loadAdditionalGuests } from '../api/additionalGuests';
+import {
+  EU_SHOE_SIZES,
+  US_SHOE_SIZES,
+  euToUs,
+  type ShoeSizeSystem,
+  toEu,
+} from '../shoeSize';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
-import type { Database } from '@/types/database.types';
 
-type SwagItemRow = Database['public']['Tables']['swag_items']['Row'];
+type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
 
-interface SelectionState {
-  optedIn: boolean;
-  size: string;
-  fitPreference: 'fitted' | 'relaxed' | '';
+const TSHIRT_SIZES: ReadonlyArray<string> = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+const KIDS_TSHIRT_SIZES: ReadonlyArray<string> = [
+  '2T',
+  '3T',
+  '4T',
+  '5',
+  '6',
+  '7',
+  '8',
+  '10',
+  '12',
+  '14',
+];
+
+interface SizingState {
+  tshirtSize: string;
+  shoeSize: string; // entered value as string (may be float)
+  shoeSystem: ShoeSizeSystem;
 }
 
-const EMPTY_SELECTION: SelectionState = { optedIn: true, size: '', fitPreference: '' };
+const EMPTY: SizingState = { tshirtSize: '', shoeSize: '', shoeSystem: 'us' };
+
+function fromEu(eu: number | null, system: ShoeSizeSystem): string {
+  if (eu === null || eu === undefined) return '';
+  if (system === 'eu') return String(eu);
+  const us = euToUs(eu);
+  return us === null ? '' : String(us);
+}
 
 export function SwagSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: event } = useActiveEvent();
-  const [catalogue, setCatalogue] = useState<SwagItemRow[]>([]);
-  const [selections, setSelections] = useState<Record<string, SelectionState>>({});
+  const [self, setSelf] = useState<SizingState>(EMPTY);
+  const [guests, setGuests] = useState<AdditionalGuestRow[]>([]);
+  const [guestState, setGuestState] = useState<Record<string, SizingState>>({});
   const [hydrated, setHydrated] = useState(false);
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
@@ -42,59 +70,54 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
   });
 
   useEffect(() => {
-    if (!user || !event) return;
+    if (!user) return;
     let active = true;
     void (async () => {
-      const [items, picks] = await Promise.all([
-        loadSwagCatalogue(getSupabaseClient(), event.id),
-        loadSwagSelections(getSupabaseClient(), user.id),
+      const client = getSupabaseClient();
+      const [own, list, guestSizes] = await Promise.all([
+        loadSelfSwagSize(client, user.id),
+        loadAdditionalGuests(client, user.id),
+        loadAdditionalGuestSwagSizes(client, user.id),
       ]);
       if (!active) return;
-      setCatalogue(items);
-      const map: Record<string, SelectionState> = {};
-      for (const item of items) {
-        const existing = picks.find((p) => p.swag_item_id === item.id);
-        map[item.id] = existing
-          ? {
-              optedIn: existing.opted_in,
-              size: existing.size ?? '',
-              fitPreference: (existing.fit_preference as 'fitted' | 'relaxed' | null) ?? '',
-            }
-          : { ...EMPTY_SELECTION };
+      setSelf({
+        tshirtSize: own?.tshirt_size ?? '',
+        shoeSize: fromEu(own?.shoe_size_eu ?? null, 'us'),
+        shoeSystem: 'us',
+      });
+      setGuests(list);
+      const map: Record<string, SizingState> = {};
+      for (const guest of list) {
+        const sized = guestSizes.find((g) => g.additional_guest_id === guest.id);
+        map[guest.id] = {
+          tshirtSize: sized?.tshirt_size ?? '',
+          shoeSize: fromEu(sized?.shoe_size_eu ?? null, 'us'),
+          shoeSystem: 'us',
+        };
       }
-      setSelections(map);
+      setGuestState(map);
       setHydrated(true);
     })();
     return () => {
       active = false;
     };
-  }, [user, event]);
-
-  function update(itemId: string, patch: Partial<SelectionState>): void {
-    setSelections((prev) => ({
-      ...prev,
-      [itemId]: { ...(prev[itemId] ?? EMPTY_SELECTION), ...patch },
-    }));
-  }
+  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;
-    void submit(() => {
-      const payload: SwagSelectionInput[] = catalogue.map((item) => {
-        const sel = selections[item.id] ?? EMPTY_SELECTION;
-        return {
-          swagItemId: item.id,
-          optedIn: sel.optedIn,
-          size: item.requires_sizing && sel.optedIn ? sel.size || null : null,
-          fitPreference:
-            item.has_fit_options && sel.optedIn
-              ? sel.fitPreference === ''
-                ? null
-                : sel.fitPreference
-              : null,
-        };
+    void submit(async () => {
+      const client = getSupabaseClient();
+      await saveSelfSwagSize(client, user.id, {
+        tshirtSize: self.tshirtSize || null,
+        shoeSizeEu: parseShoe(self.shoeSize, self.shoeSystem),
       });
-      return saveSwagSelections(getSupabaseClient(), user.id, payload);
+      for (const guest of guests) {
+        const s = guestState[guest.id] ?? EMPTY;
+        await saveAdditionalGuestSwagSize(client, guest.id, {
+          tshirtSize: s.tshirtSize || null,
+          shoeSizeEu: parseShoe(s.shoeSize, s.shoeSystem),
+        });
+      }
     });
   }
 
@@ -102,77 +125,140 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
     <SectionChrome
       mode={mode}
       title={t('registration.steps.swag')}
+      description={t('registration.swag.intro')}
       busy={busy}
       hydrated={hydrated}
       errorKey={errorKey}
       onSubmit={handleSubmit}
     >
-      {catalogue.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('registration.swag.noCatalogue')}</p>
+      <SizingFieldset
+        title={t('registration.swag.yourSizes')}
+        value={self}
+        onChange={setSelf}
+        tshirtSizes={TSHIRT_SIZES}
+      />
+
+      {guests.length > 0 ? (
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">{t('registration.swag.guestsHeading')}</h3>
+          {guests.map((guest) => (
+            <SizingFieldset
+              key={guest.id}
+              title={`${guest.full_name} (${t('registration.swag.age', { age: guest.age })})`}
+              value={guestState[guest.id] ?? EMPTY}
+              onChange={(next) => setGuestState((prev) => ({ ...prev, [guest.id]: next }))}
+              tshirtSizes={guest.age < 14 ? KIDS_TSHIRT_SIZES : TSHIRT_SIZES}
+            />
+          ))}
+        </div>
       ) : null}
-
-      {catalogue.map((item) => {
-        const sel = selections[item.id] ?? EMPTY_SELECTION;
-        return (
-          <fieldset key={item.id} className="space-y-3 rounded-md border p-4">
-            <header className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium">{item.name}</p>
-                {item.description ? (
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
-                ) : null}
-              </div>
-              <label className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={sel.optedIn}
-                  onCheckedChange={(value) => update(item.id, { optedIn: value === true })}
-                />
-                {t('registration.swag.optIn')}
-              </label>
-            </header>
-
-            {sel.optedIn && item.requires_sizing ? (
-              <div className="space-y-2">
-                <Label>{t('registration.swag.size')}</Label>
-                <div className="flex flex-wrap gap-2">
-                  {item.available_sizes.map((size) => (
-                    <label key={size} className="flex items-center gap-1 text-sm">
-                      <input
-                        type="radio"
-                        name={`size-${item.id}`}
-                        className="h-4 w-4 accent-primary"
-                        checked={sel.size === size}
-                        onChange={() => update(item.id, { size })}
-                      />
-                      {size}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {sel.optedIn && item.has_fit_options ? (
-              <div className="space-y-2">
-                <Label>{t('registration.swag.fitPreference')}</Label>
-                <div className="flex gap-3">
-                  {(['fitted', 'relaxed'] as const).map((fit) => (
-                    <label key={fit} className="flex items-center gap-1 text-sm">
-                      <input
-                        type="radio"
-                        name={`fit-${item.id}`}
-                        className="h-4 w-4 accent-primary"
-                        checked={sel.fitPreference === fit}
-                        onChange={() => update(item.id, { fitPreference: fit })}
-                      />
-                      {t(`registration.swag.fitOptions.${fit}`)}
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </fieldset>
-        );
-      })}
     </SectionChrome>
   );
+}
+
+interface SizingFieldsetProps {
+  title: string;
+  value: SizingState;
+  onChange: (next: SizingState) => void;
+  tshirtSizes: ReadonlyArray<string>;
+}
+
+function SizingFieldset({
+  title,
+  value,
+  onChange,
+  tshirtSizes,
+}: SizingFieldsetProps): JSX.Element {
+  const { t } = useTranslation();
+  const shoeOptions = value.shoeSystem === 'eu' ? EU_SHOE_SIZES : US_SHOE_SIZES;
+  return (
+    <fieldset className="space-y-4 rounded-md border p-4">
+      <legend className="px-1 text-sm font-medium">{title}</legend>
+
+      <div className="space-y-2">
+        <Label>{t('registration.swag.tshirtSize')}</Label>
+        <div className="flex flex-wrap gap-2">
+          {tshirtSizes.map((size) => (
+            <SizeChip
+              key={size}
+              label={size}
+              selected={value.tshirtSize === size}
+              onClick={() => onChange({ ...value, tshirtSize: size })}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <Label>{t('registration.swag.shoeSize')}</Label>
+          <div role="tablist" className="flex rounded-md border bg-muted/30 p-0.5">
+            {(['us', 'eu'] as const).map((system) => (
+              <button
+                key={system}
+                type="button"
+                role="tab"
+                aria-selected={value.shoeSystem === system}
+                onClick={() => onChange({ ...value, shoeSystem: system, shoeSize: '' })}
+                className={cn(
+                  'rounded-sm px-2 py-0.5 text-xs font-medium uppercase tracking-wider',
+                  value.shoeSystem === system
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground',
+                )}
+              >
+                {t(`registration.swag.shoeSystem.${system}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {shoeOptions.map((size) => (
+            <SizeChip
+              key={size}
+              label={String(size)}
+              selected={value.shoeSize === String(size)}
+              onClick={() => onChange({ ...value, shoeSize: String(size) })}
+            />
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('registration.swag.shoeSizeHint')}
+        </p>
+      </div>
+    </fieldset>
+  );
+}
+
+function SizeChip({
+  label,
+  selected,
+  onClick,
+}: {
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}): JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'rounded-md border px-3 py-1.5 text-sm transition-colors',
+        selected
+          ? 'border-primary bg-primary text-primary-foreground'
+          : 'bg-background hover:bg-accent hover:text-accent-foreground',
+      )}
+    >
+      {label}
+    </button>
+  );
+}
+
+function parseShoe(raw: string, system: ShoeSizeSystem): number | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const value = Number.parseFloat(trimmed);
+  if (!Number.isFinite(value)) return null;
+  return toEu(value, system);
 }

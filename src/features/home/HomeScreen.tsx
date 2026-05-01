@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { CardShell } from '@/components/CardShell';
 import { useAuth } from '@/features/auth/AuthContext';
+import { EventCountdown } from '@/features/events/EventCountdown';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -62,6 +63,11 @@ export function HomeScreen(): JSX.Element {
         </section>
 
         <aside className="space-y-4 lg:col-span-2">
+          {event ? (
+            <div className="flex justify-end">
+              <EventCountdown startsAt={event.start_date} size="sm" />
+            </div>
+          ) : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>
             <dl className="grid grid-cols-1 gap-4">
               <Fact label={t('home.facts.employees')} value={stats?.employeeCount ?? 0} />
@@ -146,12 +152,10 @@ function Greeting(): JSX.Element {
   }, [user]);
 
   return (
-    <header>
-      <h1 className="text-4xl font-semibold tracking-tight">
-        <span lang={greeting.lang.toLowerCase().slice(0, 2)}>{greeting.text}</span>
-        {preferredName ? `, ${preferredName}.` : '.'}
-      </h1>
-    </header>
+    <h1 className="text-4xl font-semibold tracking-tight">
+      <span lang={greeting.lang.toLowerCase().slice(0, 2)}>{greeting.text}</span>
+      {preferredName ? `, ${preferredName}.` : '.'}
+    </h1>
   );
 }
 

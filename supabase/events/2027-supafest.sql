@@ -98,47 +98,8 @@ Sample code of conduct content. Real content will replace this in production.',
      'The agenda has 14 breakout slots this year. Star the ones you want to attend in the agenda tab.',
      null);
 
-  -- Swag catalogue. Each row drives one card in the Swag registration
-  -- step. Adult sizes follow standard US apparel; shoe sizes are listed
-  -- in unisex US (the registration UI shows the conversion guide).
-  -- Children's sizes use the kids 2T-14 scale; the swag step renders
-  -- a per-additional_guest selector for these.
-  insert into public.swag_items (
-    event_id, name, audience, requires_sizing, has_fit_options,
-    available_sizes, description, display_order, sizing_guide_url
-  ) values
-    (v_event_id, 'Supafest 2027 t-shirt', 'all', true, true,
-     array['XS','S','M','L','XL','2XL','3XL'],
-     'Soft-cotton tee. Choose fitted (gender-cut) or relaxed (unisex).',
-     0, null),
-    (v_event_id, 'Supafest 2027 hoodie', 'all', true, false,
-     array['XS','S','M','L','XL','2XL','3XL'],
-     'Heavyweight pullover with embroidered Supabase wordmark.',
-     10, null),
-    (v_event_id, 'Banff cap', 'all', false, false,
-     array[]::text[],
-     'One-size-fits-most cap with adjustable strap.',
-     20, null),
-    (v_event_id, 'Sneakers', 'employee', true, false,
-     array['6','7','8','9','10','11','12','13','14'],
-     'Custom Supafest x partner sneakers. US sizing — see guide for women''s conversion.',
-     30, 'https://www.acme.com/sneaker-sizing'),
-    (v_event_id, 'Tote bag', 'all', false, false,
-     array[]::text[],
-     'Heavy-duty canvas tote with side pocket.',
-     40, null),
-    (v_event_id, 'Beanie', 'all', false, false,
-     array[]::text[],
-     'Knit beanie with Supabase logo patch.',
-     50, null),
-    (v_event_id, 'Kids'' t-shirt', 'child', true, false,
-     array['2T','3T','4T','5','6','7','8','10','12','14'],
-     'Same Supafest tee, sized for kids.',
-     60, null),
-    (v_event_id, 'Kids'' hoodie', 'child', true, false,
-     array['2T','3T','4T','5','6','7','8','10','12','14'],
-     'Soft-fleece hoodie sized for kids.',
-     70, null);
+  -- Swag catalogue is gone — every attendee just gives us a t-shirt
+  -- size and (optionally) a shoe size, captured per-user via swag_sizes.
 
   -- Starter registrations + per-task rows for the dev employees so the
   -- wizard has data to resume from. Other users register on first visit.

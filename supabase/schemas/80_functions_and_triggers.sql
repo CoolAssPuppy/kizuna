@@ -38,7 +38,7 @@ declare
     'flights',
     'accommodations',
     'transport_requests',
-    'swag_selections'
+    'swag_sizes'
   ];
 begin
   foreach t in array touch_tables loop

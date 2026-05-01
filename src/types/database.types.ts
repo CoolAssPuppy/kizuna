@@ -121,57 +121,6 @@ export type Database = {
           },
         ]
       }
-      additional_guest_swag_selections: {
-        Row: {
-          additional_guest_id: string
-          exchange_notes: string | null
-          fit_preference: string | null
-          fulfilled: boolean
-          id: string
-          opted_in: boolean
-          size: string | null
-          swag_item_id: string
-          updated_at: string
-        }
-        Insert: {
-          additional_guest_id: string
-          exchange_notes?: string | null
-          fit_preference?: string | null
-          fulfilled?: boolean
-          id?: string
-          opted_in?: boolean
-          size?: string | null
-          swag_item_id: string
-          updated_at?: string
-        }
-        Update: {
-          additional_guest_id?: string
-          exchange_notes?: string | null
-          fit_preference?: string | null
-          fulfilled?: boolean
-          id?: string
-          opted_in?: boolean
-          size?: string | null
-          swag_item_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "additional_guest_swag_selections_additional_guest_id_fkey"
-            columns: ["additional_guest_id"]
-            isOneToOne: false
-            referencedRelation: "additional_guests"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "additional_guest_swag_selections_swag_item_id_fkey"
-            columns: ["swag_item_id"]
-            isOneToOne: false
-            referencedRelation: "swag_items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       additional_guests: {
         Row: {
           age: number
@@ -1590,99 +1539,43 @@ export type Database = {
           },
         ]
       }
-      swag_items: {
+      swag_sizes: {
         Row: {
-          audience: Database["public"]["Enums"]["swag_audience"]
-          available_sizes: string[]
-          description: string | null
-          display_order: number
-          event_id: string
-          has_fit_options: boolean
+          additional_guest_id: string | null
           id: string
-          name: string
-          requires_sizing: boolean
-          sizing_guide_url: string | null
-        }
-        Insert: {
-          audience?: Database["public"]["Enums"]["swag_audience"]
-          available_sizes?: string[]
-          description?: string | null
-          display_order?: number
-          event_id: string
-          has_fit_options?: boolean
-          id?: string
-          name: string
-          requires_sizing?: boolean
-          sizing_guide_url?: string | null
-        }
-        Update: {
-          audience?: Database["public"]["Enums"]["swag_audience"]
-          available_sizes?: string[]
-          description?: string | null
-          display_order?: number
-          event_id?: string
-          has_fit_options?: boolean
-          id?: string
-          name?: string
-          requires_sizing?: boolean
-          sizing_guide_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "swag_items_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      swag_selections: {
-        Row: {
-          exchange_notes: string | null
-          fit_preference: string | null
-          fulfilled: boolean
-          id: string
-          opted_in: boolean
-          size: string | null
-          swag_item_id: string
+          shoe_size_eu: number | null
+          tshirt_size: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
-          exchange_notes?: string | null
-          fit_preference?: string | null
-          fulfilled?: boolean
+          additional_guest_id?: string | null
           id?: string
-          opted_in?: boolean
-          size?: string | null
-          swag_item_id: string
+          shoe_size_eu?: number | null
+          tshirt_size?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
-          exchange_notes?: string | null
-          fit_preference?: string | null
-          fulfilled?: boolean
+          additional_guest_id?: string | null
           id?: string
-          opted_in?: boolean
-          size?: string | null
-          swag_item_id?: string
+          shoe_size_eu?: number | null
+          tshirt_size?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "swag_selections_swag_item_id_fkey"
-            columns: ["swag_item_id"]
-            isOneToOne: false
-            referencedRelation: "swag_items"
+            foreignKeyName: "swag_sizes_additional_guest_id_fkey"
+            columns: ["additional_guest_id"]
+            isOneToOne: true
+            referencedRelation: "additional_guests"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "swag_selections_user_id_fkey"
+            foreignKeyName: "swag_sizes_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1981,7 +1874,6 @@ export type Database = {
         | "activity"
         | "transport"
         | "social"
-      swag_audience: "all" | "employee" | "guest" | "child"
       sync_status: "success" | "partial" | "failed"
       task_audience: "all" | "employee_only" | "guest_only"
       transport_direction: "arrival" | "departure"
@@ -2192,7 +2084,6 @@ export const Constants = {
         "transport",
         "social",
       ],
-      swag_audience: ["all", "employee", "guest", "child"],
       sync_status: ["success", "partial", "failed"],
       task_audience: ["all", "employee_only", "guest_only"],
       transport_direction: ["arrival", "departure"],

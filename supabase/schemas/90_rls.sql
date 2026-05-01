@@ -396,36 +396,32 @@ create policy transport_vehicles_admin_all on public.transport_vehicles
   with check (public.is_admin());
 
 
-create policy swag_items_authenticated_read on public.swag_items
-  for select using (auth.role() = 'authenticated');
-
-create policy swag_items_admin_write on public.swag_items
-  for all using (public.is_admin())
-  with check (public.is_admin());
-
-
-create policy swag_selections_self_all on public.swag_selections
-  for all using (public.is_self_or_admin(user_id))
-  with check (public.is_self_or_admin(user_id));
-
-
--- Sponsor or admin can read/write swag selections for their additional
--- guests. Uses an EXISTS join on additional_guests to gate by sponsor.
-create policy additional_guest_swag_sponsor_or_admin on public.additional_guest_swag_selections
+-- swag_sizes is polymorphic: a row is owned either by the user_id (the
+-- attendee themselves) or by the sponsor of the additional_guest_id.
+-- Admins can read/write everything.
+create policy swag_sizes_self_or_sponsor on public.swag_sizes
   for all using (
     public.is_admin()
-    or exists (
-      select 1 from public.additional_guests g
-      where g.id = additional_guest_id
-        and g.sponsor_id = auth.uid()
+    or (user_id is not null and public.is_self_or_admin(user_id))
+    or (
+      additional_guest_id is not null
+      and exists (
+        select 1 from public.additional_guests g
+        where g.id = additional_guest_id
+          and g.sponsor_id = auth.uid()
+      )
     )
   )
   with check (
     public.is_admin()
-    or exists (
-      select 1 from public.additional_guests g
-      where g.id = additional_guest_id
-        and g.sponsor_id = auth.uid()
+    or (user_id is not null and public.is_self_or_admin(user_id))
+    or (
+      additional_guest_id is not null
+      and exists (
+        select 1 from public.additional_guests g
+        where g.id = additional_guest_id
+          and g.sponsor_id = auth.uid()
+      )
     )
   );
 

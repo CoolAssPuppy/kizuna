@@ -118,32 +118,64 @@ export async function fetchDietarySummary(client: AppSupabaseClient): Promise<Di
 
 export interface SwagOrderRow extends CsvRow {
   email: string;
-  item: string;
-  size: string | null;
-  fit_preference: string | null;
-  opted_in: boolean;
+  full_name: string;
+  attendee_type: 'employee' | 'guest' | 'additional_guest';
+  tshirt_size: string | null;
+  shoe_size_eu: number | null;
 }
 
 export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrderRow[]> {
   const { data, error } = await client
-    .from('swag_selections')
+    .from('swag_sizes')
     .select(
       `
-      opted_in, size, fit_preference,
-      swag_items ( name ),
-      users ( email )
+      tshirt_size, shoe_size_eu,
+      user:users!swag_sizes_user_id_fkey (
+        email, role,
+        employee_profiles ( preferred_name, legal_name ),
+        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+      ),
+      additional_guests ( full_name, sponsor_id, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
     `,
-    )
-    .order('user_id', { ascending: true });
+    );
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    email: flatJoin<{ email: string }>(row.users)?.email ?? '',
-    item: flatJoin<{ name: string }>(row.swag_items)?.name ?? '',
-    size: row.size,
-    fit_preference: row.fit_preference,
-    opted_in: row.opted_in,
-  }));
+  return (data ?? []).map((row) => {
+    const user = flatJoin<{
+      email: string;
+      role: string;
+      employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
+      guest_profiles: Joined<{ full_name: string }>;
+    }>(row.user);
+    const additional = flatJoin<{
+      full_name: string;
+      sponsor_id: string;
+      sponsor: Joined<{ email: string }>;
+    }>(row.additional_guests);
+
+    if (additional) {
+      return {
+        email: flatJoin<{ email: string }>(additional.sponsor)?.email ?? '',
+        full_name: additional.full_name,
+        attendee_type: 'additional_guest' as const,
+        tshirt_size: row.tshirt_size,
+        shoe_size_eu: row.shoe_size_eu,
+      };
+    }
+
+    const employee = flatJoin(user?.employee_profiles);
+    const guest = flatJoin(user?.guest_profiles);
+    const fullName =
+      employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+    const attendeeType: 'employee' | 'guest' = user?.role === 'guest' ? 'guest' : 'employee';
+    return {
+      email: user?.email ?? '',
+      full_name: fullName,
+      attendee_type: attendeeType,
+      tshirt_size: row.tshirt_size,
+      shoe_size_eu: row.shoe_size_eu,
+    };
+  });
 }
 
 export interface PaymentReconciliationRow extends CsvRow {

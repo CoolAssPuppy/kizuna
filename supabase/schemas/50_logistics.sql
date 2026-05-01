@@ -117,58 +117,33 @@ create index transport_requests_needs_review_idx
   on public.transport_requests(needs_review) where needs_review;
 
 
-create table public.swag_items (
+-- Swag sizes
+--
+-- Single, simple table. We don't run a swag catalogue — for Phase 1 every
+-- attendee just tells us their t-shirt size and shoe size and the events
+-- team orders centrally. The row is polymorphic on (user_id,
+-- additional_guest_id) so the same shape covers employees, guests, and
+-- additional_guests (children, partners) on a sponsor's registration.
+--
+-- Shoe size is stored in canonical EU units (numeric so 38.5, 39, 39.5
+-- all fit). The UI offers US/EU input and converts on save so the kitchen
+-- spreadsheet always reads one unit.
+create table public.swag_sizes (
   id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references public.events(id) on delete cascade,
-  name text not null,
-  audience swag_audience not null default 'all',
-  requires_sizing boolean not null default false,
-  has_fit_options boolean not null default false,
-  sizing_guide_url text,
-  available_sizes text[] not null default '{}',
-  description text,
-  display_order int not null default 0
-);
-
-comment on column public.swag_items.has_fit_options is
-  'True for gender-cut items where fit_preference (fitted | relaxed) is collected.';
-comment on column public.swag_items.audience is
-  'Who can select this item. Children swag is offered separately so it does not clutter the adult menu.';
-
-create index swag_items_event_id_idx on public.swag_items(event_id);
-
-
-create table public.swag_selections (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.users(id) on delete cascade,
-  swag_item_id uuid not null references public.swag_items(id) on delete cascade,
-  opted_in boolean not null default true,
-  size text,
-  fit_preference text check (fit_preference is null or fit_preference in ('fitted', 'relaxed')),
-  fulfilled boolean not null default false,
-  exchange_notes text,
+  user_id uuid references public.users(id) on delete cascade,
+  additional_guest_id uuid references public.additional_guests(id) on delete cascade,
+  tshirt_size text,
+  shoe_size_eu numeric(4,1) check (shoe_size_eu is null or shoe_size_eu > 0),
   updated_at timestamptz not null default now(),
-  unique (user_id, swag_item_id)
+  constraint swag_sizes_owner check (
+    (user_id is not null and additional_guest_id is null)
+    or (user_id is null and additional_guest_id is not null)
+  ),
+  unique (user_id),
+  unique (additional_guest_id)
 );
 
--- Swag for additional_guests (children, dependents). They aren't full
--- Kizuna users so selections live in their own table keyed off the
--- additional_guests row instead of users.
-create table public.additional_guest_swag_selections (
-  id uuid primary key default gen_random_uuid(),
-  additional_guest_id uuid not null references public.additional_guests(id) on delete cascade,
-  swag_item_id uuid not null references public.swag_items(id) on delete cascade,
-  opted_in boolean not null default true,
-  size text,
-  fit_preference text check (fit_preference is null or fit_preference in ('fitted', 'relaxed')),
-  fulfilled boolean not null default false,
-  exchange_notes text,
-  updated_at timestamptz not null default now(),
-  unique (additional_guest_id, swag_item_id)
-);
-
-create index additional_guest_swag_selections_guest_idx
-  on public.additional_guest_swag_selections(additional_guest_id);
-
-comment on column public.swag_selections.fulfilled is
-  'Set true when the swag bag is QR-scanned and packed at check-in.';
+comment on table public.swag_sizes is
+  'One row per attendee with their t-shirt and shoe sizes. Polymorphic on (user_id, additional_guest_id) so employees, guests, and accompanying additional_guests share the same table.';
+comment on column public.swag_sizes.shoe_size_eu is
+  'Canonical EU shoe size. UI accepts US or EU and converts on save.';
