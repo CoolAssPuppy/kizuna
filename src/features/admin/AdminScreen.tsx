@@ -19,6 +19,7 @@ import {
   fetchSwagOrder,
   fetchTransportManifest,
 } from './reports';
+import { ReportTable } from './ReportTable';
 import { ShareReportButton } from './ShareReportButton';
 
 type ReportType = Database['public']['Enums']['report_type'];
@@ -84,7 +85,6 @@ function ReportPanel({ rows, filename, reportType, eventId }: ReportPanelProps):
   if (rows.length === 0) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>;
   }
-  const headers = Object.keys(rows[0]!);
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -93,30 +93,7 @@ function ReportPanel({ rows, filename, reportType, eventId }: ReportPanelProps):
           {t('admin.exportCsv')}
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-md border">
-        <table className="w-full text-sm">
-          <thead className="bg-muted text-left">
-            <tr>
-              {headers.map((h) => (
-                <th key={h} className="px-3 py-2 font-medium">
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => (
-              <tr key={i} className="border-t">
-                {headers.map((h) => (
-                  <td key={h} className="px-3 py-2 align-top">
-                    {String(row[h] ?? '')}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <ReportTable rows={rows} />
     </div>
   );
 }

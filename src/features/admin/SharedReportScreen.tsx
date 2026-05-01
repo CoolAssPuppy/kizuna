@@ -4,12 +4,20 @@ import { useParams } from 'react-router-dom';
 
 import { env } from '@/lib/env';
 
+import { ReportTable } from './ReportTable';
+
 interface SharedReport {
   report_type: string;
   rows: ReadonlyArray<Record<string, string | number | boolean | null>>;
   last_modified: string | null;
   share_expires_at: string | null;
   generated_at: string;
+}
+
+function errorKeyFor(message: string): string {
+  if (message === 'not_found') return 'shareReport.notFound';
+  if (message === 'expired') return 'shareReport.expired';
+  return 'shareReport.error';
 }
 
 async function fetchSharedReport(token: string): Promise<SharedReport> {
@@ -47,17 +55,10 @@ export function SharedReportScreen(): JSX.Element {
   }
 
   if (query.error) {
-    const message = query.error.message;
-    const key =
-      message === 'not_found'
-        ? 'shareReport.notFound'
-        : message === 'expired'
-          ? 'shareReport.expired'
-          : 'shareReport.error';
     return (
       <main className="flex min-h-screen items-center justify-center px-6">
         <p role="alert" className="max-w-md text-center text-sm text-muted-foreground">
-          {t(key)}
+          {t(errorKeyFor(query.error.message))}
         </p>
       </main>
     );
@@ -65,7 +66,6 @@ export function SharedReportScreen(): JSX.Element {
 
   if (!query.data) return <main />;
   const report = query.data;
-  const headers = report.rows.length > 0 ? Object.keys(report.rows[0]!) : [];
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 px-6 py-10">
@@ -93,30 +93,7 @@ export function SharedReportScreen(): JSX.Element {
       {report.rows.length === 0 ? (
         <p className="py-8 text-sm text-muted-foreground">{t('shareReport.empty')}</p>
       ) : (
-        <div className="overflow-x-auto rounded-md border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted text-left">
-              <tr>
-                {headers.map((h) => (
-                  <th key={h} className="px-3 py-2 font-medium">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {report.rows.map((row, i) => (
-                <tr key={i} className="border-t">
-                  {headers.map((h) => (
-                    <td key={h} className="px-3 py-2 align-top">
-                      {String(row[h] ?? '')}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ReportTable rows={report.rows} />
       )}
     </main>
   );
