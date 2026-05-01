@@ -1,8 +1,11 @@
 import { getSupabaseClient } from '@/lib/supabase';
 import {
   EMPTY_PARSED_ITINERARY,
+  type ParsedCarService,
   type ParsedFlight,
+  type ParsedHotel,
   type ParsedItinerary,
+  type ParsedRentalCar,
 } from '@/lib/integrations/openai';
 
 import { timezoneForAirport } from './airportTimezones';
@@ -31,7 +34,6 @@ export async function parseItineraryViaEdge(text: string): Promise<ParsedItinera
   });
 
   if (response.error) {
-    // FunctionsHttpError surfaces an HTTP code; treat 404 as "not deployed yet".
     if (isNotDeployed(response.error)) return { ...EMPTY_PARSED_ITINERARY };
     throw response.error;
   }
@@ -39,8 +41,9 @@ export async function parseItineraryViaEdge(text: string): Promise<ParsedItinera
   const data: ParsedItinerary | null = response.data;
   return {
     flights: data?.flights ?? [],
-    accommodations: data?.accommodations ?? [],
-    transfers: data?.transfers ?? [],
+    hotels: data?.hotels ?? [],
+    rental_cars: data?.rental_cars ?? [],
+    car_services: data?.car_services ?? [],
   };
 }
 
@@ -67,10 +70,10 @@ export async function saveParsedFlights(
         arrival_time_local: string;
       } =>
         Boolean(
-          f.departure_airport &&
-            f.arrival_airport &&
-            f.departure_time_local &&
-            f.arrival_time_local,
+          f.departure_airport
+            && f.arrival_airport
+            && f.departure_time_local
+            && f.arrival_time_local,
         ),
     )
     .map((flight) => {
@@ -97,6 +100,140 @@ export async function saveParsedFlights(
 
   const client = getSupabaseClient();
   const { error } = await client.from('flights').insert(rows);
+  if (error) throw error;
+  return rows.length;
+}
+
+interface ActiveEventLite {
+  id: string;
+  time_zone: string;
+}
+
+async function loadActiveEvent(): Promise<ActiveEventLite | null> {
+  const { data, error } = await getSupabaseClient()
+    .from('events')
+    .select('id, time_zone')
+    .eq('is_active', true)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+function dateToIso(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.length === 10 ? `${trimmed}T00:00:00` : trimmed;
+}
+
+/**
+ * Persist parsed hotels as user-owned itinerary_items of type
+ * 'accommodation'. RLS allows the insert when source='self_imported' and
+ * source_id IS NULL — those rows can't collide with the trigger-
+ * materialised admin rows. Returns the number of rows inserted.
+ */
+export async function saveParsedAccommodations(
+  userId: string,
+  hotels: ReadonlyArray<ParsedHotel>,
+): Promise<number> {
+  if (hotels.length === 0) return 0;
+  const event = await loadActiveEvent();
+  if (!event) return 0;
+
+  const rows = hotels
+    .map((h) => {
+      const startsAt = dateToIso(h.check_in_time_local);
+      const endsAt = dateToIso(h.check_out_time_local);
+      const title = h.lodging_name?.trim();
+      if (!title || !startsAt) return null;
+      return {
+        user_id: userId,
+        event_id: event.id,
+        item_type: 'accommodation' as const,
+        source: 'self_imported' as const,
+        source_id: null,
+        title,
+        subtitle: h.address ?? h.city ?? null,
+        starts_at: startsAt,
+        starts_tz: event.time_zone,
+        ends_at: endsAt,
+        ends_tz: endsAt ? event.time_zone : null,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
+
+  if (rows.length === 0) return 0;
+  const { error } = await getSupabaseClient().from('itinerary_items').insert(rows);
+  if (error) throw error;
+  return rows.length;
+}
+
+/**
+ * Persist parsed car services and rental cars as user-owned
+ * itinerary_items of type 'transport'. Both shapes carry pickup time +
+ * pickup/dropoff locations; we treat them uniformly. Rows missing
+ * pickup time are skipped.
+ */
+export async function saveParsedTransfers(
+  userId: string,
+  carServices: ReadonlyArray<ParsedCarService>,
+  rentalCars: ReadonlyArray<ParsedRentalCar>,
+  eventTimezoneFallback: string,
+): Promise<number> {
+  if (carServices.length === 0 && rentalCars.length === 0) return 0;
+  const event = await loadActiveEvent();
+  if (!event) return 0;
+  const tz = event.time_zone ?? eventTimezoneFallback;
+
+  const transferRows = carServices
+    .map((c) => {
+      const startsAt = dateToIso(c.pickup_time_local);
+      if (!startsAt) return null;
+      const title = c.provider?.trim() || 'Car service';
+      const subtitle = [c.pickup_location, c.dropoff_location].filter(Boolean).join(' → ') || null;
+      const endsAt = dateToIso(c.dropoff_time_local);
+      return {
+        user_id: userId,
+        event_id: event.id,
+        item_type: 'transport' as const,
+        source: 'self_imported' as const,
+        source_id: null,
+        title,
+        subtitle,
+        starts_at: startsAt,
+        starts_tz: tz,
+        ends_at: endsAt,
+        ends_tz: endsAt ? tz : null,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
+
+  const rentalRows = rentalCars
+    .map((r) => {
+      const startsAt = dateToIso(r.pickup_time_local);
+      if (!startsAt) return null;
+      const title = [r.company, r.car_description].filter(Boolean).join(' — ') || 'Rental car';
+      const subtitle = [r.pickup_location, r.dropoff_location].filter(Boolean).join(' → ') || null;
+      const endsAt = dateToIso(r.dropoff_time_local);
+      return {
+        user_id: userId,
+        event_id: event.id,
+        item_type: 'transport' as const,
+        source: 'self_imported' as const,
+        source_id: null,
+        title,
+        subtitle,
+        starts_at: startsAt,
+        starts_tz: tz,
+        ends_at: endsAt,
+        ends_tz: endsAt ? tz : null,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
+
+  const rows = [...transferRows, ...rentalRows];
+  if (rows.length === 0) return 0;
+  const { error } = await getSupabaseClient().from('itinerary_items').insert(rows);
   if (error) throw error;
   return rows.length;
 }

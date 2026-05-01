@@ -60,7 +60,7 @@ create type session_registration_status as enum ('registered', 'waitlisted', 'at
 
 -- Itinerary
 create type itinerary_item_type as enum ('session', 'flight', 'transport', 'accommodation', 'announcement', 'reminder');
-create type itinerary_source as enum ('assigned', 'self_registered', 'auto_all');
+create type itinerary_source as enum ('assigned', 'self_registered', 'self_imported', 'auto_all');
 
 -- Community
 create type vote_target_type as enum ('session', 'idea', 'announcement');

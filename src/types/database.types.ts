@@ -1932,7 +1932,11 @@ export type Database = {
         | "accommodation"
         | "announcement"
         | "reminder"
-      itinerary_source: "assigned" | "self_registered" | "auto_all"
+      itinerary_source:
+        | "assigned"
+        | "self_registered"
+        | "self_imported"
+        | "auto_all"
       notification_channel: "slack" | "email" | "in_app"
       notification_type:
         | "nudge"
@@ -2137,7 +2141,12 @@ export const Constants = {
         "announcement",
         "reminder",
       ],
-      itinerary_source: ["assigned", "self_registered", "auto_all"],
+      itinerary_source: [
+        "assigned",
+        "self_registered",
+        "self_imported",
+        "auto_all",
+      ],
       notification_channel: ["slack", "email", "in_app"],
       notification_type: [
         "nudge",

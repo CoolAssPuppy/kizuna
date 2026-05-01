@@ -299,6 +299,31 @@ create policy itinerary_items_admin_write on public.itinerary_items
   for all using (public.is_admin())
   with check (public.is_admin());
 
+-- Self-imported rows let a user persist hotels and car services parsed
+-- from their own confirmation emails directly into the itinerary view.
+-- source='self_imported' AND source_id IS NULL keeps these rows from
+-- colliding with the trigger-materialised ones from flights / sessions /
+-- accommodations.
+create policy itinerary_items_self_imported_insert on public.itinerary_items
+  for insert with check (
+    user_id = auth.uid()
+    and source = 'self_imported'
+    and source_id is null
+  );
+
+create policy itinerary_items_self_imported_update on public.itinerary_items
+  for update using (
+    user_id = auth.uid()
+    and source = 'self_imported'
+  )
+  with check (
+    user_id = auth.uid()
+    and source = 'self_imported'
+  );
+
+create policy itinerary_items_self_imported_delete on public.itinerary_items
+  for delete using (user_id = auth.uid() and source = 'self_imported');
+
 
 -- Registration
 create policy registrations_self_all on public.registrations

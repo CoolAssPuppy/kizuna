@@ -8,7 +8,12 @@ import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 
-import { parseItineraryViaEdge, saveParsedFlights } from './importApi';
+import {
+  parseItineraryViaEdge,
+  saveParsedAccommodations,
+  saveParsedFlights,
+  saveParsedTransfers,
+} from './importApi';
 
 interface Props {
   open: boolean;
@@ -67,15 +72,21 @@ export function ImportItineraryDialog({
     setBusy(true);
     try {
       const result = await parseItineraryViaEdge(pasted.trim());
-      const flightCount = await saveParsedFlights(user.id, result.flights, eventTimezone);
-      // accommodations + transfers are admin-managed for Phase 1; we only
-      // persist flights and report the parse counts so the user can see
-      // what was understood.
-      const parsed = result.flights.length + result.accommodations.length + result.transfers.length;
-      if (flightCount === 0 && parsed === 0) {
+      const [flightCount, hotelCount, transferCount] = await Promise.all([
+        saveParsedFlights(user.id, result.flights, eventTimezone),
+        saveParsedAccommodations(user.id, result.hotels),
+        saveParsedTransfers(user.id, result.car_services, result.rental_cars, eventTimezone),
+      ]);
+      const parsed =
+        result.flights.length
+        + result.hotels.length
+        + result.rental_cars.length
+        + result.car_services.length;
+      const persisted = flightCount + hotelCount + transferCount;
+      if (persisted === 0 && parsed === 0) {
         show(t('itinerary.import.nothingFound'), 'error');
       } else {
-        show(t('itinerary.import.success', { count: flightCount }));
+        show(t('itinerary.import.success', { count: persisted }));
         onImported();
         onOpenChange(false);
         setPasted('');
