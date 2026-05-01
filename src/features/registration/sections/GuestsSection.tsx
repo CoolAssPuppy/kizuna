@@ -24,16 +24,13 @@ import {
   removeAdditionalGuest,
   renameAdditionalGuest,
 } from '@/features/guests/api';
-import type {
-  AdditionalGuestRow,
-  GuestAgeBracket,
-  GuestInvitationRow,
-} from '@/features/guests/types';
+import type { GuestAgeBracket, GuestInvitationRow } from '@/features/guests/types';
 import { GUEST_FEE_FOR_BRACKET } from '@/features/guests/types';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
+import { computeGuestFeeTotal } from './guestFees';
 import type { SectionProps } from './types';
 
 const STATUS_TONE: Record<GuestInvitationRow['status'], string> = {
@@ -102,7 +99,7 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
 
   const adultList = invitations ?? [];
   const minorList = minors ?? [];
-  const total = computeTotal(adultList, minorList);
+  const total = computeGuestFeeTotal(adultList, minorList);
 
   return (
     <CardShell
@@ -248,18 +245,6 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
       />
       <PayFeesDialog open={payOpen} onClose={() => setPayOpen(false)} amount={total} />
     </CardShell>
-  );
-}
-
-function computeTotal(
-  invitations: ReadonlyArray<GuestInvitationRow>,
-  minors: ReadonlyArray<AdditionalGuestRow>,
-): number {
-  return (
-    invitations
-      .filter((i) => i.status !== 'cancelled')
-      .reduce((sum, i) => sum + Number(i.fee_amount), 0) +
-    minors.reduce((sum, m) => sum + Number(m.fee_amount), 0)
   );
 }
 
