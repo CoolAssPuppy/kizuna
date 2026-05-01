@@ -192,6 +192,22 @@
 
 **How to apply:** Pair the trigger with a SECURITY DEFINER RPC for the blessed write path (e.g. `set_user_leadership(uuid, boolean)`). The RPC does the admin check up front and returns a typed error; the trigger is the belt-and-braces backstop that catches direct UPDATEs from any future code path.
 
+## 2026-05-01 - Don't useEffect for data fetching or state derivation
+
+**Rule:** Reach for TanStack Query (or a parent `key` for remount) instead of `useEffect` whenever the body of the effect either fetches data or sets state derived from other state. Reserve `useEffect` for one-time external sync, and prefer `useMountEffect` for that case so intent is explicit.
+
+**Why:** Effect-based fetching gets race conditions for free, has to reinvent caching/cancellation, and creates extra renders before the data lands. Effect-based state derivation runs N+1 renders. Both are common foot-guns.
+
+**How to apply:** When writing a new component, the order is: hooks → query/mutation → local state → derived values (inline) → handlers → render. If you find yourself typing `useEffect(() => set...(...))`, stop and pick a different rule. See `~/.claude/skills/no-use-effect/SKILL.md`.
+
+## 2026-05-01 - Generic repository for user-scoped tables
+
+**Rule:** Tables keyed on `user_id` (registration sections, accessibility, dietary, etc.) use `createUserScopedRepository` from `src/features/registration/api/userScopedRepository.ts` rather than hand-rolled load/save pairs.
+
+**Why:** The pre-refactor pattern was a six-line load function and a six-line save function per section, only the table name and column list differed. Drift was inevitable; one section forgot a column once and silently overwrote it. The generic helper keeps the column list in one place and the load/save pair stays in lock-step.
+
+**How to apply:** Add a new section by writing `createUserScopedRepository<'table_name', FormShape>({ table, toInsert })` and exporting `repo.load` / `repo.save`. The Supabase generic-typing gymnastics live inside the helper; callers see fully-typed `RowOf<T>` and `InsertOf<T>`.
+
 ## 2026-04-30 - Supabase CLI is a system install, not an npm dep
 
 **Rule:** Don't add `supabase` to `package.json` devDependencies. Install via `brew install supabase/tap/supabase` (or system equivalent) and document it in README prerequisites.

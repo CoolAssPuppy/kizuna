@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,6 @@ import {
   loadCommunityProfile,
   loadHobbyCatalog,
   saveCommunityProfile,
-  type HobbyOption,
 } from './api';
 import { COUNTRIES, isValidCountryCode } from './countries';
 
@@ -45,14 +45,46 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
-  const [hobbyCatalog, setHobbyCatalog] = useState<HobbyOption[]>([]);
+  const [hydratedFor, setHydratedFor] = useState<string | null>(null);
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,
     toastSuccessKey: 'community.profile.saved',
   });
 
+  const profileQuery = useQuery({
+    queryKey: ['community', 'profile', user?.id],
+    queryFn: () => loadCommunityProfile(getSupabaseClient(), user!.id),
+    enabled: !!user,
+  });
+  const catalogQuery = useQuery({
+    queryKey: ['community', 'hobbyCatalog'],
+    queryFn: () => loadHobbyCatalog(getSupabaseClient()),
+  });
+  const hobbyCatalog = useMemo(() => catalogQuery.data ?? [], [catalogQuery.data]);
+  const hydrated = hydratedFor === user?.id;
+
+  // Hydrate the form once per user from the query result. We cannot
+  // derive form state directly because the user edits it; the query
+  // is the seed, not the live source.
+  useEffect(() => {
+    if (!user || !profileQuery.data || hydratedFor === user.id) return;
+    const row = profileQuery.data;
+    setValues({
+      bio: row.bio ?? '',
+      funFact: row.fun_fact ?? '',
+      hobbies: row.hobbies,
+      hobbyDraft: '',
+      hometownCity: row.hometown_city ?? '',
+      hometownCountry: row.hometown_country ?? '',
+      currentCity: row.current_city ?? '',
+      currentCountry: row.current_country ?? '',
+    });
+    setHydratedFor(user.id);
+  }, [user, profileQuery.data, hydratedFor]);
+
+  // Suggestions are derived from the current draft + catalog: pure
+  // computation, no effect needed.
   const suggestions = useMemo(() => {
     const draft = values.hobbyDraft.toLowerCase().trim();
     if (!draft) return [];
@@ -65,34 +97,6 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
       )
       .slice(0, 6);
   }, [hobbyCatalog, values.hobbies, values.hobbyDraft]);
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const client = getSupabaseClient();
-      const [row, catalog] = await Promise.all([
-        loadCommunityProfile(client, user.id),
-        loadHobbyCatalog(client),
-      ]);
-      if (!active) return;
-      setHobbyCatalog(catalog);
-      setValues({
-        bio: row.bio ?? '',
-        funFact: row.fun_fact ?? '',
-        hobbies: row.hobbies,
-        hobbyDraft: '',
-        hometownCity: row.hometown_city ?? '',
-        hometownCountry: row.hometown_country ?? '',
-        currentCity: row.current_city ?? '',
-        currentCountry: row.current_country ?? '',
-      });
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function addHobby(label: string): void {
     const slug = label

@@ -17,8 +17,8 @@ create table public.events (
   reg_opens_at timestamptz,
   reg_closes_at timestamptz check (reg_closes_at is null or reg_opens_at is null or reg_closes_at > reg_opens_at),
   is_active boolean not null default false,
-  hero_image_url text,
-  logo_url text,
+  hero_image_url text check (hero_image_url is null or hero_image_url ~ '^https?://'),
+  logo_url text check (logo_url is null or logo_url ~ '^https?://'),
   invite_all_employees boolean not null default false
 );
 

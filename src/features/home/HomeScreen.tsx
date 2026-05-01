@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -12,6 +13,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
 import { GREETINGS } from './greetings';
+import { JetLagFighter } from './JetLagFighter';
 import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
 import { useEventStats } from './useEventStats';
 import { useHomeFeed, type FeedItem } from './useHomeFeed';
@@ -56,6 +58,7 @@ export function HomeScreen(): JSX.Element {
 
         <aside className="space-y-4 lg:col-span-2">
           {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
+          {event ? <JetLagFighter eventTimeZone={event.time_zone} /> : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>
             <dl className="grid grid-cols-1 gap-4">
               <Fact label={t('home.facts.employees')} value={stats?.employeeCount ?? 0} />
@@ -123,21 +126,14 @@ function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
 
 function Greeting(): JSX.Element {
   const { user } = useAuth();
-  const [preferredName, setPreferredName] = useState<string | null>(null);
   const greeting = useMemo(() => GREETINGS[Math.floor(Math.random() * GREETINGS.length)]!, []);
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const profile = await loadPersonalInfo(getSupabaseClient(), user.id);
-      if (!active) return;
-      setPreferredName(profile?.preferred_name ?? user.email.split('@')[0] ?? null);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
+  const { data: profile } = useQuery({
+    queryKey: ['profile', 'personalInfo', user?.id],
+    queryFn: () => loadPersonalInfo(getSupabaseClient(), user!.id),
+    enabled: !!user,
+  });
+  const preferredName =
+    profile?.preferred_name ?? (user ? (user.email.split('@')[0] ?? null) : null);
 
   return (
     <h1 className="text-4xl font-semibold tracking-tight">
