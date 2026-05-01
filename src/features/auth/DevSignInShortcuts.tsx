@@ -13,9 +13,14 @@ const DEV_EMPLOYEE = 'luke.skywalker@kizuna.dev';
 const DEV_ADMIN = 'jean-luc.picard@kizuna.dev';
 
 /**
- * Renders only when import.meta.env.DEV is true. Two shortcut buttons that
- * sign in as a seeded employee or admin so QA can swap roles without
- * juggling credentials.
+ * Two shortcut buttons that sign in as a seeded employee or admin so
+ * QA can swap roles without juggling credentials.
+ *
+ * TEMPORARY: rendered unconditionally during the launch staging
+ * window so sponsors and partners can poke around stg / prd without
+ * a real Okta dance. Re-gate with `import.meta.env.DEV` before
+ * cutting a real release; the gate lives at the call site
+ * (SignInScreen.tsx) so this component stays simple.
  *
  * Falls back gracefully: if the seeded user does not exist (the sample
  * fixtures fixture has not been applied), surfaces an alert instead of
