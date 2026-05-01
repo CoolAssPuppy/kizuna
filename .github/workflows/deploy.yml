@@ -3,24 +3,78 @@ name: Deploy
 on:
   push:
     branches: [main]
-    paths:
-      - 'supabase/functions/**'
-      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_all_functions:
+        description: 'Force-deploy every edge function'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: production-deploy
   cancel-in-progress: false
 
 permissions:
   contents: read
 
+env:
+  SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
 jobs:
-  edge-functions:
-    name: edge functions
+  detect-changes:
+    name: Detect changes
     runs-on: ubuntu-latest
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    outputs:
+      functions_changed: ${{ steps.changes.outputs.functions_changed }}
+      shared_changed: ${{ steps.changes.outputs.shared_changed }}
+      changed_functions: ${{ steps.changes.outputs.changed_functions }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the previous commit to diff against. fetch-depth: 2 is
+          # cheaper than the default unbounded clone.
+          fetch-depth: 2
+
+      - name: Compute changed paths under supabase/functions
+        id: changes
+        run: |
+          set -euo pipefail
+
+          # Did anything under supabase/functions/ change at all?
+          if git diff --name-only HEAD~1 HEAD -- 'supabase/functions/' | grep -q .; then
+            echo "functions_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "functions_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Did the shared module change? Every function imports from there
+          # so a change forces a full redeploy.
+          if git diff --name-only HEAD~1 HEAD -- 'supabase/functions/_shared/' | grep -q .; then
+            echo "shared_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "shared_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Distinct function directories that changed (excluding _shared).
+          # Space-separated for the deploy step's loop.
+          changed=$(git diff --name-only HEAD~1 HEAD -- 'supabase/functions/' \
+            | grep -oE 'supabase/functions/[^/]+' \
+            | sed 's|supabase/functions/||' \
+            | grep -v '^_shared$' \
+            | sort -u \
+            | tr '\n' ' ' \
+            || true)
+          echo "changed_functions=$changed" >> "$GITHUB_OUTPUT"
+
+  edge-functions:
+    name: Edge functions
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.functions_changed == 'true'
+      || github.event.inputs.deploy_all_functions == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -28,13 +82,56 @@ jobs:
         with:
           version: latest
 
-      - name: Deploy every edge function under supabase/functions
+      - name: Link to production project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
+      - name: Deploy changed functions only
+        if: |
+          needs.detect-changes.outputs.shared_changed != 'true'
+          && github.event.inputs.deploy_all_functions != 'true'
+          && needs.detect-changes.outputs.changed_functions != ''
+        env:
+          CHANGED: ${{ needs.detect-changes.outputs.changed_functions }}
+        run: |
+          set -euo pipefail
+          for fn in $CHANGED; do
+            echo "Deploying $fn"
+            supabase functions deploy "$fn"
+          done
+
+      - name: Deploy every function (shared/_force path)
+        if: |
+          needs.detect-changes.outputs.shared_changed == 'true'
+          || github.event.inputs.deploy_all_functions == 'true'
         run: |
           set -euo pipefail
           for dir in supabase/functions/*/; do
             fn=$(basename "$dir")
-            # Skip the shared module dir (no index.ts at the function root).
             if [ "$fn" = "_shared" ]; then continue; fi
             echo "Deploying $fn"
-            supabase functions deploy "$fn" --project-ref "$SUPABASE_PROJECT_REF"
+            supabase functions deploy "$fn"
           done
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, edge-functions]
+    if: always()
+    steps:
+      - name: Write summary
+        env:
+          FUNCTIONS_CHANGED: ${{ needs.detect-changes.outputs.functions_changed }}
+          SHARED_CHANGED: ${{ needs.detect-changes.outputs.shared_changed }}
+          CHANGED_LIST: ${{ needs.detect-changes.outputs.changed_functions }}
+          DEPLOY_RESULT: ${{ needs.edge-functions.result }}
+        run: |
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "| Item | Value |"
+            echo "|------|-------|"
+            echo "| Functions touched | $FUNCTIONS_CHANGED |"
+            echo "| _shared changed | $SHARED_CHANGED |"
+            echo "| Changed functions | ${CHANGED_LIST:-(none)} |"
+            echo "| Deploy result | $DEPLOY_RESULT |"
+          } >> "$GITHUB_STEP_SUMMARY"
