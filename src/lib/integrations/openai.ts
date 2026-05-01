@@ -244,7 +244,8 @@ async function parseLive(
   text: string,
 ): Promise<ParsedItinerary> {
   const fetchImpl = config.fetchImpl ?? fetch;
-  const model = config.model ?? DEFAULT_MODEL;
+  // `||` (not `??`) so an empty-string env value still falls back.
+  const model = config.model || DEFAULT_MODEL;
 
   const response = await fetchImpl(OPENAI_URL, {
     method: 'POST',

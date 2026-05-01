@@ -206,7 +206,8 @@ export async function parseItineraryWithOpenAI(text: string): Promise<ParsedItin
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: Deno.env.get('OPENAI_MODEL') ?? DEFAULT_MODEL,
+      // `||` (not `??`) so OPENAI_MODEL="" in env still falls back.
+      model: Deno.env.get('OPENAI_MODEL') || DEFAULT_MODEL,
       temperature: 0,
       response_format: { type: 'json_object' },
       messages: [
