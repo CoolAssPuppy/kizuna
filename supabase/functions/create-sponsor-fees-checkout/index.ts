@@ -4,6 +4,7 @@
 // to 'sent' and dispatches the invite email post-payment.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { publicUrl } from '../_shared/env.ts';
 import { dispatchSponsorPaymentSucceeded } from '../_shared/sponsorPaymentFanOut.ts';
 import { getUserClient } from '../_shared/supabaseClient.ts';
 
@@ -66,10 +67,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'nothing_to_pay' }, { status: 400 });
   }
 
-  const publicUrl = Deno.env.get('KIZUNA_PUBLIC_URL') ?? 'http://localhost:5173';
+  const baseUrl = publicUrl();
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const successUrl = `${publicUrl}/payment-success`;
-  const cancelUrl = `${publicUrl}/payment-cancelled`;
+  const successUrl = `${baseUrl}/payment-success`;
+  const cancelUrl = `${baseUrl}/payment-cancelled`;
 
   if (!stripeKey) {
     // Stub branch — webhook is the source of truth in prod; we fan

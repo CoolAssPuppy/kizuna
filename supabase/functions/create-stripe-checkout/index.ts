@@ -5,6 +5,7 @@
 // can complete the flow end-to-end.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { publicUrl } from '../_shared/env.ts';
 import { getUserClient } from '../_shared/supabaseClient.ts';
 
 const ADULT_FEE_CENTS = 95_000;
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
   }
 
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
-  const publicUrl = Deno.env.get('KIZUNA_PUBLIC_URL') ?? 'http://localhost:5173';
+  const baseUrl = publicUrl();
 
   const client = getUserClient(authHeader);
   const { data: userData, error: userError } = await client.auth.getUser();
@@ -41,8 +42,8 @@ Deno.serve(async (req) => {
   // Phase 1: every guest is charged the adult fee. Children fee handled
   // when the children step ships and the age computation lands.
   const amountCents = ADULT_FEE_CENTS;
-  const successUrl = `${publicUrl}/payment-success`;
-  const cancelUrl = `${publicUrl}/payment-cancelled`;
+  const successUrl = `${baseUrl}/payment-success`;
+  const cancelUrl = `${baseUrl}/payment-cancelled`;
 
   if (!stripeKey) {
     const stubbedSessionId = `cs_stub_${guestUserId}_${Date.now()}`;

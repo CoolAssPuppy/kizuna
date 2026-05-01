@@ -1,7 +1,5 @@
 import { createContext, useState, type ReactNode } from 'react';
 
-import { useAuth } from '@/features/auth/AuthContext';
-
 export interface ActiveSubject {
   /** user_id used for per-section data scoping. */
   userId: string;
@@ -11,22 +9,21 @@ export interface ActiveSubject {
 }
 
 export interface ActiveSubjectContextValue {
-  subject: ActiveSubject;
-  setSubject: (next: ActiveSubject) => void;
+  /** Null until the sponsor explicitly switches subject via the selector. */
+  override: ActiveSubject | null;
+  setSubject: (next: ActiveSubject | null) => void;
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const ActiveSubjectContext = createContext<ActiveSubjectContextValue | null>(null);
 
 export function ActiveSubjectProvider({ children }: { children: ReactNode }): JSX.Element {
-  const { user } = useAuth();
-  const [subject, setSubject] = useState<ActiveSubject>({
-    userId: user?.id ?? '',
-    displayName: user?.email ?? '',
-    isDependent: false,
-  });
+  // Store ONLY the explicit override. The hook resolves the effective
+  // subject from `override ?? auth.user`, so a late-arriving auth
+  // hydration is picked up automatically without a re-init pass.
+  const [override, setSubject] = useState<ActiveSubject | null>(null);
   return (
-    <ActiveSubjectContext.Provider value={{ subject, setSubject }}>
+    <ActiveSubjectContext.Provider value={{ override, setSubject }}>
       {children}
     </ActiveSubjectContext.Provider>
   );
