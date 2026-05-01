@@ -76,38 +76,50 @@ export type Database = {
       }
       accommodations: {
         Row: {
+          capacity: number
           check_in: string
           check_out: string
           confirmed_by_hotel: boolean
+          description: string | null
           event_id: string
           hotel_name: string
           id: string
+          is_suite: boolean
           room_number: string | null
           room_type: string
+          size_sqm: number | null
           special_requests: string | null
           updated_at: string
         }
         Insert: {
+          capacity?: number
           check_in: string
           check_out: string
           confirmed_by_hotel?: boolean
+          description?: string | null
           event_id: string
           hotel_name: string
           id?: string
+          is_suite?: boolean
           room_number?: string | null
           room_type: string
+          size_sqm?: number | null
           special_requests?: string | null
           updated_at?: string
         }
         Update: {
+          capacity?: number
           check_in?: string
           check_out?: string
           confirmed_by_hotel?: boolean
+          description?: string | null
           event_id?: string
           hotel_name?: string
           id?: string
+          is_suite?: boolean
           room_number?: string | null
           room_type?: string
+          size_sqm?: number | null
           special_requests?: string | null
           updated_at?: string
         }

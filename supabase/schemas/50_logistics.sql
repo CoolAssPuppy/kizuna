@@ -47,6 +47,21 @@ create table public.accommodations (
   hotel_name text not null,
   room_number text,
   room_type text not null check (room_type in ('standard', 'suite', 'accessible', 'family')),
+  -- Hotel-supplied marketing description ("Mountain-view king", "Two-
+  -- bedroom executive suite"). Free-form text; the Room Assignment
+  -- Tool surfaces it on each row so admins can match guests to the
+  -- right space.
+  description text,
+  -- Floor area in square metres. Rules engine prefers larger rooms for
+  -- earliest-registered guests; we store the metric value so the same
+  -- column works whether the hotel sheet uses sqm or sqft (the import
+  -- step converts).
+  size_sqm numeric(6, 1) check (size_sqm is null or size_sqm > 0),
+  is_suite boolean not null default false,
+  -- How many people the room comfortably sleeps. Drives the auto-
+  -- assign rules engine. CSV import infers this from is_suite when not
+  -- provided (suite -> 2, otherwise 1).
+  capacity int not null default 1 check (capacity > 0),
   check_in date not null,
   check_out date not null check (check_out > check_in),
   special_requests text,
@@ -55,9 +70,10 @@ create table public.accommodations (
 );
 
 comment on table public.accommodations is
-  'Hotel room assignments. Multiple properties per event supported (Supafest uses two).';
+  'Hotel room assignments. Multiple properties per event supported (Supafest uses two). description / size_sqm / is_suite drive the Room Assignment Tool import + auto-rules engine.';
 
 create index accommodations_event_id_idx on public.accommodations(event_id);
+create index accommodations_event_suite_idx on public.accommodations(event_id, is_suite);
 
 
 create table public.accommodation_occupants (
