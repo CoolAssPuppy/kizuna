@@ -1,7 +1,7 @@
 import { callEdgeFunction } from '@/lib/edgeFunction';
 import type { AppSupabaseClient } from '@/lib/supabase';
 
-import type { GuestInvitationRow } from './types';
+import type { AdditionalGuestRow, GuestAgeBracket, GuestInvitationRow } from './types';
 
 export async function listGuestInvitations(
   client: AppSupabaseClient,
@@ -12,6 +12,19 @@ export async function listGuestInvitations(
     .select('*')
     .eq('sponsor_id', sponsorUserId)
     .order('sent_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function listAdditionalGuests(
+  client: AppSupabaseClient,
+  sponsorUserId: string,
+): Promise<AdditionalGuestRow[]> {
+  const { data, error } = await client
+    .from('additional_guests')
+    .select('*')
+    .eq('sponsor_id', sponsorUserId)
+    .order('full_name', { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
@@ -31,24 +44,32 @@ interface InvokeContext {
   client: AppSupabaseClient;
 }
 
-interface CreateInvitationArgs {
-  guestEmail: string;
-  /** Sponsoring employee. Must equal auth.uid() under RLS. */
-  sponsorUserId: string;
+export interface InviteGuestArgs {
+  ageBracket: GuestAgeBracket;
+  fullName: string;
+  /** Required only when ageBracket = 'adult'. The edge function rejects empty for adults. */
+  guestEmail?: string;
 }
 
+export type InviteGuestResult =
+  | { kind: 'adult'; invitation: GuestInvitationRow }
+  | { kind: 'minor'; additional_guest: AdditionalGuestRow };
+
 /**
- * Creates a guest invitation. The edge function signs a JWT, writes the
- * guest_invitations row, and triggers the invite email through Resend (or
- * the local stub when no key is configured).
+ * Invite a guest. Adults (18+) get an email + signed-token flow that
+ * lands them in guest_invitations. Minors (under 12 / teen) skip auth
+ * entirely and write straight into additional_guests with a
+ * sponsor-paid fee. The edge function captures fee_amount server-side
+ * so the SPA cannot under-quote.
  */
-export function createGuestInvitation(
+export function inviteGuest(
   { client }: InvokeContext,
-  args: CreateInvitationArgs,
-): Promise<GuestInvitationRow> {
-  return callEdgeFunction<GuestInvitationRow>(client, 'create-guest-invitation', {
-    guest_email: args.guestEmail,
-    sponsor_user_id: args.sponsorUserId,
+  args: InviteGuestArgs,
+): Promise<InviteGuestResult> {
+  return callEdgeFunction<InviteGuestResult>(client, 'create-guest-invitation', {
+    age_bracket: args.ageBracket,
+    full_name: args.fullName,
+    ...(args.guestEmail ? { guest_email: args.guestEmail } : {}),
   });
 }
 

@@ -18,24 +18,27 @@ import { toggleArrayMember } from './utils';
 
 const SPECIAL_NEEDS_OPTIONS = ['crib', 'high_chair', 'allergy', 'mobility', 'other'] as const;
 
-interface GuestEntry {
-  id?: string;
+interface MinorEntry {
+  id: string;
   fullName: string;
-  age: string;
+  ageBracketLabel: string;
   specialNeeds: string[];
   notes: string;
 }
 
-const EMPTY_GUEST: GuestEntry = { fullName: '', age: '', specialNeeds: [], notes: '' };
-
+/**
+ * Minor profile editor. Minors are CREATED through the Invite-a-Guest
+ * dialog (which captures the age bracket and locks in the fee). This
+ * section lets the sponsor and the sponsor's adult guests edit each
+ * minor's name, special needs, and notes after the fact. The age
+ * bracket is intentionally read-only: changing it would shift the fee
+ * and break Stripe reconciliation.
+ */
 export function DependentsSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [guests, setGuests] = useState<GuestEntry[]>([]);
+  const [minors, setMinors] = useState<MinorEntry[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  // Dependents (kids, partners without their own login) ride on the
-  // sponsor's registration. The 'guest' task_key is reserved for the
-  // separate invitation flow that issues an actual account.
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,
@@ -48,11 +51,11 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
     void (async () => {
       const rows = await loadAdditionalGuests(getSupabaseClient(), user.id);
       if (!active) return;
-      setGuests(
+      setMinors(
         rows.map((row) => ({
           id: row.id,
           fullName: row.full_name,
-          age: String(row.age),
+          ageBracketLabel: t(`registration.guests.brackets.${row.age_bracket}`),
           specialNeeds: row.special_needs,
           notes: row.notes ?? '',
         })),
@@ -62,10 +65,10 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, t]);
 
-  function update(index: number, patch: Partial<GuestEntry>): void {
-    setGuests((prev) => prev.map((g, i) => (i === index ? { ...g, ...patch } : g)));
+  function update(index: number, patch: Partial<MinorEntry>): void {
+    setMinors((prev) => prev.map((m, i) => (i === index ? { ...m, ...patch } : m)));
   }
 
   function handleSubmit(): void {
@@ -74,12 +77,11 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
       saveAdditionalGuests(
         getSupabaseClient(),
         user.id,
-        guests.map((g) => ({
-          ...(g.id ? { id: g.id } : {}),
-          full_name: g.fullName,
-          age: Number.parseInt(g.age, 10) || 0,
-          special_needs: g.specialNeeds,
-          notes: g.notes.trim() || null,
+        minors.map((m) => ({
+          id: m.id,
+          full_name: m.fullName,
+          special_needs: m.specialNeeds,
+          notes: m.notes.trim() || null,
         })),
       ),
     );
@@ -95,45 +97,36 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
       errorKey={errorKey}
       onSubmit={handleSubmit}
     >
-      {guests.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t('registration.dependents.noGuests')}</p>
+      {minors.length === 0 ? (
+        <p className="rounded-md border border-dashed bg-muted/30 px-4 py-6 text-sm text-muted-foreground">
+          {t('registration.dependents.noMinorsYet')}
+        </p>
       ) : null}
 
-      {guests.map((guest, index) => (
-        <fieldset key={guest.id ?? `new-${index}`} className="space-y-3 rounded-md border p-4">
+      {minors.map((minor, index) => (
+        <fieldset key={minor.id} className="space-y-3 rounded-md border p-4">
           <div className="space-y-2">
-            <Label htmlFor={`guest-name-${index}`}>{t('registration.dependents.fullName')}</Label>
+            <Label htmlFor={`minor-name-${index}`}>{t('registration.dependents.fullName')}</Label>
             <Input
-              id={`guest-name-${index}`}
+              id={`minor-name-${index}`}
               required
-              value={guest.fullName}
+              value={minor.fullName}
               onChange={(e) => update(index, { fullName: e.target.value })}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor={`guest-age-${index}`}>{t('registration.dependents.age')}</Label>
-            <Input
-              id={`guest-age-${index}`}
-              type="number"
-              inputMode="numeric"
-              min={0}
-              max={119}
-              required
-              value={guest.age}
-              onChange={(e) => update(index, { age: e.target.value })}
-            />
-            <p className="text-xs text-muted-foreground">{t('registration.dependents.ageHint')}</p>
-          </div>
+          <p className="text-xs text-muted-foreground">
+            {t('registration.dependents.ageBracketLabel', { bracket: minor.ageBracketLabel })}
+          </p>
           <div className="space-y-2">
             <Label>{t('registration.dependents.specialNeeds')}</Label>
             <div className="grid grid-cols-2 gap-2">
               {SPECIAL_NEEDS_OPTIONS.map((option) => (
                 <label key={option} className="flex items-center gap-2 text-sm">
                   <Checkbox
-                    checked={guest.specialNeeds.includes(option)}
+                    checked={minor.specialNeeds.includes(option)}
                     onCheckedChange={() =>
                       update(index, {
-                        specialNeeds: toggleArrayMember(guest.specialNeeds, option),
+                        specialNeeds: toggleArrayMember(minor.specialNeeds, option),
                       })
                     }
                   />
@@ -143,30 +136,22 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor={`guest-notes-${index}`}>{t('registration.dependents.notes')}</Label>
+            <Label htmlFor={`minor-notes-${index}`}>{t('registration.dependents.notes')}</Label>
             <Textarea
-              id={`guest-notes-${index}`}
-              value={guest.notes}
+              id={`minor-notes-${index}`}
+              value={minor.notes}
               onChange={(e) => update(index, { notes: e.target.value })}
             />
           </div>
           <Button
             type="button"
             variant="ghost"
-            onClick={() => setGuests((prev) => prev.filter((_, i) => i !== index))}
+            onClick={() => setMinors((prev) => prev.filter((_, i) => i !== index))}
           >
             {t('registration.dependents.removeGuest')}
           </Button>
         </fieldset>
       ))}
-
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setGuests((prev) => [...prev, { ...EMPTY_GUEST }])}
-      >
-        {t('registration.dependents.addGuest')}
-      </Button>
     </SectionChrome>
   );
 }

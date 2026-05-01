@@ -363,17 +363,35 @@
       "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
     },
     "guests": {
-      "intro": "Invite a partner or guest with their own login. They'll receive an email with a magic link to register and pay the guest fee.",
+      "intro": "Invite the people coming with you. Adults (18+) get their own login and email. Kids ride on your registration with no email needed. The total fee is charged to you.",
       "invite": "Invite a guest",
       "inviteTitle": "Invite a guest",
       "inviteBody": "We'll email a single-use link valid for 7 days. Once they accept, they get their own Kizuna account and can complete the rest of registration themselves.",
+      "bracketIntro": "How old is the guest you're inviting? The fee is rolled into your Stripe checkout, not theirs.",
+      "brackets": {
+        "under_12": "Under 12",
+        "teen": "12 to 17",
+        "adult": "18 and over"
+      },
+      "bracketHints": {
+        "under_12": "Added to your registration. No email or login.",
+        "teen": "Added to your registration. No email or login.",
+        "adult": "Sent an email invite with their own login."
+      },
+      "detailsIntroAdult": "Tell us their name and email. They'll receive a single-use invite link valid for 7 days.",
+      "detailsIntroMinor": "Tell us their name. You can edit dietary needs and other details from their profile later.",
+      "guestName": "Full name",
+      "namePlaceholder": "Marisa Skywalker",
       "guestEmail": "Guest email",
       "emailPlaceholder": "guest@example.com",
       "send": "Send invitation",
+      "addMinor": "Add to your registration",
       "sending": "Sending",
       "invited": "Invitation sent to {{email}}",
+      "minorAdded": "{{name}} added to your registration.",
       "invitedAt": "Invited {{date}}",
-      "empty": "No guests invited yet. Start by sending an invitation.",
+      "empty": "No guests yet. Add one to get started.",
+      "totalDue": "Total guest fees: {{amount}}",
       "cancel": "Cancel invitation",
       "cancelled": "Invitation cancelled.",
       "statuses": {

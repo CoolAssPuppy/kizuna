@@ -138,10 +138,13 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
           {guests.map((guest) => (
             <SizingFieldset
               key={guest.id}
-              title={`${guest.full_name} (${t('registration.swag.age', { age: guest.age })})`}
+              title={`${guest.full_name} (${t(`registration.guests.brackets.${guest.age_bracket}`)})`}
               value={guestState[guest.id] ?? EMPTY}
               onChange={(next) => setGuestState((prev) => ({ ...prev, [guest.id]: next }))}
-              tshirtSizes={guest.age < 14 ? KIDS_TSHIRT_SIZES : TSHIRT_SIZES}
+              // Under-12 fits the youth t-shirt size grid; teens and
+              // adults fit the standard adult grid. Bracket-based switch
+              // replaces the previous numeric `age < 14` heuristic.
+              tshirtSizes={guest.age_bracket === 'under_12' ? KIDS_TSHIRT_SIZES : TSHIRT_SIZES}
             />
           ))}
         </div>

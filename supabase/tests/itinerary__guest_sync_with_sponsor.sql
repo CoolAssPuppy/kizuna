@@ -15,11 +15,14 @@ insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider) 
   ('00000000-0000-0000-0000-000000000071', 'guest@example.com',   'guest',    null,        '00000000-0000-0000-0000-000000000070', 'email_password'),
   ('00000000-0000-0000-0000-000000000072', 'rando@example.com',   'employee', 'h_rando',   null, 'sso');
 
-insert into public.guest_profiles (user_id, sponsor_id, full_name, legal_name, relationship, syncs_with_sponsor)
+-- payment_status='paid' so the guard_guest_profile_completion trigger
+-- (which blocks legal_name from landing until the sponsor's fees are
+-- settled) does not interfere with this itinerary-sync test.
+insert into public.guest_profiles (user_id, sponsor_id, full_name, legal_name, relationship, fee_amount, payment_status, syncs_with_sponsor)
 values (
   '00000000-0000-0000-0000-000000000071',
   '00000000-0000-0000-0000-000000000070',
-  'Sample Guest', 'Sample Guest', 'partner', false
+  'Sample Guest', 'Sample Guest', 'partner', 950.00, 'paid', false
 );
 
 -- Reuse the active supafest event seeded by 2027-supafest.sql so we

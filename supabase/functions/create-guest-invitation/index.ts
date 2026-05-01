@@ -1,19 +1,31 @@
 // deno-lint-ignore-file no-explicit-any
 // Edge function: create-guest-invitation
 //
-// Authenticated employee asks Kizuna to invite a guest. We:
-//   1. Insert the guest_invitations row (RLS scopes this to the sponsor)
-//   2. Sign a 7-day JWT
-//   3. Stamp it onto the row
-//   4. Send the invitation email via Resend (or stub when no key)
+// Authenticated employee asks Kizuna to invite a guest. The flow forks
+// on `age_bracket`:
 //
-// The Resend call is best-effort — we still return the row even if the
-// email send fails, so the admin can copy the link manually if needed.
+//   * 'adult' (18+) -> insert into guest_invitations + sign a 7-day JWT
+//     + send the invite email via Resend (or stub when no key).
+//   * 'under_12' / 'teen' -> insert into additional_guests directly.
+//     No email, no signed token, no auth user — minors ride on the
+//     sponsor's registration. The trigger guard_guest_profile_completion
+//     plus payment_status keep them blocked until the sponsor pays.
+//
+// Both branches charge the sponsor; fee_amount is captured server-side
+// from guest_fee_for_bracket() to make sure the SPA cannot under-quote.
 
 import { corsHeaders, handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { INVITATION_TTL_SECONDS } from '../_shared/constants.ts';
 import { signInvitationToken } from '../_shared/invitationToken.ts';
 import { getUserClient } from '../_shared/supabaseClient.ts';
+
+type AgeBracket = 'under_12' | 'teen' | 'adult';
+
+interface RequestBody {
+  age_bracket?: AgeBracket;
+  full_name?: string;
+  guest_email?: string;
+}
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -37,12 +49,45 @@ Deno.serve(async (req) => {
   }
   const sponsorUserId = userData.user.id;
 
-  let body: { guest_email?: string };
+  let body: RequestBody;
   try {
     body = await req.json();
   } catch {
     return jsonResponse({ error: 'invalid_body' }, { status: 400 });
   }
+
+  const ageBracket = body.age_bracket;
+  if (ageBracket !== 'under_12' && ageBracket !== 'teen' && ageBracket !== 'adult') {
+    return jsonResponse({ error: 'invalid_age_bracket' }, { status: 400 });
+  }
+
+  const fullName = body.full_name?.trim();
+  if (!fullName || fullName.length < 2) {
+    return jsonResponse({ error: 'invalid_full_name' }, { status: 400 });
+  }
+
+  // ------- Minor branch: write straight into additional_guests -------
+  if (ageBracket !== 'adult') {
+    const { data: minor, error: minorError } = await client
+      .from('additional_guests')
+      .insert({
+        sponsor_id: sponsorUserId,
+        full_name: fullName,
+        age_bracket: ageBracket,
+        // fee_amount is overwritten by the BIU trigger; pass 0 so the
+        // NOT NULL constraint is satisfied without us guessing the
+        // canonical price client-side.
+        fee_amount: 0,
+      })
+      .select()
+      .single();
+    if (minorError || !minor) {
+      return jsonResponse({ error: minorError?.message ?? 'minor_insert_failed' }, { status: 500 });
+    }
+    return jsonResponse({ kind: 'minor', additional_guest: minor }, { status: 201, headers: corsHeaders });
+  }
+
+  // ------- Adult branch: full email + signed-token invite flow -------
   const guestEmail = body.guest_email?.trim().toLowerCase();
   if (!guestEmail || !guestEmail.includes('@')) {
     return jsonResponse({ error: 'invalid_email' }, { status: 400 });
@@ -54,6 +99,10 @@ Deno.serve(async (req) => {
     .insert({
       sponsor_id: sponsorUserId,
       guest_email: guestEmail,
+      full_name: fullName,
+      age_bracket: 'adult',
+      // BIU trigger overwrites with guest_fee_for_bracket('adult').
+      fee_amount: 0,
       signed_token: 'pending',
       expires_at: expiresAt,
     })
@@ -87,7 +136,7 @@ Deno.serve(async (req) => {
     console.warn('[kizuna] resend send failed', err);
   });
 
-  return jsonResponse(updated, { status: 201, headers: corsHeaders });
+  return jsonResponse({ kind: 'adult', invitation: updated }, { status: 201, headers: corsHeaders });
 });
 
 async function tryEmail(token: string, guestEmail: string): Promise<void> {

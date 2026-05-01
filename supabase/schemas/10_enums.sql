@@ -43,6 +43,11 @@ create type document_content_type as enum ('markdown', 'pdf', 'notion');
 create type guest_relationship as enum ('partner', 'family', 'friend', 'other');
 create type guest_payment_status as enum ('pending', 'paid', 'waived', 'refunded', 'failed');
 create type guest_invitation_status as enum ('pending', 'accepted', 'expired', 'cancelled');
+-- Pricing tiers for the Invite-a-Guest flow.
+--   under_12 -> $200, teen (12-17) -> $500, adult (18+) -> $950.
+-- 18+ guests get their own login + email; under 18 are admin-managed
+-- riders on the sponsor's registration.
+create type guest_age_bracket as enum ('under_12', 'teen', 'adult');
 
 -- Dietary
 create type dietary_severity as enum ('preference', 'intolerance', 'allergy');

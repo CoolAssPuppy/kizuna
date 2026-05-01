@@ -123,30 +123,45 @@ export type Database = {
       }
       additional_guests: {
         Row: {
-          age: number
+          age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
+          dietary_restrictions: string[]
+          fee_amount: number
           full_name: string
           id: string
+          legal_name: string | null
           notes: string | null
+          payment_status: Database["public"]["Enums"]["guest_payment_status"]
           special_needs: string[]
           sponsor_id: string
+          stripe_payment_id: string | null
           updated_at: string
         }
         Insert: {
-          age: number
+          age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
+          dietary_restrictions?: string[]
+          fee_amount: number
           full_name: string
           id?: string
+          legal_name?: string | null
           notes?: string | null
+          payment_status?: Database["public"]["Enums"]["guest_payment_status"]
           special_needs?: string[]
           sponsor_id: string
+          stripe_payment_id?: string | null
           updated_at?: string
         }
         Update: {
-          age?: number
+          age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
+          dietary_restrictions?: string[]
+          fee_amount?: number
           full_name?: string
           id?: string
+          legal_name?: string | null
           notes?: string | null
+          payment_status?: Database["public"]["Enums"]["guest_payment_status"]
           special_needs?: string[]
           sponsor_id?: string
+          stripe_payment_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -851,8 +866,11 @@ export type Database = {
       guest_invitations: {
         Row: {
           accepted_at: string | null
+          age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
           created_user_id: string | null
           expires_at: string
+          fee_amount: number
+          full_name: string
           guest_email: string
           id: string
           sent_at: string
@@ -862,8 +880,11 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           created_user_id?: string | null
           expires_at: string
+          fee_amount: number
+          full_name: string
           guest_email: string
           id?: string
           sent_at?: string
@@ -873,8 +894,11 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           created_user_id?: string | null
           expires_at?: string
+          fee_amount?: number
+          full_name?: string
           guest_email?: string
           id?: string
           sent_at?: string
@@ -901,6 +925,7 @@ export type Database = {
       }
       guest_profiles: {
         Row: {
+          age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount: number | null
           full_name: string
           id: string
@@ -914,6 +939,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount?: number | null
           full_name: string
           id?: string
@@ -927,6 +953,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount?: number | null
           full_name?: string
           id?: string
@@ -1877,7 +1904,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      sponsor_guest_fee_summary: {
+        Row: {
+          all_settled: boolean | null
+          paid_amount: number | null
+          sponsor_id: string | null
+          total_fee: number | null
+          waived_amount: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auth_role: { Args: never; Returns: string }
@@ -1889,6 +1925,10 @@ export type Database = {
       current_active_event_id: { Args: never; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       get_passport_number: { Args: { p_user_id: string }; Returns: string }
+      guest_fee_for_bracket: {
+        Args: { p_bracket: Database["public"]["Enums"]["guest_age_bracket"] }
+        Returns: number
+      }
       is_admin: { Args: never; Returns: boolean }
       is_leadership_user: { Args: never; Returns: boolean }
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
@@ -1933,6 +1973,7 @@ export type Database = {
       flight_direction: "inbound" | "outbound"
       flight_source_type: "perk_sync" | "perk_csv" | "manual_obs"
       ground_transport_need: "none" | "arrival" | "departure" | "both"
+      guest_age_bracket: "under_12" | "teen" | "adult"
       guest_invitation_status: "pending" | "accepted" | "expired" | "cancelled"
       guest_payment_status:
         | "pending"
@@ -2147,6 +2188,7 @@ export const Constants = {
       flight_direction: ["inbound", "outbound"],
       flight_source_type: ["perk_sync", "perk_csv", "manual_obs"],
       ground_transport_need: ["none", "arrival", "departure", "both"],
+      guest_age_bracket: ["under_12", "teen", "adult"],
       guest_invitation_status: ["pending", "accepted", "expired", "cancelled"],
       guest_payment_status: ["pending", "paid", "waived", "refunded", "failed"],
       guest_relationship: ["partner", "family", "friend", "other"],

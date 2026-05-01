@@ -7,7 +7,7 @@ import { saveAdditionalGuests } from './additionalGuests';
 interface Existing {
   id: string;
   full_name: string;
-  age: number;
+  age_bracket: 'under_12' | 'teen';
   special_needs: string[];
   notes: string | null;
 }
@@ -15,67 +15,83 @@ interface Existing {
 function makeClient(opts: {
   existing: Existing[];
   deleteSpy?: ReturnType<typeof vi.fn>;
-  upsertSpy?: ReturnType<typeof vi.fn>;
+  updateSpy?: ReturnType<typeof vi.fn>;
 }): AppSupabaseClient {
+  // The save flow per row chains .update(...).eq('id', ...). The eq()
+  // call is what triggers the actual UPDATE, so we record the patch
+  // payload in the update spy and resolve eq() with success.
+  const update = opts.updateSpy ?? vi.fn();
   return {
     from: vi.fn(() => ({
-      // Reads back the existing list
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       order: vi.fn().mockResolvedValue({ data: opts.existing, error: null }),
-      // Writes
       delete: vi.fn(() => ({
         in: opts.deleteSpy ?? vi.fn().mockResolvedValue({ data: null, error: null }),
       })),
-      upsert: opts.upsertSpy ?? vi.fn().mockResolvedValue({ data: null, error: null }),
+      update: vi.fn((patch: Record<string, unknown>) => {
+        update(patch);
+        return {
+          eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+        };
+      }),
     })),
   } as unknown as AppSupabaseClient;
 }
 
 describe('saveAdditionalGuests', () => {
-  it('deletes rows missing from the new list and upserts the rest', async () => {
+  it('deletes rows missing from the new list and updates the survivors', async () => {
     const deleteSpy = vi.fn().mockResolvedValue({ data: null, error: null });
-    const upsertSpy = vi.fn().mockResolvedValue({ data: null, error: null });
+    const updateSpy = vi.fn();
     const client = makeClient({
       existing: [
-        { id: 'a', full_name: 'A', age: 5, special_needs: [], notes: null },
-        { id: 'b', full_name: 'B', age: 8, special_needs: [], notes: null },
+        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
+        { id: 'b', full_name: 'B', age_bracket: 'under_12', special_needs: [], notes: null },
       ],
       deleteSpy,
-      upsertSpy,
+      updateSpy,
     });
     await saveAdditionalGuests(client, 'u', [
-      { id: 'a', full_name: 'A', age: 6, special_needs: [], notes: null },
+      { id: 'a', full_name: 'A renamed', special_needs: ['allergy'], notes: null },
     ]);
     expect(deleteSpy).toHaveBeenCalledWith('id', ['b']);
-    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledWith({
+      full_name: 'A renamed',
+      special_needs: ['allergy'],
+      notes: null,
+    });
   });
 
-  it('skips upsert when given an empty list and deletes existing rows', async () => {
+  it('does not call update when given an empty list and deletes existing rows', async () => {
     const deleteSpy = vi.fn().mockResolvedValue({ data: null, error: null });
-    const upsertSpy = vi.fn();
+    const updateSpy = vi.fn();
     const client = makeClient({
-      existing: [{ id: 'a', full_name: 'A', age: 5, special_needs: [], notes: null }],
+      existing: [
+        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
+      ],
       deleteSpy,
-      upsertSpy,
+      updateSpy,
     });
     await saveAdditionalGuests(client, 'u', []);
     expect(deleteSpy).toHaveBeenCalledWith('id', ['a']);
-    expect(upsertSpy).not.toHaveBeenCalled();
+    expect(updateSpy).not.toHaveBeenCalled();
   });
 
   it('does not call delete when there is nothing to remove', async () => {
     const deleteSpy = vi.fn();
-    const upsertSpy = vi.fn().mockResolvedValue({ data: null, error: null });
+    const updateSpy = vi.fn();
     const client = makeClient({
-      existing: [{ id: 'a', full_name: 'A', age: 5, special_needs: [], notes: null }],
+      existing: [
+        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
+      ],
       deleteSpy,
-      upsertSpy,
+      updateSpy,
     });
     await saveAdditionalGuests(client, 'u', [
-      { id: 'a', full_name: 'A', age: 6, special_needs: [], notes: null },
+      { id: 'a', full_name: 'A', special_needs: [], notes: null },
     ]);
     expect(deleteSpy).not.toHaveBeenCalled();
-    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledTimes(1);
   });
 });

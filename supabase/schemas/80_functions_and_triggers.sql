@@ -600,3 +600,145 @@ $$;
 
 revoke all on function public.mark_all_notifications_read() from public;
 grant execute on function public.mark_all_notifications_read() to authenticated;
+
+
+-- =====================================================================
+-- Guest fee tiers (Phase 1 launch pricing)
+-- =====================================================================
+-- Single source of truth for the Invite-a-Guest pricing. Triggers on
+-- guest_invitations and additional_guests stamp fee_amount from this
+-- function on insert so the captured value never drifts away from the
+-- real charge that runs through Stripe.
+--
+-- Update intent: bump prices via `alter function` in a future schema
+-- change; existing rows keep their captured fee_amount unchanged so a
+-- mid-cycle bill cannot suddenly increase.
+create or replace function public.guest_fee_for_bracket(
+  p_bracket guest_age_bracket
+)
+returns numeric
+language sql
+immutable
+as $$
+  select case p_bracket
+    when 'under_12' then 200.00
+    when 'teen'     then 500.00
+    when 'adult'    then 950.00
+  end
+$$;
+
+grant execute on function public.guest_fee_for_bracket(guest_age_bracket) to authenticated;
+
+
+create or replace function public.set_guest_fee_amount()
+returns trigger
+language plpgsql
+as $$
+begin
+  -- Always overwrite on insert so the SPA cannot under-quote. On update
+  -- we refuse to silently re-price a confirmed invite — fee_amount only
+  -- changes via an explicit admin action.
+  if tg_op = 'INSERT' then
+    new.fee_amount := public.guest_fee_for_bracket(new.age_bracket);
+  elsif new.age_bracket is distinct from old.age_bracket then
+    new.fee_amount := public.guest_fee_for_bracket(new.age_bracket);
+  end if;
+  return new;
+end
+$$;
+
+create trigger set_additional_guest_fee_biu
+  before insert or update on public.additional_guests
+  for each row execute function public.set_guest_fee_amount();
+
+create trigger set_guest_invitation_fee_biu
+  before insert or update on public.guest_invitations
+  for each row execute function public.set_guest_fee_amount();
+
+
+-- =====================================================================
+-- Sponsor-fee summary view + gate
+-- =====================================================================
+-- A view that rolls up the total / paid amounts across BOTH adult
+-- guest_profiles and minor additional_guests for a sponsor. The
+-- registration logic reads `all_paid` to decide whether a guest can
+-- complete their profile or whether they must wait for the sponsor's
+-- card to clear.
+create or replace view public.sponsor_guest_fee_summary as
+  select
+    sponsor_id,
+    coalesce(sum(fee_amount), 0)::numeric(10, 2) as total_fee,
+    coalesce(sum(fee_amount) filter (where payment_status = 'paid'), 0)::numeric(10, 2) as paid_amount,
+    coalesce(sum(fee_amount) filter (where payment_status = 'waived'), 0)::numeric(10, 2) as waived_amount,
+    bool_and(payment_status in ('paid', 'waived')) as all_settled
+  from (
+    select sponsor_id, fee_amount, payment_status
+    from public.guest_profiles
+    where fee_amount is not null
+    union all
+    select sponsor_id, fee_amount, payment_status
+    from public.additional_guests
+  ) combined
+  group by sponsor_id;
+
+comment on view public.sponsor_guest_fee_summary is
+  'Per-sponsor rollup of total guest fees vs paid + waived. The registration code blocks guest profile completion until all_settled is true.';
+
+
+-- Trigger: prevent guest_profiles from being marked complete (i.e.
+-- legal_name being filled in) until the sponsor has settled every fee.
+-- The sponsor pays once for everyone they invite, including under-18
+-- additional_guests, so this gate keeps the invariant enforced no
+-- matter how many guests are added.
+--
+-- We evaluate against OTHER currently-stored rows for this sponsor PLUS
+-- the new row's own payment_status, rather than reading the
+-- sponsor_guest_fee_summary view. The view is a snapshot that doesn't
+-- yet include the row being inserted, so an INSERT for a sponsor's
+-- first guest would otherwise read as "no rows -> not settled" and
+-- spuriously trip the gate. Computing the membership inline keeps the
+-- contract correct: the sponsor must have everything settled, and the
+-- new row must also be settled, before legal_name can land.
+create or replace function public.guard_guest_profile_completion()
+returns trigger
+language plpgsql
+as $$
+declare
+  v_other_unsettled int;
+begin
+  if new.legal_name is null or length(trim(new.legal_name)) = 0 then
+    return new;
+  end if;
+
+  -- Defensive: NOT NULL on sponsor_id covers this in practice; the
+  -- early return keeps a future schema relaxation from locking out
+  -- anonymous rows we have no sponsor to bill against.
+  if new.sponsor_id is null then return new; end if;
+
+  select count(*) into v_other_unsettled
+  from (
+    select payment_status
+    from public.guest_profiles gp
+    where gp.sponsor_id = new.sponsor_id
+      and (tg_op = 'INSERT' or gp.id <> new.id)
+    union all
+    select payment_status
+    from public.additional_guests ag
+    where ag.sponsor_id = new.sponsor_id
+  ) others
+  where payment_status not in ('paid', 'waived');
+
+  if v_other_unsettled > 0
+     or new.payment_status not in ('paid', 'waived') then
+    raise exception 'guest_profile_locked_until_paid'
+      using hint = 'The sponsoring employee has not finished paying all guest fees. The Stripe checkout for the sponsor must complete before this guest can finish their profile.',
+            errcode = '42501';
+  end if;
+
+  return new;
+end
+$$;
+
+create trigger guard_guest_profile_completion_biu
+  before insert or update of legal_name on public.guest_profiles
+  for each row execute function public.guard_guest_profile_completion();

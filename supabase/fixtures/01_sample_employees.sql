@@ -405,11 +405,11 @@ on conflict (user_id) do nothing;
 -- Guest invitations + a confirmed guest
 -- =====================================================================
 
-insert into public.guest_invitations (sponsor_id, guest_email, signed_token, status, expires_at)
+insert into public.guest_invitations (sponsor_id, guest_email, full_name, age_bracket, fee_amount, signed_token, status, expires_at)
 values
-  ('a0000000-0000-0000-0000-000000000010', 'mara.jade@example.com',     'sample-token-luke',     'pending', now() + interval '6 days'),
-  ('a0000000-0000-0000-0000-000000000020', 'ginny.weasley.guest@example.com', 'sample-token-harry',     'pending', now() + interval '4 days'),
-  ('a0000000-0000-0000-0000-000000000040', 'maggie.simpson@example.com','sample-token-homer',    'accepted', now() + interval '2 days')
+  ('a0000000-0000-0000-0000-000000000010', 'mara.jade@example.com',     'Mara Jade',      'adult', 950.00, 'sample-token-luke',  'pending',  now() + interval '6 days'),
+  ('a0000000-0000-0000-0000-000000000020', 'ginny.weasley.guest@example.com', 'Ginny Weasley', 'adult', 950.00, 'sample-token-harry', 'pending',  now() + interval '4 days'),
+  ('a0000000-0000-0000-0000-000000000040', 'maggie.simpson@example.com','Maggie Simpson', 'adult', 950.00, 'sample-token-homer', 'accepted', now() + interval '2 days')
 on conflict do nothing;
 
 commit;

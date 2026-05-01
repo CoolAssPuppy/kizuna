@@ -210,9 +210,35 @@ create policy guest_invitations_admin_all on public.guest_invitations
   with check (public.is_admin());
 
 
-create policy additional_guests_sponsor_all on public.additional_guests
-  for all using (public.is_self_or_admin(sponsor_id))
-  with check (public.is_self_or_admin(sponsor_id));
+-- Minor profiles on additional_guests are private by default. Read +
+-- write are open to:
+--   * Admins (via is_admin())
+--   * The sponsoring employee (auth.uid() = sponsor_id)
+--   * Any of the sponsor's ADULT guests (a guest_profiles row whose
+--     sponsor_id matches AND whose user_id = auth.uid()). This lets
+--     a sponsor's spouse fill in their child's dietary restrictions
+--     without a separate handoff back to the sponsor.
+-- The CHECK clause uses the same expression so writes obey the same
+-- audience as reads.
+create policy additional_guests_editor_all on public.additional_guests
+  for all using (
+    public.is_admin()
+    or sponsor_id = auth.uid()
+    or exists (
+      select 1 from public.guest_profiles gp
+      where gp.user_id = auth.uid()
+        and gp.sponsor_id = additional_guests.sponsor_id
+    )
+  )
+  with check (
+    public.is_admin()
+    or sponsor_id = auth.uid()
+    or exists (
+      select 1 from public.guest_profiles gp
+      where gp.user_id = auth.uid()
+        and gp.sponsor_id = additional_guests.sponsor_id
+    )
+  );
 
 
 create policy emergency_contacts_self_all on public.emergency_contacts

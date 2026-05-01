@@ -92,6 +92,8 @@ create index employee_profiles_department_idx on public.employee_profiles(depart
 
 
 -- Guest profiles. Linked to the sponsoring employee. Payment lifecycle.
+-- This table only ever holds ADULT guests (18+). Under-18 dependents
+-- live on additional_guests and never get a Kizuna login.
 create table public.guest_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users(id) on delete cascade,
@@ -99,6 +101,8 @@ create table public.guest_profiles (
   full_name text not null,
   legal_name text not null,
   relationship guest_relationship not null,
+  age_bracket guest_age_bracket not null default 'adult'
+    check (age_bracket = 'adult'),
   payment_status guest_payment_status not null default 'pending',
   stripe_payment_id text,
   fee_amount numeric(10, 2) check (fee_amount is null or fee_amount >= 0),
@@ -116,11 +120,17 @@ create index guest_profiles_sponsor_id_idx on public.guest_profiles(sponsor_id);
 create index guest_profiles_payment_status_idx on public.guest_profiles(payment_status);
 
 
--- Guest invitations: pre-account state. Signed JWT in the email link.
+-- Guest invitations: pre-account state for ADULT guests (18+).
+-- Under-18 dependents skip this table entirely — the sponsor adds them
+-- as additional_guests rows in the same flow.
 create table public.guest_invitations (
   id uuid primary key default gen_random_uuid(),
   sponsor_id uuid not null references public.users(id) on delete cascade,
   guest_email citext not null,
+  full_name text not null,
+  age_bracket guest_age_bracket not null default 'adult'
+    check (age_bracket = 'adult'),
+  fee_amount numeric(10, 2) not null check (fee_amount >= 0),
   signed_token text not null,
   status guest_invitation_status not null default 'pending',
   sent_at timestamptz not null default now(),
@@ -130,27 +140,37 @@ create table public.guest_invitations (
 );
 
 comment on table public.guest_invitations is
-  'Invitation lifecycle. signed_token expires in 7 days. Once accepted, created_user_id points to the new guest user.';
+  'Invitation lifecycle for adult guests. signed_token expires in 7 days. Once accepted, created_user_id points to the new guest user. fee_amount is captured at invite time so the Stripe checkout total stays stable across price changes.';
 
 create index guest_invitations_sponsor_id_idx on public.guest_invitations(sponsor_id);
 create index guest_invitations_status_idx on public.guest_invitations(status);
 
 
--- Additional guests an employee is bringing (partners, kids, parents, etc.)
--- These are *not* full Kizuna accounts; they ride on the sponsor's
--- registration. Adults with their own login live in public.guest_profiles.
+-- Additional guests an employee is bringing — children and other
+-- under-18 dependents. Adults with their own login live in
+-- public.guest_profiles, which carries CHECK (age_bracket = 'adult').
+-- Under-18 rows here are private-by-default minor profiles editable
+-- only by the sponsor and the sponsor's adult guests (see RLS).
 create table public.additional_guests (
   id uuid primary key default gen_random_uuid(),
   sponsor_id uuid not null references public.users(id) on delete cascade,
   full_name text not null,
-  age int not null check (age >= 0 and age < 120),
+  legal_name text,
+  age_bracket guest_age_bracket not null
+    check (age_bracket in ('under_12', 'teen')),
+  fee_amount numeric(10, 2) not null check (fee_amount >= 0),
+  payment_status guest_payment_status not null default 'pending',
+  stripe_payment_id text,
+  dietary_restrictions text[] not null default '{}',
   special_needs text[] not null default '{}',
   notes text,
   updated_at timestamptz not null default now()
 );
 
 comment on table public.additional_guests is
-  'Additional guests (children, partners, dependents) accompanying an employee. Age drives the fee tier and meal allowance at billing time.';
+  'Under-18 dependents accompanying a sponsoring employee. Stored separately from guest_profiles because they have no auth user — the sponsor (and the sponsor''s adult guests) edit the row directly. The age_bracket CHECK keeps adult flows in guest_profiles, which prevents an under-12 row from ever ending up with a login.';
+comment on column public.additional_guests.fee_amount is
+  'Captured at invite time from guest_fee_for_bracket(age_bracket). Stays stable across pricing changes so a partial Stripe charge can never under-bill the sponsor.';
 
 create index additional_guests_sponsor_id_idx on public.additional_guests(sponsor_id);
 
