@@ -108,19 +108,29 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
             }
           </Geographies>
           {pins.map((pin) => (
-            <Marker key={pin.user.user_id} coordinates={[pin.lon, pin.lat]}>
-              <g style={{ transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' }}>
-                <circle r={9} fill="hsl(var(--primary))" fillOpacity={0.2} />
-                <circle
-                  r={5}
-                  fill="hsl(var(--primary))"
-                  stroke="hsl(var(--background))"
-                  strokeWidth={2}
-                />
-                <title>
-                  {pin.user.first_name} {pin.user.last_name}
-                </title>
-              </g>
+            <Marker
+              key={pin.user.user_id}
+              coordinates={[pin.lon, pin.lat]}
+              // Marker spreads style.default onto its outer <g>, which
+              // is the node that receives the translate transform when
+              // coordinates change. Putting the transition here animates
+              // the pin between hometown and current-town.
+              style={{
+                default: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
+                hover: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
+                pressed: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
+              }}
+            >
+              <circle r={9} fill="hsl(var(--primary))" fillOpacity={0.2} />
+              <circle
+                r={5}
+                fill="hsl(var(--primary))"
+                stroke="hsl(var(--background))"
+                strokeWidth={2}
+              />
+              <title>
+                {pin.user.first_name} {pin.user.last_name}
+              </title>
             </Marker>
           ))}
         </ComposableMap>
