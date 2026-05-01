@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -33,38 +34,33 @@ const EMPTY: FormState = {
 export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: row, isSuccess: hydrated } = useQuery({
+    queryKey: ['emergency-contact', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadEmergencyContact(getSupabaseClient(), user!.id),
+  });
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setValues(
+      row
+        ? {
+            fullName: row.full_name,
+            relationship: row.relationship,
+            phonePrimary: row.phone_primary,
+            phoneSecondary: row.phone_secondary ?? '',
+            email: row.email ?? '',
+            notes: row.notes ?? '',
+          }
+        : EMPTY,
+    );
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'emergency_contact',
     toastSuccessKey: 'profile.toast.emergencyContactSaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const row = await loadEmergencyContact(getSupabaseClient(), user.id);
-      if (!active) return;
-      setValues(
-        row
-          ? {
-              fullName: row.full_name,
-              relationship: row.relationship,
-              phonePrimary: row.phone_primary,
-              phoneSecondary: row.phone_secondary ?? '',
-              email: row.email ?? '',
-              notes: row.notes ?? '',
-            }
-          : EMPTY,
-      );
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;

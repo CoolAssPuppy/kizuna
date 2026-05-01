@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -37,35 +38,30 @@ interface MinorEntry {
 export function DependentsSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: rows, isSuccess: hydrated } = useQuery({
+    queryKey: ['additional-guests', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadAdditionalGuests(getSupabaseClient(), user!.id),
+  });
   const [minors, setMinors] = useState<MinorEntry[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setMinors(
+      (rows ?? []).map((row) => ({
+        id: row.id,
+        fullName: row.full_name,
+        ageBracketLabel: t(`registration.guests.brackets.${row.age_bracket}`),
+        specialNeeds: row.special_needs,
+        notes: row.notes ?? '',
+      })),
+    );
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,
     toastSuccessKey: 'profile.toast.dependentsSaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const rows = await loadAdditionalGuests(getSupabaseClient(), user.id);
-      if (!active) return;
-      setMinors(
-        rows.map((row) => ({
-          id: row.id,
-          fullName: row.full_name,
-          ageBracketLabel: t(`registration.guests.brackets.${row.age_bracket}`),
-          specialNeeds: row.special_needs,
-          notes: row.notes ?? '',
-        })),
-      );
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user, t]);
 
   function update(index: number, patch: Partial<MinorEntry>): void {
     setMinors((prev) => prev.map((m, i) => (i === index ? { ...m, ...patch } : m)));

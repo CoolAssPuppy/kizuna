@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   Accessibility,
@@ -17,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { CommunityProfileSection } from '@/features/community/CommunityProfileSection';
+import { listAdditionalGuests } from '@/features/guests/api';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { DependentsSection } from '@/features/registration/sections/DependentsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
@@ -26,6 +28,7 @@ import { PassportSection } from '@/features/registration/sections/PassportSectio
 import { PersonalInfoSection } from '@/features/registration/sections/PersonalInfoSection';
 import { SwagSection } from '@/features/registration/sections/SwagSection';
 import { TransportSection } from '@/features/registration/sections/TransportSection';
+import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import { ProfileAvatar } from './ProfileAvatar';
@@ -118,7 +121,20 @@ export function ProfileScreen(): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [active, setActive] = useState<SectionId>('personal');
-  const activeSection = SECTIONS.find((s) => s.id === active) ?? SECTIONS[0]!;
+
+  // Hide the Dependents tab when the user has no minor guests attached.
+  // The section itself is read+write but only meaningful when there's
+  // someone to edit; surfacing the empty state on every profile pollutes
+  // the nav for the 90% of attendees who travel solo.
+  const { data: minors } = useQuery({
+    queryKey: ['additional-guests', user?.id ?? null, 'count'],
+    enabled: !!user,
+    queryFn: () => listAdditionalGuests(getSupabaseClient(), user!.id),
+  });
+  const hasMinors = (minors?.length ?? 0) > 0;
+
+  const sections = hasMinors ? SECTIONS : SECTIONS.filter((s) => s.id !== 'dependents');
+  const activeSection = sections.find((s) => s.id === active) ?? sections[0]!;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
@@ -142,7 +158,7 @@ export function ProfileScreen(): JSX.Element {
             aria-orientation="vertical"
             className="flex flex-col gap-0.5"
           >
-            {SECTIONS.map(({ id, icon: Icon, labelKey }) => (
+            {sections.map(({ id, icon: Icon, labelKey }) => (
               <button
                 key={id}
                 type="button"

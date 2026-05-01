@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '@/components/ui/checkbox';
@@ -50,37 +51,32 @@ const EMPTY: FormState = {
 export function DietarySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: row, isSuccess: hydrated } = useQuery({
+    queryKey: ['dietary', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadDietary(getSupabaseClient(), user!.id),
+  });
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setValues(
+      row
+        ? {
+            restrictions: row.restrictions,
+            allergies: row.allergies,
+            alcoholFree: row.alcohol_free,
+            severity: row.severity,
+            notes: row.notes ?? '',
+          }
+        : EMPTY,
+    );
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'dietary',
     toastSuccessKey: 'profile.toast.dietarySaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const row = await loadDietary(getSupabaseClient(), user.id);
-      if (!active) return;
-      setValues(
-        row
-          ? {
-              restrictions: row.restrictions,
-              allergies: row.allergies,
-              alcoholFree: row.alcohol_free,
-              severity: row.severity,
-              notes: row.notes ?? '',
-            }
-          : EMPTY,
-      );
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;

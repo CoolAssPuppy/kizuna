@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -31,34 +32,29 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: event } = useActiveEvent();
+  const { data: meta, isSuccess: hydrated } = useQuery({
+    queryKey: ['passport-metadata', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadPassportMetadata(getSupabaseClient(), user!.id),
+  });
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setValues({
+      passportName: meta?.passport_name ?? '',
+      // The number is encrypted at rest and never returned. Leave blank
+      // so the user must re-enter it when correcting any field.
+      passportNumber: '',
+      issuingCountry: meta?.issuing_country ?? '',
+      expiryDate: meta?.expiry_date ?? '',
+    });
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'passport',
     toastSuccessKey: 'profile.toast.passportSaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const meta = await loadPassportMetadata(getSupabaseClient(), user.id);
-      if (!active) return;
-      setValues({
-        passportName: meta?.passport_name ?? '',
-        // The number is encrypted at rest and never returned. Leave blank
-        // so the user must re-enter it when correcting any field.
-        passportNumber: '',
-        issuingCountry: meta?.issuing_country ?? '',
-        expiryDate: meta?.expiry_date ?? '',
-      });
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;

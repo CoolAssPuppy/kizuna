@@ -440,17 +440,29 @@ interface RenameMinorDialogProps {
   onSubmit: (payload: { id: string; fullName: string }) => void;
 }
 
+function splitFullName(full: string): { first: string; last: string } {
+  const trimmed = full.trim();
+  if (!trimmed) return { first: '', last: '' };
+  const idx = trimmed.lastIndexOf(' ');
+  if (idx === -1) return { first: trimmed, last: '' };
+  return { first: trimmed.slice(0, idx).trim(), last: trimmed.slice(idx + 1).trim() };
+}
+
 function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps): JSX.Element {
   const { t } = useTranslation();
-  const [name, setName] = useState('');
-  // Sync local state when a new minor opens. Reads target?.fullName
-  // each render — when target changes we re-fill, when target is null
-  // the dialog closes and we leave the state alone.
+  const [first, setFirst] = useState('');
+  const [last, setLast] = useState('');
+  // Re-fill when a new minor opens. We split the stored full_name on
+  // the LAST space so middle names ride along on the first-name field;
+  // round-trip is full_name = `${first} ${last}`.trim().
   const [lastId, setLastId] = useState<string | null>(null);
   if (target && target.id !== lastId) {
     setLastId(target.id);
-    setName(target.fullName);
+    const split = splitFullName(target.fullName);
+    setFirst(split.first);
+    setLast(split.last);
   }
+  const valid = first.trim().length >= 1 && last.trim().length >= 1;
   return (
     <Dialog
       open={!!target}
@@ -462,19 +474,35 @@ function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps
         <DialogHeader>
           <DialogTitle>{t('registration.guests.renameTitle')}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-2">
-          <Label htmlFor="rename-name">{t('registration.guests.guestName')}</Label>
-          <Input id="rename-name" value={name} onChange={(e) => setName(e.target.value)} />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="rename-first">{t('registration.guests.firstName')}</Label>
+            <Input
+              id="rename-first"
+              value={first}
+              onChange={(e) => setFirst(e.target.value)}
+              placeholder={t('registration.guests.firstNamePlaceholder')}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="rename-last">{t('registration.guests.lastName')}</Label>
+            <Input
+              id="rename-last"
+              value={last}
+              onChange={(e) => setLast(e.target.value)}
+              placeholder={t('registration.guests.lastNamePlaceholder')}
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {t('actions.cancel')}
           </Button>
           <Button
-            disabled={!target || name.trim().length < 2}
+            disabled={!target || !valid}
             onClick={() => {
               if (target) {
-                onSubmit({ id: target.id, fullName: name.trim() });
+                onSubmit({ id: target.id, fullName: `${first.trim()} ${last.trim()}`.trim() });
                 onClose();
               }
             }}

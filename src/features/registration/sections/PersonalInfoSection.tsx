@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -36,8 +37,26 @@ const EMPTY: FormState = {
 export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: row, isSuccess: hydrated } = useQuery({
+    queryKey: ['personal-info', user?.id ?? null],
+    enabled: !!user,
+    queryFn: () => loadPersonalInfo(getSupabaseClient(), user!.id),
+  });
   const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated) {
+    setSynced(true);
+    setValues({
+      preferredName: row?.preferred_name ?? '',
+      firstName: row?.first_name ?? '',
+      middleInitial: row?.middle_initial ?? '',
+      lastName: row?.last_name ?? '',
+      alternateEmail: row?.alternate_email ?? '',
+      phoneNumber: row?.phone_number ?? '',
+      whatsapp: row?.whatsapp ?? '',
+      baseCity: row?.base_city ?? '',
+    });
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'personal_info',
@@ -53,29 +72,6 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
       }),
     [values.firstName, values.middleInitial, values.lastName],
   );
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const row = await loadPersonalInfo(getSupabaseClient(), user.id);
-      if (!active) return;
-      setValues({
-        preferredName: row?.preferred_name ?? '',
-        firstName: row?.first_name ?? '',
-        middleInitial: row?.middle_initial ?? '',
-        lastName: row?.last_name ?? '',
-        alternateEmail: row?.alternate_email ?? '',
-        phoneNumber: row?.phone_number ?? '',
-        whatsapp: row?.whatsapp ?? '',
-        baseCity: row?.base_city ?? '',
-      });
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;

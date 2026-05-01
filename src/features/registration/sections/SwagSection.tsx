@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Label } from '@/components/ui/label';
@@ -53,49 +54,47 @@ function fromEu(eu: number | null, system: ShoeSizeSystem): string {
 export function SwagSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: loaded, isSuccess: hydrated } = useQuery({
+    queryKey: ['swag-sizes', user?.id ?? null],
+    enabled: !!user,
+    queryFn: async () => {
+      const client = getSupabaseClient();
+      const [own, list, guestSizes] = await Promise.all([
+        loadSelfSwagSize(client, user!.id),
+        loadAdditionalGuests(client, user!.id),
+        loadAdditionalGuestSwagSizes(client, user!.id),
+      ]);
+      return { own, list, guestSizes };
+    },
+  });
   const [self, setSelf] = useState<SizingState>(EMPTY);
   const [guests, setGuests] = useState<AdditionalGuestRow[]>([]);
   const [guestState, setGuestState] = useState<Record<string, SizingState>>({});
-  const [hydrated, setHydrated] = useState(false);
+  const [synced, setSynced] = useState(false);
+  if (!synced && hydrated && loaded) {
+    setSynced(true);
+    setSelf({
+      tshirtSize: loaded.own?.tshirt_size ?? '',
+      shoeSize: fromEu(loaded.own?.shoe_size_eu ?? null, 'us'),
+      shoeSystem: 'us',
+    });
+    setGuests(loaded.list);
+    const map: Record<string, SizingState> = {};
+    for (const guest of loaded.list) {
+      const sized = loaded.guestSizes.find((g) => g.additional_guest_id === guest.id);
+      map[guest.id] = {
+        tshirtSize: sized?.tshirt_size ?? '',
+        shoeSize: fromEu(sized?.shoe_size_eu ?? null, 'us'),
+        shoeSystem: 'us',
+      };
+    }
+    setGuestState(map);
+  }
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: 'swag',
     toastSuccessKey: 'profile.toast.swagSaved',
   });
-
-  useEffect(() => {
-    if (!user) return;
-    let active = true;
-    void (async () => {
-      const client = getSupabaseClient();
-      const [own, list, guestSizes] = await Promise.all([
-        loadSelfSwagSize(client, user.id),
-        loadAdditionalGuests(client, user.id),
-        loadAdditionalGuestSwagSizes(client, user.id),
-      ]);
-      if (!active) return;
-      setSelf({
-        tshirtSize: own?.tshirt_size ?? '',
-        shoeSize: fromEu(own?.shoe_size_eu ?? null, 'us'),
-        shoeSystem: 'us',
-      });
-      setGuests(list);
-      const map: Record<string, SizingState> = {};
-      for (const guest of list) {
-        const sized = guestSizes.find((g) => g.additional_guest_id === guest.id);
-        map[guest.id] = {
-          tshirtSize: sized?.tshirt_size ?? '',
-          shoeSize: fromEu(sized?.shoe_size_eu ?? null, 'us'),
-          shoeSystem: 'us',
-        };
-      }
-      setGuestState(map);
-      setHydrated(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
 
   function handleSubmit(): void {
     if (!user) return;
