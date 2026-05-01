@@ -35,6 +35,7 @@ function makeFakeClient(opts?: { authedUser?: { id: string; email: string } }): 
               email: opts.authedUser.email,
               role: 'employee',
               is_active: true,
+              is_leadership: false,
             }
           : null,
         error: null,

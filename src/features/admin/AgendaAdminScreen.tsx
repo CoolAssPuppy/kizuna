@@ -178,22 +178,22 @@ export function AgendaAdminScreen(): JSX.Element {
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start">
           <IconAction
-            icon={<FileDown aria-hidden className="h-3.5 w-3.5" />}
+            icon={<FileDown aria-hidden className="h-4 w-4" />}
             label={t('admin.agenda.downloadBlank')}
             onClick={handleDownloadBlank}
           />
           <IconAction
-            icon={<Download aria-hidden className="h-3.5 w-3.5" />}
+            icon={<Download aria-hidden className="h-4 w-4" />}
             label={t('admin.agenda.downloadCurrent')}
             onClick={handleDownloadCurrent}
           />
           <IconAction
-            icon={<Upload aria-hidden className="h-3.5 w-3.5" />}
+            icon={<Upload aria-hidden className="h-4 w-4" />}
             label={importMutation.isPending ? t('admin.agenda.importing') : t('admin.agenda.import')}
             onClick={() => fileInputRef.current?.click()}
             disabled={importMutation.isPending}
           />
-          <Button size="sm" onClick={() => setEditing(emptySessionDraft())} className="gap-2">
+          <Button onClick={() => setEditing(emptySessionDraft())} className="gap-2 self-start">
             <Plus aria-hidden className="h-4 w-4" />
             {t('admin.agenda.addSession')}
           </Button>
@@ -291,13 +291,12 @@ function IconAction({ icon, label, onClick, disabled }: IconActionProps): JSX.El
   return (
     <Button
       type="button"
-      size="sm"
+      size="icon"
       variant="outline"
       onClick={onClick}
       disabled={disabled}
       title={label}
       aria-label={label}
-      className="h-8 w-8 p-0"
     >
       {icon}
     </Button>

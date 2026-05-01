@@ -273,6 +273,7 @@ export interface RegistrationProgressRow extends CsvRow {
   last_name: string;
   email: string;
   role: string;
+  is_leadership: boolean;
   completion_pct: number;
   status: string;
 }
@@ -295,7 +296,7 @@ export async function fetchRegistrationProgress(
       `
       completion_pct, status,
       user:users!registrations_user_id_fkey (
-        email, role,
+        email, role, is_leadership,
         employee_profiles ( preferred_name, legal_name ),
         guest_profiles!guest_profiles_user_id_fkey ( full_name )
       )
@@ -309,6 +310,7 @@ export async function fetchRegistrationProgress(
     const u = flatJoin<{
       email: string;
       role: string;
+      is_leadership: boolean;
       employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
       guest_profiles: Joined<{ full_name: string }>;
     }>(row.user);
@@ -322,6 +324,7 @@ export async function fetchRegistrationProgress(
       last_name: last,
       email: u?.email ?? '',
       role: u?.role ?? '',
+      is_leadership: u?.is_leadership ?? false,
       completion_pct: row.completion_pct,
       status: row.status,
     };

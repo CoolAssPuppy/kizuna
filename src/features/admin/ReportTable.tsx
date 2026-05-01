@@ -2,7 +2,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { RolePill } from '@/components/RolePill';
+import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { Button } from '@/components/ui/button';
 
 import type { CsvRow } from './csv';
@@ -19,6 +19,7 @@ const PAGE_SIZE = 25;
  * "pct" → "%" so completion_pct renders nicely.
  */
 function headerLabel(key: string): string {
+  if (key === 'is_leadership') return 'Leadership';
   const replaced = key.replace(/_/g, ' ').replace(/\bpct\b/i, '%');
   return replaced.charAt(0).toUpperCase() + replaced.slice(1);
 }
@@ -185,6 +186,9 @@ interface CellProps {
 function Cell({ column, value }: CellProps): JSX.Element {
   if (column === 'role' && typeof value === 'string' && value.length > 0) {
     return <RolePill role={value} />;
+  }
+  if (column === 'is_leadership' && typeof value === 'boolean') {
+    return value ? <LeadershipPill /> : <span />;
   }
   if ((column === 'status' || column.endsWith('_status')) && typeof value === 'string') {
     return <span>{sentenceCase(value)}</span>;

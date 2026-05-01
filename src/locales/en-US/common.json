@@ -11,7 +11,8 @@
     "super_admin": "Super admin",
     "admin": "Admin",
     "employee": "Employee",
-    "guest": "Guest"
+    "guest": "Guest",
+    "leadership": "Leadership"
   },
   "nav": {
     "home": "Home",

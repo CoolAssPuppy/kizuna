@@ -52,7 +52,7 @@ export function AuthProvider({ children, ssoConfig = {} }: AuthProviderProps): J
     async (supabaseUserId: string): Promise<AppUser | null> => {
       const { data, error } = await supabase
         .from('users')
-        .select('id, email, role, is_active')
+        .select('id, email, role, is_active, is_leadership')
         .eq('id', supabaseUserId)
         .maybeSingle();
 
@@ -64,7 +64,13 @@ export function AuthProvider({ children, ssoConfig = {} }: AuthProviderProps): J
       }
       if (!data) return null;
 
-      return { id: data.id, email: data.email, role: data.role, isActive: data.is_active };
+      return {
+        id: data.id,
+        email: data.email,
+        role: data.role,
+        isActive: data.is_active,
+        isLeadership: data.is_leadership,
+      };
     },
     [supabase],
   );

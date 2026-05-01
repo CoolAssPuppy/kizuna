@@ -1697,6 +1697,7 @@ export type Database = {
           hibob_id: string | null
           id: string
           is_active: boolean
+          is_leadership: boolean
           last_login_at: string | null
           role: Database["public"]["Enums"]["user_role"]
           sponsor_id: string | null
@@ -1708,6 +1709,7 @@ export type Database = {
           hibob_id?: string | null
           id: string
           is_active?: boolean
+          is_leadership?: boolean
           last_login_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           sponsor_id?: string | null
@@ -1719,6 +1721,7 @@ export type Database = {
           hibob_id?: string | null
           id?: string
           is_active?: boolean
+          is_leadership?: boolean
           last_login_at?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           sponsor_id?: string | null
@@ -1779,6 +1782,7 @@ export type Database = {
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       get_passport_number: { Args: { p_user_id: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_leadership_user: { Args: never; Returns: boolean }
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       mark_all_notifications_read: { Args: never; Returns: number }
@@ -1794,6 +1798,10 @@ export type Database = {
           p_passport_number: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      set_user_leadership: {
+        Args: { p_user_id: string; p_value: boolean }
         Returns: undefined
       }
     }

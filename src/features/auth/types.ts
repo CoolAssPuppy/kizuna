@@ -9,6 +9,7 @@ export interface AppUser {
   email: string;
   role: AppRole;
   isActive: boolean;
+  isLeadership: boolean;
 }
 
 export interface AuthState {

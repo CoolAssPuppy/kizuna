@@ -9,6 +9,7 @@ create table public.users (
   id uuid primary key references auth.users(id) on delete cascade,
   email citext unique not null,
   role user_role not null default 'employee',
+  is_leadership boolean not null default false,
   hibob_id text unique,
   sponsor_id uuid references public.users(id) on delete set null,
   auth_provider auth_provider not null,
@@ -23,6 +24,8 @@ comment on column public.users.is_active is
   'False when HiBob signals termination. Auto-deprovisioned within one sync cycle.';
 comment on column public.users.sponsor_id is
   'For role=guest, the employee who invited this guest. Null for employees.';
+comment on column public.users.is_leadership is
+  'Orthogonal to role. A guest investor or an employee VP can both be flagged. Only admins/super_admins can set this; enforced by the users_leadership_change_guard trigger.';
 
 -- Constraint: a guest must have a sponsor; a non-guest must not.
 alter table public.users
@@ -34,6 +37,7 @@ alter table public.users
 
 create index users_role_idx on public.users(role) where is_active;
 create index users_sponsor_id_idx on public.users(sponsor_id) where sponsor_id is not null;
+create index users_leadership_idx on public.users(is_leadership) where is_leadership;
 
 
 -- Employee profiles. Most fields are sourced from HiBob with field_source

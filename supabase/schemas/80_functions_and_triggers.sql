@@ -429,6 +429,63 @@ grant execute on function public.get_passport_number(uuid) to authenticated;
 
 
 -- =====================================================================
+-- Leadership flag: only admins/super_admins can change it
+-- =====================================================================
+--
+-- Approach: a BEFORE UPDATE trigger on public.users that raises if
+-- is_leadership is being changed by a caller who isn't an admin. RLS
+-- alone can't gate per-column writes, so the trigger keeps the rule
+-- enforceable regardless of which policy actually allowed the row
+-- update (users_self_update, users_admin_all, etc.).
+--
+-- A SECURITY DEFINER RPC `set_user_leadership` is the SPA's blessed
+-- write path: it does the admin check up front, returns a typed error,
+-- and updates through RLS so audit triggers fire normally.
+create or replace function public.guard_leadership_change()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.is_leadership is distinct from old.is_leadership
+     and not public.is_admin() then
+    raise exception 'only admins can change is_leadership'
+      using errcode = '42501';
+  end if;
+  return new;
+end
+$$;
+
+create trigger users_leadership_change_guard
+  before update of is_leadership on public.users
+  for each row execute function public.guard_leadership_change();
+
+
+create or replace function public.set_user_leadership(
+  p_user_id uuid,
+  p_value boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'only admins can change is_leadership'
+      using errcode = '42501';
+  end if;
+
+  update public.users
+     set is_leadership = p_value
+   where id = p_user_id;
+end
+$$;
+
+revoke all on function public.set_user_leadership(uuid, boolean) from public;
+grant execute on function public.set_user_leadership(uuid, boolean) to authenticated;
+
+
+-- =====================================================================
 -- Notifications: recipient marks one (or all) as read
 -- =====================================================================
 

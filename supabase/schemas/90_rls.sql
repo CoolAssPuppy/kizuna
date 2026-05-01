@@ -72,6 +72,25 @@ as $$
 $$;
 
 
+-- Reads is_leadership from the JWT custom claim, with a fallback to a
+-- direct read of public.users for sessions minted before the auth hook
+-- gained the claim.
+create or replace function public.is_leadership_user()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'is_leadership')::boolean,
+    (auth.jwt() ->> 'is_leadership')::boolean,
+    (select is_leadership from public.users where id = auth.uid()),
+    false
+  )
+$$;
+
+
 -- channel_has_access: messages RLS gate. Phase 1 simple rules:
 --   - 'general'                -> any authenticated user
 --   - 'announcements'          -> any authenticated user (read), admins (write)

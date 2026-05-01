@@ -109,14 +109,14 @@ export function ReportsScreen(): JSX.Element {
         <Button
           type="button"
           variant="outline"
-          size="sm"
+          size="icon"
           onClick={() => downloadCsv(activeReport.filename, rowsToCsv(rows))}
           disabled={rows.length === 0}
-          className="h-8 w-8 self-start p-0"
+          className="self-start"
           title={t('admin.exportCsv')}
           aria-label={t('admin.exportCsv')}
         >
-          <Download aria-hidden className="h-3.5 w-3.5" />
+          <Download aria-hidden className="h-4 w-4" />
         </Button>
       </header>
 

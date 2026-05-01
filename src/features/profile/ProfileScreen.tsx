@@ -13,7 +13,7 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { RolePill } from '@/components/RolePill';
+import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { DependentsSection } from '@/features/registration/sections/DependentsSection';
@@ -120,6 +120,7 @@ export function ProfileScreen(): JSX.Element {
           <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             <span>{user?.email}</span>
             {user ? <RolePill role={user.role} /> : null}
+            {user?.isLeadership ? <LeadershipPill /> : null}
           </div>
         </div>
       </header>

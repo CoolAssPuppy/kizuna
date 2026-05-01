@@ -184,6 +184,14 @@
 
 **How to apply:** New domains go through `src/features/registration/sections/` only. Use `SectionChrome` for the mode-aware shell (StepShell vs CardShell) and `useSectionSubmit` for the post-save side effects (markTaskComplete + advance vs toast). Both wizard and profile mount the same Section component.
 
+## 2026-05-01 - Per-column write rules belong in a trigger, not RLS
+
+**Rule:** When a column needs different write permissions than the rest of its row (e.g. `users.is_leadership` is admin-only while every user can edit their own `email`), enforce the rule with a `BEFORE UPDATE` trigger on that specific column, not by adding/removing RLS policies.
+
+**Why:** RLS UPDATE policies gate the row, not the column. Splitting by column means either inventing per-column tables or tacking on `with check` clauses that compare every editable column to its old value — both fragile. A single trigger that compares `new.is_leadership IS DISTINCT FROM old.is_leadership` and raises if `not is_admin()` is one assertion in one place.
+
+**How to apply:** Pair the trigger with a SECURITY DEFINER RPC for the blessed write path (e.g. `set_user_leadership(uuid, boolean)`). The RPC does the admin check up front and returns a typed error; the trigger is the belt-and-braces backstop that catches direct UPDATEs from any future code path.
+
 ## 2026-04-30 - Supabase CLI is a system install, not an npm dep
 
 **Rule:** Don't add `supabase` to `package.json` devDependencies. Install via `brew install supabase/tap/supabase` (or system equivalent) and document it in README prerequisites.
