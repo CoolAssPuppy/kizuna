@@ -130,42 +130,33 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
               <Marker
                 key={pin.user.user_id}
                 coordinates={[pin.lon, pin.lat]}
+                onMouseEnter={() => setHovered(pin.user.user_id)}
+                onMouseLeave={() =>
+                  setHovered((current) => (current === pin.user.user_id ? null : current))
+                }
                 style={{
-                  default: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
-                  hover: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
-                  pressed: { transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)' },
+                  default: {
+                    transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',
+                    cursor: 'pointer',
+                  },
+                  hover: { cursor: 'pointer' },
+                  pressed: { cursor: 'pointer' },
                 }}
               >
-                <g
-                  onMouseEnter={() => setHovered(pin.user.user_id)}
-                  onMouseLeave={() => setHovered((current) => (current === pin.user.user_id ? null : current))}
-                  onFocus={() => setHovered(pin.user.user_id)}
-                  onBlur={() => setHovered((current) => (current === pin.user.user_id ? null : current))}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`${pin.user.first_name} ${pin.user.last_name}`}
-                  style={{ cursor: 'pointer', outline: 'none' }}
-                >
-                  <circle
-                    r={isHovered ? 11 : 9}
-                    fill="hsl(var(--primary))"
-                    fillOpacity={isHovered ? 0.35 : 0.2}
-                    style={{ transition: 'r 200ms ease, fill-opacity 200ms ease' }}
-                  />
-                  <circle
-                    r={isHovered ? 6 : 5}
-                    fill="hsl(var(--primary))"
-                    stroke="hsl(var(--background))"
-                    strokeWidth={2}
-                    style={{ transition: 'r 200ms ease' }}
-                  />
-                  {isHovered ? (
-                    <PinTooltip
-                      person={pin.user}
-                      mode={mode}
-                    />
-                  ) : null}
-                </g>
+                {/* Invisible 18px hit-target so the small dot is easy to hover. */}
+                <circle r={18} fill="transparent" />
+                <circle
+                  r={isHovered ? 11 : 9}
+                  fill="hsl(var(--primary))"
+                  fillOpacity={isHovered ? 0.35 : 0.2}
+                />
+                <circle
+                  r={isHovered ? 6 : 5}
+                  fill="hsl(var(--primary))"
+                  stroke="hsl(var(--background))"
+                  strokeWidth={2}
+                />
+                {isHovered ? <PinTooltip person={pin.user} mode={mode} /> : null}
               </Marker>
             );
           })}
