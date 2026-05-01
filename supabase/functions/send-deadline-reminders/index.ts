@@ -2,28 +2,28 @@
 //
 // Cron-triggered. Walks open registrations whose event closes within
 // the next 7 days, finds pending registration_tasks that have not been
-// nudged in the last 3 days, and pushes a notification per task via the
-// channel that matches the user's role (Slack for employees, email for
-// guests). Always writes a row to `notifications` so the audit log is
-// complete, and stamps `registration_tasks.last_nudge_at` so the rate
-// limit holds across runs.
+// nudged in the last 3 days, and pushes a notification per task via
+// the channel that matches the user's role (Slack for employees with
+// a slack_handle, email otherwise). Always writes a row to
+// `notifications` so the audit log is complete, and stamps
+// `registration_tasks.last_nudge_at` so the rate limit holds across
+// runs.
 //
 // Auth model: cron passes a shared secret in the X-Cron-Secret header.
-// Locally, the secret defaults to "dev-cron-secret" so manual runs are
-// trivial. Production sets CRON_SECRET on the function and on the cron
-// trigger itself — anyone hitting the URL without it gets 401.
+// Locally the secret defaults to "dev-cron-secret"; production sets
+// CRON_SECRET on the function and on the cron trigger itself.
 
-import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { NUDGE_COOLDOWN_MS, REMINDER_HORIZON_MS } from '../_shared/constants.ts';
+import { sendResendEmail, sendSlackDm } from '../_shared/notify.ts';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: {
   serve: (handler: (req: Request) => Response | Promise<Response>) => void;
   env: { get: (k: string) => string | undefined };
 };
-
-const NUDGE_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000;
-const REMINDER_HORIZON_MS = 7 * 24 * 60 * 60 * 1000;
 
 interface OpenTask {
   task_id: string;
@@ -40,7 +40,6 @@ interface OpenTask {
 
 async function loadOpenTasks(client: SupabaseClient): Promise<OpenTask[]> {
   const horizon = new Date(Date.now() + REMINDER_HORIZON_MS).toISOString();
-  // Single query with joins so we don't issue N+1.
   const { data, error } = await client
     .from('registration_tasks')
     .select(
@@ -105,49 +104,17 @@ function compose(task: OpenTask): { subject: string; body: string } {
   };
 }
 
-async function sendViaSlack(task: OpenTask, subject: string, body: string): Promise<boolean> {
-  const token = Deno.env.get('SLACK_BOT_TOKEN');
-  if (!token) {
-    console.info('[deadline-reminders] SLACK_BOT_TOKEN missing — skipping send');
-    return true;
-  }
-  if (!task.slack_handle) return false;
-  const handle = task.slack_handle.startsWith('@') ? task.slack_handle : `@${task.slack_handle}`;
-  const response = await fetch('https://slack.com/api/chat.postMessage', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json; charset=utf-8',
-    },
-    body: JSON.stringify({ channel: handle, text: `*${subject}*\n${body}` }),
-  });
-  const json = (await response.json()) as { ok?: boolean };
-  return json.ok === true;
-}
-
-async function sendViaResend(task: OpenTask, subject: string, body: string): Promise<boolean> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  const from = Deno.env.get('RESEND_FROM_EMAIL') ?? 'hello@kizuna.example';
-  if (!apiKey) {
-    console.info('[deadline-reminders] RESEND_API_KEY missing — skipping send');
-    return true;
-  }
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: task.user_email, subject, text: body }),
-  });
-  return response.ok;
-}
-
 async function processTask(client: SupabaseClient, task: OpenTask): Promise<boolean> {
   const channel = pickChannel(task);
   const { subject, body } = compose(task);
 
   let delivered = true;
   try {
-    if (channel === 'slack') delivered = await sendViaSlack(task, subject, body);
-    else if (channel === 'email') delivered = await sendViaResend(task, subject, body);
+    if (channel === 'slack') {
+      delivered = await sendSlackDm({ handle: task.slack_handle, subject, body });
+    } else {
+      delivered = await sendResendEmail({ to: task.user_email, subject, body });
+    }
   } catch (err) {
     console.warn('[deadline-reminders] driver failed', err);
     delivered = false;
@@ -181,15 +148,7 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL');
-  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  if (!supabaseUrl || !serviceRoleKey) {
-    return jsonResponse({ error: 'server_misconfigured' }, { status: 500 });
-  }
-  const client = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
+  const client = getAdminClient();
   let scanned = 0;
   let sent = 0;
   let skippedRateLimit = 0;

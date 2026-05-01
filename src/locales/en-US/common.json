@@ -2,7 +2,9 @@
   "app": {
     "name": "Kizuna",
     "tagline": "An enduring bond",
-    "offline": "You are offline. Your itinerary, room, and transport details are cached and still readable."
+    "offline": "You are offline. Your itinerary, room, and transport details are cached and still readable.",
+    "loadingEvent": "Loading event details",
+    "noEvent": "No active event right now. Check back soon."
   },
   "nav": {
     "home": "Home",

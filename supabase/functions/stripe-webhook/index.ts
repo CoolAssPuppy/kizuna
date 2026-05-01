@@ -9,7 +9,7 @@
 // verify the Stripe-Signature header. Without it we accept the webhook
 // in dev mode and log a warning.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 import { jsonResponse } from '../_shared/cors.ts';
 
@@ -56,13 +56,6 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'method_not_allowed' }, { status: 405 });
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const serviceRoleKey =
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SECRET_KEY') ?? '';
-  if (!serviceRoleKey) {
-    return jsonResponse({ error: 'misconfigured' }, { status: 500 });
-  }
-
   const rawBody = await req.text();
 
   const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
@@ -83,9 +76,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'invalid_json' }, { status: 400 });
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const admin = getAdminClient();
 
   const intent = event.data?.object;
   const guestUserId = intent?.metadata?.guest_user_id as string | undefined;

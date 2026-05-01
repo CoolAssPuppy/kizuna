@@ -8,9 +8,9 @@
 // Audit trail lives in hibob_sync_log: each invocation records start,
 // completion, status, counts, and (on failure) error_detail.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
+import { requireAdmin } from '../_shared/adminGuard.ts';
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 const HIBOB_API = 'https://api.hibob.com/v1/people';
 
@@ -54,34 +54,11 @@ Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
   if (preflight) return preflight;
 
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
+  const guard = await requireAdmin(req);
+  if (guard instanceof Response) return guard;
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '';
-  const serviceRoleKey =
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SECRET_KEY') ?? '';
   const hibobKey = Deno.env.get('HIBOB_API_KEY');
-
-  // Admin role check via the user-scoped client.
-  const userClient = createClient(supabaseUrl, anon, {
-    global: { headers: { Authorization: authHeader } },
-    auth: { persistSession: false },
-  });
-  const { data: userData, error: userError } = await userClient.auth.getUser();
-  if (userError || !userData.user) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
-  const role = (userData.user.app_metadata as Record<string, unknown> | undefined)?.['app_role'];
-  if (role !== 'admin' && role !== 'super_admin') {
-    return jsonResponse({ error: 'forbidden' }, { status: 403 });
-  }
-
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const admin = getAdminClient();
 
   // Open the audit row so a failure in HiBob still gets recorded.
   const { data: logRow, error: logError } = await admin

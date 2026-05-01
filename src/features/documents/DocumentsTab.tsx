@@ -5,6 +5,7 @@ import remarkGfm from 'remark-gfm';
 
 import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/features/auth/hooks';
+import { mediumDateTimeFormatter } from '@/lib/formatters';
 
 import { useDocumentsQuery } from './useDocumentsQuery';
 import type { DocumentWithAck } from './types';
@@ -12,11 +13,6 @@ import type { DocumentWithAck } from './types';
 interface DocumentsTabProps {
   eventId: string;
 }
-
-const dateFormatter = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
 
 export function DocumentsTab({ eventId }: DocumentsTabProps): JSX.Element {
   const { t } = useTranslation();
@@ -83,7 +79,7 @@ function DocumentCard({ entry }: DocumentCardProps): JSX.Element {
             {t('documents.version', { version: document.version })}
             {acknowledgement
               ? ` · ${t('documents.acknowledgedOn', {
-                  date: dateFormatter.format(new Date(acknowledgement.acknowledged_at)),
+                  date: mediumDateTimeFormatter.format(new Date(acknowledgement.acknowledged_at)),
                 })}`
               : null}
           </p>

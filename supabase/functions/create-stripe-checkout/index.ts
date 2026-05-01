@@ -5,9 +5,8 @@
 // to a stubbed redirect when STRIPE_SECRET_KEY is missing so local dev
 // can complete the flow end-to-end.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { getUserClient } from '../_shared/supabaseClient.ts';
 
 const ADULT_FEE_CENTS = 95_000;
 const CHILD_FEE_CENTS = 50_000;
@@ -21,16 +20,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '';
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
   const publicUrl = Deno.env.get('KIZUNA_PUBLIC_URL') ?? 'http://localhost:5173';
 
-  const client = createClient(supabaseUrl, anon, {
-    global: { headers: { Authorization: authHeader } },
-    auth: { persistSession: false },
-  });
-
+  const client = getUserClient(authHeader);
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData.user) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });

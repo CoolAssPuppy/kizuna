@@ -2,15 +2,11 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
+import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { fetchOpenConflicts, resolveConflict } from './conflicts';
 import type { DataConflictRow } from './conflicts';
-
-const dateFmt = new Intl.DateTimeFormat(undefined, {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
 
 export function ConflictsPanel(): JSX.Element {
   const { t } = useTranslation();
@@ -74,7 +70,8 @@ function ConflictRow({ conflict, onResolve }: RowProps): JSX.Element {
           </p>
           <p className="text-xs text-muted-foreground">
             {t('admin.conflicts.external')}: {conflict.external_source} ·{' '}
-            {t('admin.conflicts.detectedAt')}: {dateFmt.format(new Date(conflict.detected_at))}
+            {t('admin.conflicts.detectedAt')}:{' '}
+            {mediumDateTimeFormatter.format(new Date(conflict.detected_at))}
           </p>
         </div>
       </header>

@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any
 // Edge function: send-notification
 //
 // One channel router for every transactional notification Kizuna emits.
@@ -18,11 +17,15 @@
 //     (graceful when unkeyed). Always inserts a row in `notifications`
 //     so the admin nudge log is complete.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
+import { requireAdmin } from '../_shared/adminGuard.ts';
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { NUDGE_COOLDOWN_MS } from '../_shared/constants.ts';
+import { sendResendEmail, sendSlackDm } from '../_shared/notify.ts';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
-const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+declare const Deno: { serve: (handler: (req: Request) => Response | Promise<Response>) => void };
 
 interface NotificationInput {
   userId: string;
@@ -43,29 +46,9 @@ Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
   if (preflight) return preflight;
 
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
-
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '';
-  const serviceRoleKey =
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SECRET_KEY') ?? '';
-
-  const userClient = createClient(supabaseUrl, anon, {
-    global: { headers: { Authorization: authHeader } },
-    auth: { persistSession: false },
-  });
-  const { data: userData, error: userError } = await userClient.auth.getUser();
-  if (userError || !userData.user) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
-  const senderId = userData.user.id;
-  const role = (userData.user.app_metadata as Record<string, unknown> | undefined)?.['app_role'];
-  if (role !== 'admin' && role !== 'super_admin') {
-    return jsonResponse({ error: 'forbidden' }, { status: 403 });
-  }
+  const guard = await requireAdmin(req);
+  if (guard instanceof Response) return guard;
+  const senderId = guard.userId;
 
   let payload: NotificationInput;
   try {
@@ -74,11 +57,9 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'invalid_body' }, { status: 400 });
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const admin = getAdminClient();
 
-  // Rate-limit task-scoped nudges to one per 3 days.
+  // Rate-limit task-scoped nudges to one per cooldown window.
   if (payload.taskId) {
     const { data: task } = await admin
       .from('registration_tasks')
@@ -87,7 +68,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (task?.last_nudge_at) {
       const last = new Date(task.last_nudge_at).getTime();
-      if (Date.now() - last < THREE_DAYS_MS) {
+      if (Date.now() - last < NUDGE_COOLDOWN_MS) {
         return jsonResponse({ error: 'rate_limited' }, { status: 429 });
       }
     }
@@ -96,17 +77,18 @@ Deno.serve(async (req) => {
   let delivered = false;
   try {
     if (payload.channel === 'slack') {
-      delivered = await sendViaSlack(admin, payload);
+      const handle = await loadSlackHandle(admin, payload.userId);
+      delivered = await sendSlackDm({ handle, subject: payload.subject, body: payload.body });
     } else if (payload.channel === 'email') {
-      delivered = await sendViaResend(admin, payload);
+      const to = await loadEmail(admin, payload.userId);
+      delivered = await sendResendEmail({ to, subject: payload.subject, body: payload.body });
     } else {
       delivered = true; // in-app: just write the notifications row
     }
-  } catch (err: unknown) {
+  } catch (err) {
     console.warn('[kizuna] send-notification driver failed', err);
   }
 
-  // Append to the audit log regardless of delivery success.
   await admin.from('notifications').insert({
     user_id: payload.userId,
     channel: payload.channel,
@@ -131,7 +113,7 @@ Deno.serve(async (req) => {
   return jsonResponse({ delivered });
 });
 
-async function currentNudgeCount(admin: any, taskId: string): Promise<number> {
+async function currentNudgeCount(admin: SupabaseClient, taskId: string): Promise<number> {
   const { data } = await admin
     .from('registration_tasks')
     .select('nudge_count')
@@ -140,58 +122,16 @@ async function currentNudgeCount(admin: any, taskId: string): Promise<number> {
   return (data?.nudge_count as number | null) ?? 0;
 }
 
-async function sendViaSlack(admin: any, payload: NotificationInput): Promise<boolean> {
-  const token = Deno.env.get('SLACK_BOT_TOKEN');
-  const { data: profile } = await admin
+async function loadSlackHandle(admin: SupabaseClient, userId: string): Promise<string | null> {
+  const { data } = await admin
     .from('employee_profiles')
     .select('slack_handle')
-    .eq('user_id', payload.userId)
+    .eq('user_id', userId)
     .maybeSingle();
-  const handle = profile?.slack_handle as string | null;
-
-  if (!token) {
-    console.info('[kizuna] SLACK_BOT_TOKEN missing — would have DM\'d %s', handle ?? payload.userId);
-    return true;
-  }
-  if (!handle) return false;
-
-  const response = await fetch('https://slack.com/api/chat.postMessage', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=utf-8' },
-    body: JSON.stringify({
-      channel: handle.startsWith('@') ? handle : `@${handle}`,
-      text: `*${payload.subject}*\n${payload.body}`,
-    }),
-  });
-  const body = (await response.json()) as { ok?: boolean };
-  return body.ok === true;
+  return (data?.slack_handle as string | null) ?? null;
 }
 
-async function sendViaResend(admin: any, payload: NotificationInput): Promise<boolean> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  const from = Deno.env.get('RESEND_FROM_EMAIL') ?? 'hello@kizuna.example';
-  const { data: user } = await admin
-    .from('users')
-    .select('email')
-    .eq('id', payload.userId)
-    .maybeSingle();
-  const to = user?.email as string | null;
-
-  if (!apiKey) {
-    console.info('[kizuna] RESEND_API_KEY missing — would have emailed %s', to ?? payload.userId);
-    return true;
-  }
-  if (!to) return false;
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to,
-      subject: payload.subject,
-      text: payload.body,
-    }),
-  });
-  return response.ok;
+async function loadEmail(admin: SupabaseClient, userId: string): Promise<string | null> {
+  const { data } = await admin.from('users').select('email').eq('id', userId).maybeSingle();
+  return (data?.email as string | null) ?? null;
 }

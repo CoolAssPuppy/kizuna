@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
+import { SHARE_LINK_TTL_MS } from '@/lib/constants';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -15,8 +16,6 @@ interface Props {
   reportType: ReportType;
   eventId: string | null;
 }
-
-const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function ShareReportButton({ reportType, eventId }: Props): JSX.Element | null {
   const { t } = useTranslation();
@@ -32,7 +31,7 @@ export function ShareReportButton({ reportType, eventId }: Props): JSX.Element |
     setBusy(true);
     try {
       const token = generateShareToken();
-      const expires = new Date(Date.now() + ONE_WEEK_MS).toISOString();
+      const expires = new Date(Date.now() + SHARE_LINK_TTL_MS).toISOString();
       const { error } = await getSupabaseClient().from('report_snapshots').insert({
         event_id: eventId,
         report_type: reportType,

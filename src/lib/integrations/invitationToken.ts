@@ -7,6 +7,8 @@
  * portable between Deno (edge functions) and the browser (tests + dev).
  */
 
+import { INVITATION_TTL_SECONDS } from '@/lib/constants';
+
 export interface InvitationClaims {
   /** invitation row id (uuid) */
   inv: string;
@@ -61,7 +63,7 @@ interface SignArgs {
 
 export async function signInvitationToken(args: SignArgs): Promise<string> {
   const now = args.now ?? Math.floor(Date.now() / 1000);
-  const ttl = args.ttlSeconds ?? 7 * 24 * 60 * 60;
+  const ttl = args.ttlSeconds ?? INVITATION_TTL_SECONDS;
   const claims: InvitationClaims = {
     inv: args.invitationId,
     sub: args.sponsorUserId,

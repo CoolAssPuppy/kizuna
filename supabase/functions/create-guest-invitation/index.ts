@@ -10,12 +10,10 @@
 // The Resend call is best-effort — we still return the row even if the
 // email send fails, so the admin can copy the link manually if needed.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 import { corsHeaders, handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { INVITATION_TTL_SECONDS } from '../_shared/constants.ts';
 import { signInvitationToken } from '../_shared/invitationToken.ts';
-
-const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60;
+import { getUserClient } from '../_shared/supabaseClient.ts';
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -26,19 +24,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const anon = Deno.env.get('SUPABASE_ANON_KEY') ?? Deno.env.get('SUPABASE_PUBLISHABLE_KEY') ?? '';
   const tokenSecret =
     Deno.env.get('KIZUNA_INVITATION_SECRET') ?? Deno.env.get('SUPABASE_JWT_SECRET') ?? '';
   if (!tokenSecret) {
     return jsonResponse({ error: 'invitation_secret_missing' }, { status: 500 });
   }
 
-  const client = createClient(supabaseUrl, anon, {
-    global: { headers: { Authorization: authHeader } },
-    auth: { persistSession: false },
-  });
-
+  const client = getUserClient(authHeader);
   const { data: userData, error: userError } = await client.auth.getUser();
   if (userError || !userData.user) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
@@ -56,7 +48,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'invalid_email' }, { status: 400 });
   }
 
-  const expiresAt = new Date(Date.now() + SEVEN_DAYS_SECONDS * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + INVITATION_TTL_SECONDS * 1000).toISOString();
   const { data: invitation, error: insertError } = await client
     .from('guest_invitations')
     .insert({

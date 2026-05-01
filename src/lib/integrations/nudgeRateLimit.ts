@@ -7,7 +7,7 @@
  * "send nudge" buttons.
  */
 
-const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+import { NUDGE_COOLDOWN_MS } from '@/lib/constants';
 
 export interface NudgeRateLimitInput {
   lastNudgeAtIso: string | null;
@@ -21,13 +21,13 @@ export function canSendNudge({ lastNudgeAtIso, now, windowMs }: NudgeRateLimitIn
   if (lastNudgeAtIso === null) return true;
   const last = new Date(lastNudgeAtIso).getTime();
   if (Number.isNaN(last)) return true;
-  const cutoff = (now ?? new Date()).getTime() - (windowMs ?? THREE_DAYS_MS);
+  const cutoff = (now ?? new Date()).getTime() - (windowMs ?? NUDGE_COOLDOWN_MS);
   return last <= cutoff;
 }
 
 export function nextEligibleAt(
   lastNudgeAtIso: string | null,
-  windowMs = THREE_DAYS_MS,
+  windowMs = NUDGE_COOLDOWN_MS,
 ): Date | null {
   if (lastNudgeAtIso === null) return null;
   const last = new Date(lastNudgeAtIso);

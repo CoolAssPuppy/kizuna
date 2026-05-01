@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
-import { useActiveEvent } from '@/features/events/useActiveEvent';
+import { EventGate } from '@/components/EventGate';
+import type { Database } from '@/types/database.types';
 
 import { RegistrationLayout } from './RegistrationLayout';
 import { AccessibilitySection } from './sections/AccessibilitySection';
@@ -36,49 +37,37 @@ function StepRouter({ mode, stepPath }: { mode: SectionMode; stepPath: string })
   }
 }
 
-export function RegistrationRoute(): JSX.Element {
+type EventRow = Database['public']['Tables']['events']['Row'];
+
+function RegistrationInner({ event }: { event: EventRow }): JSX.Element {
   const { t } = useTranslation();
   const { stepPath } = useParams<{ stepPath?: string }>();
   const navigate = useNavigate();
-
-  const { data: event, isLoading: eventLoading, error: eventError } = useActiveEvent();
-  const eventId = event?.id ?? null;
   const {
     data: bundle,
-    isLoading: regLoading,
-    error: regError,
+    isLoading,
+    error,
     invalidate,
-  } = useRegistration({ eventId: eventId ?? '' });
+  } = useRegistration({ eventId: event.id });
 
-  if (eventLoading || regLoading) {
+  if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center" aria-busy="true">
-        <p className="text-muted-foreground">{t('auth.checkingSession')}</p>
+        <p className="text-muted-foreground">{t('app.loadingEvent')}</p>
       </main>
     );
   }
 
-  if (eventError || !event) {
+  if (error || !bundle) {
     return (
       <main className="flex min-h-screen items-center justify-center p-6">
         <p role="alert" className="text-destructive">
-          {eventError?.message ?? t('documents.noDocuments')}
+          {error?.message ?? t('registration.errorSaving')}
         </p>
       </main>
     );
   }
 
-  if (regError || !bundle) {
-    return (
-      <main className="flex min-h-screen items-center justify-center p-6">
-        <p role="alert" className="text-destructive">
-          {regError?.message ?? t('registration.errorSaving')}
-        </p>
-      </main>
-    );
-  }
-
-  // Without a path, send the user to the next pending step.
   if (!stepPath) {
     const next = nextPendingStep(bundle.tasks);
     if (next) return <Navigate to={`/registration/${next.path}`} replace />;
@@ -95,11 +84,8 @@ export function RegistrationRoute(): JSX.Element {
     invalidate();
     const idx = WIZARD_STEPS.findIndex((s) => s.path === stepPath);
     const next = WIZARD_STEPS[idx + 1];
-    if (next) {
-      navigate(`/registration/${next.path}`);
-    } else {
-      navigate('/');
-    }
+    if (next) navigate(`/registration/${next.path}`);
+    else navigate('/');
   }
 
   const wizardMode: SectionMode = {
@@ -113,4 +99,8 @@ export function RegistrationRoute(): JSX.Element {
       <StepRouter mode={wizardMode} stepPath={stepPath} />
     </RegistrationLayout>
   );
+}
+
+export function RegistrationRoute(): JSX.Element {
+  return <EventGate>{(event) => <RegistrationInner event={event} />}</EventGate>;
 }

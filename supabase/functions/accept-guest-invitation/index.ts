@@ -11,21 +11,17 @@
 //
 // Returns the new user's id and email so the SPA can sign them in directly.
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { verifyInvitationToken } from '../_shared/invitationToken.ts';
+import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
   if (preflight) return preflight;
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-  const serviceRoleKey =
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? Deno.env.get('SUPABASE_SECRET_KEY') ?? '';
   const tokenSecret =
     Deno.env.get('KIZUNA_INVITATION_SECRET') ?? Deno.env.get('SUPABASE_JWT_SECRET') ?? '';
-  if (!serviceRoleKey || !tokenSecret) {
+  if (!tokenSecret) {
     return jsonResponse({ error: 'misconfigured' }, { status: 500 });
   }
 
@@ -47,9 +43,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: verification.reason }, { status: 400 });
   }
 
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+  const admin = getAdminClient();
 
   const { data: invitation, error: invitationError } = await admin
     .from('guest_invitations')
