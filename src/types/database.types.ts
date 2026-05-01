@@ -1936,6 +1936,7 @@ export type Database = {
       }
       current_active_event_id: { Args: never; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      delete_event_cascade: { Args: { p_event_id: string }; Returns: boolean }
       get_passport_number: { Args: { p_user_id: string }; Returns: string }
       guest_fee_for_bracket: {
         Args: { p_bracket: Database["public"]["Enums"]["guest_age_bracket"] }

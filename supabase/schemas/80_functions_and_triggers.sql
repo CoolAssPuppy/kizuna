@@ -742,3 +742,48 @@ $$;
 create trigger guard_guest_profile_completion_biu
   before insert or update of legal_name on public.guest_profiles
   for each row execute function public.guard_guest_profile_completion();
+
+
+-- =====================================================================
+-- Admin-triggered event cascade delete.
+-- =====================================================================
+-- Hard-delete every row that lives under an event: sessions,
+-- registrations, accommodations, transport vehicles, transport
+-- requests, itinerary items, document acknowledgements, profile field
+-- responses, notifications, feed items, report snapshots. The FK
+-- cascades on each of those tables already point at events(id) ON
+-- DELETE CASCADE, so dropping the events row is sufficient.
+--
+-- User-scoped data (additional_guests, guest_profiles, swag_sizes,
+-- attendee_profiles, emergency_contacts, dietary, passport, etc.)
+-- intentionally survives — those describe the person, not the event.
+-- Use the dedicated user-deletion path if you need to remove someone.
+--
+-- Returns true on success. Raises on missing event so the SPA can
+-- surface a clear error rather than silently doing nothing.
+create or replace function public.delete_event_cascade(p_event_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count int;
+begin
+  if not public.is_admin() then
+    raise exception 'only admins can delete events'
+      using errcode = '42501';
+  end if;
+
+  delete from public.events where id = p_event_id;
+  get diagnostics v_count = row_count;
+  if v_count = 0 then
+    raise exception 'event not found' using errcode = 'P0002';
+  end if;
+
+  return true;
+end
+$$;
+
+revoke all on function public.delete_event_cascade(uuid) from public;
+grant execute on function public.delete_event_cascade(uuid) to authenticated;
