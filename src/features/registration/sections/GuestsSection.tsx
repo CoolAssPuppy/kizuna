@@ -205,13 +205,17 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
   const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>('bracket');
   const [bracket, setBracket] = useState<GuestAgeBracket | null>(null);
-  const [fullName, setFullName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+
+  const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
 
   function reset(): void {
     setStep('bracket');
     setBracket(null);
-    setFullName('');
+    setFirstName('');
+    setLastName('');
     setEmail('');
   }
 
@@ -223,7 +227,7 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
         { client: getSupabaseClient() },
         {
           ageBracket: bracket,
-          fullName: fullName.trim(),
+          fullName,
           ...(bracket === 'adult' ? { guestEmail: email.trim() } : {}),
         },
       );
@@ -243,10 +247,9 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
+  const namesValid = firstName.trim().length >= 1 && lastName.trim().length >= 1;
   const adultDetailsValid =
-    bracket === 'adult'
-      ? fullName.trim().length >= 2 && email.trim().includes('@')
-      : fullName.trim().length >= 2;
+    bracket === 'adult' ? namesValid && email.trim().includes('@') : namesValid;
 
   return (
     <Dialog
@@ -304,15 +307,27 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
                   ? t('registration.guests.detailsIntroAdult')
                   : t('registration.guests.detailsIntroMinor')}
               </p>
-              <div className="space-y-1.5">
-                <Label htmlFor="invite-name">{t('registration.guests.guestName')}</Label>
-                <Input
-                  id="invite-name"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder={t('registration.guests.namePlaceholder')}
-                />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="invite-first-name">{t('registration.guests.firstName')}</Label>
+                  <Input
+                    id="invite-first-name"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder={t('registration.guests.firstNamePlaceholder')}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="invite-last-name">{t('registration.guests.lastName')}</Label>
+                  <Input
+                    id="invite-last-name"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder={t('registration.guests.lastNamePlaceholder')}
+                  />
+                </div>
               </div>
               {bracket === 'adult' ? (
                 <div className="space-y-1.5">
