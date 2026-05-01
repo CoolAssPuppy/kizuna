@@ -43,6 +43,51 @@ create trigger cascade_auth_user_delete_ad
   after delete on auth.users
   for each row execute function public.cascade_auth_user_delete();
 
+
+-- Auto-mint public.users when a new auth.users lands.
+--
+-- Without this, anyone created outside the in-app flows (Supabase
+-- Studio, Admin API seeding, GoTrue invite) signs in but has no
+-- public.users row — every save FK-fails because per-section tables
+-- reference public.users(id). The accept-guest-invitation edge fn
+-- explicitly inserts the row with role='guest' + sponsor_id BEFORE
+-- this trigger reaches its body (the row already exists) so the
+-- ON CONFLICT branch keeps that path intact.
+--
+-- Default role is 'employee' since the only other paths are guests
+-- (which take care of themselves) and dependents (which never create
+-- an auth.users row to begin with).
+create or replace function public.ensure_public_user_for_auth()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- Only fire on inserts from GoTrue (supabase_auth_admin) or the
+  -- service role. Direct postgres inserts (pgTAP fixtures, manual SQL
+  -- in tests) skip the auto-mint so the test's explicit
+  -- public.users insert with the role it actually wants doesn't
+  -- collide on the PK.
+  if current_user not in ('supabase_auth_admin', 'service_role') then
+    return new;
+  end if;
+  insert into public.users (id, email, role, auth_provider)
+  values (
+    new.id,
+    coalesce(new.email, format('user-%s@kizuna.invalid', new.id)),
+    'employee',
+    (case when (new.raw_user_meta_data ->> 'provider') is not null then 'sso' else 'email_password' end)::auth_provider
+  )
+  on conflict (id) do nothing;
+  return new;
+end
+$$;
+
+create trigger ensure_public_user_for_auth_ai
+  after insert on auth.users
+  for each row execute function public.ensure_public_user_for_auth();
+
 -- Wire touch_updated_at onto every table that owns an updated_at column. The
 -- list lives here (rather than scanning information_schema) so the surface
 -- area is explicit and reviewable in one place.
