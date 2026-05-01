@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
-import { getSupabaseClient } from '@/lib/supabase';
+import { type AppSupabaseClient, getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import { ConflictsPanel } from './ConflictsPanel';
@@ -18,31 +18,46 @@ import {
   fetchTransportManifest,
 } from './reports';
 
-type Tab =
-  | 'registration'
-  | 'rooming'
-  | 'transport'
-  | 'dietary'
-  | 'swag'
-  | 'payments'
-  | 'conflicts';
+interface ReportConfig {
+  key: string;
+  filename: string;
+  fetch: (client: AppSupabaseClient, eventId: string | null) => Promise<readonly CsvRow[]>;
+}
 
-const TABS: ReadonlyArray<Tab> = [
-  'registration',
-  'rooming',
-  'transport',
-  'dietary',
-  'swag',
-  'payments',
-  'conflicts',
+const REPORTS: ReadonlyArray<ReportConfig> = [
+  {
+    key: 'registration',
+    filename: 'registration-progress.csv',
+    fetch: (c, eid) => (eid ? fetchRegistrationProgress(c, eid) : Promise.resolve([])),
+  },
+  {
+    key: 'rooming',
+    filename: 'rooming-list.csv',
+    fetch: (c, eid) => (eid ? fetchRoomingList(c, eid) : Promise.resolve([])),
+  },
+  {
+    key: 'transport',
+    filename: 'transport-manifest.csv',
+    fetch: (c) => fetchTransportManifest(c),
+  },
+  { key: 'dietary', filename: 'dietary-summary.csv', fetch: (c) => fetchDietarySummary(c) },
+  { key: 'swag', filename: 'swag-order.csv', fetch: (c) => fetchSwagOrder(c) },
+  {
+    key: 'payments',
+    filename: 'payment-reconciliation.csv',
+    fetch: (c) => fetchPaymentReconciliation(c),
+  },
 ];
 
-interface ReportPanelProps<R extends CsvRow> {
-  rows: R[];
+const TABS = [...REPORTS.map((r) => r.key), 'conflicts'] as const;
+type Tab = (typeof TABS)[number];
+
+interface ReportPanelProps {
+  rows: ReadonlyArray<CsvRow>;
   filename: string;
 }
 
-function ReportPanel<R extends CsvRow>({ rows, filename }: ReportPanelProps<R>): JSX.Element {
+function ReportPanel({ rows, filename }: ReportPanelProps): JSX.Element {
   const { t } = useTranslation();
   if (rows.length === 0) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>;
@@ -83,43 +98,25 @@ function ReportPanel<R extends CsvRow>({ rows, filename }: ReportPanelProps<R>):
   );
 }
 
+interface ActiveReportProps {
+  config: ReportConfig;
+  eventId: string | null;
+}
+
+function ActiveReport({ config, eventId }: ActiveReportProps): JSX.Element {
+  const query = useQuery({
+    queryKey: ['admin', config.key, eventId],
+    queryFn: () => config.fetch(getSupabaseClient(), eventId),
+  });
+  return <ReportPanel rows={query.data ?? []} filename={config.filename} />;
+}
+
 export function AdminScreen(): JSX.Element {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('registration');
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
-  const supabase = useMemo(() => getSupabaseClient(), []);
-
-  const registrationQ = useQuery({
-    queryKey: ['admin', 'registration', eventId],
-    enabled: tab === 'registration' && eventId !== null,
-    queryFn: () => (eventId ? fetchRegistrationProgress(supabase, eventId) : Promise.resolve([])),
-  });
-  const roomingQ = useQuery({
-    queryKey: ['admin', 'rooming', eventId],
-    enabled: tab === 'rooming' && eventId !== null,
-    queryFn: () => (eventId ? fetchRoomingList(supabase, eventId) : Promise.resolve([])),
-  });
-  const transportQ = useQuery({
-    queryKey: ['admin', 'transport'],
-    enabled: tab === 'transport',
-    queryFn: () => fetchTransportManifest(supabase),
-  });
-  const dietaryQ = useQuery({
-    queryKey: ['admin', 'dietary'],
-    enabled: tab === 'dietary',
-    queryFn: () => fetchDietarySummary(supabase),
-  });
-  const swagQ = useQuery({
-    queryKey: ['admin', 'swag'],
-    enabled: tab === 'swag',
-    queryFn: () => fetchSwagOrder(supabase),
-  });
-  const paymentsQ = useQuery({
-    queryKey: ['admin', 'payments'],
-    enabled: tab === 'payments',
-    queryFn: () => fetchPaymentReconciliation(supabase),
-  });
+  const activeReport = REPORTS.find((r) => r.key === tab);
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 px-6 py-10">
@@ -148,22 +145,7 @@ export function AdminScreen(): JSX.Element {
         ))}
       </div>
 
-      {tab === 'registration' ? (
-        <ReportPanel rows={registrationQ.data ?? []} filename="registration-progress.csv" />
-      ) : null}
-      {tab === 'rooming' ? (
-        <ReportPanel rows={roomingQ.data ?? []} filename="rooming-list.csv" />
-      ) : null}
-      {tab === 'transport' ? (
-        <ReportPanel rows={transportQ.data ?? []} filename="transport-manifest.csv" />
-      ) : null}
-      {tab === 'dietary' ? (
-        <ReportPanel rows={dietaryQ.data ?? []} filename="dietary-summary.csv" />
-      ) : null}
-      {tab === 'swag' ? <ReportPanel rows={swagQ.data ?? []} filename="swag-order.csv" /> : null}
-      {tab === 'payments' ? (
-        <ReportPanel rows={paymentsQ.data ?? []} filename="payment-reconciliation.csv" />
-      ) : null}
+      {activeReport ? <ActiveReport config={activeReport} eventId={eventId} /> : null}
       {tab === 'conflicts' ? <ConflictsPanel /> : null}
     </main>
   );

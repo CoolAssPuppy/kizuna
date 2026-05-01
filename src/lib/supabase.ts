@@ -33,3 +33,15 @@ export function getSupabaseClient(): AppSupabaseClient {
 export function __resetSupabaseClientForTests(next: AppSupabaseClient | null = null): void {
   clientInstance = next;
 }
+
+/**
+ * Supabase typegen sometimes resolves a 1-to-1 join (an aliased FK on a
+ * table with multiple references to the same target) as `T[] | T | null`.
+ * `flatJoin` flattens to a single record for the common case where the
+ * relation is logically 1-to-1 — saves a layer of `as unknown as` casts.
+ */
+export type Joined<T> = T | T[] | null | undefined;
+export function flatJoin<T>(rel: Joined<T>): T | null {
+  if (rel == null) return null;
+  return Array.isArray(rel) ? (rel[0] ?? null) : rel;
+}

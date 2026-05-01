@@ -1,4 +1,4 @@
-import type { AppSupabaseClient } from '@/lib/supabase';
+import { type AppSupabaseClient, flatJoin, type Joined } from '@/lib/supabase';
 
 import type { CsvRow } from './csv';
 
@@ -35,7 +35,11 @@ export async function fetchRoomingList(
       hotel_name, room_number, room_type, check_in, check_out, special_requests,
       accommodation_occupants (
         is_primary,
-        users ( email )
+        users (
+          email,
+          employee_profiles ( preferred_name, legal_name ),
+          guest_profiles!guest_profiles_user_id_fkey ( full_name )
+        )
       )
     `,
     )
@@ -46,35 +50,35 @@ export async function fetchRoomingList(
 
   const rows: RoomingRow[] = [];
   for (const room of data ?? []) {
-    const occupants = (room.accommodation_occupants ?? []) as Array<{
-      is_primary: boolean;
-      users: { email: string } | null;
-    }>;
+    const baseRow = {
+      hotel: room.hotel_name,
+      room_number: room.room_number,
+      room_type: room.room_type,
+      check_in: room.check_in,
+      check_out: room.check_out,
+      special_requests: room.special_requests,
+    } as const;
+    const occupants = room.accommodation_occupants ?? [];
     if (occupants.length === 0) {
-      rows.push({
-        hotel: room.hotel_name,
-        room_number: room.room_number,
-        room_type: room.room_type,
-        check_in: room.check_in,
-        check_out: room.check_out,
-        guest_name: '(unassigned)',
-        guest_email: '',
-        is_primary: false,
-        special_requests: room.special_requests,
-      });
+      rows.push({ ...baseRow, guest_name: '(unassigned)', guest_email: '', is_primary: false });
       continue;
     }
     for (const occ of occupants) {
+      const user = flatJoin<{
+        email: string;
+        employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
+        guest_profiles: Joined<{ full_name: string }>;
+      }>(occ.users);
+      const email = user?.email ?? '';
+      const employee = flatJoin(user?.employee_profiles);
+      const guest = flatJoin(user?.guest_profiles);
+      const displayName =
+        employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? email;
       rows.push({
-        hotel: room.hotel_name,
-        room_number: room.room_number,
-        room_type: room.room_type,
-        check_in: room.check_in,
-        check_out: room.check_out,
-        guest_name: occ.users?.email ?? '',
-        guest_email: occ.users?.email ?? '',
+        ...baseRow,
+        guest_name: displayName,
+        guest_email: email,
         is_primary: occ.is_primary,
-        special_requests: room.special_requests,
       });
     }
   }
@@ -103,7 +107,7 @@ export async function fetchDietarySummary(client: AppSupabaseClient): Promise<Di
   if (error) throw error;
 
   return (data ?? []).map((row) => ({
-    email: (row.users as { email: string } | null)?.email ?? '',
+    email: flatJoin<{ email: string }>(row.users)?.email ?? '',
     restrictions: row.restrictions.join(', '),
     allergies: row.allergies.join(', '),
     alcohol_free: row.alcohol_free,
@@ -134,8 +138,8 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
   if (error) throw error;
 
   return (data ?? []).map((row) => ({
-    email: (row.users as { email: string } | null)?.email ?? '',
-    item: (row.swag_items as { name: string } | null)?.name ?? '',
+    email: flatJoin<{ email: string }>(row.users)?.email ?? '',
+    item: flatJoin<{ name: string }>(row.swag_items)?.name ?? '',
     size: row.size,
     fit_preference: row.fit_preference,
     opted_in: row.opted_in,
@@ -165,7 +169,7 @@ export async function fetchPaymentReconciliation(
   if (error) throw error;
 
   return (data ?? []).map((row) => ({
-    email: (row.user as unknown as { email: string } | null)?.email ?? '',
+    email: flatJoin<{ email: string }>(row.user)?.email ?? '',
     full_name: row.full_name,
     payment_status: row.payment_status,
     fee_amount: row.fee_amount,
@@ -207,13 +211,18 @@ export async function fetchTransportManifest(
   if (error) throw error;
 
   return (data ?? []).map((row) => {
-    const flight = row.flights;
-    const vehicle = row.transport_vehicles;
+    const flight = flatJoin<{
+      flight_number: string | null;
+      airline: string | null;
+      origin: string;
+      destination: string;
+    }>(row.flights);
+    const vehicle = flatJoin<{ vehicle_name: string }>(row.transport_vehicles);
     return {
       direction: row.direction,
       pickup_datetime: row.pickup_datetime,
       pickup_tz: row.pickup_tz,
-      email: row.users?.email ?? '',
+      email: flatJoin<{ email: string }>(row.users)?.email ?? '',
       flight_number: flight?.flight_number ?? null,
       airline: flight?.airline ?? null,
       origin: flight?.origin ?? null,
@@ -251,7 +260,7 @@ export async function fetchRegistrationProgress(
   if (error) throw error;
 
   return (data ?? []).map((row) => {
-    const u = row.user as unknown as { email: string; role: string } | null;
+    const u = flatJoin<{ email: string; role: string }>(row.user);
     return {
       email: u?.email ?? '',
       role: u?.role ?? '',

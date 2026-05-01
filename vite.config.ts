@@ -3,6 +3,22 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+// Tables the bus has no signal for. Anything in this list is served
+// stale-while-revalidate so the offline cache keeps the app readable.
+const OFFLINE_CACHED_TABLES = [
+  'itinerary_items',
+  'registrations',
+  'documents',
+  'flights',
+  'accommodations',
+  'accommodation_occupants',
+  'transport_requests',
+  'sessions',
+  'events',
+] as const;
+
+const OFFLINE_CACHED_PATTERN = new RegExp(`^/rest/v1/(${OFFLINE_CACHED_TABLES.join('|')})`);
+
 export default defineConfig({
   plugins: [
     react(),
@@ -27,14 +43,7 @@ export default defineConfig({
             },
           },
           {
-            // Operational data the bus has no signal for: itinerary,
-            // flights, hotel assignment, transport, registration, docs.
-            // Stale-while-revalidate serves the last good copy offline
-            // and a background fetch refreshes once connectivity returns.
-            urlPattern: ({ url }) =>
-              /^\/rest\/v1\/(itinerary_items|registrations|documents|flights|accommodations|accommodation_occupants|transport_requests|sessions|events)/.test(
-                url.pathname,
-              ),
+            urlPattern: ({ url }) => OFFLINE_CACHED_PATTERN.test(url.pathname),
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'kizuna-data-v2',
