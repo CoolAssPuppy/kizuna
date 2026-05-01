@@ -1,26 +1,36 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { fetchHiBobDirectory, hibobStatus } from './hibob';
+import { fetchHiBobByEmail, hibobStatus } from './hibob';
 
 describe('hibobStatus', () => {
-  it('reports live with a key', () => {
-    expect(hibobStatus({ apiKey: 'k' }).mode).toBe('live');
+  it('reports live with both halves of the service-user credential', () => {
+    expect(hibobStatus({ serviceUserId: 'id', serviceUserToken: 'tok' }).mode).toBe('live');
   });
-  it('reports stubbed without a key', () => {
+
+  it('reports stubbed if either half is missing', () => {
     expect(hibobStatus({}).mode).toBe('stubbed');
+    expect(hibobStatus({ serviceUserId: 'id' }).mode).toBe('stubbed');
+    expect(hibobStatus({ serviceUserToken: 'tok' }).mode).toBe('stubbed');
   });
 });
 
-describe('fetchHiBobDirectory', () => {
-  it('returns the stub directory when no key is configured', async () => {
+describe('fetchHiBobByEmail', () => {
+  it('returns the stub row for a known seed email when no credentials are set', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const directory = await fetchHiBobDirectory({});
-    expect(directory.length).toBeGreaterThan(0);
-    expect(directory[0]?.hibobId).toEqual(expect.any(String));
-    expect(directory[0]?.email).toContain('@');
+    const person = await fetchHiBobByEmail({}, 'paul@kizuna.dev');
+    expect(person).not.toBeNull();
+    expect(person?.workEmail).toBe('paul@kizuna.dev');
+    expect(person?.tshirtSize).toBe('L');
+    expect(person?.shoeSizeEu).toBe(44);
   });
 
-  it('calls the HiBob API and normalises rows when keyed', async () => {
+  it('returns null when the email is unknown to the stub directory', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const person = await fetchHiBobByEmail({}, 'noone@kizuna.dev');
+    expect(person).toBeNull();
+  });
+
+  it('POSTs /people/search with HTTP Basic auth and the right field paths', async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: true,
       json: () =>
@@ -28,50 +38,79 @@ describe('fetchHiBobDirectory', () => {
           employees: [
             {
               id: 'h_1',
-              work: { email: 'a@b.com', department: 'Eng', team: 'DB', title: 'Eng' },
-              personal: { displayName: 'A B', legalName: 'A Bertram' },
-              home: { countryCode: 'GB' },
-              state: 'active',
-            },
-            {
-              id: 'h_2',
-              work: { email: 'c@d.com' },
-              personal: { displayName: 'C D' },
-              state: 'terminated',
+              email: 'a@b.com',
+              firstName: 'A',
+              surname: 'Bertram',
+              displayName: 'A B',
+              fullName: 'A Bertram',
+              avatarUrl: 'https://cdn/avatar.jpg',
+              work: {
+                title: 'Engineer',
+                department: 'Eng',
+                site: 'London',
+                startDate: '2023-01-01',
+                custom: { field_tshirt: 1, field_shoe: 42 },
+              },
+              home: { privateEmail: 'a@gmail.com', mobilePhone: '+44 1' },
+              address: { country: 'GB', city: 'London' },
+              internal: { lifecycleStatus: 'Employed', status: 'active' },
+              humanReadable: { work: { custom: { field_tshirt: 'Large' } } },
             },
           ],
         }),
     });
 
-    const directory = await fetchHiBobDirectory({ apiKey: 'sk', fetchImpl });
-    expect(fetchImpl).toHaveBeenCalledWith(
-      'https://api.hibob.com/v1/people',
-      expect.objectContaining({ method: 'GET' }),
+    const person = await fetchHiBobByEmail(
+      {
+        serviceUserId: 'svc_id',
+        serviceUserToken: 'svc_tok',
+        tshirtFieldId: 'field_tshirt',
+        shoeFieldId: 'field_shoe',
+        fetchImpl,
+      },
+      'a@b.com',
     );
-    expect(directory).toHaveLength(2);
-    expect(directory[0]).toEqual({
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const call = fetchImpl.mock.calls[0] as [string, RequestInit];
+    expect(call[0]).toBe('https://api.hibob.com/v1/people/search');
+    const headers = call[1].headers as Record<string, string>;
+    expect(headers['Authorization']).toMatch(/^Basic /);
+    interface SearchBody {
+      filters: Array<{ fieldPath: string; operator: string; values: string[] }>;
+      fields: string[];
+      humanReadable: string;
+    }
+    const body = JSON.parse(call[1].body as string) as SearchBody;
+    expect(body.filters[0]).toEqual({
+      fieldPath: 'root.email',
+      operator: 'equals',
+      values: ['a@b.com'],
+    });
+    expect(body.fields).toEqual(expect.arrayContaining(['root.email', 'work.custom.field_tshirt']));
+    expect(body.humanReadable).toBe('APPEND');
+
+    expect(person).toMatchObject({
       hibobId: 'h_1',
-      email: 'a@b.com',
+      workEmail: 'a@b.com',
       legalName: 'A Bertram',
-      preferredName: 'A B',
       department: 'Eng',
-      team: 'DB',
-      jobTitle: 'Eng',
-      startDate: null,
-      homeCountry: 'GB',
+      jobTitle: 'Engineer',
+      tshirtSize: 'Large',
+      shoeSizeEu: 42,
+      privateEmail: 'a@gmail.com',
       isActive: true,
     });
-    expect(directory[1]?.isActive).toBe(false);
   });
 
-  it('throws when the HiBob API returns an error', async () => {
+  it('throws when the live API returns a non-2xx', async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       ok: false,
       status: 401,
       json: () => Promise.resolve({}),
     });
-    await expect(fetchHiBobDirectory({ apiKey: 'sk', fetchImpl })).rejects.toThrow(
-      /HiBob \/people failed/,
-    );
+    await expect(
+      fetchHiBobByEmail({ serviceUserId: 'id', serviceUserToken: 'tok', fetchImpl }, 'a@b.com'),
+    ).rejects.toThrow(/HiBob \/people\/search failed \(401\)/);
   });
 });

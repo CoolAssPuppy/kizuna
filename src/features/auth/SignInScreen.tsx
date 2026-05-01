@@ -5,10 +5,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import { useAuth } from './AuthContext';
 import { DevSignInShortcuts } from './DevSignInShortcuts';
+import { hydrateFromHiBob } from './hibobHydrate';
 
 type Tab = 'employee' | 'guest';
 type Mode = 'sign-in' | 'sign-up';
@@ -38,7 +40,15 @@ export function SignInScreen(): JSX.Element {
     setErrorKey(null);
     try {
       await signInWithSso();
-      navigate(redirectTo, { replace: true });
+      // Pull preferred name / t-shirt size / department / etc. from
+      // HiBob into the local profile so the wizard is pre-filled. The
+      // helper swallows errors — registration still proceeds even if
+      // HiBob is unreachable or the credentials are stubbed.
+      await hydrateFromHiBob(getSupabaseClient());
+      // Brand-new sign-ins land in the registration wizard. The wizard
+      // is fully cancellable: users who want to skip it can navigate
+      // anywhere and the same questions live on the Profile page.
+      navigate('/registration', { replace: true });
     } catch {
       setErrorKey('auth.errors.generic');
     } finally {

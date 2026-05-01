@@ -12,7 +12,11 @@ import { requireAdmin } from '../_shared/adminGuard.ts';
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient } from '../_shared/supabaseClient.ts';
 
-const HIBOB_API = 'https://api.hibob.com/v1/people';
+// HiBob's documented happy-path is `POST /v1/people/search` with HTTP
+// Basic auth using a Service User credential. The legacy
+// `GET /v1/people` endpoint with a Bearer token is being deprecated; do
+// not move back to it.
+const HIBOB_SEARCH_URL = 'https://api.hibob.com/v1/people/search';
 
 interface HiBobPerson {
   id: string;
@@ -57,7 +61,10 @@ Deno.serve(async (req) => {
   const guard = await requireAdmin(req);
   if (guard instanceof Response) return guard;
 
-  const hibobKey = Deno.env.get('HIBOB_API_KEY');
+  const serviceUserId = Deno.env.get('HIBOB_SERVICE_USER_ID');
+  const serviceUserToken = Deno.env.get('HIBOB_SERVICE_USER_TOKEN');
+  const tshirtFieldId = Deno.env.get('HIBOB_TSHIRT_FIELD_ID');
+  const teamFieldId = Deno.env.get('HIBOB_TEAM_FIELD_ID');
   const admin = getAdminClient();
 
   // Open the audit row so a failure in HiBob still gets recorded.
@@ -72,7 +79,7 @@ Deno.serve(async (req) => {
 
   let directory: HiBobPerson[];
   try {
-    directory = await fetchDirectory(hibobKey);
+    directory = await fetchDirectory({ serviceUserId, serviceUserToken, tshirtFieldId, teamFieldId });
   } catch (err: unknown) {
     await admin
       .from('hibob_sync_log')
@@ -166,30 +173,68 @@ Deno.serve(async (req) => {
   });
 });
 
-async function fetchDirectory(apiKey: string | undefined): Promise<HiBobPerson[]> {
-  if (!apiKey) {
-    console.warn('[kizuna] HIBOB_API_KEY missing — using stub directory.');
+interface DirectoryConfig {
+  serviceUserId: string | undefined;
+  serviceUserToken: string | undefined;
+  tshirtFieldId: string | undefined;
+  teamFieldId: string | undefined;
+}
+
+async function fetchDirectory(config: DirectoryConfig): Promise<HiBobPerson[]> {
+  if (!config.serviceUserId || !config.serviceUserToken) {
+    console.warn(
+      '[kizuna] HIBOB_SERVICE_USER_ID / HIBOB_SERVICE_USER_TOKEN missing — using stub directory.',
+    );
     return STUB_DIRECTORY;
   }
-  const response = await fetch(HIBOB_API, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json' },
+  // Pulling the entire directory in one POST search call. Large tenants
+  // should switch to paginated /people/search with cursor; for Supafest
+  // the org fits comfortably under a single response.
+  const fields: string[] = [
+    'root.id',
+    'root.email',
+    'root.firstName',
+    'root.surname',
+    'root.displayName',
+    'root.fullName',
+    'work.title',
+    'work.department',
+    'work.startDate',
+    'address.country',
+    'internal.lifecycleStatus',
+    'internal.status',
+  ];
+  if (config.teamFieldId) fields.push(`work.custom.${config.teamFieldId}`);
+  if (config.tshirtFieldId) fields.push(`work.custom.${config.tshirtFieldId}`);
+
+  const auth = btoa(`${config.serviceUserId}:${config.serviceUserToken}`);
+  const response = await fetch(HIBOB_SEARCH_URL, {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${auth}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({ fields, humanReadable: 'APPEND' }),
   });
   if (!response.ok) {
     throw new Error(`hibob ${response.status}`);
   }
   const body = (await response.json()) as { employees?: any[] };
-  return (body.employees ?? []).map((e: any) => ({
-    id: e.id ?? '',
-    email: e.work?.email ?? '',
-    legalName: e.personal?.legalName ?? e.personal?.displayName ?? '',
-    preferredName: e.personal?.displayName ?? null,
-    department: e.work?.department ?? null,
-    team: e.work?.team ?? null,
-    jobTitle: e.work?.title ?? null,
-    startDate: e.work?.startDate ?? null,
-    homeCountry: e.home?.countryCode ?? null,
-  }));
+  return (body.employees ?? []).map((e: any) => {
+    const teamCustom = config.teamFieldId ? e.work?.custom?.[config.teamFieldId] : null;
+    return {
+      id: e.id ?? '',
+      email: e.email ?? '',
+      legalName: e.fullName ?? e.displayName ?? `${e.firstName ?? ''} ${e.surname ?? ''}`.trim(),
+      preferredName: e.displayName ?? null,
+      department: e.work?.department ?? null,
+      team: typeof teamCustom === 'string' ? teamCustom : null,
+      jobTitle: e.work?.title ?? null,
+      startDate: e.work?.startDate ?? null,
+      homeCountry: e.address?.country ?? null,
+    };
+  });
 }
 
 function hibobValue(row: HiBobPerson, field: FieldName): string | null {
