@@ -239,6 +239,7 @@
   },
   "footer": {
     "tagline": "Kizuna · An enduring bond.",
+    "poweredBy": "Built on Supabase",
     "theme": "Theme",
     "themes": {
       "light": "Light",

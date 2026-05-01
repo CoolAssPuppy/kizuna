@@ -1,0 +1,120 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Kizuna" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e7]: 絆
+          - generic [ref=e8]: Kizuna
+        - navigation [ref=e37]:
+          - link "Home" [ref=e38] [cursor=pointer]:
+            - /url: /
+          - link "Itinerary" [ref=e39] [cursor=pointer]:
+            - /url: /itinerary
+          - link "Agenda" [ref=e40] [cursor=pointer]:
+            - /url: /agenda
+          - link "Documents" [ref=e41] [cursor=pointer]:
+            - /url: /documents
+          - link "Community" [ref=e42] [cursor=pointer]:
+            - /url: /community
+        - generic [ref=e9]:
+          - button "Notifications, none unread" [ref=e44] [cursor=pointer]:
+            - img [ref=e45]
+          - button "Open account menu" [ref=e48] [cursor=pointer]:
+            - img [ref=e49]
+    - main [ref=e53]:
+      - generic [ref=e54]:
+        - button "Upload Your Avatar" [ref=e55] [cursor=pointer]:
+          - generic [ref=e56]: LS
+          - img [ref=e58]
+        - generic [ref=e61]:
+          - heading "Profile" [level=1] [ref=e62]
+          - generic [ref=e63]:
+            - generic [ref=e64]: luke.skywalker@kizuna.dev
+            - generic [ref=e65]: Employee
+      - generic [ref=e66]:
+        - complementary [ref=e67]:
+          - tablist "Profile sections" [ref=e68]:
+            - tab "Personal info" [selected] [ref=e69] [cursor=pointer]:
+              - img [ref=e70]
+              - generic [ref=e73]: Personal info
+            - tab "Community" [ref=e74] [cursor=pointer]:
+              - img [ref=e75]
+              - generic [ref=e78]: Community
+            - tab "Dietary" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+              - generic [ref=e85]: Dietary
+            - tab "Accessibility" [ref=e86] [cursor=pointer]:
+              - img [ref=e87]
+              - generic [ref=e93]: Accessibility
+            - tab "Emergency contact" [ref=e94] [cursor=pointer]:
+              - img [ref=e95]
+              - generic [ref=e98]: Emergency contact
+            - tab "Passport" [ref=e99] [cursor=pointer]:
+              - img [ref=e100]
+              - generic [ref=e104]: Passport
+            - tab "Guests" [ref=e105] [cursor=pointer]:
+              - img [ref=e106]
+              - generic [ref=e111]: Guests
+            - tab "Swag" [ref=e112] [cursor=pointer]:
+              - img [ref=e113]
+              - generic [ref=e115]: Swag
+            - tab "Transport" [ref=e116] [cursor=pointer]:
+              - img [ref=e117]
+              - generic [ref=e119]: Transport
+        - tabpanel "Personal info" [ref=e120]:
+          - generic [ref=e121]:
+            - generic [ref=e123]:
+              - heading "Personal Info" [level=2] [ref=e124]
+              - paragraph [ref=e125]: Name, badge name, and the city you call home.
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - text: Preferred Name
+                - textbox "Preferred Name" [ref=e128]: LukeFromTest
+                - paragraph [ref=e129]: How your name appears on your badge.
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - text: First Name
+                  - textbox "First Name" [ref=e132]: Luke
+                - generic [ref=e133]:
+                  - text: Middle
+                  - textbox "Middle" [ref=e134]
+                - generic [ref=e135]:
+                  - text: Last Name
+                  - textbox "Last Name" [ref=e136]: Skywalker
+              - paragraph [ref=e137]: Exactly as printed on your passport. We use this for travel documents and the dinner seating chart.
+              - generic [ref=e138]:
+                - generic [ref=e139]:
+                  - text: Alternate Email
+                  - textbox "Alternate Email" [ref=e140]: luke.skywalker@personal.example
+                - generic [ref=e141]:
+                  - text: Phone Number
+                  - textbox "Phone Number" [ref=e142]:
+                    - /placeholder: +1 415 555 0101
+                    - text: +1 415 555 9343
+                - generic [ref=e143]:
+                  - text: WhatsApp
+                  - textbox "WhatsApp" [ref=e144]
+              - generic [ref=e145]:
+                - text: Current City
+                - textbox "Current City" [ref=e146]: San Francisco
+                - paragraph [ref=e147]: Where you are travelling from.
+              - button "Save" [ref=e149] [cursor=pointer]
+    - contentinfo [ref=e14]:
+      - generic [ref=e15]:
+        - link "Built on Supabase" [ref=e16] [cursor=pointer]:
+          - /url: https://supabase.com
+          - img "Built on Supabase" [ref=e17]
+        - paragraph [ref=e18]: Kizuna · An enduring bond.
+        - generic [ref=e19]:
+          - radiogroup "Language" [ref=e20]:
+            - radio "English (United States)" [checked] [ref=e21] [cursor=pointer]:
+              - generic [ref=e22]: 🇺🇸
+          - radiogroup "Theme" [ref=e23]:
+            - radio "Light" [checked] [ref=e24] [cursor=pointer]:
+              - img [ref=e25]
+            - radio "Dark" [ref=e31] [cursor=pointer]:
+              - img [ref=e32]
+            - radio "Barbie" [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+  - status [ref=e151]: Personal info saved.

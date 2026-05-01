@@ -1,0 +1,183 @@
+- generic [ref=e3]:
+  - banner [ref=e56]:
+    - generic [ref=e57]:
+      - link "Kizuna" [ref=e58] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e59]: 絆
+        - generic [ref=e60]: Kizuna
+      - navigation [ref=e61]:
+        - link "Home" [ref=e62] [cursor=pointer]:
+          - /url: /
+        - link "Itinerary" [ref=e63] [cursor=pointer]:
+          - /url: /itinerary
+        - link "Agenda" [ref=e64] [cursor=pointer]:
+          - /url: /agenda
+        - link "Documents" [ref=e65] [cursor=pointer]:
+          - /url: /documents
+        - link "Community" [ref=e66] [cursor=pointer]:
+          - /url: /community
+      - generic [ref=e67]:
+        - button "Notifications, none unread" [ref=e69] [cursor=pointer]:
+          - img [ref=e70]
+        - button "Open account menu" [ref=e74] [cursor=pointer]:
+          - img [ref=e75]
+  - main [ref=e80]:
+    - heading "مرحبا, Luke." [level=1] [ref=e81]
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - list [ref=e84]:
+          - listitem [ref=e85]:
+            - article [ref=e86]:
+              - heading "Welcome to Supafest 2027" [level=3] [ref=e87]
+              - paragraph [ref=e88]: Five days in Banff, January 11-15
+              - paragraph [ref=e89]: Hotel rooms are filling up. Book your travel through Perk by 15 December 2026.
+          - listitem [ref=e90]:
+            - article [ref=e91]:
+              - 'heading "New: opt-in breakouts" [level=3] [ref=e92]'
+              - paragraph [ref=e93]: Pick the technical sessions that matter to you
+              - paragraph [ref=e94]: The agenda has 14 breakout slots this year. Star the ones you want to attend in the agenda tab.
+        - list [ref=e95]:
+          - listitem [ref=e96]:
+            - link "Registration May 1, 2026 dietary Registration step still open" [ref=e97] [cursor=pointer]:
+              - /url: /registration/dietary
+              - generic [ref=e98]:
+                - generic [ref=e99]:
+                  - generic [ref=e100]: Registration
+                  - generic [ref=e101]: May 1, 2026
+                - heading "dietary" [level=3] [ref=e102]
+                - paragraph [ref=e103]: Registration step still open
+          - listitem [ref=e104]:
+            - link "Registration May 1, 2026 swag Registration step still open" [ref=e105] [cursor=pointer]:
+              - /url: /registration/swag
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - generic [ref=e108]: Registration
+                  - generic [ref=e109]: May 1, 2026
+                - heading "swag" [level=3] [ref=e110]
+                - paragraph [ref=e111]: Registration step still open
+          - listitem [ref=e112]:
+            - link "Registration May 1, 2026 transport Registration step still open" [ref=e113] [cursor=pointer]:
+              - /url: /registration/transport
+              - generic [ref=e114]:
+                - generic [ref=e115]:
+                  - generic [ref=e116]: Registration
+                  - generic [ref=e117]: May 1, 2026
+                - heading "transport" [level=3] [ref=e118]
+                - paragraph [ref=e119]: Registration step still open
+          - listitem [ref=e120]:
+            - link "Registration May 1, 2026 documents Registration step still open" [ref=e121] [cursor=pointer]:
+              - /url: /registration/documents
+              - generic [ref=e122]:
+                - generic [ref=e123]:
+                  - generic [ref=e124]: Registration
+                  - generic [ref=e125]: May 1, 2026
+                - heading "documents" [level=3] [ref=e126]
+                - paragraph [ref=e127]: Registration step still open
+          - listitem [ref=e128]:
+            - link "Registration May 1, 2026 emergency contact Registration step still open" [ref=e129] [cursor=pointer]:
+              - /url: /registration/emergency-contact
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: Registration
+                  - generic [ref=e133]: May 1, 2026
+                - heading "emergency contact" [level=3] [ref=e134]
+                - paragraph [ref=e135]: Registration step still open
+          - listitem [ref=e136]:
+            - link "Document May 1, 2026 Travel Expense Policy Awaiting your signature" [ref=e137] [cursor=pointer]:
+              - /url: /documents/5dabadcf-7f3e-44da-ae46-a168d9852335/sign
+              - generic [ref=e138]:
+                - generic [ref=e139]:
+                  - generic [ref=e140]: Document
+                  - generic [ref=e141]: May 1, 2026
+                - heading "Travel Expense Policy" [level=3] [ref=e142]
+                - paragraph [ref=e143]: Awaiting your signature
+          - listitem [ref=e144]:
+            - link "Document May 1, 2026 Event waiver Awaiting your signature" [ref=e145] [cursor=pointer]:
+              - /url: /documents/7969fce4-f314-456d-ae22-54a9f1c0eb61/sign
+              - generic [ref=e146]:
+                - generic [ref=e147]:
+                  - generic [ref=e148]: Document
+                  - generic [ref=e149]: May 1, 2026
+                - heading "Event waiver" [level=3] [ref=e150]
+                - paragraph [ref=e151]: Awaiting your signature
+          - listitem [ref=e152]:
+            - link "Document May 1, 2026 Code of conduct Awaiting your signature" [ref=e153] [cursor=pointer]:
+              - /url: /documents/e98a5b91-662a-4c0d-afe4-6315fddeb693/sign
+              - generic [ref=e154]:
+                - generic [ref=e155]:
+                  - generic [ref=e156]: Document
+                  - generic [ref=e157]: May 1, 2026
+                - heading "Code of conduct" [level=3] [ref=e158]
+                - paragraph [ref=e159]: Awaiting your signature
+      - complementary [ref=e160]:
+        - generic "Countdown to event start" [ref=e161]:
+          - generic [ref=e162]:
+            - term [ref=e163]: "254"
+            - definition [ref=e164]: Days
+          - generic [ref=e165]:
+            - term [ref=e166]: "02"
+            - definition [ref=e167]: Hours
+          - generic [ref=e168]:
+            - term [ref=e169]: "15"
+            - definition [ref=e170]: Minutes
+        - generic [ref=e171]:
+          - generic [ref=e173]:
+            - heading "Get to know your teammate" [level=2] [ref=e174]
+            - paragraph [ref=e175]: A real fun fact from a fellow attendee. Take a guess, then reveal.
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - img [ref=e178]
+              - paragraph [ref=e181]: Which teammate holds the Delta-quadrant record for fastest cup of coffee?
+            - button "Reveal the answer" [ref=e182] [cursor=pointer]
+            - button "Try another" [ref=e184] [cursor=pointer]
+        - generic [ref=e185]:
+          - generic [ref=e187]:
+            - heading "Jet lag fighter" [level=2] [ref=e188]
+            - paragraph [ref=e189]: 7 hours west from where you live now. Expect moderate jet lag.
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - img [ref=e192]
+              - paragraph [ref=e194]: Set your watch to destination time the moment you board the plane.
+            - generic [ref=e195]:
+              - paragraph [ref=e196]: General guidance, not medical advice. Confirm with your doctor for any chronic-use plans.
+              - button "Show another tip" [ref=e197] [cursor=pointer]
+        - generic [ref=e198]:
+          - generic [ref=e200]:
+            - heading "Facts About Our Event" [level=2] [ref=e201]
+            - paragraph [ref=e202]: All hail the legend of Team 18.
+          - generic [ref=e203]:
+            - generic [ref=e204]:
+              - term [ref=e205]: Employees
+              - definition [ref=e206]: "14"
+            - generic [ref=e207]:
+              - term [ref=e208]: Guests
+              - definition [ref=e209]: "0"
+            - generic [ref=e210]:
+              - term [ref=e211]: Registrations in progress
+              - definition [ref=e212]: "1"
+            - generic [ref=e213]:
+              - term [ref=e214]: Registrations complete
+              - definition [ref=e215]: "0"
+            - generic [ref=e216]:
+              - term [ref=e217]: Documents signed
+              - definition [ref=e218]: "0"
+        - generic [ref=e221]:
+          - heading "Defending SupaCup champion" [level=2] [ref=e222]
+          - paragraph [ref=e223]: Tyler Shukert · Champion of Supafest 2026 — Da Nang
+  - contentinfo [ref=e224]:
+    - generic [ref=e225]:
+      - link "Built on Supabase" [ref=e226] [cursor=pointer]:
+        - /url: https://supabase.com
+        - img "Built on Supabase" [ref=e227]
+      - paragraph [ref=e228]: Kizuna · An enduring bond.
+      - generic [ref=e229]:
+        - radiogroup "Language" [ref=e230]:
+          - radio "English (United States)" [checked] [ref=e231] [cursor=pointer]:
+            - generic [ref=e232]: 🇺🇸
+        - radiogroup "Theme" [ref=e233]:
+          - radio "Light" [checked] [ref=e234] [cursor=pointer]:
+            - img [ref=e235]
+          - radio "Dark" [ref=e241] [cursor=pointer]:
+            - img [ref=e242]
+          - radio "Barbie" [ref=e244] [cursor=pointer]:
+            - img [ref=e245]

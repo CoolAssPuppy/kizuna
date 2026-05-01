@@ -52,7 +52,11 @@ Deno.serve(async (req) => {
   if (invitationError || !invitation) {
     return jsonResponse({ error: 'invitation_not_found' }, { status: 404 });
   }
-  if (invitation.status !== 'pending') {
+  // Lifecycle: pending -> sent -> accepted. Only 'sent' invitations
+  // should be accepted in the new flow (sponsor has paid, the email
+  // went out). 'pending' is allowed too so older invites issued before
+  // the payment-gate change keep working.
+  if (invitation.status !== 'sent' && invitation.status !== 'pending') {
     return jsonResponse({ error: 'invitation_already_used' }, { status: 409 });
   }
 
@@ -77,13 +81,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: usersError.message }, { status: 500 });
   }
 
+  // The sponsor pays the bundled fee BEFORE the invite email goes
+  // out, so by the time we reach this point the guest's seat has
+  // already been settled. Stamp 'paid' on the new guest_profiles row
+  // so guard_guest_profile_completion doesn't immediately block
+  // legal_name from landing.
   const { error: guestProfilesError } = await admin.from('guest_profiles').insert({
     user_id: newUserId,
     sponsor_id: verification.claims.sub,
     full_name: verification.claims.email,
     legal_name: verification.claims.email,
     relationship: 'partner',
-    payment_status: 'pending',
+    payment_status: 'paid',
   });
   if (guestProfilesError) {
     return jsonResponse({ error: guestProfilesError.message }, { status: 500 });

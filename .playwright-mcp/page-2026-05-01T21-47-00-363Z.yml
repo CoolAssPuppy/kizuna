@@ -1,0 +1,117 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "Kizuna" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e7]: 絆
+        - generic [ref=e8]: Kizuna
+      - navigation [ref=e37]:
+        - link "Home" [ref=e38] [cursor=pointer]:
+          - /url: /
+        - link "Itinerary" [ref=e39] [cursor=pointer]:
+          - /url: /itinerary
+        - link "Agenda" [ref=e40] [cursor=pointer]:
+          - /url: /agenda
+        - link "Documents" [ref=e41] [cursor=pointer]:
+          - /url: /documents
+        - link "Community" [ref=e42] [cursor=pointer]:
+          - /url: /community
+      - generic [ref=e9]:
+        - button "Notifications, none unread" [ref=e44] [cursor=pointer]:
+          - img [ref=e45]
+        - button "Open account menu" [ref=e48] [cursor=pointer]:
+          - img [ref=e49]
+  - main [ref=e53]:
+    - generic [ref=e54]:
+      - button "Upload Your Avatar" [ref=e55] [cursor=pointer]:
+        - generic [ref=e56]: LS
+        - img [ref=e58]
+      - generic [ref=e61]:
+        - heading "Profile" [level=1] [ref=e62]
+        - generic [ref=e63]:
+          - generic [ref=e64]: luke.skywalker@kizuna.dev
+          - generic [ref=e65]: Employee
+    - generic [ref=e66]:
+      - complementary [ref=e67]:
+        - tablist "Profile sections" [ref=e68]:
+          - tab "Personal info" [ref=e69] [cursor=pointer]:
+            - img [ref=e70]
+            - generic [ref=e73]: Personal info
+          - tab "Community" [ref=e74] [cursor=pointer]:
+            - img [ref=e75]
+            - generic [ref=e78]: Community
+          - tab "Dietary" [ref=e79] [cursor=pointer]:
+            - img [ref=e80]
+            - generic [ref=e85]: Dietary
+          - tab "Accessibility" [ref=e86] [cursor=pointer]:
+            - img [ref=e87]
+            - generic [ref=e93]: Accessibility
+          - tab "Emergency contact" [ref=e94] [cursor=pointer]:
+            - img [ref=e95]
+            - generic [ref=e98]: Emergency contact
+          - tab "Passport" [ref=e99] [cursor=pointer]:
+            - img [ref=e100]
+            - generic [ref=e104]: Passport
+          - tab "Guests" [ref=e105] [cursor=pointer]:
+            - img [ref=e106]
+            - generic [ref=e111]: Guests
+          - tab "Swag" [active] [selected] [ref=e112] [cursor=pointer]:
+            - img [ref=e113]
+            - generic [ref=e115]: Swag
+          - tab "Transport" [ref=e116] [cursor=pointer]:
+            - img [ref=e117]
+            - generic [ref=e119]: Transport
+      - tabpanel "Swag" [ref=e154]:
+        - generic [ref=e155]:
+          - generic [ref=e157]:
+            - heading "Swag" [level=2] [ref=e158]
+            - paragraph [ref=e159]: Tell us your t-shirt and shoe sizes so we can order the right gear ahead of time.
+          - generic [ref=e160]:
+            - group "Your sizes" [ref=e161]:
+              - generic [ref=e162]: Your sizes
+              - generic [ref=e163]:
+                - text: T-shirt size
+                - generic [ref=e164]:
+                  - button "XS" [ref=e165] [cursor=pointer]
+                  - button "S" [ref=e166] [cursor=pointer]
+                  - button "M" [ref=e167] [cursor=pointer]
+                  - button "L" [ref=e168] [cursor=pointer]
+                  - button "XL" [ref=e169] [cursor=pointer]
+                  - button "2XL" [ref=e170] [cursor=pointer]
+                  - button "3XL" [ref=e171] [cursor=pointer]
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - generic [ref=e174]: Shoe size
+                  - tablist [ref=e175]:
+                    - tab "US" [selected] [ref=e176] [cursor=pointer]
+                    - tab "EU" [ref=e177] [cursor=pointer]
+                - generic [ref=e178]:
+                  - button "5" [ref=e179] [cursor=pointer]
+                  - button "6" [ref=e180] [cursor=pointer]
+                  - button "7" [ref=e181] [cursor=pointer]
+                  - button "8" [ref=e182] [cursor=pointer]
+                  - button "9" [ref=e183] [cursor=pointer]
+                  - button "10" [ref=e184] [cursor=pointer]
+                  - button "11" [ref=e185] [cursor=pointer]
+                  - button "12" [ref=e186] [cursor=pointer]
+                  - button "13" [ref=e187] [cursor=pointer]
+                  - button "14" [ref=e188] [cursor=pointer]
+                - paragraph [ref=e189]: Pick the system you know — we store everything as EU.
+            - button "Save" [ref=e191] [cursor=pointer]
+  - contentinfo [ref=e14]:
+    - generic [ref=e15]:
+      - link "Built on Supabase" [ref=e16] [cursor=pointer]:
+        - /url: https://supabase.com
+        - img "Built on Supabase" [ref=e17]
+      - paragraph [ref=e18]: Kizuna · An enduring bond.
+      - generic [ref=e19]:
+        - radiogroup "Language" [ref=e20]:
+          - radio "English (United States)" [checked] [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: 🇺🇸
+        - radiogroup "Theme" [ref=e23]:
+          - radio "Light" [checked] [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+          - radio "Dark" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+          - radio "Barbie" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]

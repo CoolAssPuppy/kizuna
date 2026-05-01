@@ -3,8 +3,10 @@
 // Authenticated employee asks Kizuna to invite a guest. The flow forks
 // on `age_bracket`:
 //
-//   * 'adult' (18+) -> insert into guest_invitations + sign a 7-day JWT
-//     + send the invite email via Resend (or stub when no key).
+//   * 'adult' (18+) -> insert into guest_invitations with status='pending'
+//     and a signed 7-day JWT. The invite email DOES NOT go out here —
+//     it lands only after the sponsor pays the bundled fee, at which
+//     point stripe-webhook flips status='sent' and dispatches the mail.
 //   * 'under_12' / 'teen' -> insert into additional_guests directly.
 //     No email, no signed token, no auth user — minors ride on the
 //     sponsor's registration. The trigger guard_guest_profile_completion
@@ -130,40 +132,9 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: updateError?.message ?? 'update_failed' }, { status: 500 });
   }
 
-  // Best-effort email send. Resend stub mode logs and returns success.
-  await tryEmail(signedToken, guestEmail).catch((err: unknown) => {
-    console.warn('[kizuna] resend send failed', err);
-  });
-
+  // The invitation email DOES NOT go out here. It lands only after the
+  // sponsor pays the bundled fee — stripe-webhook flips status='sent'
+  // and dispatches the mail then. Returning the invitation row lets the
+  // SPA render the "Pending payment" badge in GuestsSection.
   return jsonResponse({ kind: 'adult', invitation: updated }, { status: 201, headers: corsHeaders });
 });
-
-async function tryEmail(token: string, guestEmail: string): Promise<void> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  const fromAddress = Deno.env.get('RESEND_FROM_EMAIL') ?? 'hello@kizuna.example';
-  const acceptUrl = `${Deno.env.get('KIZUNA_PUBLIC_URL') ?? 'http://localhost:5173'}/accept-invitation?token=${encodeURIComponent(token)}`;
-
-  if (!apiKey) {
-    console.info('[kizuna] RESEND_API_KEY missing — would have sent invite to %s with link %s', guestEmail, acceptUrl);
-    return;
-  }
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: fromAddress,
-      to: guestEmail,
-      subject: "You're invited to Supafest",
-      html: `<p>You've been invited to attend Supafest. <a href="${acceptUrl}">Accept your invitation</a> within 7 days.</p>`,
-    }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`resend ${response.status}: ${text}`);
-  }
-}

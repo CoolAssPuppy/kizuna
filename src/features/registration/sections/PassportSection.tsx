@@ -51,8 +51,18 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
     toastSuccessKey: 'profile.toast.passportSaved',
   });
 
+  // The set_passport RPC takes p_expiry_date as a NOT-NULL `date`, so an
+  // empty string from the date input gets rejected by Postgres with
+  // 22007 (invalid input syntax for type date). Gate Save on every
+  // required field rather than letting a 400 echo back as an error toast.
+  const submitDisabled =
+    !values.passportName.trim() ||
+    !values.passportNumber.trim() ||
+    values.issuingCountry.trim().length !== 2 ||
+    !values.expiryDate;
+
   function handleSubmit(): void {
-    if (!user) return;
+    if (!user || submitDisabled) return;
     void submit(() =>
       savePassport(getSupabaseClient(), user.id, {
         passportName: values.passportName,
@@ -74,6 +84,7 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
       hydrated={hydrated}
       errorKey={errorKey}
       onSubmit={handleSubmit}
+      submitDisabled={submitDisabled}
     >
       <div className="space-y-2">
         <Label htmlFor="passport-name">{t('registration.passport.passportName')}</Label>

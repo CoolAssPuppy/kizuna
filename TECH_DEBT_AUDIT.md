@@ -1,0 +1,83 @@
+# Tech Debt Audit — kizuna
+
+Generated: 2026-05-01 (post-M9.5 sweep)
+
+This is a fresh audit run after the M9.5 sweep retired the prior `TECH_DEBT_AUDIT.md`. Findings are scoped to what survived that sweep plus new debt accreted during the recent feature push (room block dialog, edit-itinerary dialog, guest fees box, dev-shortcut prod fix). The repo is in good shape — most categories are quiet — so this is short on purpose.
+
+## Executive summary
+
+- **1 Critical**: `parse-itinerary` edge function has no auth guard. Identical shape to the `rephrase-icebreaker` bug fixed yesterday: any anon caller can POST and burn OpenAI tokens.
+- **2 High**: A `vite-plugin-pwa` CVE (high) and a `vitest` CVE (moderate) are reachable via `npm audit`. Both fixes are semver-major and need a deliberate upgrade pass, not auto-fix.
+- **6 Medium**: Two ~600-LOC screens (`GroundTransportToolScreen`, `GuestsSection`) creep close to god-component territory. ~50 unused exported types live mostly in `*/api/*.ts`. No rate limiting on either OpenAI-calling edge function. One stale `TODO(M10)` for Sentry in `ErrorBoundary`. `parse-itinerary` and `rephrase-icebreaker` have no body-size cap. `share-report` doesn't honour CORS allow-origin per environment.
+- **6 Low**: Knip flags 8 unused exports — three are real, five are factory exports kept around for tests. A handful of `as unknown as` casts in `api/*.ts` are Supabase typegen workarounds — acceptable but should be ring-fenced. Dead-code surface is small; depcheck false positives dominate that report.
+- **Hot spot**: `src/features/admin/*` accounts for the largest screens; debt concentration there is moderate, not severe. No god classes, no circular deps (madge clean), no `any` in src code.
+- **No findings**: type debt (zero `as any`, zero `@ts-ignore` outside generated files), service-role leakage to client (none), circular deps (none), commented-out code (none flagged).
+
+## Architectural mental model
+
+A Vite + React 18 PWA with feature-sliced layout (`src/features/<domain>`), backed by Supabase (Postgres + Auth + Realtime + Storage + Edge Functions). Each feature owns its own `components/`, `hooks/`, `api/` (Supabase client wrappers), and tests. Cross-cutting concerns live in `src/lib/` (Supabase singleton, i18n, integrations to OpenAI / Resend / Slack / HiBob / Stripe). Backend is declarative SQL in `supabase/schemas/` (numbered 10–99) plus pgTAP tests and Deno edge functions. Two big SQL files (`80_functions_and_triggers.sql` 868 LOC, `90_rls.sql` 664 LOC) carry the trust-boundary code — both are intentionally large because they're the spine of the security model and benefit from being readable end-to-end.
+
+The integration story is the bit most likely to bite: every external dependency (HiBob, Perk, Stripe, Resend, Slack, OpenAI) has a stub-fallback so the SPA runs without third-party credentials, and `field_source` / `field_locked` columns prevent silent overwrite of synced data. RLS is enabled on all tables; admin-only writes happen through SECURITY DEFINER RPCs. Edge functions split between user-scoped (auth header → `getUserClient`), admin-only (`requireAdmin`), and webhook-only (`getAdminClient`, no JWT). The model is internally consistent — every place I expected a security boundary, I found one — except `parse-itinerary` and `rephrase-icebreaker`, which were the two known gaps before the sweep. `rephrase-icebreaker` is now fixed; `parse-itinerary` is the one finding below.
+
+## Findings
+
+| ID | Category | File:Line | Severity | Effort | Description | Recommendation |
+|----|----------|-----------|----------|--------|-------------|----------------|
+| F001 | Security | supabase/functions/parse-itinerary/index.ts:14 | Critical | S | No auth check before calling OpenAI. Same shape as the rephrase-icebreaker hole closed in this sweep. Anonymous caller can burn tokens at will. | Add `const authHeader = req.headers.get('Authorization'); if (!authHeader) return jsonResponse({error:'unauthorized'},{status:401});` plus `getUserClient(authHeader).auth.getUser()` check, mirroring create-stripe-checkout/index.ts:34-46. |
+| F002 | Dependency | package.json devDependencies (vite-plugin-pwa) | High | M | `npm audit` reports a high CVE in `@rollup/plugin-terser` reachable via `vite-plugin-pwa < 1.0`. Fix is `vite-plugin-pwa@1.2.0` (semver-major). | Upgrade in a focused PR with PWA verification (precache list, install prompt, offline fallback). Do not run `npm audit fix --force`. |
+| F003 | Dependency | package.json devDependencies (@vitest/coverage-v8) | High | M | Moderate CVE via vitest <2.2-beta.2. Fix is `@vitest/coverage-v8@4.x` (semver-major across vitest itself). | Pin vitest + @vitest/coverage-v8 + @vitest/ui together. Re-run `npm run test:coverage` and confirm thresholds. |
+| F004 | Architectural | src/features/admin/GroundTransportToolScreen.tsx:1-593 | Medium | M | After threading `event.time_zone` through, the screen sits at 593 LOC with five inner components (`DirectionTabs`, `PassengerLane`, `PassengerRowCard`, `VehicleSidebar`, `NewVehicleDialog`). Approaching god-component territory. | Extract `NewVehicleDialog` and `VehicleSidebar` into `groundTransport/` subfolder (mirrors what was done with `roomAssignment/ImportRoomBlockDialog`). Keep the screen as compositor. |
+| F005 | Architectural | src/features/registration/sections/GuestsSection.tsx:1-542 | Medium | M | Section now hosts InviteGuestDialog, RenameMinorDialog, PayFeesDialog, edit/delete handlers, and the totals box. Five concerns in one file. | Move each dialog to its own file under `sections/guests/`. Section becomes ~150 LOC and the dialogs become composable. |
+| F006 | Type | src/features/registration/api/userScopedRepository.ts:44 | Medium | S | `client.from(table as never) as unknown as GenericPostgrestBuilder` ring-fences a Supabase generic-typing limitation, but it's the only spot without a comment explaining why the cast is unavoidable. | Add a short docstring on the cast pointing to the Supabase typegen GitHub issue. |
+| F007 | Performance | supabase/functions/parse-itinerary/index.ts:22 + rephrase-icebreaker/index.ts | Medium | S | Both OpenAI-calling functions read the entire request body without a size cap. A 5MB itinerary blob would be parsed (and billed) before any guard fires. | Wrap `await req.json()` in a `Content-Length` check (reject >32KB for parse-itinerary, >2KB for rephrase-icebreaker). |
+| F008 | Security | supabase/functions/share-report/index.ts:225 | Medium | S | `corsHeaders` allows `*` for the public share endpoint. Fine for public, but the same module is reachable for authenticated reports too — origin should narrow when `Authorization` is present. | Split CORS handling: `*` for the share-token branch, allow-list for any future authenticated branch. |
+| F009 | Documentation | src/app/ErrorBoundary.tsx:21 | Medium | S | `TODO(M10)` for Sentry wiring is the only TODO in the repo. Either wire it up before launch or downgrade to a follow-up issue and remove the TODO. | Decide M10 scope first; if Sentry slips post-launch, file an issue and remove the TODO so the codebase stays TODO-free. |
+| F010 | Dead code | src/lib/i18n.ts (DEFAULT_LOCALE, NAMESPACES) | Low | S | Knip flags both as unused. Locale routing reads them from a different module. | Delete or re-export from the canonical i18n entry point. |
+| F011 | Dead code | src/components/ui/dialog.tsx (DialogClose, DialogOverlay, DialogPortal, DialogTrigger) | Low | S | Re-exports from radix that no caller imports. Generated by `shadcn add dialog` and never trimmed. | Remove the unused re-exports; keep `Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`, `DialogFooter`. |
+| F012 | Dead code | src/features/admin/groundTransport/grouping.ts:3 (WINDOW_MINUTES export) | Low | S | After the timezone refactor, `WINDOW_MINUTES` is only consumed inside this module. | Drop `export`; keep the const file-private. |
+| F013 | Dead code | src/components/ui/dropzone.tsx (formatBytes) + ui/button.tsx (buttonVariants) | Low | S | Both are exports kept "in case someone needs them." Nobody does. | Delete or `// noinspection unused — public API for shadcn parity` if the parity is the reason. |
+| F014 | Dead code | src/lib/timezone.ts (tzOffsetMs) | Low | S | Helper exported during the simplifier sweep, never imported. The factory it was meant to feed builds offsets inline. | Delete. If you need it later, recreate. |
+| F015 | Type | src/features/admin/api/groundTransport.ts:170 + rooms.ts:101,162 + community/api/messages.ts:43 + people.ts:53 + features/home/TeammateIcebreaker.tsx:73 | Low | S | Six `as unknown as <Row>[]` casts in api wrappers. Each one papers over a Supabase nested-relation typegen limitation. | Centralise the pattern: a `castNestedRelation<T>(rows: unknown): T[]` helper in `src/lib/supabase.ts` so the lint exception lives in one place and the api modules stay clean. |
+
+(15 findings is the right number for this run. Padding past the real material would dilute the signal — most of the obvious debt was eaten in the M9.5 sweep two hours ago.)
+
+## Top 5 — if you fix nothing else, fix these
+
+1. **F001 — Auth-gate `parse-itinerary`.** Twelve lines of code, prevents anonymous OpenAI billing. Pattern is already in `create-stripe-checkout/index.ts:34-46` — copy the auth header check + `getUserClient` + `auth.getUser` triplet, return 401 on miss. Add a pgTAP-equivalent test under `tests/e2e/` (or a Deno test) that hits the function without an auth header and asserts 401.
+
+2. **F002 + F003 — Knock out both CVEs in one PR.** Bump `vite-plugin-pwa` to `1.2.0`, `vitest` and `@vitest/coverage-v8` to the matching `4.x` line, run the full gate set (typecheck, lint, vitest, build, then a manual PWA install). One commit, two CVEs gone.
+
+3. **F004 — Split `GroundTransportToolScreen.tsx`.** The pattern is set: extract `NewVehicleDialog.tsx` and `VehicleSidebar.tsx` into `src/features/admin/groundTransport/`. Mirrors `ImportRoomBlockDialog.tsx`'s extraction. The screen file should drop to ~350 LOC and the dialogs become independently testable.
+
+4. **F005 — Same treatment for `GuestsSection.tsx`.** Move each inner dialog (`InviteGuestDialog`, `RenameMinorDialog`, `PayFeesDialog`) under `sections/guests/`. The fee-totals box stays in the section. Net: ~150-LOC section + 3 ~120-LOC dialogs.
+
+5. **F007 — Cap request size on OpenAI edge functions.** A line of `if ((req.headers.get('Content-Length') ?? '0') > '32768') return jsonResponse({error:'payload_too_large'}, {status:413});` per function blocks the most obvious cost-amplification attack. Pair with F001's auth check for defense in depth.
+
+## Quick wins
+
+- [ ] F001: paste 12 lines of auth check into `parse-itinerary/index.ts` (10 min)
+- [ ] F010: delete `DEFAULT_LOCALE` and `NAMESPACES` from `src/lib/i18n.ts` (2 min)
+- [ ] F011: trim radix re-exports in `src/components/ui/dialog.tsx` (5 min)
+- [ ] F012: remove `export` from `WINDOW_MINUTES` in `groundTransport/grouping.ts` (1 min)
+- [ ] F013: delete `formatBytes` and `buttonVariants` exports (5 min)
+- [ ] F014: delete `tzOffsetMs` from `src/lib/timezone.ts` (1 min)
+- [ ] F009: file the Sentry follow-up issue and remove the TODO (5 min)
+
+## Things that look bad but are actually fine
+
+- **`80_functions_and_triggers.sql` at 868 LOC and `90_rls.sql` at 664 LOC.** Looks like god-file territory but isn't. These files want to be readable end-to-end because they encode the entire trust boundary. Splitting them into per-table files would make trigger interdependencies invisible. Leave them.
+- **51 unused exported types per knip.** Most are factory return types, prop types for un-extracted inner components, or `Insert`/`Update` types that exist for symmetry with `Row` types in the API modules. Pruning them mechanically would create churn for no readability gain.
+- **Eight `as unknown as` casts in api wrappers.** They look like type debt but each one documents a specific Supabase typegen edge case (nested 1-to-1 joins, `from(table as never)` for table-name generics). The right fix is F015 (centralise the helper), not removing the casts blindly.
+- **The two big admin screens (~600 LOC each).** Borderline god-components, but each inner component is meaningfully co-located with the orchestrator state — splitting prematurely would force prop drilling for ~50 booleans. F004/F005 recommend the split because they've crossed the threshold; smaller siblings (`StatsScreen` 309 LOC, `EventEditScreen` 330 LOC, `RoomAssignmentToolScreen` 372 LOC) shouldn't be touched.
+- **`src/types/database.types.ts` at 2,315 LOC.** Generated, not human-written. Not debt.
+- **No circular deps despite ~280 modules.** Confirmed via madge. Tells me the feature-slice boundaries are real and respected — not a finding, but worth noting because a refactor that tries to optimise this further is likely to introduce one.
+- **`accept-guest-invitation` and `share-report` both use service role.** Reviewed. Both have the right shape: `accept-guest-invitation` verifies a signed JWT before doing privileged inserts; `share-report` resolves a snapshot token before reading. Service-role is the right tool for both.
+- **Stripe webhook signature verification rolls its own HMAC.** Looks like reinvention; isn't. The constant-time-ish compare is correct, the algorithm matches Stripe's spec, and avoiding the Stripe SDK dodges a 4MB Deno bundle. Keep.
+
+## Open questions for the maintainer
+
+1. Is the M10 Sentry wiring still in scope before 2026-08-01, or has it slipped to post-launch? F009 depends on the answer.
+2. The semver-major upgrades in F002/F003 want a single batched PR — is there a better moment than now (post-feature-freeze for M10 hardening)?
+3. F004/F005 are meaningful refactors. Worth doing before M10 hardening starts, or after launch when the code is settled?
+4. The `as unknown as` pattern in F015 — is centralising it worthwhile, or does the Supabase typegen team have a fix in flight that would obviate the helper?
+5. F008 CORS narrowing on `share-report` — is the function intended to ever serve authenticated requests, or is it strictly the public-share endpoint? If strictly public, F008 drops to "nothing material."

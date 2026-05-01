@@ -1,0 +1,25 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - link "Kizuna" [ref=e6] [cursor=pointer]:
+      - /url: /
+      - generic [ref=e7]: 絆
+      - generic [ref=e8]: Kizuna
+  - main [ref=e12]:
+    - paragraph [ref=e13]: Checking your session
+  - contentinfo [ref=e14]:
+    - generic [ref=e15]:
+      - link "Built on Supabase" [ref=e16] [cursor=pointer]:
+        - /url: https://supabase.com
+        - img "Built on Supabase" [ref=e17]
+      - paragraph [ref=e18]: Kizuna · An enduring bond.
+      - generic [ref=e19]:
+        - radiogroup "Language" [ref=e20]:
+          - radio "English (United States)" [checked] [ref=e21] [cursor=pointer]:
+            - generic [ref=e22]: 🇺🇸
+        - radiogroup "Theme" [ref=e23]:
+          - radio "Light" [checked] [ref=e24] [cursor=pointer]:
+            - img [ref=e25]
+          - radio "Dark" [ref=e31] [cursor=pointer]:
+            - img [ref=e32]
+          - radio "Barbie" [ref=e34] [cursor=pointer]:
+            - img [ref=e35]

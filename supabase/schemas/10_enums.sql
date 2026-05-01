@@ -42,7 +42,12 @@ create type document_content_type as enum ('markdown', 'pdf', 'notion');
 -- Guests
 create type guest_relationship as enum ('partner', 'family', 'friend', 'other');
 create type guest_payment_status as enum ('pending', 'paid', 'waived', 'refunded', 'failed');
-create type guest_invitation_status as enum ('pending', 'accepted', 'expired', 'cancelled');
+-- Lifecycle: pending (row added, sponsor has not paid) -> sent (sponsor
+-- paid the bundled fees and the invite email is out) -> accepted (guest
+-- followed the link, set a password, signed in). expired/cancelled are
+-- terminal admin states. We do NOT send the invite email until the
+-- sponsor pays — that's the gate between pending and sent.
+create type guest_invitation_status as enum ('pending', 'sent', 'accepted', 'expired', 'cancelled');
 -- Pricing tiers for the Invite-a-Guest flow.
 --   under_12 -> $200, teen (12-17) -> $500, adult (18+) -> $950.
 -- 18+ guests get their own login + email; under 18 are admin-managed
