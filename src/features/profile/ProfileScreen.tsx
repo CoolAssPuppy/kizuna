@@ -12,8 +12,8 @@ import {
   User,
   Users,
 } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -143,7 +143,8 @@ function ProfileScreenInner(): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const subject = useActiveSubject();
-  const [active, setActive] = useState<SectionId>('personal');
+  const navigate = useNavigate();
+  const { sectionId } = useParams<{ sectionId?: string }>();
 
   // Shared query key with GuestsSection + DependentsSection.
   const { data: minors } = useQuery({
@@ -158,7 +159,14 @@ function ProfileScreenInner(): JSX.Element {
     if (!hasMinors && s.id === 'dependents') return false;
     return true;
   });
+  // The active section is whichever URL slug matches a visible section,
+  // falling back to the first one. Unknown slugs land on the default
+  // rather than throwing a 404 — same behaviour Admin has.
+  const active: SectionId = sections.find((s) => s.id === sectionId)?.id ?? sections[0]!.id;
   const activeSection = sections.find((s) => s.id === active) ?? sections[0]!;
+  const setActive = (next: SectionId): void => {
+    navigate(`/profile/${next}`);
+  };
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">

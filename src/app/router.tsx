@@ -96,7 +96,7 @@ export function AppRouter(): JSX.Element {
           <Route path="/accept-invitation" element={<AcceptInvitationScreen />} />
           <Route path="/" element={<HomeRoute />} />
           <Route
-            path="/profile"
+            path="/profile/:sectionId?"
             element={
               <RequireAuth>
                 <ProfileScreen />
