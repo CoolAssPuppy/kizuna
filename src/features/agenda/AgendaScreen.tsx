@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
 import type { AgendaSession } from './api';
+import { dayKey, groupSessionsByDay } from './grouping';
 import { useAgenda } from './useAgenda';
 
 type EventRow = Database['public']['Tables']['events']['Row'];
@@ -16,52 +17,12 @@ interface Props {
 
 type FilterMode = 'all' | 'favorites';
 
-function dayKey(iso: string, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone,
-  }).format(new Date(iso));
-}
-
-function dayHeading(iso: string, timeZone: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    timeZone,
-  }).format(new Date(iso));
-}
-
 function formatTime(iso: string, timeZone: string): string {
   return new Intl.DateTimeFormat(undefined, {
     hour: 'numeric',
     minute: '2-digit',
     timeZone,
   }).format(new Date(iso));
-}
-
-interface Day {
-  iso: string;
-  heading: string;
-  sessions: AgendaSession[];
-}
-
-function groupByDay(sessions: AgendaSession[], timeZone: string): Day[] {
-  const map = new Map<string, AgendaSession[]>();
-  for (const s of sessions) {
-    const key = dayKey(s.starts_at, timeZone);
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(s);
-  }
-  return Array.from(map.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([iso, daySessions]) => ({
-      iso,
-      heading: dayHeading(daySessions[0]!.starts_at, timeZone),
-      sessions: daySessions,
-    }));
 }
 
 export function AgendaScreen({ event }: Props): JSX.Element {
@@ -91,11 +52,11 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   const sessions = data ?? [];
   const filteredByMode =
     filter === 'favorites' ? sessions.filter((s) => s.is_favorite) : sessions;
-  const allDays = groupByDay(sessions, event.time_zone);
+  const allDays = groupSessionsByDay(sessions, event.time_zone);
   const visible = dayFilter === 'all'
     ? filteredByMode
     : filteredByMode.filter((s) => dayKey(s.starts_at, event.time_zone) === dayFilter);
-  const days = groupByDay(visible, event.time_zone);
+  const days = groupSessionsByDay(visible, event.time_zone);
   const now = Date.now();
 
   return (

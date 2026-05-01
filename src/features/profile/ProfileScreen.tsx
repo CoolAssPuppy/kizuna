@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
@@ -21,19 +22,11 @@ import { PassportSection } from '@/features/registration/sections/PassportSectio
 import { PersonalInfoSection } from '@/features/registration/sections/PersonalInfoSection';
 import { SwagSection } from '@/features/registration/sections/SwagSection';
 import { TransportSection } from '@/features/registration/sections/TransportSection';
-import type { AppRole } from '@/features/auth/types';
 import { cn } from '@/lib/utils';
 
 import { ProfileAvatar } from './ProfileAvatar';
 
 const PROFILE_MODE = { kind: 'profile' } as const;
-
-const ROLE_LABEL: Record<AppRole, string> = {
-  super_admin: 'Super admin',
-  admin: 'Admin',
-  employee: 'Employee',
-  guest: 'Guest',
-};
 
 type SectionId =
   | 'personal'
@@ -124,13 +117,21 @@ export function ProfileScreen(): JSX.Element {
 
       <div className="flex gap-8">
         <aside className="w-56 shrink-0 space-y-1">
-          <nav className="flex flex-col gap-0.5" aria-label={t('profile.nav.label')}>
+          <div
+            role="tablist"
+            aria-label={t('profile.nav.label')}
+            aria-orientation="vertical"
+            className="flex flex-col gap-0.5"
+          >
             {SECTIONS.map(({ id, icon: Icon, labelKey }) => (
               <button
                 key={id}
                 type="button"
+                role="tab"
+                id={`profile-tab-${id}`}
+                aria-controls="profile-tabpanel"
+                aria-selected={active === id}
                 onClick={() => setActive(id)}
-                aria-current={active === id ? 'page' : undefined}
                 className={cn(
                   'flex items-center gap-2 rounded-md px-3 py-1.5 text-left text-sm transition-colors',
                   active === id
@@ -142,18 +143,18 @@ export function ProfileScreen(): JSX.Element {
                 <span>{t(labelKey)}</span>
               </button>
             ))}
-          </nav>
+          </div>
         </aside>
-        <section className="min-w-0 flex-1">{activeSection.render()}</section>
+        <section
+          id="profile-tabpanel"
+          role="tabpanel"
+          aria-labelledby={`profile-tab-${activeSection.id}`}
+          className="min-w-0 flex-1"
+        >
+          {activeSection.render()}
+        </section>
       </div>
     </main>
   );
 }
 
-function RolePill({ role }: { role: AppRole }): JSX.Element {
-  return (
-    <span className="inline-flex items-center rounded-full border bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
-      {ROLE_LABEL[role]}
-    </span>
-  );
-}

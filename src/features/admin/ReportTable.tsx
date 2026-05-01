@@ -2,8 +2,8 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { RolePill } from '@/components/RolePill';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 import type { CsvRow } from './csv';
 
@@ -12,13 +12,6 @@ interface Props {
 }
 
 const PAGE_SIZE = 25;
-
-const ROLE_LABEL: Record<string, string> = {
-  super_admin: 'Super admin',
-  admin: 'Admin',
-  employee: 'Employee',
-  guest: 'Guest',
-};
 
 /**
  * Convert a snake_case column key (e.g. "payment_status") into a
@@ -206,15 +199,3 @@ function Cell({ column, value }: CellProps): JSX.Element {
   return <span>{JSON.stringify(value)}</span>;
 }
 
-function RolePill({ role }: { role: string }): JSX.Element {
-  const label = ROLE_LABEL[role] ?? sentenceCase(role);
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full border bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground',
-      )}
-    >
-      {label}
-    </span>
-  );
-}

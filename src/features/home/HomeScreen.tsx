@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { EventCountdown } from '@/features/events/EventCountdown';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
+import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
@@ -161,7 +162,6 @@ function Greeting(): JSX.Element {
 
 function FeedRow({ item }: { item: FeedItem }): JSX.Element {
   const { t } = useTranslation();
-  const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
   const body = (
     <div className="flex flex-col gap-1 rounded-lg border bg-card px-4 py-3 text-card-foreground transition-colors hover:bg-accent">
@@ -170,7 +170,7 @@ function FeedRow({ item }: { item: FeedItem }): JSX.Element {
           {t(`home.kinds.${item.kind}`)}
         </span>
         <span className="text-xs text-muted-foreground">
-          {dateFmt.format(new Date(item.createdAt))}
+          {mediumDateFormatter.format(new Date(item.createdAt))}
         </span>
       </div>
       <h3 className="text-sm font-semibold capitalize">{item.title}</h3>

@@ -39,9 +39,11 @@ export function EventCountdown({ startsAt, size = 'default' }: Props): JSX.Eleme
   );
 
   useEffect(() => {
-    const tick = (): void => setCountdown(diffToCountdown(new Date(startsAt)));
-    tick();
-    const id = window.setInterval(tick, 60_000);
+    setCountdown(diffToCountdown(new Date(startsAt)));
+    const id = window.setInterval(
+      () => setCountdown(diffToCountdown(new Date(startsAt))),
+      60_000,
+    );
     return () => window.clearInterval(id);
   }, [startsAt]);
 

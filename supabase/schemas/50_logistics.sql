@@ -2,8 +2,9 @@
 --
 -- Flights are sourced from Perk (CSV in Phase 1, API later) plus manual
 -- bookings for off-broadcast travel. Accommodations are admin-managed.
--- transport_requests link flights to vehicle assignments. Swag selections
--- close the loop on per-attendee inventory.
+-- transport_requests link flights to vehicle assignments. swag_sizes
+-- captures the per-attendee t-shirt and shoe sizes the events team
+-- orders against.
 
 create table public.flights (
   id uuid primary key default gen_random_uuid(),

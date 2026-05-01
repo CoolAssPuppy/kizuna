@@ -6,6 +6,12 @@
     "loadingEvent": "Loading event details",
     "noEvent": "No active event right now. Check back soon."
   },
+  "roles": {
+    "super_admin": "Super admin",
+    "admin": "Admin",
+    "employee": "Employee",
+    "guest": "Guest"
+  },
   "nav": {
     "home": "Home",
     "itinerary": "Itinerary",
@@ -714,12 +720,18 @@
     "fields": {
       "title": "Title",
       "documentKey": "Type",
-      "version": "Version",
       "appliesTo": "Applies to",
-      "displayOrder": "Display order",
       "isActive": "Active",
       "requiresAcknowledgement": "Requires acknowledgement",
       "requiresScroll": "Require scroll-to-end before acknowledging"
+    },
+    "keys": {
+      "waiver": "Waiver",
+      "code_of_conduct": "Code of conduct",
+      "expense_policy": "Expense policy",
+      "booking_process": "Booking process",
+      "livestream": "Livestream",
+      "toc": "Terms and conditions"
     },
     "appliesTo": {
       "all": "Everyone",

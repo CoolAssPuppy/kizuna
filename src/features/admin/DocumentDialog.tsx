@@ -53,15 +53,6 @@ const DOCUMENT_KEYS: ReadonlyArray<DocumentKey> = [
   'toc',
 ];
 
-const DOCUMENT_KEY_LABELS: Record<DocumentKey, string> = {
-  waiver: 'Waiver',
-  code_of_conduct: 'Code of conduct',
-  expense_policy: 'Expense policy',
-  booking_process: 'Booking process',
-  livestream: 'Livestream',
-  toc: 'Terms and conditions',
-};
-
 const AUDIENCES: ReadonlyArray<Audience> = ['all', 'employee', 'guest'];
 const CONTENT_TYPES: ReadonlyArray<DocumentContentType> = ['markdown', 'pdf', 'notion'];
 
@@ -184,7 +175,7 @@ export function DocumentDialog({
               >
                 {DOCUMENT_KEYS.map((key) => (
                   <option key={key} value={key}>
-                    {DOCUMENT_KEY_LABELS[key]}
+                    {t(`adminDocuments.keys.${key}`)}
                   </option>
                 ))}
               </select>

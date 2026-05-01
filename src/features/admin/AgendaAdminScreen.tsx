@@ -10,6 +10,8 @@ import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
+import { dayHeading, dayKey } from '@/features/agenda/grouping';
+
 import {
   agendaToCsv,
   blankAgendaCsv,
@@ -35,34 +37,16 @@ function toIso(value: string): string {
   return new Date(value).toISOString();
 }
 
-function sessionDayKey(iso: string, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone,
-  }).format(new Date(iso));
-}
-
-function sessionDayHeading(iso: string, timeZone: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-    timeZone,
-  }).format(new Date(iso));
-}
-
 interface DayBucket {
   iso: string;
   heading: string;
 }
 
-function groupSessionsByDay(sessions: ReadonlyArray<SessionRow>, timeZone: string): DayBucket[] {
+function uniqueDayBuckets(sessions: ReadonlyArray<SessionRow>, timeZone: string): DayBucket[] {
   const seen = new Map<string, string>();
   for (const s of sessions) {
-    const key = sessionDayKey(s.starts_at, timeZone);
-    if (!seen.has(key)) seen.set(key, sessionDayHeading(s.starts_at, timeZone));
+    const key = dayKey(s.starts_at, timeZone);
+    if (!seen.has(key)) seen.set(key, dayHeading(s.starts_at, timeZone));
   }
   return Array.from(seen.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -90,7 +74,7 @@ export function AgendaAdminScreen(): JSX.Element {
   });
 
   const timeZone = event?.time_zone ?? 'UTC';
-  const dayBuckets = useMemo(() => groupSessionsByDay(sessions ?? [], timeZone), [
+  const dayBuckets = useMemo(() => uniqueDayBuckets(sessions ?? [], timeZone), [
     sessions,
     timeZone,
   ]);
@@ -98,7 +82,7 @@ export function AgendaAdminScreen(): JSX.Element {
     () =>
       dayFilter === 'all'
         ? sessions ?? []
-        : (sessions ?? []).filter((s) => sessionDayKey(s.starts_at, timeZone) === dayFilter),
+        : (sessions ?? []).filter((s) => dayKey(s.starts_at, timeZone) === dayFilter),
     [sessions, dayFilter, timeZone],
   );
 
