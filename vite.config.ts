@@ -97,5 +97,21 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split the heaviest vendor trees into their own chunks so the
+          // main entry stays well under the 500 kB warning. recharts +
+          // react-markdown + i18next together account for ~half of the
+          // pre-split index bundle.
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-i18n': ['i18next', 'react-i18next'],
+          'vendor-charts': ['recharts'],
+          'vendor-markdown': ['react-markdown', 'remark-gfm'],
+        },
+      },
+    },
   },
 });
