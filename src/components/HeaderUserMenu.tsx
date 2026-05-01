@@ -69,13 +69,22 @@ export function HeaderUserMenu(): JSX.Element {
             }}
           />
           {isAdmin ? (
-            <MenuItem
-              label={t('nav.admin')}
-              onClick={() => {
-                setOpen(false);
-                navigate('/admin');
-              }}
-            />
+            <>
+              <MenuItem
+                label={t('nav.admin')}
+                onClick={() => {
+                  setOpen(false);
+                  navigate('/admin');
+                }}
+              />
+              <MenuItem
+                label={t('nav.allEvents')}
+                onClick={() => {
+                  setOpen(false);
+                  navigate('/all-events');
+                }}
+              />
+            </>
           ) : null}
           <MenuItem
             label={t('auth.signOut')}

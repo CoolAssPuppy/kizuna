@@ -3,21 +3,34 @@ import { useQuery } from '@tanstack/react-query';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
+import { useEventOverride } from './eventOverride';
+
 export type EventRow = Database['public']['Tables']['events']['Row'];
 
 /**
- * Returns the single active Supafest event. Phase 1 ships against one event
- * at a time; this hook is the canonical accessor for "the event the user is
- * registering for". Event picker UI is post-Supafest 2027 (Phase 4).
+ * Returns the event the app is currently rendering. Default: the single
+ * Supafest event flagged is_active = true. Admins can pick a different
+ * event from the All events screen, which sets a per-browser override
+ * (see eventOverride.ts) — this hook prefers that override when set.
  */
 export function useActiveEvent(): {
   data: EventRow | null;
   isLoading: boolean;
   error: Error | null;
 } {
+  const override = useEventOverride();
   const query = useQuery({
-    queryKey: ['active-event'],
+    queryKey: ['active-event', override],
     queryFn: async (): Promise<EventRow | null> => {
+      if (override) {
+        const { data, error } = await getSupabaseClient()
+          .from('events')
+          .select('*')
+          .eq('id', override)
+          .maybeSingle();
+        if (error) throw error;
+        if (data) return data;
+      }
       const { data, error } = await getSupabaseClient()
         .from('events')
         .select('*')

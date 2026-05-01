@@ -20,7 +20,21 @@
     "documents": "Documents",
     "community": "Community",
     "admin": "Admin",
+    "allEvents": "All events",
     "signOut": "Sign out"
+  },
+  "events": {
+    "title": "All events",
+    "subtitle": "Switch which event the app is showing. The active event applies by default.",
+    "create": "New event",
+    "empty": "No events configured yet.",
+    "active": "Active",
+    "past": "Past",
+    "viewing": "Viewing",
+    "view": "View",
+    "currentlyViewing": "Currently viewing",
+    "switched": "Now showing this event.",
+    "cleared": "Switched back to the active event."
   },
   "auth": {
     "signIn": "Sign in",
@@ -293,7 +307,6 @@
     "loading": "Loading",
     "nav": {
       "label": "Admin sections",
-      "events": "Events",
       "agenda": "Agenda",
       "feed": "Feed",
       "documents": "Documents",

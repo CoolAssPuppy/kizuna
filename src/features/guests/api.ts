@@ -2,6 +2,30 @@ import type { AppSupabaseClient } from '@/lib/supabase';
 
 import type { GuestInvitationRow } from './types';
 
+export async function listGuestInvitations(
+  client: AppSupabaseClient,
+  sponsorUserId: string,
+): Promise<GuestInvitationRow[]> {
+  const { data, error } = await client
+    .from('guest_invitations')
+    .select('*')
+    .eq('sponsor_id', sponsorUserId)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function cancelGuestInvitation(
+  client: AppSupabaseClient,
+  invitationId: string,
+): Promise<void> {
+  const { error } = await client
+    .from('guest_invitations')
+    .update({ status: 'cancelled' })
+    .eq('id', invitationId);
+  if (error) throw error;
+}
+
 interface InvokeContext {
   client: AppSupabaseClient;
 }

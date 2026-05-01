@@ -2,7 +2,6 @@ import type { LucideIcon } from 'lucide-react';
 import {
   AlertTriangle,
   BarChart3,
-  Calendar,
   CalendarRange,
   FileText,
   Newspaper,
@@ -22,7 +21,6 @@ interface NavSection {
 }
 
 const SECTIONS: ReadonlyArray<NavSection> = [
-  { to: '/admin/events', icon: Calendar, labelKey: 'admin.nav.events' },
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },

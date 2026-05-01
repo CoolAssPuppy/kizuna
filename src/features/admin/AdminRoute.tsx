@@ -8,7 +8,6 @@ import { AgendaAdminScreen } from './AgendaAdminScreen';
 import { ConflictsScreen } from './ConflictsScreen';
 import { DocumentsScreen } from './DocumentsScreen';
 import { EventEditScreen } from './EventEditScreen';
-import { EventsListScreen } from './EventsListScreen';
 import { FeedScreen } from './FeedScreen';
 import { NudgesScreen } from './NudgesScreen';
 import { ReportsScreen } from './ReportsScreen';
@@ -31,8 +30,8 @@ export function AdminRoute(): JSX.Element {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to="events" replace />} />
-        <Route path="events" element={<EventsListScreen />} />
+        <Route index element={<Navigate to="agenda" replace />} />
+        <Route path="events" element={<Navigate to="/all-events" replace />} />
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />
         <Route path="agenda" element={<AgendaAdminScreen />} />

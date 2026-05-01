@@ -12,6 +12,7 @@ import { CreateDocumentScreen } from '@/features/documents/CreateDocumentScreen'
 import { DocumentsRoute } from '@/features/documents/DocumentsRoute';
 import { SignDocumentScreen } from '@/features/documents/SignDocumentScreen';
 import { NotFound } from '@/features/errors/NotFound';
+import { AllEventsScreen } from '@/features/events/AllEventsScreen';
 import { AcceptInvitationScreen } from '@/features/guests/AcceptInvitationScreen';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { ItineraryRoute } from '@/features/itinerary/ItineraryRoute';
@@ -120,6 +121,14 @@ export function AppRouter(): JSX.Element {
         element={
           <RequireAuth allow={['admin', 'super_admin']}>
             <AdminRoute />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/all-events"
+        element={
+          <RequireAuth allow={['admin', 'super_admin']}>
+            <AllEventsScreen />
           </RequireAuth>
         }
       />
