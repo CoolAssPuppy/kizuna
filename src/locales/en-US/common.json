@@ -30,7 +30,10 @@
     "community": "Community",
     "admin": "Admin",
     "allEvents": "All events",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "events": {
     "title": "All events",
