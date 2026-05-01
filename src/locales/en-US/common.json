@@ -68,7 +68,7 @@
     },
     "dev": {
       "header": "Dev Sign-In Shortcuts",
-      "subtitle": "These buttons only appear locally.",
+      "subtitle": "For testing purposes only.",
       "asEmployee": "Pretend you're an employee",
       "asAdmin": "Pretend you're an admin"
     }

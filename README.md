@@ -200,6 +200,7 @@ That runs `doppler secrets download` into `supabase/.env` (so `OPENAI_API_KEY` a
 | `npm run db:stop`                             | Stop local Supabase stack                                            |
 | `npm run db:reset`                            | Reset DB — drops state and reapplies init scripts                    |
 | `npm run db:apply`                            | Apply declarative schemas + pgTAP + seed via psql                    |
+| `./scripts/reset-remote-db.sh [prd\|stg]`     | TEMPORARY: wipe + re-seed a remote Supabase project via Doppler      |
 | `npm run db:diff`                             | Generate a migration from declarative schema diffs                   |
 | `npm run db:test`                             | Run pgTAP tests                                                      |
 | `npm run functions:env`                       | Sync Doppler secrets into `supabase/.env` for the local edge runtime |
@@ -375,11 +376,30 @@ Updating the brand is a one-file edit (`src/lib/email/theme.ts`) followed by re-
 - **Sales** — Battlestar Galactica
 - **Support** — The Simpsons
 
-Plus a handful of guest invitations, dietary preferences, accessibility notes, and emergency contacts. Eight people are flagged as leadership (the C-suite plus department heads).
+Plus a handful of guest invitations (now carrying age bracket + fee), dietary preferences, accessibility notes, and emergency contacts. Eight people are flagged as leadership (the C-suite plus department heads).
 
-`supabase/fixtures/02_sample_community.sql` builds on top with attendee_profiles (bios, hobbies, hometowns, current cities) for 14 of the seeded users, five user-created channels, and starter messages so the channel list looks alive on first load.
+`supabase/fixtures/02_sample_community.sql` adds attendee_profiles (bios, hobbies, hometowns, current cities, ground-transport need) for 14 of the seeded users, five user-created channels, and starter messages so the channel list looks alive on first load.
 
-Both files are applied automatically by `npm run db:apply`. Every fictional account uses the password `kizuna-dev-only`.
+`supabase/fixtures/03_sample_itineraries.sql` seeds 12 inbound + 12 outbound flights spread across 9 arrival windows. Multiple cities map to the same flight tuple so the Ground Transport Tool's same-flight grouping has real demo content.
+
+All three files are applied automatically by `npm run db:apply`. Every fictional account uses the password `kizuna-dev-only`.
+
+### Pushing sample data to staging or production
+
+`scripts/reset-remote-db.sh` is a TEMPORARY launch-window utility that drops the remote `public` schema, re-applies declarative schemas, and re-seeds. It reads every credential from Doppler so nothing lands on disk.
+
+```bash
+# Defaults to --config prd
+./scripts/reset-remote-db.sh
+
+# Target staging
+./scripts/reset-remote-db.sh stg
+
+# Skip the "type RESET to confirm" prompt (use carefully)
+./scripts/reset-remote-db.sh prd --yes
+```
+
+Prerequisites in the chosen Doppler config: `SUPABASE_URL`, `SUPABASE_DB_PASSWORD` (find under Settings → Database in the Supabase dashboard), and optionally `SUPABASE_DB_REGION` (defaults to `us-east-1`). Delete this script once Phase 1 launch is settled.
 
 ## Testing
 
@@ -390,7 +410,7 @@ Both files are applied automatically by `npm run db:apply`. Every fictional acco
 | Database (RLS, triggers) | pgTAP                                     | `npm run db:test`  |
 | Network mocking          | MSW                                       | imported per-test  |
 
-Vitest currently ships **49 files / 237 tests**. pgTAP ships **11 files / 35+ assertions** covering RLS, leadership-flag guard, channel ownership, passport encryption, registration completion trigger, itinerary materialisation, and channel access control. The repo follows a strict TDD bias: tests for pure helpers go in before the component or feature that consumes them.
+Vitest currently ships **52 files / 260 tests**. pgTAP ships **14 files / 51 assertions** covering RLS (including the admin-read policy on attendee_profiles), leadership-flag guard, channel ownership, passport encryption, registration completion trigger, itinerary materialisation, channel access control, the flight-change cascade that unassigns vehicles, and the guest age-bracket pricing + payment gate. The repo follows a strict TDD bias: tests for pure helpers go in before the component or feature that consumes them.
 
 The project also enforces a no-`useEffect` discipline for data fetching and state derivation. See `~/.claude/skills/no-use-effect/SKILL.md` and `tasks/lessons.md` for the rule and the five replacement patterns.
 

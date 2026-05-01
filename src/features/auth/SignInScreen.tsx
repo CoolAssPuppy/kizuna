@@ -111,7 +111,11 @@ export function SignInScreen(): JSX.Element {
             <Button onClick={() => void handleSso()} disabled={busy} className="w-full" size="lg">
               {t('auth.continueWithSso')}
             </Button>
-            {import.meta.env.DEV ? <DevSignInShortcuts disabled={busy} /> : null}
+            {/* TEMPORARY: dev shortcuts shown in prod for the launch
+                staging window so a sponsor / partner can sanity-check
+                the seeded data without juggling credentials. Re-gate
+                with `import.meta.env.DEV` before we cut a real release. */}
+            <DevSignInShortcuts disabled={busy} />
           </div>
         ) : (
           <form onSubmit={(event) => void handlePassword(event)} className="space-y-4" noValidate>
