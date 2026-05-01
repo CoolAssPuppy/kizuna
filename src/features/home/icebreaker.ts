@@ -4,12 +4,19 @@
  * Most fun_facts in attendee_profiles are written in the first person
  * ("I once played first chair in a Klingon opera."). The card asks
  * "Which teammate ${question}?", so we need to rephrase the first
- * person into a third-person predicate. Keeping this client-side and
- * deterministic means the card renders without any backend round-trip;
- * a future enhancement can route through a cheap edge-function using
- * gpt-4o-mini for stronger rephrasing, with this fallback for offline
- * mode.
+ * person into a third-person predicate.
+ *
+ * Two paths:
+ *   - reframeAsTeammateQuestion (here): pure, deterministic, runs
+ *     instantly with no network. Used as the initial render and as
+ *     the fallback when the live path errors.
+ *   - rephrase-icebreaker edge function: routes the same fact through
+ *     gpt-4o-mini for cleaner grammar. Triggered by rephraseTeammateQuestion
+ *     below; the result swaps in once it arrives.
  */
+
+import { callEdgeFunction } from '@/lib/edgeFunction';
+import type { AppSupabaseClient } from '@/lib/supabase';
 
 /**
  * Reframe a first-person fun_fact into a "Which teammate _____?"
@@ -67,4 +74,31 @@ export function pickIcebreakerTarget<T extends SeedablePerson>(
   if (eligible.length === 0) return null;
   const index = Math.abs(Math.floor(seed)) % eligible.length;
   return eligible[index] ?? null;
+}
+
+interface RephraseResult {
+  question: string;
+  source: 'live' | 'stub' | 'fallback';
+}
+
+/**
+ * Hit the rephrase-icebreaker edge function for an OpenAI-polished
+ * "Which teammate ___?" question. The component already renders the
+ * local-heuristic version; this swap-in upgrades it once the model
+ * responds. Failures resolve to the local heuristic so we never break
+ * the card's UX.
+ */
+export async function rephraseTeammateQuestion(
+  client: AppSupabaseClient,
+  fact: string,
+): Promise<string> {
+  try {
+    const result = await callEdgeFunction<RephraseResult>(client, 'rephrase-icebreaker', {
+      fact,
+    });
+    return result.question;
+  } catch (err) {
+    console.warn('[icebreaker] rephrase failed, using local heuristic', err);
+    return reframeAsTeammateQuestion(fact);
+  }
 }

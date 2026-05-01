@@ -9,7 +9,11 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/AuthContext';
 import { flatJoin, getSupabaseClient } from '@/lib/supabase';
 
-import { pickIcebreakerTarget, reframeAsTeammateQuestion } from './icebreaker';
+import {
+  pickIcebreakerTarget,
+  reframeAsTeammateQuestion,
+  rephraseTeammateQuestion,
+} from './icebreaker';
 
 interface EmployeeProfileFields {
   preferred_name: string | null;
@@ -94,9 +98,20 @@ export function TeammateIcebreaker(): JSX.Element | null {
 
   const target = useMemo(() => pickIcebreakerTarget(candidates ?? [], seed), [candidates, seed]);
 
+  // Polished rephrasing arrives async via the edge function; the local
+  // heuristic renders immediately so there's no spinner, and the
+  // smoother version swaps in once the model responds.
+  const polishedQuery = useQuery({
+    queryKey: ['icebreaker-rephrase', target?.user_id, target?.fun_fact],
+    enabled: !!target && !!target.fun_fact,
+    queryFn: () => rephraseTeammateQuestion(getSupabaseClient(), target?.fun_fact ?? ''),
+    staleTime: Infinity,
+  });
+
   if (!target) return null;
 
-  const question = reframeAsTeammateQuestion(target.fun_fact ?? '');
+  const localQuestion = reframeAsTeammateQuestion(target.fun_fact ?? '');
+  const question = polishedQuery.data ?? localQuestion;
   const initials = (target.full_name || target.email)
     .split(' ')
     .filter(Boolean)
