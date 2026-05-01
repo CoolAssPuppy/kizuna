@@ -5,13 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 
-import { parseItineraryViaEdge } from './importApi';
+import { parseItineraryViaEdge, saveParsedFlights } from './importApi';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** IANA timezone of the event venue, used as the fallback when an
+   *  airport's timezone isn't in our static lookup. */
+  eventTimezone: string;
   /** Called once parsed records have been saved into the database. */
   onImported: () => void;
 }
@@ -29,9 +33,15 @@ const TAB_ICON: Record<SourceTab, typeof ClipboardPaste> = {
  * Phase 1 supports paste; upload and email are surfaced as "soon" so the
  * design pattern is in place and the feature flag can flip later.
  */
-export function ImportItineraryDialog({ open, onOpenChange, onImported }: Props): JSX.Element | null {
+export function ImportItineraryDialog({
+  open,
+  onOpenChange,
+  eventTimezone,
+  onImported,
+}: Props): JSX.Element | null {
   const { t } = useTranslation();
   const { show } = useToast();
+  const { user } = useAuth();
   const [tab, setTab] = useState<SourceTab>('paste');
   const [pasted, setPasted] = useState('');
   const [busy, setBusy] = useState(false);
@@ -53,15 +63,19 @@ export function ImportItineraryDialog({ open, onOpenChange, onImported }: Props)
   if (!open) return null;
 
   async function handleParse(): Promise<void> {
-    if (!pasted.trim()) return;
+    if (!pasted.trim() || !user) return;
     setBusy(true);
     try {
       const result = await parseItineraryViaEdge(pasted.trim());
-      const total = result.flights.length + result.accommodations.length + result.transfers.length;
-      if (total === 0) {
+      const flightCount = await saveParsedFlights(user.id, result.flights, eventTimezone);
+      // accommodations + transfers are admin-managed for Phase 1; we only
+      // persist flights and report the parse counts so the user can see
+      // what was understood.
+      const parsed = result.flights.length + result.accommodations.length + result.transfers.length;
+      if (flightCount === 0 && parsed === 0) {
         show(t('itinerary.import.nothingFound'), 'error');
       } else {
-        show(t('itinerary.import.success', { count: total }));
+        show(t('itinerary.import.success', { count: flightCount }));
         onImported();
         onOpenChange(false);
         setPasted('');

@@ -12,6 +12,7 @@ import type { DietaryRow } from '../types';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
+import { toggleArrayMember } from './utils';
 
 const RESTRICTION_OPTIONS = [
   'vegan',
@@ -45,10 +46,6 @@ const EMPTY: FormState = {
   severity: 'preference',
   notes: '',
 };
-
-function toggle(list: string[], value: string): string[] {
-  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-}
 
 export function DietarySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -119,10 +116,10 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
               <Checkbox
                 checked={values.restrictions.includes(option)}
                 onCheckedChange={() =>
-                  setValues((v) => ({ ...v, restrictions: toggle(v.restrictions, option) }))
+                  setValues((v) => ({ ...v, restrictions: toggleArrayMember(v.restrictions, option) }))
                 }
               />
-              {option.replace('_', ' ')}
+              {t(`registration.dietary.restrictionOptions.${option}`)}
             </label>
           ))}
         </div>
@@ -137,10 +134,10 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
               <Checkbox
                 checked={values.allergies.includes(option)}
                 onCheckedChange={() =>
-                  setValues((v) => ({ ...v, allergies: toggle(v.allergies, option) }))
+                  setValues((v) => ({ ...v, allergies: toggleArrayMember(v.allergies, option) }))
                 }
               />
-              {option}
+              {t(`registration.dietary.allergyOptions.${option}`)}
             </label>
           ))}
         </div>

@@ -34,6 +34,7 @@ declare
     'passport_details',
     'dietary_preferences',
     'accessibility_preferences',
+    'additional_guests',
     'flights',
     'accommodations',
     'transport_requests',

@@ -164,8 +164,25 @@
     "dietary": {
       "restrictions": "Dietary Restrictions",
       "restrictionsHint": "Select all that apply.",
+      "restrictionOptions": {
+        "vegan": "Vegan",
+        "vegetarian": "Vegetarian",
+        "halal": "Halal",
+        "kosher": "Kosher",
+        "gluten_free": "Gluten free",
+        "dairy_free": "Dairy free"
+      },
       "allergies": "Allergies",
       "allergiesHint": "Select any that apply.",
+      "allergyOptions": {
+        "nuts": "Nuts",
+        "shellfish": "Shellfish",
+        "dairy": "Dairy",
+        "eggs": "Eggs",
+        "soy": "Soy",
+        "wheat": "Wheat",
+        "sesame": "Sesame"
+      },
       "alcoholFree": "Please do not serve me alcohol",
       "severity": "Severity",
       "severityHint": "Anaphylactic risks are flagged to the kitchen.",
@@ -273,6 +290,7 @@
     "title": "Your Itinerary",
     "subtitle": "Your schedule for the event.",
     "timelineTitle": "Timeline",
+    "loading": "Loading your itinerary",
     "empty": "Nothing on your itinerary yet. Add a flight or paste your booking confirmation to get started.",
     "offline": "You are offline. Showing the last cached schedule.",
     "hero": {

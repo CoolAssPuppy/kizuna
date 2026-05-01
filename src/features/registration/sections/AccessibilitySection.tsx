@@ -11,6 +11,7 @@ import { loadAccessibility, saveAccessibility } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
+import { toggleArrayMember } from './utils';
 
 const NEEDS_OPTIONS = [
   'mobility',
@@ -27,10 +28,6 @@ interface FormState {
 }
 
 const EMPTY: FormState = { needs: [], notes: '' };
-
-function toggle(list: string[], value: string): string[] {
-  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-}
 
 export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -91,7 +88,7 @@ export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
               <Checkbox
                 checked={values.needs.includes(option)}
                 onCheckedChange={() =>
-                  setValues((v) => ({ ...v, needs: toggle(v.needs, option) }))
+                  setValues((v) => ({ ...v, needs: toggleArrayMember(v.needs, option) }))
                 }
               />
               {t(`registration.accessibility.needsOptions.${option}`)}

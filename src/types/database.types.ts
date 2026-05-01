@@ -129,6 +129,7 @@ export type Database = {
           notes: string | null
           special_needs: string[]
           sponsor_id: string
+          updated_at: string
         }
         Insert: {
           age: number
@@ -137,6 +138,7 @@ export type Database = {
           notes?: string | null
           special_needs?: string[]
           sponsor_id: string
+          updated_at?: string
         }
         Update: {
           age?: number
@@ -145,6 +147,7 @@ export type Database = {
           notes?: string | null
           special_needs?: string[]
           sponsor_id?: string
+          updated_at?: string
         }
         Relationships: [
           {

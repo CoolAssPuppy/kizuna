@@ -8,10 +8,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
+import { Checkbox } from '@/components/ui/checkbox';
+
 import { loadAdditionalGuests, saveAdditionalGuests } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
+import { toggleArrayMember } from './utils';
 
 const SPECIAL_NEEDS_OPTIONS = ['crib', 'high_chair', 'allergy', 'mobility', 'other'] as const;
 
@@ -24,10 +27,6 @@ interface GuestEntry {
 }
 
 const EMPTY_GUEST: GuestEntry = { fullName: '', age: '', specialNeeds: [], notes: '' };
-
-function toggle(list: string[], value: string): string[] {
-  return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
-}
 
 export function GuestsSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -100,7 +99,7 @@ export function GuestsSection({ mode }: SectionProps): JSX.Element {
       ) : null}
 
       {guests.map((guest, index) => (
-        <fieldset key={index} className="space-y-3 rounded-md border p-4">
+        <fieldset key={guest.id ?? `new-${index}`} className="space-y-3 rounded-md border p-4">
           <div className="space-y-2">
             <Label htmlFor={`guest-name-${index}`}>{t('registration.guests.fullName')}</Label>
             <Input
@@ -129,12 +128,12 @@ export function GuestsSection({ mode }: SectionProps): JSX.Element {
             <div className="grid grid-cols-2 gap-2">
               {SPECIAL_NEEDS_OPTIONS.map((option) => (
                 <label key={option} className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-primary"
+                  <Checkbox
                     checked={guest.specialNeeds.includes(option)}
-                    onChange={() =>
-                      update(index, { specialNeeds: toggle(guest.specialNeeds, option) })
+                    onCheckedChange={() =>
+                      update(index, {
+                        specialNeeds: toggleArrayMember(guest.specialNeeds, option),
+                      })
                     }
                   />
                   {t(`registration.guests.specialNeedsOptions.${option}`)}

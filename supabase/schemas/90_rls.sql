@@ -277,6 +277,20 @@ create policy dietary_preferences_admin_all on public.dietary_preferences
 create policy flights_self_read on public.flights
   for select using (public.is_self_or_admin(user_id));
 
+-- Self-insert lets the SPA persist user-pasted flights (parse-itinerary
+-- import flow). Source is recorded as 'manual_obs' so admin reports can
+-- distinguish self-reported flights from Perk-synced ones. Admins can
+-- still write any row via flights_admin_write.
+create policy flights_self_insert on public.flights
+  for insert with check (user_id = auth.uid() and source = 'manual_obs');
+
+create policy flights_self_update on public.flights
+  for update using (user_id = auth.uid() and source = 'manual_obs')
+  with check (user_id = auth.uid() and source = 'manual_obs');
+
+create policy flights_self_delete on public.flights
+  for delete using (user_id = auth.uid() and source = 'manual_obs');
+
 create policy flights_admin_write on public.flights
   for all using (public.is_admin())
   with check (public.is_admin());

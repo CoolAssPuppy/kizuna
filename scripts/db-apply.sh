@@ -4,8 +4,9 @@
 # Order of operations:
 #   1. Run every supabase/schemas/*.sql in alphabetical order
 #   2. Install pgTAP into a `tap` schema (test-only, kept out of public)
-#   3. Apply supabase/seed.sql for the canonical dev fixture
-#   4. Apply supabase/fixtures/*.sql (idempotent demo data — Star Wars employees etc.)
+#   3. Apply supabase/seed.sql for the canonical dev fixture (people only)
+#   4. Apply supabase/events/*.sql (event-specific data — one file per year)
+#   5. Apply supabase/fixtures/*.sql (idempotent demo data — Star Wars employees etc.)
 #
 # Idempotent: safe to run repeatedly. Designed for the local DB only — not
 # for production. Production deploys go through generated migrations.
@@ -27,6 +28,13 @@ echo "installing pgtap into tap schema"
 
 echo "applying seed"
 "${PSQL_BASE[@]}" -f supabase/seed.sql
+
+if compgen -G "supabase/events/*.sql" > /dev/null; then
+  for f in supabase/events/*.sql; do
+    echo "applying $f"
+    "${PSQL_BASE[@]}" -f "$f"
+  done
+fi
 
 if compgen -G "supabase/fixtures/*.sql" > /dev/null; then
   for f in supabase/fixtures/*.sql; do

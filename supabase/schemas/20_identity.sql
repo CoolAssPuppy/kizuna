@@ -118,7 +118,8 @@ create table public.additional_guests (
   full_name text not null,
   age int not null check (age >= 0 and age < 120),
   special_needs text[] not null default '{}',
-  notes text
+  notes text,
+  updated_at timestamptz not null default now()
 );
 
 comment on table public.additional_guests is

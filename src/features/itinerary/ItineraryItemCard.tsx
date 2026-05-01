@@ -11,17 +11,24 @@ interface Props {
   index: number;
 }
 
-const TIME_FMT = new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit',
-  minute: '2-digit',
-});
+function formatTime(iso: string, timeZone: string | null): string {
+  return new Intl.DateTimeFormat(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    ...(timeZone && timeZone !== 'UTC' ? { timeZone } : {}),
+  }).format(new Date(iso));
+}
 
 export function ItineraryItemCard({ item, index }: Props): JSX.Element {
   const { t } = useTranslation();
   const meta = ITEM_META[item.item_type];
   const Icon = meta.Icon;
-  const start = new Date(item.starts_at);
-  const end = item.ends_at ? new Date(item.ends_at) : null;
+  // Each row renders in its own zone — a SFO→YYC flight shows departure
+  // time in PT and arrival in MT even when both timestamps live as UTC.
+  const startLabel = formatTime(item.starts_at, item.starts_tz);
+  const endLabel = item.ends_at
+    ? formatTime(item.ends_at, item.ends_tz ?? item.starts_tz)
+    : null;
 
   return (
     <li
@@ -57,8 +64,8 @@ export function ItineraryItemCard({ item, index }: Props): JSX.Element {
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <p className="text-sm font-semibold leading-snug">{item.title}</p>
             <span className="text-xs font-medium tabular-nums text-muted-foreground">
-              {TIME_FMT.format(start)}
-              {end ? ` – ${TIME_FMT.format(end)}` : ''}
+              {startLabel}
+              {endLabel ? ` – ${endLabel}` : ''}
             </span>
           </div>
 

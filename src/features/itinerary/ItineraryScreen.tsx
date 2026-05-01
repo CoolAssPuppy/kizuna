@@ -30,7 +30,7 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center" aria-busy="true">
-        <p className="text-muted-foreground">{t('auth.checkingSession')}</p>
+        <p className="text-muted-foreground">{t('itinerary.loading')}</p>
       </main>
     );
   }
@@ -75,6 +75,7 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
       <ImportItineraryDialog
         open={importOpen}
         onOpenChange={setImportOpen}
+        eventTimezone={event.time_zone}
         onImported={invalidate}
       />
     </main>
