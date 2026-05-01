@@ -183,8 +183,36 @@ function ProfileScreenInner(): JSX.Element {
         />
       ) : null}
 
+      {/* Mobile: horizontally scrollable pill row of section tabs. */}
+      <div
+        role="tablist"
+        aria-label={t('profile.nav.label')}
+        aria-orientation="horizontal"
+        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 md:hidden"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        {sections.map(({ id, icon: Icon, labelKey }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={active === id}
+            onClick={() => setActive(id)}
+            className={cn(
+              'inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm transition-colors',
+              active === id
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-foreground hover:bg-accent',
+            )}
+          >
+            <Icon aria-hidden className="h-4 w-4" />
+            <span>{t(labelKey)}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="flex gap-8">
-        <aside className="w-56 shrink-0 space-y-1">
+        <aside className="hidden w-56 shrink-0 space-y-1 md:block">
           <div
             role="tablist"
             aria-label={t('profile.nav.label')}

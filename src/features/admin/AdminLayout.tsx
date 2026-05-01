@@ -37,33 +37,65 @@ const SECTIONS: ReadonlyArray<NavSection> = [
 export function AdminLayout(): JSX.Element {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto flex w-full max-w-7xl gap-8 px-8 py-10">
-      <aside className="w-56 shrink-0 space-y-1">
-        <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight">{t('admin.title')}</h1>
-        <nav className="flex flex-col gap-0.5" aria-label={t('admin.nav.label')}>
-          {SECTIONS.map(({ to, end, icon: Icon, labelKey }) => (
-            <NavLink
-              key={to}
-              to={to}
-              {...(end !== undefined ? { end } : {})}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                  isActive
-                    ? 'bg-accent font-medium text-accent-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )
-              }
-            >
-              <Icon aria-hidden className="h-4 w-4" />
-              <span>{t(labelKey)}</span>
-            </NavLink>
-          ))}
-        </nav>
-      </aside>
-      <main className="min-w-0 flex-1">
-        <Outlet />
-      </main>
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
+      <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight md:hidden">
+        {t('admin.title')}
+      </h1>
+
+      {/* Mobile: horizontally scrollable pill nav above the content. */}
+      <nav
+        aria-label={t('admin.nav.label')}
+        className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-2 md:hidden"
+        style={{ scrollbarWidth: 'thin' }}
+      >
+        {SECTIONS.map(({ to, end, icon: Icon, labelKey }) => (
+          <NavLink
+            key={to}
+            to={to}
+            {...(end !== undefined ? { end } : {})}
+            className={({ isActive }) =>
+              cn(
+                'inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm transition-colors',
+                isActive
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-foreground hover:bg-accent',
+              )
+            }
+          >
+            <Icon aria-hidden className="h-4 w-4" />
+            <span>{t(labelKey)}</span>
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="flex gap-8">
+        <aside className="hidden w-56 shrink-0 space-y-1 md:block">
+          <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight">{t('admin.title')}</h1>
+          <nav className="flex flex-col gap-0.5" aria-label={t('admin.nav.label')}>
+            {SECTIONS.map(({ to, end, icon: Icon, labelKey }) => (
+              <NavLink
+                key={to}
+                to={to}
+                {...(end !== undefined ? { end } : {})}
+                className={({ isActive }) =>
+                  cn(
+                    'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
+                    isActive
+                      ? 'bg-accent font-medium text-accent-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )
+                }
+              >
+                <Icon aria-hidden className="h-4 w-4" />
+                <span>{t(labelKey)}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </aside>
+        <main className="min-w-0 flex-1">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
