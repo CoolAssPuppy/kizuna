@@ -113,6 +113,7 @@ Three load-bearing primitives:
 - [Node.js 22+](https://nodejs.org)
 - [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) (`brew install supabase/tap/supabase`)
 - Docker Desktop (for `supabase start`)
+- [Doppler CLI](https://docs.doppler.com/docs/install-cli) (`brew install dopplerhq/cli/doppler`) — optional but recommended; the npm scripts auto-detect it
 - Optional: `rsvg-convert` if you want to regenerate favicons (`brew install librsvg`)
 
 ### First run
@@ -120,6 +121,12 @@ Three load-bearing primitives:
 ```bash
 git clone https://github.com/CoolAssPuppy/kizuna.git
 cd kizuna
+
+# Either: sign in to Doppler and bind the repo to the kizuna project
+doppler login
+doppler setup           # picks the project from doppler.yaml; pick a config
+
+# Or: fall back to a local .env file
 cp .env.example .env
 
 # Spin up the local Supabase stack (Postgres, Auth, Storage, Edge Functions).
@@ -130,9 +137,21 @@ npm install
 npm run db:apply
 npm run gen:types
 
-# Run the app.
+# Run the app. The dev/build/preview scripts wrap with `doppler run --`
+# when Doppler is on PATH; otherwise they read .env directly.
 npm run dev
 ```
+
+### Doppler configs
+
+| Config           | Purpose                                                           |
+| ---------------- | ----------------------------------------------------------------- |
+| `dev`            | Shared local defaults (local Supabase URLs, dev placeholders)     |
+| `dev_personal`   | Your personal overrides — set keys here that should not be shared |
+| `stg`            | Staging cloud Supabase + integrations                             |
+| `prd`            | Production                                                        |
+
+Each config holds the same 24 keys as `.env.example`. Empty values fall through the integration stub paths gracefully (see [Integrations and graceful degradation](#integrations-and-graceful-degradation)).
 
 Visit <http://localhost:5173>. The Sign In screen exposes two dev shortcut buttons:
 

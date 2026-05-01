@@ -1,0 +1,7 @@
+setup:
+  project: kizuna
+  # Each contributor picks their own config the first time they run
+  # `doppler setup`. The convention in this repo:
+  #   - dev          → shared defaults for local development
+  #   - dev_personal → per-developer overrides (private credentials)
+  #   - stg / prd    → reserved for staging + production deploys

@@ -12,6 +12,12 @@ mcp.json
 .env.production
 !.env.example
 
+# Doppler. Local CLI state lives in ~/.doppler.
+# Per-repo binding is committed via doppler.yaml (project scope only,
+# no values), but any cached secret artifacts stay local.
+.doppler/
+doppler.local.yaml
+
 # Dependencies and build artifacts
 node_modules/
 dist/
