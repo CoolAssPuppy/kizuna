@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { getSupabaseClient } from './supabase';
 
@@ -8,9 +8,9 @@ interface Options {
 }
 
 /**
- * Resolves a Storage object path to a signed URL. Returns null while loading
- * or when `path` is null/empty. Tracks the latest path so race conditions on
- * rapid prop changes don't surface a stale URL.
+ * Resolves a Storage object path to a signed URL. Returns null while
+ * loading or when `path` is null/empty. TanStack Query handles the
+ * race-on-rapid-prop-change cancellation.
  */
 export function useStorageImage(
   bucket: string,
@@ -18,24 +18,18 @@ export function useStorageImage(
   options: Options = {},
 ): string | null {
   const { ttlSeconds = 3600 } = options;
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!path) {
-      setUrl(null);
-      return;
-    }
-    void (async () => {
-      const { data } = await getSupabaseClient()
+  const { data = null } = useQuery({
+    queryKey: ['storage-signed-url', bucket, path, ttlSeconds],
+    enabled: !!path,
+    // Refresh well before the signed URL itself expires.
+    staleTime: Math.floor(ttlSeconds * 0.5) * 1000,
+    queryFn: async () => {
+      if (!path) return null;
+      const { data: signed } = await getSupabaseClient()
         .storage.from(bucket)
         .createSignedUrl(path, ttlSeconds);
-      if (!cancelled) setUrl(data?.signedUrl ?? null);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [bucket, path, ttlSeconds]);
-
-  return url;
+      return signed?.signedUrl ?? null;
+    },
+  });
+  return data;
 }

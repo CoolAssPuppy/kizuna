@@ -33,6 +33,9 @@ export function useNotifications(): {
     },
   });
 
+  // useEffect (not useMountEffect) because the channel filter is
+  // userId-scoped and userId can change after sign-in/out.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (!userId) return;
     const supabase = getSupabaseClient();

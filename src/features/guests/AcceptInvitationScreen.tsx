@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -20,16 +20,11 @@ export function AcceptInvitationScreen(): JSX.Element {
 
   const token = params.get('token');
   const sponsor = params.get('sponsor') ?? 'your sponsor';
+  const tokenMissing = token === null || token.length === 0;
   const [password, setPassword] = useState('');
-  const [state, setState] = useState<State>({ kind: 'idle' });
-
-  const tokenMissing = useMemo(() => token === null || token.length === 0, [token]);
-
-  useEffect(() => {
-    if (tokenMissing) {
-      setState({ kind: 'error', messageKey: 'guests.errors.missingToken' });
-    }
-  }, [tokenMissing]);
+  const [state, setState] = useState<State>(
+    tokenMissing ? { kind: 'error', messageKey: 'guests.errors.missingToken' } : { kind: 'idle' },
+  );
 
   async function handleSubmit(event: React.FormEvent): Promise<void> {
     event.preventDefault();

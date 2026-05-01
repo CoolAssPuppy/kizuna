@@ -12,7 +12,7 @@ import { loadPassportMetadata, savePassport } from '../api';
 import { isExpiryRiskyForEvent } from '../expiryWarning';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from './useHydratedFormState';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {

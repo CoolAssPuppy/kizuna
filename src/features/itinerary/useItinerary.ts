@@ -43,6 +43,9 @@ export function useItinerary({ eventId }: Args): {
     },
   });
 
+  // useEffect (not useMountEffect) because the channel filter scopes
+  // by userId + eventId and both can change at runtime.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (userId === null) return;
     const channel = supabase

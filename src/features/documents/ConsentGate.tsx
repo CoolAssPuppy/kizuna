@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -29,25 +29,27 @@ interface ConsentGateProps {
  * On submit, calls onAcknowledge with the captured signals so the caller can
  * persist them to document_acknowledgements with IP/UA captured server-side.
  */
-export function ConsentGate({ document, onAcknowledge }: ConsentGateProps): JSX.Element {
+export function ConsentGate(props: ConsentGateProps): JSX.Element {
+  // Re-mount on document change so the scroll ref re-evaluates and
+  // local state resets to the new document's requires_scroll default.
+  return <ConsentGateInner key={props.document.id} {...props} />;
+}
+
+function ConsentGateInner({ document, onAcknowledge }: ConsentGateProps): JSX.Element {
   const { t } = useTranslation();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
   const [reachedBottom, setReachedBottom] = useState(!document.requires_scroll);
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
-  const evaluateBottom = useCallback(() => {
+  function evaluateBottom(): void {
     const el = scrollRef.current;
     if (!el) return;
-    const atBottom = isScrolledToBottom(el.scrollTop, el.scrollHeight, el.clientHeight);
-    if (atBottom) setReachedBottom(true);
-  }, []);
-
-  useEffect(() => {
-    // Initial check covers documents short enough to fit without scrolling.
-    evaluateBottom();
-  }, [evaluateBottom, document.id]);
+    if (isScrolledToBottom(el.scrollTop, el.scrollHeight, el.clientHeight)) {
+      setReachedBottom(true);
+    }
+  }
 
   const submitEnabled = reachedBottom && checkboxChecked && !busy;
 
@@ -78,7 +80,11 @@ export function ConsentGate({ document, onAcknowledge }: ConsentGateProps): JSX.
       </header>
 
       <div
-        ref={scrollRef}
+        ref={(el) => {
+          scrollRef.current = el;
+          // Initial check on mount; covers short docs that don't scroll.
+          if (el) evaluateBottom();
+        }}
         onScroll={evaluateBottom}
         className="prose prose-sm max-h-[60vh] max-w-none overflow-y-auto rounded-md border bg-card p-6 text-card-foreground"
         role="region"

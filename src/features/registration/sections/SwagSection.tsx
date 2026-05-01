@@ -17,7 +17,7 @@ import {
 import { EU_SHOE_SIZES, US_SHOE_SIZES, euToUs, type ShoeSizeSystem, toEu } from '../shoeSize';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from './useHydratedFormState';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 
 type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];

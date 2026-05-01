@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+import { useMountEffect } from '@/hooks/useMountEffect';
 
 /**
  * Returns true while the browser reports online connectivity.
@@ -14,20 +16,16 @@ export function useOnlineStatus(): boolean {
     typeof navigator === 'undefined' ? true : navigator.onLine,
   );
 
-  useEffect(() => {
-    function handleOnline(): void {
-      setOnline(true);
-    }
-    function handleOffline(): void {
-      setOnline(false);
-    }
+  useMountEffect(() => {
+    const handleOnline = (): void => setOnline(true);
+    const handleOffline = (): void => setOnline(false);
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  });
 
   return online;
 }

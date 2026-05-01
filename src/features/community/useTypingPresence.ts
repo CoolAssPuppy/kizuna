@@ -36,6 +36,11 @@ export function useTypingPresence(slug: string, displayName: string): Result {
   );
   const lastSentRef = useRef(0);
 
+  // useEffect (not useMountEffect) because the channel identity depends
+  // on slug + user — both change at runtime when the route navigates
+  // between channels. Caller is expected to remount this hook's
+  // component if it wants different behavior.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (!user || !slug) return;
     const supabase = getSupabaseClient();

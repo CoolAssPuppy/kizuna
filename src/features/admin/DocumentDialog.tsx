@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -91,7 +91,18 @@ interface DocumentDialogProps {
   onClose: () => void;
 }
 
-export function DocumentDialog({
+export function DocumentDialog(props: DocumentDialogProps): JSX.Element {
+  // Re-mount the form when the user switches documents (or new vs edit)
+  // so state initialises from the freshly-passed prop. No effect needed.
+  return (
+    <DocumentDialogInner
+      key={props.open ? (props.document?.id ?? 'new') : 'closed'}
+      {...props}
+    />
+  );
+}
+
+function DocumentDialogInner({
   open,
   eventId,
   document,
@@ -100,14 +111,10 @@ export function DocumentDialog({
   const { t } = useTranslation();
   const { show } = useToast();
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
+  const [draft, setDraft] = useState<Draft>(() =>
+    document ? rowToDraft(document) : EMPTY_DRAFT,
+  );
   const [bodyTab, setBodyTab] = useState<'write' | 'preview'>('write');
-
-  useEffect(() => {
-    if (!open) return;
-    setDraft(document ? rowToDraft(document) : EMPTY_DRAFT);
-    setBodyTab('write');
-  }, [open, document]);
 
   const save = useMutation({
     mutationFn: async () => {

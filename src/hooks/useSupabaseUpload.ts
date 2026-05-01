@@ -143,6 +143,10 @@ export function useSupabaseUpload(options: UseSupabaseUploadOptions) {
     }
   }, [files, path, bucketName, errors, successes, cacheControl, upsert, onUploadComplete]);
 
+  // useEffect (not useMountEffect): reconciles file errors when the
+  // user adds/removes via dropzone. Lifting this into setFiles call
+  // sites would require restructuring the hook — pragmatic exception.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (files.length === 0) {
       setErrors([]);

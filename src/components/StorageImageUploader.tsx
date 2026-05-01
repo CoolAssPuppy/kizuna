@@ -1,5 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
@@ -43,24 +43,16 @@ export function StorageImageUploader({
   className,
 }: StorageImageUploaderProps): JSX.Element {
   const { t } = useTranslation();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  // Resolve a signed URL whenever `value` changes so the preview reflects
-  // what the form has bound.
-  useEffect(() => {
-    let cancelled = false;
-    if (!value) {
-      setPreviewUrl(null);
-      return;
-    }
-    void (async () => {
+  const { data: previewUrl = null } = useQuery({
+    queryKey: ['storage-signed-url', bucket, value],
+    enabled: !!value,
+    staleTime: 30 * 60_000,
+    queryFn: async () => {
+      if (!value) return null;
       const { data } = await getSupabaseClient().storage.from(bucket).createSignedUrl(value, 3600);
-      if (!cancelled) setPreviewUrl(data?.signedUrl ?? null);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [value, bucket]);
+      return data?.signedUrl ?? null;
+    },
+  });
 
   const upload = useSupabaseUpload({
     bucketName: bucket,
@@ -76,8 +68,9 @@ export function StorageImageUploader({
 
   function clear(): void {
     if (!value) return;
+    // onChange('') drops `value`, which disables the signed-URL query;
+    // the preview clears automatically via TanStack Query.
     onChange('');
-    setPreviewUrl(null);
     // Best-effort delete; ignore errors so the form doesn't get stuck.
     void getSupabaseClient().storage.from(bucket).remove([value]);
   }

@@ -27,6 +27,10 @@ export function useRealtimeInvalidation(bindings: ReadonlyArray<RealtimeBinding>
     .map((b) => `${b.table}|${b.filter ?? ''}|${b.invalidates.join('.')}`)
     .join(';');
 
+  // useEffect (not useMountEffect) because subscription identity
+  // depends on `fingerprint` — bindings can change at runtime when the
+  // active event flips or filters update.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (bindings.length === 0) return;
     const client = getSupabaseClient();

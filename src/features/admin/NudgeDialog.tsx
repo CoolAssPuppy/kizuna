@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,12 @@ interface NudgeDialogProps {
   onClose: () => void;
 }
 
-export function NudgeDialog({ open, onClose }: NudgeDialogProps): JSX.Element {
+export function NudgeDialog(props: NudgeDialogProps): JSX.Element {
+  // Re-key on open so all local state resets to defaults each time.
+  return <NudgeDialogInner key={props.open ? 'open' : 'closed'} {...props} />;
+}
+
+function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const queryClient = useQueryClient();
@@ -54,37 +59,17 @@ export function NudgeDialog({ open, onClose }: NudgeDialogProps): JSX.Element {
   const [audienceKind, setAudienceKind] = useState<AudienceKind>('all_employees');
   const [pickedUser, setPickedUser] = useState<UserSearchResult | null>(null);
   const [search, setSearch] = useState('');
-  const [results, setResults] = useState<UserSearchResult[]>([]);
 
-  useEffect(() => {
-    if (!open) return;
-    setChannel('in_app');
-    setType('announcement');
-    setSubject('');
-    setBody('');
-    setAudienceKind('all_employees');
-    setPickedUser(null);
-    setSearch('');
-    setResults([]);
-  }, [open]);
-
-  useEffect(() => {
-    if (audienceKind !== 'user') return;
-    if (!search.trim()) {
-      setResults([]);
-      return;
-    }
-    let active = true;
-    const timer = window.setTimeout(() => {
-      void searchUsers(getSupabaseClient(), search).then((r) => {
-        if (active) setResults(r);
-      });
-    }, 200);
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
-  }, [search, audienceKind]);
+  // TanStack Query handles cancellation + dedup; per-keystroke is fine
+  // for an admin tool against a narrow people search.
+  const trimmedSearch = search.trim();
+  const searchEnabled = audienceKind === 'user' && !pickedUser && trimmedSearch.length > 0;
+  const { data: results = [] } = useQuery({
+    queryKey: ['admin', 'nudges', 'userSearch', trimmedSearch],
+    queryFn: () => searchUsers(getSupabaseClient(), trimmedSearch),
+    enabled: searchEnabled,
+    staleTime: 30_000,
+  });
 
   const audience = useMemo<NudgeAudience | null>(() => {
     if (audienceKind === 'user') return pickedUser ? { kind: 'user', userId: pickedUser.id } : null;
@@ -223,7 +208,6 @@ export function NudgeDialog({ open, onClose }: NudgeDialogProps): JSX.Element {
                                 onClick={() => {
                                   setPickedUser(u);
                                   setSearch('');
-                                  setResults([]);
                                 }}
                                 className="block w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground"
                               >

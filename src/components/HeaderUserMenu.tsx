@@ -1,14 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
+import { useMountEffect } from '@/hooks/useMountEffect';
 
-/**
- * Three-dot menu trigger in the header. Opens a dropdown with profile
- * navigation and sign-out. Click-outside closes the menu.
- */
 export function HeaderUserMenu(): JSX.Element {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
@@ -16,17 +13,6 @@ export function HeaderUserMenu(): JSX.Element {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onClick(event: MouseEvent): void {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
-  }, [open]);
 
   if (!user) return <div className="h-9 w-9" aria-hidden />;
 
@@ -56,10 +42,7 @@ export function HeaderUserMenu(): JSX.Element {
         </svg>
       </button>
       {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 top-full z-20 mt-2 w-56 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
-        >
+        <DropdownPanel containerRef={containerRef} onDismiss={() => setOpen(false)}>
           <div className="border-b px-3 py-2 text-xs text-muted-foreground">{user.email}</div>
           <MenuItem
             label={t('profile.title')}
@@ -91,8 +74,38 @@ export function HeaderUserMenu(): JSX.Element {
             onClick={() => void signOut()}
             variant="destructive"
           />
-        </div>
+        </DropdownPanel>
       ) : null}
+    </div>
+  );
+}
+
+function DropdownPanel({
+  containerRef,
+  onDismiss,
+  children,
+}: {
+  containerRef: React.RefObject<HTMLDivElement>;
+  onDismiss: () => void;
+  children: React.ReactNode;
+}): JSX.Element {
+  // Listener attaches only while the panel is mounted; closing
+  // unmounts the panel, which detaches the listener.
+  useMountEffect(() => {
+    const onClick = (event: MouseEvent): void => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        onDismiss();
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  });
+  return (
+    <div
+      role="menu"
+      className="absolute right-0 top-full z-20 mt-2 w-56 overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md"
+    >
+      {children}
     </div>
   );
 }

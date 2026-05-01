@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { useMountEffect } from '@/hooks/useMountEffect';
 import { applyTheme, DEFAULT_THEME, readStoredTheme, type ThemeId } from '@/lib/theme';
 
 import { ThemeContext, type ThemeContextValue } from './ThemeContext';
@@ -12,13 +13,12 @@ interface ThemeProviderProps {
 export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
   const [theme, setThemeState] = useState<ThemeId>(DEFAULT_THEME);
 
-  // Hydrate from localStorage on mount. Doing this in an effect avoids the
-  // SSR / hydration mismatch trap (the server has no localStorage).
-  useEffect(() => {
+  // localStorage isn't available during SSR, so we hydrate after mount.
+  useMountEffect(() => {
     const stored = readStoredTheme();
     setThemeState(stored);
     applyTheme(stored);
-  }, []);
+  });
 
   const setTheme = useCallback((next: ThemeId): void => {
     setThemeState(next);

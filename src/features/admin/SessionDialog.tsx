@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -41,15 +41,21 @@ interface SessionDialogProps {
   saving: boolean;
 }
 
-export function SessionDialog({ draft, onClose, onSave, saving }: SessionDialogProps): JSX.Element {
+export function SessionDialog(props: SessionDialogProps): JSX.Element {
+  // Remount when a different draft opens so initial state reflects it.
+  const key = props.draft === null ? 'closed' : (props.draft.id ?? 'new');
+  return <SessionDialogInner key={key} {...props} />;
+}
+
+function SessionDialogInner({
+  draft,
+  onClose,
+  onSave,
+  saving,
+}: SessionDialogProps): JSX.Element {
   const { t } = useTranslation();
   const open = draft !== null;
   const [state, setState] = useState<SessionDraft>(draft ?? emptySessionDraft());
-
-  useEffect(() => {
-    if (draft) setState(draft);
-  }, [draft]);
-
   return (
     <Dialog
       open={open}

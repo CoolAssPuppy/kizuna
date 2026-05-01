@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, type ReactNode } from 'react';
+import { useCallback, useMemo, useReducer, useRef, type ReactNode } from 'react';
+
+import { useMountEffect } from '@/hooks/useMountEffect';
 import type { Session } from '@supabase/supabase-js';
 
 import { getSupabaseClient } from '@/lib/supabase';
@@ -93,7 +95,7 @@ export function AuthProvider({ children, ssoConfig = {} }: AuthProviderProps): J
     [loadAppUser],
   );
 
-  useEffect(() => {
+  useMountEffect(() => {
     activeRef.current = true;
     // onAuthStateChange fires INITIAL_SESSION on subscribe, so a
     // manual getSession() here would race against it. Lean on the
@@ -105,7 +107,7 @@ export function AuthProvider({ children, ssoConfig = {} }: AuthProviderProps): J
       activeRef.current = false;
       subscription.subscription.unsubscribe();
     };
-  }, [supabase, syncSession]);
+  });
 
   const signInWithPassword = useCallback(
     async (email: string, password: string): Promise<void> => {

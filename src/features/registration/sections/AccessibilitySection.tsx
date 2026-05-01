@@ -10,7 +10,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { loadAccessibility, saveAccessibility } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from './useHydratedFormState';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 import { toggleArrayMember } from './utils';
 

@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -25,42 +26,28 @@ export function SignDocumentScreen(): JSX.Element {
   const { data: event } = useActiveEvent();
   const { show } = useToast();
 
-  const [document, setDocument] = useState<DocumentRow | null>(null);
-  const [reachedBottom, setReachedBottom] = useState(false);
-  const [fullName, setFullName] = useState('');
-  const [busy, setBusy] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!documentId) return;
-    const supabase = getSupabaseClient();
-    let active = true;
-    void (async () => {
-      const { data } = await supabase
+  const { data: document = null } = useQuery({
+    queryKey: ['document', documentId],
+    enabled: !!documentId,
+    queryFn: async (): Promise<DocumentRow | null> => {
+      if (!documentId) return null;
+      const { data } = await getSupabaseClient()
         .from('documents')
         .select('*')
         .eq('id', documentId)
         .maybeSingle();
-      if (!active) return;
-      setDocument(data);
-      if (!data?.requires_scroll) setReachedBottom(true);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [documentId]);
+      return data;
+    },
+  });
+  const [reachedBottom, setReachedBottom] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [busy, setBusy] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // After the document renders, check whether it already fits in the
-  // viewport — short documents have no scrollable area, so the user can
-  // never trigger onScroll and would otherwise be stuck.
-  useEffect(() => {
-    if (!document) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    if (isScrolledToBottom(el.scrollTop, el.scrollHeight, el.clientHeight)) {
-      setReachedBottom(true);
-    }
-  }, [document]);
+  // Documents that don't require scroll OR whose body fits the viewport
+  // never fire onScroll, so we mark "reached" once the DOM is laid out.
+  // Keyed on document.id via the parent so this fires fresh per doc.
+  const requiresScroll = document?.requires_scroll ?? true;
 
   function handleScroll(): void {
     const el = scrollRef.current;
@@ -71,8 +58,8 @@ export function SignDocumentScreen(): JSX.Element {
   }
 
   const submitEnabled = useMemo(() => {
-    return reachedBottom && fullName.trim().length >= 3 && !busy;
-  }, [reachedBottom, fullName, busy]);
+    return (!requiresScroll || reachedBottom) && fullName.trim().length >= 3 && !busy;
+  }, [requiresScroll, reachedBottom, fullName, busy]);
 
   async function handleSign(): Promise<void> {
     if (!user || !event || !document) return;
@@ -118,7 +105,16 @@ export function SignDocumentScreen(): JSX.Element {
 
       <div className="mx-auto max-w-3xl space-y-6">
         <div
-          ref={scrollRef}
+          ref={(el) => {
+            scrollRef.current = el;
+            // Ref callback runs once the element is in the DOM. If the
+            // body fits the viewport without scrolling, mark reached
+            // immediately — otherwise the user can never trigger
+            // onScroll and the form stays disabled.
+            if (el && isScrolledToBottom(el.scrollTop, el.scrollHeight, el.clientHeight)) {
+              setReachedBottom(true);
+            }
+          }}
           onScroll={handleScroll}
           role="region"
           aria-label={document.title}
@@ -127,7 +123,7 @@ export function SignDocumentScreen(): JSX.Element {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.body}</ReactMarkdown>
         </div>
 
-        {document.requires_scroll && !reachedBottom ? (
+        {requiresScroll && !reachedBottom ? (
           <p role="status" className="text-sm text-muted-foreground">
             {t('documents.scrollToContinue')}
           </p>

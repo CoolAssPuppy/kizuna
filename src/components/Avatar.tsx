@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 import { getSupabaseClient } from '@/lib/supabase';
 
@@ -17,31 +17,24 @@ interface Props {
  * Renders an attendee avatar at any size. Supports:
  *   - null → initial-tile fallback
  *   - absolute URL → <img>
- *   - storage object path → resolves a signed URL on mount
+ *   - storage object path → resolves a signed URL via TanStack Query
  */
 export function Avatar({ url, fallback, size = 32 }: Props): JSX.Element {
-  const [signed, setSigned] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!url) {
-      setSigned(null);
-      return;
-    }
-    if (url.startsWith('http')) {
-      setSigned(url);
-      return;
-    }
-    let active = true;
-    void (async () => {
+  const isAbsolute = !!url && url.startsWith('http');
+  const isStoragePath = !!url && !isAbsolute;
+  const { data: resolvedSigned = null } = useQuery({
+    queryKey: ['storage-signed-url', BUCKET, url],
+    enabled: isStoragePath,
+    staleTime: 30 * 60_000,
+    queryFn: async () => {
+      if (!url) return null;
       const { data } = await getSupabaseClient()
         .storage.from(BUCKET)
         .createSignedUrl(url, 60 * 60);
-      if (active) setSigned(data?.signedUrl ?? null);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [url]);
+      return data?.signedUrl ?? null;
+    },
+  });
+  const signed = isAbsolute ? url : resolvedSigned;
 
   const dim = `${size}px`;
   if (signed) {

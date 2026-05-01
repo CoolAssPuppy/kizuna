@@ -75,7 +75,10 @@ export function ChannelScreen(): JSX.Element {
 
   const groups = useMemo(() => groupMessagesForBubbles(messagesQ.data ?? []), [messagesQ.data]);
 
+  // useEffect (not useMountEffect): channel filter is slug-scoped and
+  // slug changes when the user navigates between community channels.
   // Realtime: refetch on insert / soft-delete in this channel.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (!slug) return;
     const supabase = getSupabaseClient();
@@ -95,7 +98,11 @@ export function ChannelScreen(): JSX.Element {
     };
   }, [slug, qc]);
 
-  // Auto-scroll to bottom on message changes.
+  // useEffect (not useMountEffect): re-runs when groups changes so
+  // the message list scrolls to the latest bubble after every fetch.
+  // The fix-without-effect pattern is a layout effect with mutation
+  // observer, which is more code than this one-liner deserves.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) return;
@@ -329,19 +336,16 @@ export function ChannelScreen(): JSX.Element {
 }
 
 function ChannelImage({ path }: { path: string }): JSX.Element | null {
-  const [src, setSrc] = useState<string | null>(null);
-  useEffect(() => {
-    let active = true;
-    void (async () => {
+  const { data: src = null } = useQuery({
+    queryKey: ['community', 'media-signed-url', path],
+    staleTime: 30 * 60_000,
+    queryFn: async () => {
       const { data } = await getSupabaseClient()
         .storage.from(COMMUNITY_MEDIA_BUCKET)
         .createSignedUrl(path, 60 * 60);
-      if (active) setSrc(data?.signedUrl ?? null);
-    })();
-    return () => {
-      active = false;
-    };
-  }, [path]);
+      return data?.signedUrl ?? null;
+    },
+  });
   if (!src) return null;
   return <img src={src} alt="" className="mb-2 max-h-72 w-full rounded-lg object-cover" />;
 }

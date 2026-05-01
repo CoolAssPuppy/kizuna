@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Camera, Loader2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,8 +32,31 @@ interface ProfileAvatarProps {
 export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  // Local override wins after a fresh upload — used until the next
+  // page load when the query cache picks up the new avatar_url.
+  const [overrideUrl, setOverrideUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: queriedUrl = null } = useQuery({
+    queryKey: ['profile-avatar', user?.id ?? null],
+    enabled: !!user,
+    queryFn: async () => {
+      if (!user) return null;
+      const supabase = getSupabaseClient();
+      const { data } = await supabase
+        .from('employee_profiles')
+        .select('avatar_url')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      const stored = data?.avatar_url;
+      if (typeof stored !== 'string' || stored.length === 0) return null;
+      const { data: signed } = await supabase.storage
+        .from(AVATAR_BUCKET)
+        .createSignedUrl(stored, 60 * 60);
+      return signed?.signedUrl ?? null;
+    },
+  });
+  const avatarUrl = overrideUrl ?? queriedUrl;
 
   const upload = useSupabaseUpload({
     bucketName: AVATAR_BUCKET,
@@ -49,37 +73,17 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
         const { data: signed } = await client.storage
           .from(AVATAR_BUCKET)
           .createSignedUrl(next, 60 * 60);
-        setAvatarUrl(signed?.signedUrl ?? null);
+        setOverrideUrl(signed?.signedUrl ?? null);
         upload.setFiles([]);
       })();
     },
   });
 
-  useEffect(() => {
-    if (!user) return;
-    const supabase = getSupabaseClient();
-    let active = true;
-    void (async () => {
-      const { data } = await supabase
-        .from('employee_profiles')
-        .select('avatar_url')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if (!active) return;
-      const stored = data?.avatar_url;
-      if (typeof stored === 'string' && stored.length > 0) {
-        const { data: signed } = await supabase.storage
-          .from(AVATAR_BUCKET)
-          .createSignedUrl(stored, 60 * 60);
-        if (active) setAvatarUrl(signed?.signedUrl ?? null);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
-
-  // When the picker resolves a single file, kick off the upload immediately.
+  // useEffect (not useMountEffect) because `upload.onUpload` reads its
+  // `files` state from closure and only sees the freshly-set value
+  // after a re-render. Restructuring useSupabaseUpload to take files
+  // as an argument is a separate refactor.
+  // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (upload.files.length > 0 && !upload.loading && upload.successes.length === 0) {
       void upload.onUpload();

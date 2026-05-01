@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useActiveSubject } from '@/features/profile/useActiveSubject';
 import { SectionChrome } from '@/features/registration/sections/SectionChrome';
 import type { SectionProps } from '@/features/registration/sections/types';
 import { useSectionSubmit } from '@/features/registration/sections/useSectionSubmit';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadCommunityProfile, loadHobbyCatalog, saveCommunityProfile } from './api';
@@ -39,19 +40,23 @@ const EMPTY: FormState = {
   currentCountry: '',
 };
 
-export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
+export function CommunityProfileSection(props: SectionProps): JSX.Element {
+  // Re-mount when the active subject changes so hydration replays.
+  const subject = useActiveSubject();
+  return <CommunityProfileSectionInner key={subject.userId} {...props} />;
+}
+
+function CommunityProfileSectionInner({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const subject = useActiveSubject();
   const qc = useQueryClient();
-  const [values, setValues] = useState<FormState>(EMPTY);
-  const [hydratedFor, setHydratedFor] = useState<string | null>(null);
   const { busy, errorKey, submit } = useSectionSubmit({
     mode,
     taskKey: null,
     toastSuccessKey: 'community.profile.saved',
   });
 
-  const profileQuery = useQuery({
+  const { data: profile, isSuccess: hydrated } = useQuery({
     queryKey: ['community', 'profile', subject.userId],
     queryFn: () => loadCommunityProfile(getSupabaseClient(), subject.userId),
     enabled: !!subject.userId,
@@ -61,15 +66,10 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
     queryFn: () => loadHobbyCatalog(getSupabaseClient()),
   });
   const hobbyCatalog = useMemo(() => catalogQuery.data ?? [], [catalogQuery.data]);
-  const hydrated = hydratedFor === subject.userId;
 
-  // Hydrate the form once per subject from the query result. Switching
-  // subjects (e.g. from sponsor to dependent) re-fires this branch and
-  // refills with the dependent's data.
-  useEffect(() => {
-    if (!subject.userId || !profileQuery.data || hydratedFor === subject.userId) return;
-    const row = profileQuery.data;
-    setValues({
+  const [values, setValues] = useHydratedFormState(hydrated, profile, EMPTY, (row) => {
+    if (!row) return EMPTY;
+    return {
       bio: row.bio ?? '',
       funFact: row.fun_fact ?? '',
       hobbies: row.hobbies,
@@ -78,9 +78,8 @@ export function CommunityProfileSection({ mode }: SectionProps): JSX.Element {
       hometownCountry: row.hometown_country ?? '',
       currentCity: row.current_city ?? '',
       currentCountry: row.current_country ?? '',
-    });
-    setHydratedFor(subject.userId);
-  }, [subject.userId, profileQuery.data, hydratedFor]);
+    };
+  });
 
   // Suggestions are derived from the current draft + catalog: pure
   // computation, no effect needed.

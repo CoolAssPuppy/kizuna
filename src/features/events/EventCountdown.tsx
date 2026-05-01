@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useMountEffect } from '@/hooks/useMountEffect';
 
 interface Countdown {
   days: number;
@@ -34,7 +36,12 @@ interface Props {
  * passes it flips to a pulsing "Live" pill. Single source of truth for
  * countdown UI across the itinerary hero and the home header.
  */
-export function EventCountdown({
+export function EventCountdown(props: Props): JSX.Element {
+  // Re-mount when startsAt changes so the interval restarts cleanly.
+  return <EventCountdownInner key={props.startsAt} {...props} />;
+}
+
+function EventCountdownInner({
   startsAt,
   size = 'default',
   fullWidth = false,
@@ -42,11 +49,11 @@ export function EventCountdown({
   const { t } = useTranslation();
   const [countdown, setCountdown] = useState<Countdown>(() => diffToCountdown(new Date(startsAt)));
 
-  useEffect(() => {
-    setCountdown(diffToCountdown(new Date(startsAt)));
-    const id = window.setInterval(() => setCountdown(diffToCountdown(new Date(startsAt))), 60_000);
+  useMountEffect(() => {
+    const target = new Date(startsAt);
+    const id = window.setInterval(() => setCountdown(diffToCountdown(target)), 60_000);
     return () => window.clearInterval(id);
-  }, [startsAt]);
+  });
 
   if (countdown.isLive) {
     return (

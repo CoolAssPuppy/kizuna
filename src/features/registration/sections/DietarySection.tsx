@@ -11,7 +11,7 @@ import { loadDietary, saveDietary } from '../api';
 import type { DietaryRow } from '../types';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from './useHydratedFormState';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { useSectionSubmit } from './useSectionSubmit';
 import { toggleArrayMember } from './utils';
 

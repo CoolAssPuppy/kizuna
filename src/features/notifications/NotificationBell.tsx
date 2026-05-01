@@ -1,8 +1,9 @@
 import { Bell } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useMountEffect } from '@/hooks/useMountEffect';
 import { cn } from '@/lib/utils';
 
 import type { NotificationRow } from './api';
@@ -30,28 +31,6 @@ export function NotificationBell(): JSX.Element {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function handleClickOutside(event: MouseEvent): void {
-      if (
-        containerRef.current &&
-        event.target instanceof Node &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setOpen(false);
-      }
-    }
-    function handleEscape(event: KeyboardEvent): void {
-      if (event.key === 'Escape') setOpen(false);
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [open]);
-
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -73,10 +52,10 @@ export function NotificationBell(): JSX.Element {
       </button>
 
       {open ? (
-        <div
-          role="dialog"
-          aria-label={t('notifications.title')}
-          className="absolute right-0 z-30 mt-2 w-80 origin-top-right rounded-lg border bg-popover text-popover-foreground shadow-lg"
+        <DismissableDropdown
+          containerRef={containerRef}
+          onDismiss={() => setOpen(false)}
+          ariaLabel={t('notifications.title')}
         >
           <header className="flex items-center justify-between border-b px-4 py-2">
             <h2 className="text-sm font-semibold">{t('notifications.title')}</h2>
@@ -108,8 +87,51 @@ export function NotificationBell(): JSX.Element {
               ))
             )}
           </ul>
-        </div>
+        </DismissableDropdown>
       ) : null}
+    </div>
+  );
+}
+
+function DismissableDropdown({
+  containerRef,
+  onDismiss,
+  ariaLabel,
+  children,
+}: {
+  containerRef: React.RefObject<HTMLDivElement>;
+  onDismiss: () => void;
+  ariaLabel: string;
+  children: ReactNode;
+}): JSX.Element {
+  // Listeners attach only while the dropdown is mounted.
+  useMountEffect(() => {
+    const onClick = (event: MouseEvent): void => {
+      if (
+        containerRef.current &&
+        event.target instanceof Node &&
+        !containerRef.current.contains(event.target)
+      ) {
+        onDismiss();
+      }
+    };
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') onDismiss();
+    };
+    document.addEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  });
+  return (
+    <div
+      role="dialog"
+      aria-label={ariaLabel}
+      className="absolute right-0 z-30 mt-2 w-80 origin-top-right rounded-lg border bg-popover text-popover-foreground shadow-lg"
+    >
+      {children}
     </div>
   );
 }

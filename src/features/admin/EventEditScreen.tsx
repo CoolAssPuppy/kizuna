@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -71,33 +71,30 @@ export function EventEditScreen(): JSX.Element {
   const { show } = useToast();
   const isNew = eventId === 'new' || !eventId;
 
-  const { data: event, isLoading } = useQuery({
+  const { data: event, isLoading, isSuccess } = useQuery({
     queryKey: ['admin', 'event', eventId],
     enabled: !isNew && eventId !== undefined,
     queryFn: () => (eventId ? fetchEventById(getSupabaseClient(), eventId) : Promise.resolve(null)),
   });
 
-  const [form, setForm] = useState<FormState>(EMPTY);
-
-  useEffect(() => {
-    if (event) {
-      setForm({
-        name: event.name,
-        subtitle: event.subtitle ?? '',
-        type: event.type,
-        location: event.location ?? '',
-        time_zone: event.time_zone,
-        start_date: event.start_date,
-        end_date: event.end_date,
-        reg_opens_at: fromIso(event.reg_opens_at),
-        reg_closes_at: fromIso(event.reg_closes_at),
-        hero_image_url: event.hero_image_url ?? '',
-        logo_url: event.logo_url ?? '',
-        invite_all_employees: event.invite_all_employees,
-        is_active: event.is_active,
-      });
-    }
-  }, [event]);
+  const [form, setForm] = useHydratedFormState(isSuccess, event, EMPTY, (row) => {
+    if (!row) return EMPTY;
+    return {
+      name: row.name,
+      subtitle: row.subtitle ?? '',
+      type: row.type,
+      location: row.location ?? '',
+      time_zone: row.time_zone,
+      start_date: row.start_date,
+      end_date: row.end_date,
+      reg_opens_at: fromIso(row.reg_opens_at),
+      reg_closes_at: fromIso(row.reg_closes_at),
+      hero_image_url: row.hero_image_url ?? '',
+      logo_url: row.logo_url ?? '',
+      invite_all_employees: row.invite_all_employees,
+      is_active: row.is_active,
+    };
+  });
 
   const save = useMutation({
     mutationFn: async (state: FormState) => {

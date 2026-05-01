@@ -41,6 +41,25 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+      // Ban useEffect — use derived state, event handlers, useQuery, or
+      // useMountEffect instead. See src/hooks/useMountEffect.ts and
+      // ~/.claude/skills/no-use-effect/SKILL.md.
+      // Ban CALLS to useEffect; the import is fine (legitimate
+      // exceptions documented per-file with eslint-disable + a comment).
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.name='useEffect']",
+          message:
+            'Direct useEffect is banned. Use derived state, useQuery, event handlers, or useMountEffect (see src/hooks/useMountEffect.ts).',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/hooks/useMountEffect.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
     },
   },
   {

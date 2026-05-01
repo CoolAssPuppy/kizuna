@@ -1,5 +1,7 @@
 import { CircleDot, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
+import { useMountEffect } from '@/hooks/useMountEffect';
 import { useTranslation } from 'react-i18next';
 
 import { ITEM_META } from './itemMeta';
@@ -56,11 +58,11 @@ export function NowNextCard({ items, now: nowOverride }: Props): JSX.Element | n
   const { t } = useTranslation();
   const [now, setNow] = useState<Date>(() => nowOverride ?? new Date());
 
-  useEffect(() => {
+  useMountEffect(() => {
     if (nowOverride) return;
     const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
-  }, [nowOverride]);
+  });
 
   const slot = findSlot(items, now);
   if (!slot) return null;
