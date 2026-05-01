@@ -180,7 +180,7 @@ function InviteDialog({ open, onClose }: InviteDialogProps): JSX.Element {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="guest@example.com"
+                placeholder={t('registration.guests.emailPlaceholder')}
               />
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { callEdgeFunction } from '@/lib/edgeFunction';
 import type { AppSupabaseClient } from '@/lib/supabase';
 
 import type { GuestInvitationRow } from './types';
@@ -28,27 +29,6 @@ export async function cancelGuestInvitation(
 
 interface InvokeContext {
   client: AppSupabaseClient;
-}
-
-/**
- * Wraps `client.functions.invoke` with consistent error handling. The
- * Supabase types return `data` and `error` as `any`, so funnelling every
- * call through a single typed helper keeps eslint and TS happy without
- * `as any` scattered through the feature.
- */
-async function callEdgeFunction<T>(
-  client: AppSupabaseClient,
-  name: string,
-  body: Record<string, unknown>,
-): Promise<T> {
-  const response = await client.functions.invoke<T>(name, { body });
-  if (response.error) {
-    throw response.error instanceof Error ? response.error : new Error(String(response.error));
-  }
-  if (response.data === null || response.data === undefined) {
-    throw new Error(`${name} returned no payload`);
-  }
-  return response.data;
 }
 
 interface CreateInvitationArgs {

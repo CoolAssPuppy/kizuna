@@ -35,7 +35,7 @@ export function AllEventsScreen(): JSX.Element {
   if (isLoading) {
     return (
       <main className="mx-auto w-full max-w-7xl px-8 py-10">
-        <p className="text-sm text-muted-foreground">{t('admin.loading')}</p>
+        <p className="text-sm text-muted-foreground">{t('app.loading')}</p>
       </main>
     );
   }

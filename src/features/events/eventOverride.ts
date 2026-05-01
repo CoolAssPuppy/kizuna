@@ -17,15 +17,23 @@ const STORAGE_KEY = 'kizuna:event-override';
 
 const listeners = new Set<() => void>();
 
+function emit(): void {
+  for (const listener of listeners) listener();
+}
+
+// Bind the cross-tab `storage` listener exactly once at module init so
+// React StrictMode's double-subscribe in dev doesn't stack duplicate
+// browser listeners on top of each other.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === STORAGE_KEY) emit();
+  });
+}
+
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
-  const onStorage = (event: StorageEvent): void => {
-    if (event.key === STORAGE_KEY) listener();
-  };
-  window.addEventListener('storage', onStorage);
   return () => {
     listeners.delete(listener);
-    window.removeEventListener('storage', onStorage);
   };
 }
 
@@ -43,10 +51,10 @@ export function useEventOverride(): string | null {
 
 export function setEventOverride(eventId: string): void {
   window.localStorage.setItem(STORAGE_KEY, eventId);
-  for (const listener of listeners) listener();
+  emit();
 }
 
 export function clearEventOverride(): void {
   window.localStorage.removeItem(STORAGE_KEY);
-  for (const listener of listeners) listener();
+  emit();
 }

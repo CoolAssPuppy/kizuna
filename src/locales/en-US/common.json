@@ -3,6 +3,7 @@
     "name": "Kizuna",
     "tagline": "An enduring bond",
     "offline": "You are offline. Your itinerary, room, and transport details are cached and still readable.",
+    "loading": "Loading",
     "loadingEvent": "Loading event details",
     "noEvent": "No active event right now. Check back soon."
   },
@@ -270,6 +271,7 @@
       "inviteTitle": "Invite a guest",
       "inviteBody": "We'll email a single-use link valid for 7 days. Once they accept, they get their own Kizuna account and can complete the rest of registration themselves.",
       "guestEmail": "Guest email",
+      "emailPlaceholder": "guest@example.com",
       "send": "Send invitation",
       "sending": "Sending",
       "invited": "Invitation sent to {{email}}",
@@ -699,13 +701,6 @@
       "childFee": "$500 USD",
       "payNow": "Pay Now",
       "redirecting": "Taking you to checkout"
-    },
-    "invite": {
-      "addGuest": "Invite a Guest",
-      "guestEmail": "Guest Email",
-      "send": "Send Invitation",
-      "sending": "Sending invitation",
-      "invited": "Invitation sent to {{email}}"
     }
   },
   "documents": {

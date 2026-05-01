@@ -1,3 +1,4 @@
+import { callEdgeFunction } from '@/lib/edgeFunction';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -13,6 +14,9 @@ export interface NudgeHistoryRow {
   subject: string;
   delivered: boolean;
 }
+
+/** Shape of the joined users row for the recipient email. Single-row FK join. */
+type RecipientJoin = { email: string } | null;
 
 export async function fetchNudgeHistory(
   client: AppSupabaseClient,
@@ -31,10 +35,7 @@ export async function fetchNudgeHistory(
   return (data ?? []).map((row) => ({
     id: row.id,
     sent_at: row.sent_at,
-    recipient_email:
-      // Supabase typings on the joined relation come back as Joined<> from supabase-js;
-      // it is either an object or null when filter doesn't match.
-      (row.users as { email: string } | null)?.email ?? '',
+    recipient_email: (row.users as RecipientJoin)?.email ?? '',
     channel: row.channel,
     type: row.notification_type,
     subject: row.subject,
@@ -60,6 +61,15 @@ interface SendNudgeResult {
   delivered: number;
 }
 
+const SEND_CONCURRENCY = 8;
+
+/**
+ * Fan out a manual nudge to every resolved recipient. Uses bounded
+ * concurrency (Promise.allSettled in chunks) so that "all employees"
+ * doesn't tie up the Supabase functions endpoint with 60+ serialised
+ * requests, but also doesn't try to flood it with every recipient at
+ * once.
+ */
 export async function sendNudge(
   client: AppSupabaseClient,
   payload: SendNudgePayload,
@@ -68,21 +78,22 @@ export async function sendNudge(
   if (recipientIds.length === 0) return { attempted: 0, delivered: 0 };
 
   let delivered = 0;
-  for (const userId of recipientIds) {
-    const response = await client.functions.invoke<{ delivered: boolean }>(
-      'send-notification',
-      {
-        body: {
+  for (let i = 0; i < recipientIds.length; i += SEND_CONCURRENCY) {
+    const slice = recipientIds.slice(i, i + SEND_CONCURRENCY);
+    const settled = await Promise.allSettled(
+      slice.map((userId) =>
+        callEdgeFunction<{ delivered: boolean }>(client, 'send-notification', {
           userId,
           channel: payload.channel,
           type: payload.type,
           subject: payload.subject,
           body: payload.body,
-        },
-      },
+        }),
+      ),
     );
-    if (response.error) throw response.error;
-    if (response.data?.delivered) delivered += 1;
+    for (const result of settled) {
+      if (result.status === 'fulfilled' && result.value.delivered) delivered += 1;
+    }
   }
   return { attempted: recipientIds.length, delivered };
 }

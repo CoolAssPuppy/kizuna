@@ -72,10 +72,12 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
 const TABS = REPORTS.map((r) => r.key);
 type Tab = (typeof TABS)[number];
 
-function useReportRows(
-  config: ReportConfig,
-  eventId: string | null,
-): ReadonlyArray<CsvRow> {
+interface ReportData {
+  rows: ReadonlyArray<CsvRow>;
+  isLoading: boolean;
+}
+
+function useReportRows(config: ReportConfig, eventId: string | null): ReportData {
   const query = useQuery({
     queryKey: ['admin', config.key, eventId],
     queryFn: () => config.fetch(getSupabaseClient(), eventId),
@@ -86,7 +88,7 @@ function useReportRows(
     { table: 'flights', invalidates: ['admin', config.key] },
     { table: 'transport_requests', invalidates: ['admin', config.key] },
   ]);
-  return query.data ?? [];
+  return { rows: query.data ?? [], isLoading: query.isPending };
 }
 
 export function ReportsScreen(): JSX.Element {
@@ -95,7 +97,7 @@ export function ReportsScreen(): JSX.Element {
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
   const activeReport = REPORTS.find((r) => r.key === tab) ?? REPORTS[0]!;
-  const rows = useReportRows(activeReport, eventId);
+  const { rows, isLoading } = useReportRows(activeReport, eventId);
 
   return (
     <section className="space-y-6">
@@ -138,7 +140,9 @@ export function ReportsScreen(): JSX.Element {
         ))}
       </div>
 
-      {rows.length === 0 ? (
+      {isLoading ? (
+        <p className="py-8 text-sm text-muted-foreground">{t('app.loading')}</p>
+      ) : rows.length === 0 ? (
         <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>
       ) : (
         <ReportTable rows={rows} />
