@@ -1,15 +1,5 @@
-// parse-itinerary edge function
-//
-// Accepts raw itinerary text from the SPA, runs it through OpenAI to
-// extract a structured ParsedItinerary, and returns the JSON.
-//
-// The SPA never sees OPENAI_API_KEY. When the key is missing on this
-// runtime, the parser returns an empty result so local dev still works.
-//
-// Auth: caller must present a Supabase JWT — no anonymous traffic
-// reaches OpenAI from here. (TECH_DEBT_AUDIT F001)
-// Size cap: bodies above 32KB are rejected before any token is spent.
-// (TECH_DEBT_AUDIT F007)
+// Parses raw itinerary text through OpenAI. Auth-gated and size-capped
+// so anonymous callers can't burn tokens.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { parseItineraryWithOpenAI } from '../_shared/itineraryParser.ts';

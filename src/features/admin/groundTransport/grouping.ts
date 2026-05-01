@@ -2,23 +2,8 @@ import type { PassengerRow, VehicleOption } from '../api/groundTransport';
 
 const WINDOW_MINUTES = 30;
 
-/**
- * Build the window-start formatter ("Mon Jan 11 · 14:00") in the event
- * timezone. We construct fresh formatters per render rather than caching
- * a module-level instance so the timezone reads from the active event
- * — no more "America/Edmonton" baked in.
- */
-function windowStartFmt(timeZone: string): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone,
-  });
-}
-
+// Formatters are built per render so the timezone reads from the active
+// event — no module-level "America/Edmonton" baked in.
 export function windowTimeFmt(timeZone: string): Intl.DateTimeFormat {
   return new Intl.DateTimeFormat(undefined, {
     hour: '2-digit',
@@ -64,7 +49,14 @@ export function bucketByPickup(
 ): PickupWindow[] {
   if (rows.length === 0) return [];
   const slotMs = WINDOW_MINUTES * 60_000;
-  const startFmt = windowStartFmt(timeZone);
+  const startFmt = new Intl.DateTimeFormat(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone,
+  });
   const timeFmt = windowTimeFmt(timeZone);
 
   const windowMap = new Map<string, PassengerRow[]>();

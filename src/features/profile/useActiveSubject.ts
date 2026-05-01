@@ -5,29 +5,22 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { ActiveSubjectContext, type ActiveSubject } from './ActiveSubjectContext';
 
 interface UseActiveSubjectResult extends ActiveSubject {
-  setSubject: (next: ActiveSubject | null) => void;
+  setSubject: (next: ActiveSubject) => void;
 }
 
 /**
- * Returns the currently-active subject (the user_id every per-section
- * write should target) plus a setter. Falls back to the signed-in
- * user when no provider is mounted or no override has been chosen, so
- * sections work in both wizard mode and profile mode without the
- * provider being mandatory.
+ * Returns the active subject (defaults to the signed-in user) and a
+ * setter. Falls back to the auth user when no provider is mounted, so
+ * sections work in wizard mode without the provider.
  */
 export function useActiveSubject(): UseActiveSubjectResult {
   const ctx = useContext(ActiveSubjectContext);
   const { user } = useAuth();
-
-  const fallback: ActiveSubject = {
+  if (ctx) return { ...ctx.subject, setSubject: ctx.setSubject };
+  return {
     userId: user?.id ?? '',
     displayName: user?.email ?? '',
     isDependent: false,
-  };
-
-  const subject = ctx?.subject ?? fallback;
-  return {
-    ...subject,
-    setSubject: ctx?.setSubject ?? (() => undefined),
+    setSubject: () => undefined,
   };
 }

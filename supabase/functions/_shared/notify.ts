@@ -41,7 +41,10 @@ export async function sendSlackDm(input: SlackInput): Promise<boolean> {
 interface ResendInput {
   to: string | null;
   subject: string;
-  body: string;
+  /** Plain-text body. Either this or `html` must be set. */
+  body?: string;
+  /** HTML body. Either this or `body` must be set. */
+  html?: string;
 }
 
 /**
@@ -56,10 +59,13 @@ export async function sendResendEmail(input: ResendInput): Promise<boolean> {
     return true;
   }
   if (!input.to) return false;
+  const payload: Record<string, unknown> = { from, to: input.to, subject: input.subject };
+  if (input.html) payload['html'] = input.html;
+  if (input.body) payload['text'] = input.body;
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from, to: input.to, subject: input.subject, text: input.body }),
+    body: JSON.stringify(payload),
   });
   return response.ok;
 }

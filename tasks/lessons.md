@@ -247,3 +247,19 @@
 **Why:** Considered three options for dependents-as-attendees: (1) add `additional_guest_id` to every per-section table with CHECK constraints, (2) mint a shadow public.users row, (3) widen additional_guests with all the per-section columns. Option 1 doubles the surface area of every RLS policy and turns each load/save pair into a dual-write. Option 3 reverses the one-domain-per-table architecture. Option 2 reuses the existing schema and the existing Section components — RLS picks up the dependent branch via a single helper change.
 
 **How to apply:** The shadow row's `id` joins to additional_guests.user_id so the pairing is bidirectional. RLS uses an `is_self_or_admin` helper that resolves true for the sponsor of any user_id whose role='dependent'. Components read user_id from useActiveSubject (a context that defaults to auth.user) rather than directly from useAuth. ProfileScreen mounts the provider and renders a SubjectSelector pill row when minors exist.
+
+## 2026-05-01 - Mapper null-handling drifts between sections
+
+**Rule:** When using `useHydratedFormState`, the mapper must handle the `row === null` case the same way across every section. The hydrated flag flips true the moment the query succeeds; null is the legitimate "no row yet" path, not an error.
+
+**Why:** Audit found `EmergencyContactSection.tsx` guards `if (!loaded) return EMPTY` while `PassportSection.tsx` dereferences `row?.passport_name` directly. Today both work because the null-coalescing pulls EMPTY-equivalent values, but if a mapper later does `row.passport_number` (no `?.`) for a non-nullable schema field, hydration crashes.
+
+**How to apply:** Open every Section's mapper and confirm it has either an `if (!loaded) return EMPTY;` early return OR uses `?.` on every field access. Pick one shape per Section and stay consistent.
+
+## 2026-05-01 - Wizard-mode toast stacks if next step also toasts
+
+**Rule:** `useSectionSubmit` shows a success toast on every save click — including wizard mode where `mode.onComplete()` then advances the step. If a wizard step's onMount emits its own toast, you get two stacked.
+
+**Why:** I picked the universal-toast contract over the "loud only when no other feedback fires" alternative because saves were silently failing on the user. The downside is double-toast when the next step starts noisy.
+
+**How to apply:** Wizard steps must not emit a welcome toast onMount. If a future step needs one, route through the same `show()` so the deduper (TODO if it ever matters) sees both. For now no wizard step does this — contract is intact.

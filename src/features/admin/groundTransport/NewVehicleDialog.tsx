@@ -29,12 +29,10 @@ interface NewVehicleDialogProps {
   onCreated: () => void;
 }
 
-/**
- * Admin-only dialog to add a vehicle to a leg. The pickup wall-clock
- * is anchored to the active event's timezone so MST/MDT or zone shifts
- * land in UTC correctly. Stripe-style: defaults that survive the user's
- * "I just want to add a 12-pax bus quickly" workflow.
- */
+// Pickup wall-clock anchors to the active event's timezone so MST/MDT
+// shifts land in UTC correctly via zonedWallTimeToUtcIso.
+const DEFAULTS = { pickupTime: '14:00', pax: 12, bags: 12 };
+
 export function NewVehicleDialog({
   open,
   onOpenChange,
@@ -48,10 +46,18 @@ export function NewVehicleDialog({
   const { show } = useToast();
   const [name, setName] = useState('');
   const [pickupDate, setPickupDate] = useState(defaultDate);
-  const [pickupTime, setPickupTime] = useState('14:00');
-  const [pax, setPax] = useState(12);
-  const [bags, setBags] = useState(12);
+  const [pickupTime, setPickupTime] = useState(DEFAULTS.pickupTime);
+  const [pax, setPax] = useState(DEFAULTS.pax);
+  const [bags, setBags] = useState(DEFAULTS.bags);
   const [busy, setBusy] = useState(false);
+
+  function reset(): void {
+    setName('');
+    setPickupDate(defaultDate);
+    setPickupTime(DEFAULTS.pickupTime);
+    setPax(DEFAULTS.pax);
+    setBags(DEFAULTS.bags);
+  }
 
   async function handleCreate(): Promise<void> {
     if (!name.trim() || busy) return;
@@ -69,11 +75,7 @@ export function NewVehicleDialog({
       });
       onCreated();
       onOpenChange(false);
-      setName('');
-      setPickupDate(defaultDate);
-      setPickupTime('14:00');
-      setPax(12);
-      setBags(12);
+      reset();
       show(t('admin.groundTransport.vehicleCreated'));
     } catch (err) {
       show(err instanceof Error ? err.message : 'Error', 'error');

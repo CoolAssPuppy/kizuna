@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { joinFullName, splitFullName } from '@/lib/fullName';
 
 interface RenameMinorDialogProps {
   target: { id: string; fullName: string } | null;
@@ -18,19 +19,6 @@ interface RenameMinorDialogProps {
   onSubmit: (payload: { id: string; fullName: string }) => void;
 }
 
-function splitFullName(full: string): { first: string; last: string } {
-  const trimmed = full.trim();
-  if (!trimmed) return { first: '', last: '' };
-  const idx = trimmed.lastIndexOf(' ');
-  if (idx === -1) return { first: trimmed, last: '' };
-  return { first: trimmed.slice(0, idx).trim(), last: trimmed.slice(idx + 1).trim() };
-}
-
-/**
- * Re-fills first/last when a new minor opens. We split the stored
- * full_name on the LAST space so middle names ride along on the
- * first-name field; round-trip is `${first} ${last}`.trim().
- */
 export function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps): JSX.Element {
   const { t } = useTranslation();
   const [first, setFirst] = useState('');
@@ -82,7 +70,7 @@ export function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDial
             disabled={!target || !valid}
             onClick={() => {
               if (target) {
-                onSubmit({ id: target.id, fullName: `${first.trim()} ${last.trim()}`.trim() });
+                onSubmit({ id: target.id, fullName: joinFullName(first, last) });
                 onClose();
               }
             }}

@@ -1,25 +1,10 @@
-// Edge function: create-sponsor-fees-checkout
-//
-// The sponsor pays for every guest they invited (adults + minors) in
-// a single Stripe Checkout. Bundling the fees into one payment is what
-// gates the invite emails: the webhook only flips guest_invitations to
-// 'sent' (and dispatches mail) once payment succeeds.
-//
-// Inputs:
-//   - Authorization header (sponsor's JWT)
-//
-// Behaviour:
-//   - Sums all guest_invitations rows for the sponsor in {pending, sent}
-//     plus all additional_guests in payment_status='pending'.
-//     'sent' invites can re-pay if a previous attempt half-failed.
-//   - Calls Stripe with metadata.sponsor_user_id so the webhook can fan
-//     the success out across both tables.
-//   - Stub mode (no STRIPE_SECRET_KEY): synthesises a session id and
-//     returns a /payment-success URL with simulated=1, mirroring the
-//     pattern in create-stripe-checkout. Local dev still exercises the
-//     redirect.
+// Sponsor-side bundled checkout. Sums every pending guest_invitation +
+// additional_guest fee for the calling user and opens one Stripe
+// Checkout. The webhook (or the stub branch below) flips invitations
+// to 'sent' and dispatches the invite email post-payment.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { dispatchSponsorPaymentSucceeded } from '../_shared/sponsorPaymentFanOut.ts';
 import { getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: {
@@ -87,10 +72,9 @@ Deno.serve(async (req) => {
   const cancelUrl = `${publicUrl}/payment-cancelled`;
 
   if (!stripeKey) {
-    // Stub branch: simulate the success URL so the SPA flow continues.
-    // The webhook is the source of truth in production; without Stripe
-    // we run a tiny inline fan-out so dev still completes the loop.
-    await dispatchPaymentSucceeded(sponsorUserId);
+    // Stub branch — webhook is the source of truth in prod; we fan
+    // out inline here so local dev still completes the loop.
+    await dispatchSponsorPaymentSucceeded(sponsorUserId);
     const stubbedSessionId = `cs_stub_sponsor_${sponsorUserId}_${Date.now()}`;
     return jsonResponse({
       url: `${successUrl}?session_id=${stubbedSessionId}&simulated=1`,
@@ -128,15 +112,3 @@ Deno.serve(async (req) => {
 
   return jsonResponse({ url: body.url, sessionId: body.id });
 });
-
-/**
- * Local-dev fan-out: when Stripe isn't configured we still want the
- * SPA to land in the post-payment state. Mirrors what stripe-webhook
- * does on payment_intent.succeeded with sponsor_user_id metadata.
- */
-async function dispatchPaymentSucceeded(sponsorUserId: string): Promise<void> {
-  const { dispatchSponsorPaymentSucceeded } = await import(
-    '../_shared/sponsorPaymentFanOut.ts'
-  );
-  await dispatchSponsorPaymentSucceeded(sponsorUserId);
-}

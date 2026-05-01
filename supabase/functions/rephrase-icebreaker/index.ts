@@ -1,26 +1,8 @@
-// Edge function: rephrase-icebreaker
-//
-// Takes a first-person fun_fact ("I once played first chair in a
-// Klingon opera.") and returns a polished "Which teammate ___?"
-// question via gpt-4o-mini. The SPA already has a local heuristic
-// fallback (see src/features/home/icebreaker.ts -> reframeAsTeammate
-// Question) so callers can ignore failures.
-//
-// Stubbed mode (OPENAI_API_KEY missing) returns the deterministic
-// local rephrasing — same output as the SPA fallback. This lets us
-// run the full flow in dev without an OpenAI key and gives a
-// graceful no-op when the key rotates or the model is unavailable.
-//
-// Result caching: every successful rephrase persists to
-// public.icebreaker_rephrasings keyed by a normalised version of the
-// fact (lowercased, trimmed, trailing-punctuation-stripped). On every
-// call we hit the cache first; only a true miss spends an OpenAI
-// token. Bear note: the SPA reads the cache directly via RLS, so most
-// page loads never even invoke this function.
-//
-// We deliberately use gpt-4o-mini at temperature 0 with a short
-// system prompt; the rephrase is one sentence, so anything bigger
-// is a waste of tokens.
+// Rephrases a first-person fun fact into a "Which teammate ___?"
+// icebreaker question via gpt-4o-mini. Auth-gated, size-capped, and
+// cached in public.icebreaker_rephrasings — a true cache miss is the
+// only thing that spends an OpenAI token. The SPA has a local
+// heuristic fallback so callers can ignore failures.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { getAdminClient, getUserClient } from '../_shared/supabaseClient.ts';

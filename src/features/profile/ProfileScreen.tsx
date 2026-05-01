@@ -54,15 +54,7 @@ interface ProfileSection {
   icon: LucideIcon;
   labelKey: string;
   render: () => JSX.Element;
-  /**
-   * `subject` controls when this section appears:
-   *  - 'self' shows ONLY for the signed-in user (employee_profiles,
-   *    sponsor-only flows like Guests / Dependents, the personal Swag
-   *    table that bundles guests).
-   *  - 'shared' shows for the user AND for any dependent the user is
-   *    filling in for (dietary, accessibility, transport, passport,
-   *    emergency contact, community).
-   */
+  /** 'self' = signed-in user only; 'shared' = user OR dependent. */
   subject: 'self' | 'shared';
 }
 
@@ -153,9 +145,7 @@ function ProfileScreenInner(): JSX.Element {
   const subject = useActiveSubject();
   const [active, setActive] = useState<SectionId>('personal');
 
-  // Dependents = under-18 additional_guests. We share the query key
-  // with GuestsSection + DependentsSection so a single network
-  // round-trip serves all three surfaces.
+  // Shared query key with GuestsSection + DependentsSection.
   const { data: minors } = useQuery({
     queryKey: ['additional-guests', user?.id ?? null],
     enabled: !!user,
@@ -163,11 +153,6 @@ function ProfileScreenInner(): JSX.Element {
   });
   const hasMinors = (minors?.length ?? 0) > 0;
 
-  // Section gating:
-  //   - When the active subject is a dependent, only 'shared' sections
-  //     apply (the dependent has no employee_profiles / guest list).
-  //   - When the user has no minors, hide the Dependents tab to keep
-  //     the nav uncluttered for the 90% who travel solo.
   const sections = SECTIONS.filter((s) => {
     if (subject.isDependent && s.subject !== 'shared') return false;
     if (!hasMinors && s.id === 'dependents') return false;
@@ -250,11 +235,6 @@ interface SubjectSelectorProps {
   minors: ReadonlyArray<SubjectChip>;
 }
 
-/**
- * Pill row at the top of Profile that lets the sponsor switch between
- * filling in their own data and filling in for each dependent. The
- * active pill drives which user_id every Section reads/writes.
- */
 function SubjectSelector({ minors }: SubjectSelectorProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();

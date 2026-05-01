@@ -21,19 +21,8 @@ interface PayFeesDialogProps {
   amount: number;
 }
 
-interface CheckoutResponse {
-  url: string;
-  sessionId: string;
-}
-
-/**
- * Sponsor-side fees checkout. Bundles every pending guest_invitation
- * and additional_guests row for the calling user into a single Stripe
- * Checkout session. The webhook handles the fan-out (flip statuses,
- * dispatch invite emails). When STRIPE_SECRET_KEY is missing the edge
- * function returns a stubbed success URL so the local flow still
- * exercises the redirect.
- */
+// Sponsor-side bundled checkout. Webhook handles the fan-out
+// (flip statuses, dispatch invite emails) on the success path.
 export function PayFeesDialog({ open, onClose, amount }: PayFeesDialogProps): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
@@ -43,7 +32,7 @@ export function PayFeesDialog({ open, onClose, amount }: PayFeesDialogProps): JS
     if (busy || amount <= 0) return;
     setBusy(true);
     try {
-      const result = await callEdgeFunction<CheckoutResponse>(
+      const result = await callEdgeFunction<{ url: string; sessionId: string }>(
         getSupabaseClient(),
         'create-sponsor-fees-checkout',
         {},

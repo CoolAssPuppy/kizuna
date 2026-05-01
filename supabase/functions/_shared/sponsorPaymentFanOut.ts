@@ -1,19 +1,8 @@
-// Sponsor-payment fan-out
-//
-// Called from stripe-webhook (payment_intent.succeeded with
-// metadata.sponsor_user_id) and from create-sponsor-fees-checkout
-// in stub mode. The job:
-//
-//   1. Flip every additional_guests row owned by the sponsor from
-//      payment_status='pending' to 'paid'.
-//   2. Flip every guest_invitations row owned by the sponsor from
-//      status='pending' to 'sent', recording invitation_email_sent_at.
-//   3. Send the invitation email for each newly-flipped row via
-//      Resend (or log the URL if RESEND_API_KEY is missing).
-//
-// Idempotency: step 2 only matches `pending`, so re-firing the
-// webhook is a no-op for invitations that already moved.
+// Sponsor-payment fan-out: minors → paid, pending invitations → sent,
+// invite email per newly-flipped invitation. Idempotent because the
+// invitation update matches status='pending' only.
 
+import { sendResendEmail } from './notify.ts';
 import { getAdminClient } from './supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
@@ -67,38 +56,15 @@ export async function dispatchSponsorPaymentSucceeded(
 }
 
 async function sendInviteEmail(row: InvitationRow): Promise<void> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  const fromAddress = Deno.env.get('RESEND_FROM_EMAIL') ?? 'hello@kizuna.example';
   const acceptUrl = `${Deno.env.get('KIZUNA_PUBLIC_URL') ?? 'http://localhost:5173'}/accept-invitation?token=${encodeURIComponent(row.signed_token)}`;
-
-  if (!apiKey) {
-    console.info(
-      '[kizuna] RESEND_API_KEY missing — would have sent invite to %s with link %s',
-      row.guest_email,
-      acceptUrl,
-    );
-    return;
-  }
-
-  const subject = "You're invited to Supafest";
-  const html = `<p>Hi ${row.full_name.split(' ')[0] ?? ''},</p>
+  const firstName = row.full_name.split(' ')[0] ?? '';
+  const html = `<p>Hi ${firstName},</p>
 <p>Your fee has been paid and your seat is confirmed. <a href="${acceptUrl}">Accept your invitation</a> within 7 days.</p>
 <p>If you forget your password later, use "Forgot password" on the sign-in page.</p>`;
-
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ from: fromAddress, to: row.guest_email, subject, html }),
-    });
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('[kizuna] resend send failed', response.status, text);
-    }
-  } catch (err) {
-    console.error('[kizuna] resend send threw', err);
-  }
+  const ok = await sendResendEmail({
+    to: row.guest_email,
+    subject: "You're invited to Supafest",
+    html,
+  });
+  if (!ok) console.error('[kizuna] sponsor fan-out: resend send failed for %s', row.guest_email);
 }

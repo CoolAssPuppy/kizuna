@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useActiveSubject } from '@/features/profile/useActiveSubject';
+import { joinFullName, splitFullName } from '@/lib/fullName';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { loadEmergencyContact, saveEmergencyContact } from '../api';
@@ -32,19 +33,6 @@ const EMPTY: FormState = {
   email: '',
   notes: '',
 };
-
-/**
- * Round-trips emergency_contacts.full_name through first/last fields.
- * The schema column stays full_name (one less migration) and the UI
- * splits on the LAST space so middle names stay on first_name.
- */
-function splitFullName(full: string): { first: string; last: string } {
-  const trimmed = full.trim();
-  if (!trimmed) return { first: '', last: '' };
-  const idx = trimmed.lastIndexOf(' ');
-  if (idx === -1) return { first: trimmed, last: '' };
-  return { first: trimmed.slice(0, idx).trim(), last: trimmed.slice(idx + 1).trim() };
-}
 
 export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -75,10 +63,9 @@ export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
 
   function handleSubmit(): void {
     if (!subject.userId) return;
-    const fullName = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
     void submit(() =>
       saveEmergencyContact(getSupabaseClient(), subject.userId, {
-        full_name: fullName,
+        full_name: joinFullName(values.firstName, values.lastName),
         relationship: values.relationship,
         phone_primary: values.phonePrimary,
         phone_secondary: values.phoneSecondary.trim() || null,

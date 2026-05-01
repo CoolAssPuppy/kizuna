@@ -51,15 +51,9 @@ export function useSectionSubmit({
         }
         mode.onComplete();
       }
-      // Every Save click in the app emits a toast — success or error.
-      // The wizard path also nudges with a positive toast even though
-      // it advances the step; without it a save click that produces no
-      // visual change feels broken. Guarantee comes with a test that
-      // asserts the toast contract.
+      // Every Save click emits a toast — see useSectionSubmit.test.tsx.
       show(t(toastSuccessKey));
     } catch (err) {
-      // Surface the underlying error to the console — silent catches
-      // were the root cause of the "no toast" report on 2026-05-01.
       console.error('[kizuna] section save failed', err);
       show(t('profile.toast.error'), 'error');
       setErrorKey('registration.errorSaving');

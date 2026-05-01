@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { GuestInvitationRow } from '@/features/guests/types';
+import { joinFullName, splitFullName } from '@/lib/fullName';
 
 interface EditInvitationDialogProps {
   target: GuestInvitationRow | null;
@@ -19,24 +20,8 @@ interface EditInvitationDialogProps {
   onSubmit: (payload: { id: string; fullName: string; guestEmail: string }) => void;
 }
 
-function splitFullName(full: string): { first: string; last: string } {
-  const trimmed = full.trim();
-  if (!trimmed) return { first: '', last: '' };
-  const idx = trimmed.lastIndexOf(' ');
-  if (idx === -1) return { first: trimmed, last: '' };
-  return { first: trimmed.slice(0, idx).trim(), last: trimmed.slice(idx + 1).trim() };
-}
-
-/**
- * Sponsor-side editor for an existing adult invitation. Editing is
- * blocked at the call site for status='accepted' rows because at that
- * point the row points at a real auth user — that user owns their own
- * profile. Allowed states: pending, sent, expired, cancelled.
- *
- * Email and full_name persist via PATCH on guest_invitations; RLS
- * narrows the row to the calling sponsor. We re-key off `target.id`
- * to refill when a different invitation opens the dialog.
- */
+// Editing is blocked at the call site once status='accepted' — by then
+// the row points at a real auth user who owns their own profile.
 export function EditInvitationDialog({
   target,
   onClose,
@@ -54,7 +39,7 @@ export function EditInvitationDialog({
     setLast(split.last);
     setEmail(target.guest_email);
   }
-  const fullName = `${first.trim()} ${last.trim()}`.trim();
+  const fullName = joinFullName(first, last);
   const valid =
     first.trim().length >= 1 && last.trim().length >= 1 && email.trim().includes('@');
 
