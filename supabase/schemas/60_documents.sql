@@ -44,6 +44,7 @@ create table public.document_acknowledgements (
   scrolled_to_bottom boolean not null,
   explicit_checkbox boolean not null,
   device_type text check (device_type is null or device_type in ('mobile', 'tablet', 'desktop')),
+  signature_full_name text,
   unique (user_id, event_id, document_key, document_version)
 );
 

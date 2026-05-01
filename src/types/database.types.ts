@@ -335,6 +335,7 @@ export type Database = {
           id: string
           ip_address: string | null
           scrolled_to_bottom: boolean
+          signature_full_name: string | null
           user_id: string
         }
         Insert: {
@@ -348,6 +349,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           scrolled_to_bottom: boolean
+          signature_full_name?: string | null
           user_id: string
         }
         Update: {
@@ -361,6 +363,7 @@ export type Database = {
           id?: string
           ip_address?: string | null
           scrolled_to_bottom?: boolean
+          signature_full_name?: string | null
           user_id?: string
         }
         Relationships: [

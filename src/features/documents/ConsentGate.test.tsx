@@ -43,7 +43,7 @@ describe('ConsentGate', () => {
 
     renderWithProviders(<ConsentGate document={baseDoc} onAcknowledge={onAcknowledge} />);
 
-    const button = screen.getByRole('button', { name: 'I agree and continue' });
+    const button = screen.getByRole('button', { name: 'I Agree and Continue' });
     expect(button).toBeDisabled();
 
     await user.click(screen.getByRole('checkbox'));
@@ -79,7 +79,7 @@ describe('ConsentGate', () => {
     renderWithProviders(<ConsentGate document={baseDoc} onAcknowledge={onAcknowledge} />);
 
     await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: 'I agree and continue' }));
+    await user.click(screen.getByRole('button', { name: 'I Agree and Continue' }));
 
     expect(onAcknowledge).toHaveBeenCalledWith({
       scrolledToBottom: true,
@@ -95,7 +95,7 @@ describe('ConsentGate', () => {
     renderWithProviders(<ConsentGate document={baseDoc} onAcknowledge={onAcknowledge} />);
 
     await user.click(screen.getByRole('checkbox'));
-    await user.click(screen.getByRole('button', { name: 'I agree and continue' }));
+    await user.click(screen.getByRole('button', { name: 'I Agree and Continue' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'We could not record your acknowledgement. Please try again.',

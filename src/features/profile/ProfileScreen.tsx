@@ -1,25 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
 import { NavTile } from '@/components/NavTile';
-import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
+
+import { ProfileAvatar } from './ProfileAvatar';
 
 export function ProfileScreen(): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
   const isAdmin = useIsAdmin();
-
-  const localPart = user?.email.split('@')[0] ?? '';
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">
-      <header className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {t('profile.title')}
-        </p>
-        <h1 className="text-4xl font-semibold tracking-tight">
-          {t('welcome.greeting', { name: localPart })}
-        </h1>
+      <header className="space-y-4">
+        <h1 className="text-4xl font-semibold tracking-tight">{t('profile.title')}</h1>
+        <ProfileAvatar />
         <p className="text-sm text-muted-foreground">{t('profile.subtitle')}</p>
       </header>
 

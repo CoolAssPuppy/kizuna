@@ -21,12 +21,12 @@
     "continueWithSso": "Continue with single sign-on",
     "checkingSession": "Checking your session",
     "signedInAs": "Signed in as {{email}}",
-    "signInTitle": "Welcome back",
+    "signInTitle": "Welcome Back",
     "signInSubtitle": "Use single sign-on if you are a Supabase teammate. Use your invitation email and password if you are a guest.",
     "guestTab": "Guest",
     "employeeTab": "Employee",
     "needAccount": "Need to create a guest account?",
-    "createAccount": "Create account",
+    "createAccount": "Create Account",
     "alreadyHaveAccount": "Already have an account?",
     "errors": {
       "invalidCredentials": "That email and password do not match.",
@@ -34,47 +34,68 @@
       "generic": "Could not complete sign-in. Try again."
     },
     "dev": {
-      "header": "Dev sign-in shortcuts",
-      "subtitle": "These buttons only appear locally. They sign you in as a seeded fixture so QA does not need to manage credentials.",
+      "header": "Dev Sign-In Shortcuts",
+      "subtitle": "These buttons only appear locally.",
       "asEmployee": "Pretend you're an employee",
       "asAdmin": "Pretend you're an admin"
     }
   },
+  "home": {
+    "feedTitle": "Your Feed",
+    "itemsLabel": "items",
+    "feedEmpty": "Nothing waiting on you.",
+    "factsTitle": "Facts About Our Event",
+    "factsSubtitle": "All hail the legend of Team 18.",
+    "facts": {
+      "employees": "Employees",
+      "guests": "Guests",
+      "registrationsStarted": "Registrations in progress",
+      "registrationsComplete": "Registrations complete",
+      "documentsSigned": "Documents signed"
+    },
+    "kinds": {
+      "document": "Document",
+      "task": "Registration",
+      "announcement": "Announcement"
+    },
+    "supaCupTitle": "Defending SupaCup Champion",
+    "supaCupSubtitle": "Tyler Shukert · Champion of Supafest 2025 — Da Nang"
+  },
   "welcome": {
     "title": "Welcome to {{eventName}}",
     "loading": "Loading your event",
-    "greeting": "Hi {{name}}, you are signed in.",
+    "greeting": "Hi {{name}}, welcome back.",
     "tiles": {
       "registration": "Finish your event registration step by step.",
       "itinerary": "Your flights, transfers, room, and sessions.",
       "documents": "Waiver, code of conduct, and travel guidance.",
       "consent": "Review and re-confirm any pending documents.",
-      "consentTitle": "Pending documents",
+      "consentTitle": "Pending Documents",
       "admin": "Live reports, conflict resolution, and operations."
     }
   },
   "errors": {
     "boundary": {
-      "title": "Something went wrong",
+      "title": "Something Went Wrong",
       "description": "An unexpected error occurred. Reload the page to try again.",
       "reload": "Reload"
     },
     "notFound": {
-      "title": "Page not found",
+      "title": "Page Not Found",
       "description": "The page you are looking for does not exist.",
-      "goHome": "Go home"
+      "goHome": "Go Home"
     }
   },
   "header": {
-    "uploadAvatar": "Upload your avatar",
+    "uploadAvatar": "Upload Your Avatar",
     "avatarMenu": "Open account menu",
-    "editProfile": "Edit profile"
+    "editProfile": "Edit Profile"
   },
   "profile": {
-    "title": "Your profile",
+    "title": "Your Profile",
     "subtitle": "Quick links to everything you can do here.",
-    "editTitle": "Edit profile",
-    "editSubtitle": "Update any section. Each saves on its own.",
+    "editTitle": "Edit Profile",
+    "editSubtitle": "",
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",
       "emergencyContact": "Who we should reach out to if something happens.",
@@ -110,35 +131,35 @@
     "next": "Next",
     "back": "Back",
     "submit": "Submit",
-    "agree": "I agree",
+    "agree": "I Agree",
     "close": "Close"
   },
   "registration": {
     "title": "Registration",
     "stepLabel": "Step {{current}} of {{total}}",
     "progress": "{{percent}}% complete",
-    "saveAndContinue": "Save and continue",
+    "saveAndContinue": "Save and Continue",
     "saving": "Saving",
     "errorSaving": "We could not save your changes. Please try again.",
     "steps": {
-      "personalInfo": "Personal info",
+      "personalInfo": "Personal Info",
       "dietary": "Dietary",
-      "emergencyContact": "Emergency contact",
+      "emergencyContact": "Emergency Contact",
       "passport": "Passport",
       "children": "Children",
       "swag": "Swag",
       "transport": "Transport"
     },
     "personalInfo": {
-      "preferredName": "Preferred name",
+      "preferredName": "Preferred Name",
       "preferredNameHint": "How your name appears on your badge.",
-      "legalName": "Legal name",
+      "legalName": "Legal Name",
       "legalNameHint": "Exactly as printed on your passport.",
-      "baseCity": "Current city",
+      "baseCity": "Current City",
       "baseCityHint": "Where you are travelling from."
     },
     "dietary": {
-      "restrictions": "Dietary restrictions",
+      "restrictions": "Dietary Restrictions",
       "restrictionsHint": "Select all that apply.",
       "allergies": "Allergies",
       "allergiesHint": "Select any that apply.",
@@ -153,32 +174,32 @@
       "notes": "Anything else our kitchen should know"
     },
     "emergencyContact": {
-      "fullName": "Full name",
+      "fullName": "Full Name",
       "relationship": "Relationship",
-      "phonePrimary": "Primary phone",
+      "phonePrimary": "Primary Phone",
       "phonePrimaryHint": "Include country code.",
-      "phoneSecondary": "Secondary phone (optional)",
+      "phoneSecondary": "Secondary Phone (optional)",
       "email": "Email (optional)",
       "notes": "Notes (optional)"
     },
     "passport": {
       "intro": "Your passport details are encrypted at rest and never visible to admins.",
-      "passportName": "Name as printed on passport",
-      "passportNumber": "Passport number",
+      "passportName": "Name as Printed on Passport",
+      "passportNumber": "Passport Number",
       "passportNumberHint": "Encrypted before saving.",
-      "issuingCountry": "Issuing country",
+      "issuingCountry": "Issuing Country",
       "issuingCountryHint": "Two-letter ISO code (e.g. US, GB, CA).",
-      "expiryDate": "Expiry date",
+      "expiryDate": "Expiry Date",
       "expiryWarning": "This passport expires before the event ends. Please use a passport valid for at least six months past your travel."
     },
     "children": {
       "intro": "Add anyone aged 17 or under who will be travelling with you.",
-      "addChild": "Add a child",
+      "addChild": "Add a Child",
       "removeChild": "Remove",
-      "fullName": "Full name",
-      "dateOfBirth": "Date of birth",
+      "fullName": "Full Name",
+      "dateOfBirth": "Date of Birth",
       "notes": "Notes",
-      "specialNeeds": "Special needs",
+      "specialNeeds": "Special Needs",
       "specialNeedsOptions": {
         "crib": "Crib",
         "high_chair": "High chair",
@@ -206,14 +227,14 @@
   },
   "admin": {
     "title": "Admin",
-    "subtitle": "Live operational data. Reports always render fresh, never frozen exports.",
+    "subtitle": "Live operational data.",
     "tabs": {
-      "registration": "Registration progress",
-      "rooming": "Rooming list",
-      "dietary": "Dietary summary",
-      "swag": "Swag order",
+      "registration": "Registration Progress",
+      "rooming": "Rooming List",
+      "dietary": "Dietary Summary",
+      "swag": "Swag Order",
       "payments": "Payments",
-      "conflicts": "Data conflicts"
+      "conflicts": "Data Conflicts"
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",
@@ -223,19 +244,19 @@
       "externalValue": "External value",
       "external": "External source",
       "detectedAt": "Detected",
-      "acceptKizuna": "Keep Kizuna value",
-      "acceptExternal": "Use external value",
+      "acceptKizuna": "Keep Kizuna Value",
+      "acceptExternal": "Use External Value",
       "noConflicts": "No open conflicts."
     },
     "blocked": "You do not have permission to view this page."
   },
   "itinerary": {
-    "title": "Your itinerary",
+    "title": "Your Itinerary",
     "subtitle": "Your schedule for the event.",
-    "empty": "Nothing on your itinerary yet. Sessions and flights will appear here as they're confirmed.",
+    "empty": "Nothing on your itinerary yet.",
     "offline": "You are offline. Showing the last cached schedule.",
     "checkin": {
-      "title": "Check-in",
+      "title": "Check-In",
       "subtitle": "Show this code at registration to confirm your arrival.",
       "noToken": "Your check-in code will appear here once your registration is approved."
     },
@@ -251,11 +272,11 @@
     "withGuest": "With your guest"
   },
   "guests": {
-    "invitationTitle": "You're invited to Supafest",
+    "invitationTitle": "You're Invited to Supafest",
     "invitationSubtitle": "Set a password to accept your guest invitation. The link expires seven days from when {{sponsor}} sent it.",
-    "createPassword": "Create a password",
+    "createPassword": "Create a Password",
     "passwordHint": "At least 8 characters.",
-    "acceptAndContinue": "Accept invitation",
+    "acceptAndContinue": "Accept Invitation",
     "accepting": "Setting up your account",
     "errors": {
       "missingToken": "This invitation link is missing its token. Ask {{sponsor}} to resend.",
@@ -264,27 +285,49 @@
       "generic": "We could not accept your invitation. Try again or contact support."
     },
     "checkout": {
-      "title": "Confirm your spot",
+      "title": "Confirm Your Spot",
       "subtitle": "We charge a flat fee that covers your accommodation, meals, and activities for the duration of Supafest.",
       "adultFee": "$950 USD",
       "childFee": "$500 USD",
-      "payNow": "Pay now",
+      "payNow": "Pay Now",
       "redirecting": "Taking you to checkout"
     },
     "invite": {
-      "addGuest": "Invite a guest",
-      "guestEmail": "Guest email",
-      "send": "Send invitation",
+      "addGuest": "Invite a Guest",
+      "guestEmail": "Guest Email",
+      "send": "Send Invitation",
       "sending": "Sending invitation",
       "invited": "Invitation sent to {{email}}"
     }
   },
   "documents": {
     "tabTitle": "Documents",
-    "consentTitle": "Please review the following",
+    "addDocument": "Add Document",
+    "createTitle": "Add a Document",
+    "createSubtitle": "Drafts publish immediately to everyone in this event.",
+    "documentKey": "Type",
+    "documentTitle": "Title",
+    "documentBody": "Body (Markdown)",
+    "documentBodyHint": "Markdown supported.",
+    "requiresAcknowledgement": "Requires every attendee to read and sign",
+    "publish": "Publish Document",
+    "publishing": "Publishing",
+    "createSuccess": "Document published.",
+    "readAndSign": "Read and Sign",
+    "signed": "Signed",
+    "signSubtitle": "Read the document below. Type your full legal name to sign once you reach the end.",
+    "fullNameLabel": "Your Full Legal Name",
+    "signButton": "Sign",
+    "signing": "Signing",
+    "signSuccess": "Thank you. Your acknowledgement is on file.",
+    "signFailure": "We could not record your signature. Try again.",
+    "compliance": "Signed by {{signed}} of {{total}}",
+    "complianceTitle": "Compliance",
+    "complianceSubtitle": "Who has and has not signed each required document.",
+    "consentTitle": "Please Review the Following",
     "scrollToContinue": "Scroll to the end to continue",
     "explicitCheckboxLabel": "I have read and agree to the {{title}}",
-    "agreeAndContinue": "I agree and continue",
+    "agreeAndContinue": "I Agree and Continue",
     "savingAcknowledgement": "Recording your acknowledgement",
     "acknowledgedOn": "Acknowledged on {{date}}",
     "version": "Version {{version}}",

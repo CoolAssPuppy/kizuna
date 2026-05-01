@@ -141,6 +141,17 @@ A milestone is **not** complete until all of these pass:
 8. `/clean-and-refactor` skill run, all findings addressed
 9. Single commit with message in present tense
 
+## UI rules
+
+These are non-negotiable visual conventions. Every new screen and component should follow them.
+
+- **Headers in Capital Case, body copy in sentence case.** Headers (h1/h2/h3, card titles, section labels) use Title Case ("Add Document," "Your Profile"). Everything else — paragraphs, hints, labels, button text, toast messages — uses sentence case ("Add a document and publish it to everyone").
+- **Save buttons live bottom-right inside their box.** When a card or panel is editable on its own, the Save button anchors to the bottom-right of that card so the user always knows where to commit. Use `flex justify-end` (or `ml-auto`) on the action row at the bottom of `CardShell`. This applies to profile cards, document forms, admin reports — anywhere a self-contained box is editable.
+- **One viewport width across logged-in pages.** Every signed-in route uses `mx-auto w-full max-w-7xl px-8 py-10`. Form-heavy content can constrain its inner column to `max-w-2xl mx-auto` for readability, but the outer chrome stays uniform.
+- **Logged-out home is full-bleed.** No header or footer. Day/night background switch via `timeOfDay()` and `backgroundFor()`.
+- **Header on signed-in pages, full-bleed on `/sign-in` and `/accept-invitation`.** Layout decision lives in `src/app/AppLayout.tsx`.
+- **Sign Out lives in the avatar dropdown menu.** Never as a standalone button in the page.
+
 ## Design system notes
 
 - shadcn/ui components live in `src/components/ui/`. Generated via `npx shadcn add <component>`.

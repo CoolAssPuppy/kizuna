@@ -76,8 +76,17 @@ insert into public.events (id, name, type, location, start_date, end_date, reg_o
 on conflict (id) do nothing;
 
 
--- Documents (waiver + code of conduct)
+-- Documents — admin-published, every employee must read and sign.
 insert into public.documents (event_id, document_key, version, title, body, applies_to, requires_acknowledgement, requires_scroll, display_order) values
+  ('99999999-9999-9999-9999-999999999999', 'expense_policy', 1, 'Travel Expense Policy',
+   '## Travel expense policy
+
+All Supafest travel must be booked through Perk before 15 February 2027. Out-of-pocket expenses are reimbursed at 100% with a receipt and proper category. Hotel incidentals are not reimbursed except for authorised business meals.
+
+Use Brex for any reimbursable expense over $25. Anything under $25 reimburses through Expensify.
+
+By signing this document you confirm that you have read and will follow the travel expense policy.',
+   'employee', true, true, 3),
   (null, 'waiver', 1, 'Event waiver',
    '## Event waiver
 

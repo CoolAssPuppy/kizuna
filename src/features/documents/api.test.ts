@@ -85,6 +85,7 @@ const baseAck: AcknowledgementRow = {
   scrolled_to_bottom: true,
   explicit_checkbox: true,
   device_type: 'desktop',
+  signature_full_name: null,
 };
 
 describe('fetchDocuments', () => {
