@@ -12,6 +12,11 @@ export interface SwagSelectionInput {
   fitPreference: 'fitted' | 'relaxed' | null;
 }
 
+/**
+ * Loads the swag catalogue for the user's own selection step. Filters
+ * out items targeted at children — those are picked per-additional-guest
+ * in a separate section so they don't crowd the adult menu.
+ */
 export async function loadSwagCatalogue(
   client: AppSupabaseClient,
   eventId: string,
@@ -20,6 +25,7 @@ export async function loadSwagCatalogue(
     .from('swag_items')
     .select('*')
     .eq('event_id', eventId)
+    .neq('audience', 'child')
     .order('display_order', { ascending: true });
   if (error) throw error;
   return data ?? [];
