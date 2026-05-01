@@ -231,3 +231,19 @@
 **Why:** A SECURITY DEFINER function bypasses RLS for the write but the surrounding test session still runs as `authenticated <user>`. RLS on the target table can return zero rows on the readback even though the write landed. The first cut of the special_requests test failed for this reason — `lives_ok` reported success and `select special_requests` reported NULL.
 
 **How to apply:** In pgTAP: `set local role authenticated; ... call RPC ... reset role; select <column> from <table>` for the assertion. Then `set local role authenticated;` again before the next negative-path test.
+
+## 2026-05-01 - Toast must be loud or it's invisible
+
+**Rule:** Toasts that confirm a user-initiated action (save, payment, sign-in, recovery email) need to be solid-colour, top-of-viewport, with an icon and 5s minimum duration. A faint outline-only toast in the bottom-right of a tall page IS the same as no toast.
+
+**Why:** A user reported "no toast was seen" across PersonalInfo / Swag / Transport / Passport / EmergencyContact saves. Playwright proved every section was actually saving (200s in the network tab) and the toast was being inserted into the DOM. The toast just lived bottom-right with `border-primary/30 text-foreground` for 3.5s on a 1400px-tall page — easy to miss while focused on the form.
+
+**How to apply:** ToastProvider uses `bg-primary/destructive` solid colour, top-center anchor, lucide icon, 5s TTL. Every Save handler is funnelled through useSectionSubmit so success and error both emit a toast — covered by useSectionSubmit.test.tsx so the contract can't regress silently.
+
+## 2026-05-01 - Dependents are users too (just shadow ones)
+
+**Rule:** When a feature ("fill in registration for my child") needs to write into per-section tables that are keyed on user_id, give that subject a SHADOW row in public.users with a dedicated role rather than threading parallel `additional_guest_id` columns through every per-section table.
+
+**Why:** Considered three options for dependents-as-attendees: (1) add `additional_guest_id` to every per-section table with CHECK constraints, (2) mint a shadow public.users row, (3) widen additional_guests with all the per-section columns. Option 1 doubles the surface area of every RLS policy and turns each load/save pair into a dual-write. Option 3 reverses the one-domain-per-table architecture. Option 2 reuses the existing schema and the existing Section components — RLS picks up the dependent branch via a single helper change.
+
+**How to apply:** The shadow row's `id` joins to additional_guests.user_id so the pairing is bidirectional. RLS uses an `is_self_or_admin` helper that resolves true for the sponsor of any user_id whose role='dependent'. Components read user_id from useActiveSubject (a context that defaults to auth.user) rather than directly from useAuth. ProfileScreen mounts the provider and renders a SubjectSelector pill row when minors exist.

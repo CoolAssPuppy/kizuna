@@ -299,6 +299,36 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - Channel routing matches the brief: employees with a slack_handle get a DM, everyone else gets email. The notification log row is written regardless of delivery outcome — admin audit needs both successes and failures.
 - Sender path duplicated between `send-notification` and `send-deadline-reminders`. Flagged for the post-M9 refactoring audit.
 
+### M9.6 - Email-on-payment, dependents, audit pass two [complete]
+
+**Goal:** Close every audit finding from the second `/tech-debt-audit`
+run, gate the guest invite email on sponsor payment, and let sponsors
+fill in the registration sections for their dependents.
+
+- [x] F001 parse-itinerary auth gate (Critical)
+- [x] F002 vite-plugin-pwa CVE bump (semver-major)
+- [x] F003 vitest CVE bump (semver-major)
+- [x] F004 GroundTransportToolScreen split (593 → 373 LOC)
+- [x] F005 GuestsSection split (542 → 277 LOC) + EditInvitationDialog
+- [x] F006 userScopedRepository docstring on the as-never cast
+- [x] F007 32KB / 2KB body caps on parse-itinerary + rephrase-icebreaker
+- [x] F008 CORS justification comment in _shared/cors.ts
+- [x] F009 Sentry TODO replaced with reportError shim
+- [x] F010-F015 knip dead-export sweep
+- [x] Email-on-payment: pending → sent → accepted lifecycle, sponsor
+      checkout, fan-out helper, recovery email
+- [x] Universal save-toast: top-center solid colour 5s, contract test
+- [x] Edit invited adult guests
+- [x] Passport country dropdown
+- [x] Emergency contact name split
+- [x] Dependents-as-full-attendees: shadow users + active-subject context
+
+**Definition of done:**
+- typecheck/lint clean (0 warnings)
+- 316 vitest, 75 pgTAP
+- production build clean (0 vulnerabilities per `npm audit`)
+- single commit per logical milestone, pushed to main
+
 ### M9.5 - Tech debt + refactor sweep [complete]
 
 **Goal:** Run `/tech-debt-audit`, `/simplify`, and `/clean-and-refactor` against the M0–M9 stack, then address every finding so M10 starts on a clean baseline.
