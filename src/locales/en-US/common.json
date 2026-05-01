@@ -9,6 +9,7 @@
   "nav": {
     "home": "Home",
     "itinerary": "Itinerary",
+    "agenda": "Agenda",
     "registration": "Registration",
     "documents": "Documents",
     "community": "Community",
@@ -267,14 +268,81 @@
   "admin": {
     "title": "Admin",
     "subtitle": "Live operational data.",
+    "comingSoon": "Coming soon. This section is under construction.",
+    "loading": "Loading",
+    "nav": {
+      "label": "Admin sections",
+      "events": "Events",
+      "agenda": "Agenda",
+      "documents": "Documents",
+      "stats": "Stats",
+      "nudges": "Nudges",
+      "reports": "Reports",
+      "conflicts": "Conflicts"
+    },
+    "events": {
+      "title": "Events",
+      "subtitle": "Every event in Kizuna. Past and future.",
+      "create": "New event",
+      "edit": "Edit event",
+      "save": "Save event",
+      "saving": "Saving",
+      "saved": "Event saved.",
+      "delete": "Delete event",
+      "deleted": "Event deleted.",
+      "deleteConfirm": "Delete this event and every related session, registration, and report? This cannot be undone.",
+      "active": "Active",
+      "past": "Past",
+      "empty": "No events yet. Create the first one to get started.",
+      "formHint": "Edit the basics here. Invitations live on the next tab.",
+      "fields": {
+        "name": "Name",
+        "subtitle": "Subtitle",
+        "type": "Type",
+        "location": "Location",
+        "timeZone": "Time zone (IANA)",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "regOpensAt": "Registration opens",
+        "regClosesAt": "Registration closes",
+        "heroImage": "Hero image URL",
+        "logo": "Logo URL"
+      },
+      "flags": {
+        "title": "Visibility and status",
+        "isActive": "Active event",
+        "isActiveHint": "Only one supafest event can be active at a time. Active events drive the welcome screen.",
+        "inviteAll": "Invite all employees automatically",
+        "inviteAllHint": "When on, every active employee sees this event. Otherwise, invitations must be added one by one."
+      }
+    },
+    "agenda": {
+      "title": "Agenda",
+      "subtitle": "Sessions, speakers, and the daily schedule."
+    },
+    "documents": {
+      "title": "Documents",
+      "subtitle": "Versioned documents shown in registration and the documents tab."
+    },
+    "stats": {
+      "title": "Stats",
+      "subtitle": "Attendance, dietary mix, registration funnel, country breakdown."
+    },
+    "nudges": {
+      "title": "Nudges",
+      "subtitle": "Cooldowns, manual nudges, audit log."
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Live reports for hotel, transport, kitchen, and finance."
+    },
     "tabs": {
       "registration": "Registration Progress",
       "rooming": "Rooming List",
       "transport": "Transport Manifest",
       "dietary": "Dietary Summary",
       "swag": "Swag Order",
-      "payments": "Payments",
-      "conflicts": "Data Conflicts"
+      "payments": "Payments"
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",
@@ -289,6 +357,8 @@
       "error": "Could not create share link: {{message}}"
     },
     "conflicts": {
+      "title": "Data conflicts",
+      "subtitle": "When external sources disagree with Kizuna, every discrepancy lands here for review.",
       "field": "Field",
       "kizunaValue": "Kizuna value",
       "externalValue": "External value",

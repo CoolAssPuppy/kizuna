@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 const LINKS = [
   { to: '/', i18nKey: 'nav.home' },
   { to: '/itinerary', i18nKey: 'nav.itinerary' },
+  { to: '/agenda', i18nKey: 'nav.agenda' },
   { to: '/documents', i18nKey: 'nav.documents' },
   { to: '/community', i18nKey: 'nav.community' },
 ] as const;

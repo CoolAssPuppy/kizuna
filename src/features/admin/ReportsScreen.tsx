@@ -6,10 +6,8 @@ import { Button } from '@/components/ui/button';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { type AppSupabaseClient, getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-
 import type { Database } from '@/types/database.types';
 
-import { ConflictsPanel } from './ConflictsPanel';
 import { downloadCsv, rowsToCsv, type CsvRow } from './csv';
 import {
   fetchDietarySummary,
@@ -70,7 +68,7 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
   },
 ];
 
-const TABS = [...REPORTS.map((r) => r.key), 'conflicts'] as const;
+const TABS = REPORTS.map((r) => r.key);
 type Tab = (typeof TABS)[number];
 
 interface ReportPanelProps {
@@ -118,7 +116,7 @@ function ActiveReport({ config, eventId }: ActiveReportProps): JSX.Element {
   );
 }
 
-export function AdminScreen(): JSX.Element {
+export function ReportsScreen(): JSX.Element {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>('registration');
   const { data: event } = useActiveEvent();
@@ -126,10 +124,10 @@ export function AdminScreen(): JSX.Element {
   const activeReport = REPORTS.find((r) => r.key === tab);
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 px-6 py-10">
+    <section className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">{t('admin.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('admin.subtitle')}</p>
+        <h2 className="text-2xl font-semibold tracking-tight">{t('admin.reports.title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.reports.subtitle')}</p>
       </header>
 
       <div role="tablist" className="flex flex-wrap gap-1 rounded-md border p-1">
@@ -153,7 +151,6 @@ export function AdminScreen(): JSX.Element {
       </div>
 
       {activeReport ? <ActiveReport config={activeReport} eventId={eventId} /> : null}
-      {tab === 'conflicts' ? <ConflictsPanel /> : null}
-    </main>
+    </section>
   );
 }

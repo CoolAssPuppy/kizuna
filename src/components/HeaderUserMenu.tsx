@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/AuthContext';
+import { useIsAdmin } from '@/features/auth/hooks';
 
 /**
  * Three-dot menu trigger in the header. Opens a dropdown with profile
@@ -11,6 +12,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 export function HeaderUserMenu(): JSX.Element {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +68,15 @@ export function HeaderUserMenu(): JSX.Element {
               navigate('/profile');
             }}
           />
+          {isAdmin ? (
+            <MenuItem
+              label={t('nav.admin')}
+              onClick={() => {
+                setOpen(false);
+                navigate('/admin');
+              }}
+            />
+          ) : null}
           <MenuItem
             label={t('auth.signOut')}
             onClick={() => void signOut()}

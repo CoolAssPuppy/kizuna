@@ -1,0 +1,54 @@
+import type { AppSupabaseClient } from '@/lib/supabase';
+import type { Database } from '@/types/database.types';
+
+export type EventRow = Database['public']['Tables']['events']['Row'];
+export type EventInsert = Database['public']['Tables']['events']['Insert'];
+export type EventUpdate = Database['public']['Tables']['events']['Update'];
+
+/** Admin: every event in the database, newest first. */
+export async function fetchAllEvents(client: AppSupabaseClient): Promise<EventRow[]> {
+  const { data, error } = await client
+    .from('events')
+    .select('*')
+    .order('start_date', { ascending: false });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchEventById(
+  client: AppSupabaseClient,
+  id: string,
+): Promise<EventRow | null> {
+  const { data, error } = await client.from('events').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function createEvent(
+  client: AppSupabaseClient,
+  input: EventInsert,
+): Promise<EventRow> {
+  const { data, error } = await client.from('events').insert(input).select().single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateEvent(
+  client: AppSupabaseClient,
+  id: string,
+  patch: EventUpdate,
+): Promise<EventRow> {
+  const { data, error } = await client
+    .from('events')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteEvent(client: AppSupabaseClient, id: string): Promise<void> {
+  const { error } = await client.from('events').delete().eq('id', id);
+  if (error) throw error;
+}

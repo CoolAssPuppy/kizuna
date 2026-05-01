@@ -107,7 +107,7 @@ export function AppRouter(): JSX.Element {
         }
       />
       <Route
-        path="/admin"
+        path="/admin/*"
         element={
           <RequireAuth allow={['admin', 'super_admin']}>
             <AdminRoute />
