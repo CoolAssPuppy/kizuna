@@ -1,10 +1,21 @@
+import { useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { Avatar } from '@/components/Avatar';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { useMountEffect } from '@/hooks/useMountEffect';
+import { getSupabaseClient } from '@/lib/supabase';
+
+function initialsFor(email: string | undefined): string {
+  if (!email) return '?';
+  const local = email.split('@')[0] ?? '';
+  const parts = local.split(/[._-]/).filter(Boolean);
+  if (parts.length >= 2) return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase();
+  return local.slice(0, 2).toUpperCase();
+}
 
 export function HeaderUserMenu(): JSX.Element {
   const { t } = useTranslation();
@@ -13,6 +24,24 @@ export function HeaderUserMenu(): JSX.Element {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Pull the avatar storage path from the signed-in employee_profiles
+  // row. Shared cache key with ProfileAvatar so opening Profile and
+  // closing it doesn't double-fetch.
+  const { data: avatarPath = null } = useQuery({
+    queryKey: ['employee-profile-avatar-path', user?.id ?? null],
+    enabled: !!user,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await getSupabaseClient()
+        .from('employee_profiles')
+        .select('avatar_url')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return data?.avatar_url ?? null;
+    },
+  });
 
   if (!user) return <div className="h-9 w-9" aria-hidden />;
 
@@ -24,22 +53,9 @@ export function HeaderUserMenu(): JSX.Element {
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t('header.avatarMenu')}
-        className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
+        className="flex h-9 w-9 items-center justify-center rounded-full ring-offset-background hover:ring-2 hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="1" />
-          <circle cx="19" cy="12" r="1" />
-          <circle cx="5" cy="12" r="1" />
-        </svg>
+        <Avatar url={avatarPath} fallback={initialsFor(user.email)} size={32} />
       </button>
       {open ? (
         <DropdownPanel containerRef={containerRef} onDismiss={() => setOpen(false)}>
