@@ -31,7 +31,7 @@ jobs:
       shared_changed: ${{ steps.changes.outputs.shared_changed }}
       changed_functions: ${{ steps.changes.outputs.changed_functions }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Need the previous commit to diff against. fetch-depth: 2 is
           # cheaper than the default unbounded clone.
@@ -76,7 +76,7 @@ jobs:
       needs.detect-changes.outputs.functions_changed == 'true'
       || github.event.inputs.deploy_all_functions == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: supabase/setup-cli@v1
         with:
