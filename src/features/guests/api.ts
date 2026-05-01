@@ -77,20 +77,3 @@ export function acceptGuestInvitation(
   });
 }
 
-export interface CheckoutResponse {
-  url: string;
-  sessionId: string;
-}
-
-/**
- * Mints a Stripe Checkout Session for the current guest's fee. Falls back
- * to a stubbed redirect when STRIPE_SECRET_KEY is missing on the server.
- */
-export function startGuestCheckout(
-  { client }: InvokeContext,
-  args: { guestUserId: string },
-): Promise<CheckoutResponse> {
-  return callEdgeFunction<CheckoutResponse>(client, 'create-stripe-checkout', {
-    guest_user_id: args.guestUserId,
-  });
-}

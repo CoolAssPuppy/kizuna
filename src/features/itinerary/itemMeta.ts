@@ -1,4 +1,4 @@
-import { Bell, BookOpenCheck, Hotel, Megaphone, Plane, Sparkles, Van } from 'lucide-react';
+import { Bell, Hotel, Megaphone, Plane, Sparkles, Van } from 'lucide-react';
 
 import type { ItineraryItemType } from './types';
 
@@ -47,9 +47,3 @@ export const ITEM_META: Record<ItineraryItemType, ItemMeta> = {
   },
 };
 
-/** Used by the Hero countdown when the event has already started. */
-export const NOW_META: ItemMeta = {
-  Icon: BookOpenCheck,
-  chipClass: 'bg-primary/15 text-primary',
-  dotClass: 'bg-primary',
-};

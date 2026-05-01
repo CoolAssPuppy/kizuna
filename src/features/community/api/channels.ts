@@ -89,17 +89,6 @@ export async function createChannel(
   return data;
 }
 
-export async function archiveChannel(
-  client: AppSupabaseClient,
-  channelId: string,
-): Promise<void> {
-  const { error } = await client
-    .from('channels')
-    .update({ archived_at: new Date().toISOString() })
-    .eq('id', channelId);
-  if (error) throw error;
-}
-
 export async function fetchChannelBySlug(
   client: AppSupabaseClient,
   slug: string,

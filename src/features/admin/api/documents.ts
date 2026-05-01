@@ -20,15 +20,6 @@ export async function fetchAllDocuments(
   return data ?? [];
 }
 
-export async function fetchDocumentById(
-  client: AppSupabaseClient,
-  id: string,
-): Promise<DocumentRow | null> {
-  const { data, error } = await client.from('documents').select('*').eq('id', id).maybeSingle();
-  if (error) throw error;
-  return data;
-}
-
 export async function createDocument(
   client: AppSupabaseClient,
   input: DocumentInsert,
