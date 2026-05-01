@@ -7,6 +7,7 @@ import {
   Plane,
   Salad,
   Shirt,
+  Sparkles,
   User,
   Users,
 } from 'lucide-react';
@@ -15,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
+import { CommunityProfileSection } from '@/features/community/CommunityProfileSection';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { DependentsSection } from '@/features/registration/sections/DependentsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
@@ -32,6 +34,7 @@ const PROFILE_MODE = { kind: 'profile' } as const;
 
 type SectionId =
   | 'personal'
+  | 'community'
   | 'dietary'
   | 'accessibility'
   | 'emergency'
@@ -54,6 +57,12 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     icon: User,
     labelKey: 'profile.nav.personal',
     render: () => <PersonalInfoSection mode={PROFILE_MODE} />,
+  },
+  {
+    id: 'community',
+    icon: Sparkles,
+    labelKey: 'profile.nav.community',
+    render: () => <CommunityProfileSection mode={PROFILE_MODE} />,
   },
   {
     id: 'dietary',

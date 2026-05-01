@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
@@ -6,18 +6,32 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadPersonalInfo, savePersonalInfo } from '../api';
+import { composeLegalName, loadPersonalInfo, savePersonalInfo } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useSectionSubmit } from './useSectionSubmit';
 
 interface FormState {
   preferredName: string;
-  legalName: string;
+  firstName: string;
+  middleInitial: string;
+  lastName: string;
+  alternateEmail: string;
+  phoneNumber: string;
+  whatsapp: string;
   baseCity: string;
 }
 
-const EMPTY: FormState = { preferredName: '', legalName: '', baseCity: '' };
+const EMPTY: FormState = {
+  preferredName: '',
+  firstName: '',
+  middleInitial: '',
+  lastName: '',
+  alternateEmail: '',
+  phoneNumber: '',
+  whatsapp: '',
+  baseCity: '',
+};
 
 export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
@@ -30,6 +44,16 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
     toastSuccessKey: 'profile.toast.personalInfoSaved',
   });
 
+  const legalName = useMemo(
+    () =>
+      composeLegalName({
+        first_name: values.firstName || null,
+        middle_initial: values.middleInitial || null,
+        last_name: values.lastName || null,
+      }),
+    [values.firstName, values.middleInitial, values.lastName],
+  );
+
   useEffect(() => {
     if (!user) return;
     let active = true;
@@ -38,7 +62,12 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
       if (!active) return;
       setValues({
         preferredName: row?.preferred_name ?? '',
-        legalName: row?.legal_name ?? '',
+        firstName: row?.first_name ?? '',
+        middleInitial: row?.middle_initial ?? '',
+        lastName: row?.last_name ?? '',
+        alternateEmail: row?.alternate_email ?? '',
+        phoneNumber: row?.phone_number ?? '',
+        whatsapp: row?.whatsapp ?? '',
         baseCity: row?.base_city ?? '',
       });
       setHydrated(true);
@@ -52,9 +81,15 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
     if (!user) return;
     void submit(() =>
       savePersonalInfo(getSupabaseClient(), user.id, {
-        preferred_name: values.preferredName,
-        legal_name: values.legalName,
-        base_city: values.baseCity,
+        preferred_name: values.preferredName || null,
+        first_name: values.firstName || null,
+        middle_initial: values.middleInitial || null,
+        last_name: values.lastName || null,
+        legal_name: legalName || null,
+        base_city: values.baseCity || null,
+        alternate_email: values.alternateEmail || null,
+        phone_number: values.phoneNumber || null,
+        whatsapp: values.whatsapp || null,
       }),
     );
   }
@@ -82,17 +117,72 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="personal-legal">{t('registration.personalInfo.legalName')}</Label>
-        <Input
-          id="personal-legal"
-          required
-          value={values.legalName}
-          onChange={(e) => setValues((v) => ({ ...v, legalName: e.target.value }))}
-        />
-        <p className="text-xs text-muted-foreground">
-          {t('registration.personalInfo.legalNameHint')}
-        </p>
+      <div className="grid gap-4 sm:grid-cols-[1fr_5rem_1fr]">
+        <div className="space-y-2">
+          <Label htmlFor="personal-first">{t('registration.personalInfo.firstName')}</Label>
+          <Input
+            id="personal-first"
+            required
+            value={values.firstName}
+            onChange={(e) => setValues((v) => ({ ...v, firstName: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="personal-middle">{t('registration.personalInfo.middleInitial')}</Label>
+          <Input
+            id="personal-middle"
+            maxLength={3}
+            value={values.middleInitial}
+            onChange={(e) => setValues((v) => ({ ...v, middleInitial: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="personal-last">{t('registration.personalInfo.lastName')}</Label>
+          <Input
+            id="personal-last"
+            required
+            value={values.lastName}
+            onChange={(e) => setValues((v) => ({ ...v, lastName: e.target.value }))}
+          />
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {t('registration.personalInfo.legalNameHint')}
+      </p>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="space-y-2">
+          <Label htmlFor="personal-altemail">
+            {t('registration.personalInfo.alternateEmail')}
+          </Label>
+          <Input
+            id="personal-altemail"
+            type="email"
+            value={values.alternateEmail}
+            onChange={(e) => setValues((v) => ({ ...v, alternateEmail: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="personal-phone">{t('registration.personalInfo.phoneNumber')}</Label>
+          <Input
+            id="personal-phone"
+            type="tel"
+            inputMode="tel"
+            placeholder="+1 415 555 0101"
+            value={values.phoneNumber}
+            onChange={(e) => setValues((v) => ({ ...v, phoneNumber: e.target.value }))}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="personal-whatsapp">{t('registration.personalInfo.whatsapp')}</Label>
+          <Input
+            id="personal-whatsapp"
+            type="tel"
+            inputMode="tel"
+            value={values.whatsapp}
+            onChange={(e) => setValues((v) => ({ ...v, whatsapp: e.target.value }))}
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

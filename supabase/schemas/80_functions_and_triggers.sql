@@ -486,6 +486,63 @@ grant execute on function public.set_user_leadership(uuid, boolean) to authentic
 
 
 -- =====================================================================
+-- Messages: bump edited_at when the body changes after the initial send
+-- =====================================================================
+create or replace function public.touch_message_edited_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  if new.body is distinct from old.body then
+    new.edited_at := now();
+  end if;
+  return new;
+end
+$$;
+
+create trigger touch_messages_edited_at
+  before update on public.messages
+  for each row execute function public.touch_message_edited_at();
+
+
+-- =====================================================================
+-- Admin broadcast: post the same body to every active community channel
+-- in one round-trip. SECURITY DEFINER so the message rows credit the
+-- caller as sender_id while skipping per-channel RLS overhead.
+-- =====================================================================
+create or replace function public.broadcast_to_all_channels(p_body text)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count int;
+begin
+  if not public.is_admin() then
+    raise exception 'only admins can broadcast'
+      using errcode = '42501';
+  end if;
+
+  if coalesce(length(trim(p_body)), 0) = 0 then
+    raise exception 'broadcast body cannot be empty'
+      using errcode = '22023';
+  end if;
+
+  insert into public.messages (sender_id, channel, body)
+  select auth.uid(), c.slug, p_body
+  from public.channels c
+  where c.archived_at is null;
+  get diagnostics v_count = row_count;
+  return v_count;
+end
+$$;
+
+revoke all on function public.broadcast_to_all_channels(text) from public;
+grant execute on function public.broadcast_to_all_channels(text) to authenticated;
+
+
+-- =====================================================================
 -- Notifications: recipient marks one (or all) as read
 -- =====================================================================
 

@@ -46,9 +46,15 @@ create table public.employee_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users(id) on delete cascade,
   preferred_name text,
+  first_name text,
+  middle_initial text check (middle_initial is null or length(middle_initial) <= 3),
+  last_name text,
   legal_name text,
   legal_name_source field_source_type not null default 'hibob',
   legal_name_locked boolean not null default false,
+  alternate_email citext,
+  phone_number text,
+  whatsapp text,
   department text,
   team text,
   job_title text,
@@ -61,6 +67,19 @@ create table public.employee_profiles (
   hibob_synced_at timestamptz,
   updated_at timestamptz not null default now()
 );
+
+comment on column public.employee_profiles.first_name is
+  'Given name. Free-form; kept distinct from legal_name so the UI can offer a clean split.';
+comment on column public.employee_profiles.middle_initial is
+  'Optional middle initial (1–3 chars to allow up to "M.J.").';
+comment on column public.employee_profiles.last_name is
+  'Family name.';
+comment on column public.employee_profiles.alternate_email is
+  'Personal contact when @kizuna.dev is unreachable. citext for case-insensitive equality.';
+comment on column public.employee_profiles.phone_number is
+  'E.164 form preferred (+1 415 555 0101). Validation lives at the application layer.';
+comment on column public.employee_profiles.whatsapp is
+  'WhatsApp handle or number. Kept separate so locale-specific WhatsApp aliases are first-class.';
 
 comment on table public.employee_profiles is
   'Per-employee profile. Fields originating from HiBob carry _source and _locked companions.';

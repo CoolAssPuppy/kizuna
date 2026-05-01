@@ -92,47 +92,28 @@ $$;
 
 
 -- channel_has_access: messages RLS gate. Phase 1 simple rules:
---   - 'general'                -> any authenticated user
---   - 'announcements'          -> any authenticated user (read), admins (write)
---   - 'guests'                 -> guests and admins
---   - 'team:<dept>'            -> employees in that department, admins
---   - 'dm:<uuid_a>:<uuid_b>'   -> the two participants. Both UUIDs lower
---                                 case, sorted lexicographically so that
---                                 each DM has exactly one canonical name.
+--   - any slug in public.channels (active row) -> any authenticated user
+--   - 'dm:<uuid_a>:<uuid_b>'                   -> the two participants
+--
+-- Pre-`channels` legacy slugs (general / announcements / guests / team:*)
+-- are now rows in public.channels seeded by the events migration, so the
+-- single "exists in channels" branch covers them all.
 create or replace function public.channel_has_access(p_uid uuid, p_channel text)
 returns boolean
 language plpgsql
 stable
 as $$
-declare
-  v_role text;
-  v_dept text;
 begin
   if p_uid is null then return false; end if;
 
-  v_role := public.auth_role();
-
-  if p_channel in ('general', 'announcements') then
-    return true;
-  end if;
-
-  if p_channel = 'guests' then
-    return v_role in ('guest', 'admin', 'super_admin');
-  end if;
-
-  if p_channel like 'team:%' then
-    if v_role in ('admin', 'super_admin') then return true; end if;
-    select department into v_dept from public.employee_profiles where user_id = p_uid;
-    return v_dept = substr(p_channel, 6);
-  end if;
-
   if p_channel like 'dm:%' then
-    -- Channel is `dm:<uuid_a>:<uuid_b>` where both UUIDs are sorted.
-    -- Match on whole-string equality of either UUID against p_uid.
     return p_uid::text = any(string_to_array(substr(p_channel, 4), ':'));
   end if;
 
-  return false;
+  return exists (
+    select 1 from public.channels
+    where slug = p_channel and archived_at is null
+  );
 end
 $$;
 
@@ -486,6 +467,49 @@ create policy messages_self_insert on public.messages
 create policy messages_self_update on public.messages
   for update using (sender_id = auth.uid())
   with check (sender_id = auth.uid());
+
+-- Soft-delete by the sender or any admin. Hard delete is intentionally
+-- not granted because we want the audit trail.
+create policy messages_self_delete on public.messages
+  for delete using (sender_id = auth.uid() or public.is_admin());
+
+
+-- Channels: any authenticated user can read; any authenticated user can
+-- create; the creator (or an admin) can rename, set description, archive.
+-- System channels are protected from the regular update policy because
+-- only an admin can mutate them.
+create policy channels_authenticated_read on public.channels
+  for select using (auth.role() = 'authenticated');
+
+create policy channels_authenticated_insert on public.channels
+  for insert with check (
+    auth.role() = 'authenticated'
+    and created_by = auth.uid()
+    and is_system = false
+  );
+
+create policy channels_creator_update on public.channels
+  for update using (
+    (created_by = auth.uid() and is_system = false)
+    or public.is_admin()
+  )
+  with check (
+    (created_by = auth.uid() and is_system = false)
+    or public.is_admin()
+  );
+
+create policy channels_admin_delete on public.channels
+  for delete using (public.is_admin());
+
+
+-- Hobby catalog: read for anyone authenticated, write admin-only so the
+-- list stays curated.
+create policy hobby_catalog_authenticated_read on public.hobby_catalog
+  for select using (auth.role() = 'authenticated');
+
+create policy hobby_catalog_admin_write on public.hobby_catalog
+  for all using (public.is_admin())
+  with check (public.is_admin());
 
 
 create policy votes_self_all on public.votes

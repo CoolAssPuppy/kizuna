@@ -163,8 +163,12 @@ export type Database = {
         Row: {
           bio: string | null
           countries_visited: string[]
+          current_city: string | null
+          current_country: string | null
           fun_fact: string | null
           hobbies: string[]
+          hometown_city: string | null
+          hometown_country: string | null
           id: string
           interests: string[]
           languages: string[]
@@ -174,8 +178,12 @@ export type Database = {
         Insert: {
           bio?: string | null
           countries_visited?: string[]
+          current_city?: string | null
+          current_country?: string | null
           fun_fact?: string | null
           hobbies?: string[]
+          hometown_city?: string | null
+          hometown_country?: string | null
           id?: string
           interests?: string[]
           languages?: string[]
@@ -185,8 +193,12 @@ export type Database = {
         Update: {
           bio?: string | null
           countries_visited?: string[]
+          current_city?: string | null
+          current_country?: string | null
           fun_fact?: string | null
           hobbies?: string[]
+          hometown_city?: string | null
+          hometown_country?: string | null
           id?: string
           interests?: string[]
           languages?: string[]
@@ -198,6 +210,47 @@ export type Database = {
             foreignKeyName: "attendee_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_system: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_system?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -530,60 +583,78 @@ export type Database = {
       }
       employee_profiles: {
         Row: {
+          alternate_email: string | null
           avatar_url: string | null
           base_city: string | null
           department: string | null
+          first_name: string | null
           hibob_synced_at: string | null
           home_country: string | null
           id: string
           job_title: string | null
+          last_name: string | null
           legal_name: string | null
           legal_name_locked: boolean
           legal_name_source: Database["public"]["Enums"]["field_source_type"]
+          middle_initial: string | null
+          phone_number: string | null
           preferred_name: string | null
           slack_handle: string | null
           start_date: string | null
           team: string | null
           updated_at: string
           user_id: string
+          whatsapp: string | null
           years_attended: number
         }
         Insert: {
+          alternate_email?: string | null
           avatar_url?: string | null
           base_city?: string | null
           department?: string | null
+          first_name?: string | null
           hibob_synced_at?: string | null
           home_country?: string | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           legal_name?: string | null
           legal_name_locked?: boolean
           legal_name_source?: Database["public"]["Enums"]["field_source_type"]
+          middle_initial?: string | null
+          phone_number?: string | null
           preferred_name?: string | null
           slack_handle?: string | null
           start_date?: string | null
           team?: string | null
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
           years_attended?: number
         }
         Update: {
+          alternate_email?: string | null
           avatar_url?: string | null
           base_city?: string | null
           department?: string | null
+          first_name?: string | null
           hibob_synced_at?: string | null
           home_country?: string | null
           id?: string
           job_title?: string | null
+          last_name?: string | null
           legal_name?: string | null
           legal_name_locked?: boolean
           legal_name_source?: Database["public"]["Enums"]["field_source_type"]
+          middle_initial?: string | null
+          phone_number?: string | null
           preferred_name?: string | null
           slack_handle?: string | null
           start_date?: string | null
           team?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
           years_attended?: number
         }
         Relationships: [
@@ -915,6 +986,24 @@ export type Database = {
         }
         Relationships: []
       }
+      hobby_catalog: {
+        Row: {
+          category: string
+          label: string
+          slug: string
+        }
+        Insert: {
+          category: string
+          label: string
+          slug: string
+        }
+        Update: {
+          category?: string
+          label?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       itinerary_items: {
         Row: {
           ends_at: string | null
@@ -992,6 +1081,7 @@ export type Database = {
           body: string
           channel: string
           deleted_at: string | null
+          edited_at: string | null
           id: string
           media_url: string | null
           reactions: Json
@@ -1003,6 +1093,7 @@ export type Database = {
           body: string
           channel: string
           deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           media_url?: string | null
           reactions?: Json
@@ -1014,6 +1105,7 @@ export type Database = {
           body?: string
           channel?: string
           deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           media_url?: string | null
           reactions?: Json
@@ -1774,6 +1866,7 @@ export type Database = {
     }
     Functions: {
       auth_role: { Args: never; Returns: string }
+      broadcast_to_all_channels: { Args: { p_body: string }; Returns: number }
       channel_has_access: {
         Args: { p_channel: string; p_uid: string }
         Returns: boolean

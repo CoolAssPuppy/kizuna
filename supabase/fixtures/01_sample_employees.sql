@@ -334,6 +334,37 @@ $$;
 -- A handful of dietary preferences and emergency contacts
 -- =====================================================================
 
+-- =====================================================================
+-- Backfill split-name + contact columns for every fictional employee.
+-- legal_name is "First Last" or "First M Last" so we can cleanly split.
+-- =====================================================================
+update public.employee_profiles ep
+set
+  first_name = coalesce(ep.first_name, split_part(ep.legal_name, ' ', 1)),
+  last_name = coalesce(
+    ep.last_name,
+    case
+      when array_length(string_to_array(ep.legal_name, ' '), 1) >= 2 then
+        substring(ep.legal_name from position(' ' in ep.legal_name) + 1)
+      else null
+    end
+  ),
+  alternate_email = coalesce(
+    ep.alternate_email,
+    lower(replace(coalesce(ep.legal_name, ''), ' ', '.')) || '@personal.example'
+  ),
+  phone_number = coalesce(
+    ep.phone_number,
+    case
+      when ep.home_country = 'US' then '+1 415 555 ' || lpad(((abs(hashtext(ep.user_id::text)) % 9000) + 1000)::text, 4, '0')
+      when ep.home_country = 'GB' then '+44 20 7946 ' || lpad(((abs(hashtext(ep.user_id::text)) % 9000) + 1000)::text, 4, '0')
+      else null
+    end
+  ),
+  whatsapp = coalesce(ep.whatsapp, ep.phone_number)
+where ep.user_id::text like 'a0000000%';
+
+
 insert into public.dietary_preferences (user_id, restrictions, allergies, alcohol_free, severity, notes)
 values
   ('a0000000-0000-0000-0000-000000000010', array['vegetarian'], array[]::text[], false, 'preference',  'Plant-forward when possible.'),

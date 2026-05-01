@@ -28,7 +28,10 @@ declare
     'itinerary_items',
     -- Logistics
     'flights',
-    'transport_requests'
+    'transport_requests',
+    -- Community
+    'channels',
+    'messages'
   ];
 begin
   foreach v_table in array v_tables loop

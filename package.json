@@ -29,6 +29,7 @@
     "db:diff": "supabase db diff -f",
     "db:test": "supabase test db",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
+    "simulate:community": "tsx scripts/simulate-community.ts",
     "prepare": "husky 2>/dev/null || true"
   },
   "dependencies": {

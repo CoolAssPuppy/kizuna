@@ -7,6 +7,13 @@
     "loadingEvent": "Loading event details",
     "noEvent": "No active event right now. Check back soon."
   },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm"
+  },
   "roles": {
     "super_admin": "Super admin",
     "admin": "Admin",
@@ -120,6 +127,7 @@
     "nav": {
       "label": "Profile sections",
       "personal": "Personal info",
+      "community": "Community",
       "dietary": "Dietary",
       "accessibility": "Accessibility",
       "emergency": "Emergency contact",
@@ -147,7 +155,62 @@
     }
   },
   "community": {
-    "comingSoon": "Community lands in Phase 2: profiles, world map, group chat, and people-matching."
+    "title": "Community",
+    "subtitle": "Find people, share stories, and meet your fellow attendees.",
+    "editProfile": "Edit profile",
+    "noProfileYet": "Set up your community profile so others can find you.",
+    "profile": {
+      "title": "Community profile",
+      "description": "Visible to other attendees so people can connect with you.",
+      "bio": "Bio",
+      "bioPlaceholder": "A few sentences about you.",
+      "funFact": "Fun fact (icebreaker)",
+      "funFactPlaceholder": "Something a stranger would never guess.",
+      "hobbies": "Hobbies",
+      "hobbiesPlaceholder": "Type to add a hobby and press Enter.",
+      "removeHobby": "Remove {{hobby}}",
+      "hometownCity": "Hometown city",
+      "currentCity": "Where you live now (city)",
+      "country": "Country",
+      "saved": "Community profile saved."
+    },
+    "map": {
+      "title": "World map",
+      "toggleHometown": "Hometowns",
+      "toggleCurrent": "Where they live now"
+    },
+    "matches": {
+      "byHobby": "People who match your hobbies",
+      "byHometown": "People from your hometown",
+      "byCurrent": "People in your current city",
+      "empty": "No matches yet — add a few hobbies and a hometown to your community profile.",
+      "matchedHobbies": "Hobbies matched",
+      "name": "Name",
+      "email": "Email"
+    },
+    "channels": {
+      "title": "Community channels",
+      "newChannel": "Start a channel",
+      "newChannelTitle": "Start a community channel",
+      "newChannelName": "Name",
+      "newChannelDescription": "Description",
+      "newChannelCreate": "Create channel",
+      "lastMessage": "Last message",
+      "noMessagesYet": "No messages yet.",
+      "typing_one": "{{name}} is typing…",
+      "typing_other": "{{count}} people are typing…",
+      "openChannel": "Open {{name}}",
+      "send": "Send",
+      "messageInputPlaceholder": "iMessage",
+      "imagePicker": "Add image",
+      "broadcast": "Notify all channels",
+      "broadcastConfirmTitle": "Send to every channel?",
+      "broadcastConfirmBody": "This will post the message to every active channel.",
+      "broadcastConfirm": "Send to all",
+      "broadcastSuccess": "Sent to {{count}} channels.",
+      "deleteMessage": "Delete message",
+      "edited": "edited"
+    }
   },
   "footer": {
     "tagline": "Kizuna · An enduring bond.",
@@ -195,8 +258,13 @@
     "personalInfo": {
       "preferredName": "Preferred Name",
       "preferredNameHint": "How your name appears on your badge.",
-      "legalName": "Legal Name",
-      "legalNameHint": "Exactly as printed on your passport.",
+      "firstName": "First Name",
+      "middleInitial": "Middle",
+      "lastName": "Last Name",
+      "legalNameHint": "Exactly as printed on your passport. We use this for travel documents and the dinner seating chart.",
+      "alternateEmail": "Alternate Email",
+      "phoneNumber": "Phone Number",
+      "whatsapp": "WhatsApp",
       "baseCity": "Current City",
       "baseCityHint": "Where you are travelling from."
     },
