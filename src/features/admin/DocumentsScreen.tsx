@@ -8,7 +8,6 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
-import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 
 import {
   type DocumentRow,
@@ -41,10 +40,6 @@ export function DocumentsScreen(): JSX.Element {
     queryFn: () =>
       eventId ? fetchAllDocuments(getSupabaseClient(), eventId) : Promise.resolve([]),
   });
-
-  useRealtimeInvalidation([
-    { table: 'documents', invalidates: ['admin', 'documents'] },
-  ]);
 
   const remove = useMutation({
     mutationFn: async (id: string) => deleteDocument(getSupabaseClient(), id),

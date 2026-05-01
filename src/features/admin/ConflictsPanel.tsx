@@ -4,7 +4,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
-import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 
 import { fetchOpenConflicts, resolveConflict } from './conflicts';
 import type { DataConflictRow } from './conflicts';
@@ -17,10 +16,6 @@ export function ConflictsPanel(): JSX.Element {
     queryKey: ['admin', 'conflicts'],
     queryFn: () => fetchOpenConflicts(getSupabaseClient()),
   });
-
-  useRealtimeInvalidation([
-    { table: 'data_conflicts', invalidates: ['admin', 'conflicts'] },
-  ]);
 
   const mutation = useMutation({
     mutationFn: ({

@@ -7,7 +7,6 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
 import { getSupabaseClient } from '@/lib/supabase';
-import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { useStorageImage } from '@/lib/useStorageImage';
 
 import { GREETINGS } from './greetings';
@@ -25,15 +24,6 @@ export function HomeScreen(): JSX.Element {
   const editorial = useEditorialFeed(eventId);
   const dynamicCount = feed?.length ?? 0;
   const editorialCount = editorial.main.length;
-
-  useRealtimeInvalidation([
-    { table: 'feed_items', invalidates: ['home', 'editorial-feed'] },
-    { table: 'registrations', invalidates: ['home', 'event-stats'] },
-    { table: 'users', invalidates: ['home', 'event-stats'] },
-    { table: 'document_acknowledgements', invalidates: ['home', 'event-stats'] },
-    { table: 'notifications', invalidates: ['home', 'feed'] },
-    { table: 'documents', invalidates: ['home', 'feed'] },
-  ]);
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">

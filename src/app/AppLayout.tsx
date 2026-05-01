@@ -6,6 +6,8 @@ import { AppHeader } from '@/components/AppHeader';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { useAuth } from '@/features/auth/AuthContext';
 
+import { GlobalRealtime } from './GlobalRealtime';
+
 interface Props {
   children: ReactNode;
 }
@@ -47,6 +49,7 @@ export function AppLayout({ children }: Props): JSX.Element {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <GlobalRealtime />
       <OfflineBanner />
       <AppHeader />
       <div className="flex-1">{children}</div>

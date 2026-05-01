@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
-import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 
 import { fetchAllEvents, type EventRow } from './api/events';
@@ -21,10 +20,6 @@ export function EventsListScreen(): JSX.Element {
     queryKey: ['admin', 'events'],
     queryFn: () => fetchAllEvents(getSupabaseClient()),
   });
-
-  useRealtimeInvalidation([
-    { table: 'events', invalidates: ['admin', 'events'] },
-  ]);
 
   if (isLoading) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.loading')}</p>;
