@@ -34,6 +34,12 @@ export interface AssignableUser {
   role: Database['public']['Enums']['user_role'];
   is_leadership: boolean;
   has_dependents: boolean;
+  /**
+   * The registrations.created_at for this user/event. Drives the
+   * "earliest registrations get the largest rooms" rule in the
+   * auto-assign engine. Earlier ISO strings sort before later ones.
+   */
+  registration_created_at: string;
 }
 
 type JoinedUser = Joined<{
@@ -121,6 +127,7 @@ export async function fetchAssignableAttendees(
     .from('registrations')
     .select(
       `
+      created_at,
       user:users!registrations_user_id_fkey (
         id, email, role, is_leadership,
         employee_profiles ( preferred_name, first_name, last_name, legal_name ),
@@ -137,6 +144,7 @@ export async function fetchAssignableAttendees(
   const sponsorIdsWithDependents = new Set((dependents ?? []).map((d) => d.sponsor_id));
 
   type Row = {
+    created_at: string;
     user: Joined<{
       id: string;
       email: string;
@@ -163,6 +171,7 @@ export async function fetchAssignableAttendees(
         role: u.role,
         is_leadership: u.is_leadership,
         has_dependents: sponsorIdsWithDependents.has(u.id),
+        registration_created_at: row.created_at,
       };
     })
     .filter((row): row is AssignableUser => row !== null)

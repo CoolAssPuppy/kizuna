@@ -515,6 +515,9 @@
       "addOccupant": "Add occupant",
       "removeOccupant": "Remove occupant",
       "assignPlaceholder": "+ Assign attendee",
+      "autoAssign": "Auto-assign",
+      "autoAssigning": "Auto-assigning",
+      "autoAssignDone": "Auto-assigned {{assigned}} attendees ({{unplaced}} unplaced).",
       "comingSoon": "This tool is being built. Hold tight."
     },
     "events": {

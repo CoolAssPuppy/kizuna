@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Crown, Hotel, Plus, Sparkles, Upload, UserMinus, Users } from 'lucide-react';
+import { Crown, Hotel, Plus, Sparkles, Upload, UserMinus, Users, Wand2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -29,6 +29,7 @@ import {
   type AssignableUser,
   type RoomWithOccupants,
 } from './api/rooms';
+import { autoAssignRooms } from './roomAssignment/autoAssign';
 import { parseRoomCsv, type ParsedRoom } from './roomAssignment/csv';
 
 /**
@@ -94,6 +95,42 @@ export function RoomAssignmentToolScreen(): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
+  // Auto-assign: run the pure rules engine against the current rooms +
+  // unassigned attendees, then fan out the resulting (room, user) pairs
+  // through the same single-row assignOccupant API. We invalidate once
+  // at the end rather than per-row to avoid the realtime channel
+  // hammering the cache.
+  const autoAssignMutation = useMutation({
+    mutationFn: async () => {
+      const result = autoAssignRooms(
+        rooms.map((r) => ({
+          id: r.id,
+          capacity: r.capacity,
+          is_suite: r.is_suite,
+          room_type: r.room_type,
+          size_sqm: r.size_sqm,
+          occupied: r.occupants.length,
+        })),
+        unassignedAttendees,
+      );
+      const client = getSupabaseClient();
+      for (const a of result.assignments) {
+        await assignOccupant(client, a);
+      }
+      return result;
+    },
+    onSuccess: (result) => {
+      void qc.invalidateQueries({ queryKey: ['admin', 'rooms', eventId] });
+      show(
+        t('admin.roomAssignment.autoAssignDone', {
+          assigned: result.assignments.length,
+          unplaced: result.unplaced.length,
+        }),
+      );
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
   if (!event) {
     return (
       <p className="py-8 text-sm text-muted-foreground">{t('admin.roomAssignment.noEvent')}</p>
@@ -109,10 +146,26 @@ export function RoomAssignmentToolScreen(): JSX.Element {
           </h2>
           <p className="text-sm text-muted-foreground">{t('admin.roomAssignment.subtitle')}</p>
         </div>
-        <Button onClick={() => setImportOpen(true)} className="gap-2 self-start">
-          <Upload aria-hidden className="h-4 w-4" />
-          {t('admin.roomAssignment.importBlock')}
-        </Button>
+        <div className="flex flex-wrap gap-2 self-start">
+          <Button
+            type="button"
+            variant="outline"
+            className="gap-2"
+            disabled={
+              autoAssignMutation.isPending || rooms.length === 0 || unassignedAttendees.length === 0
+            }
+            onClick={() => autoAssignMutation.mutate()}
+          >
+            <Wand2 aria-hidden className="h-4 w-4" />
+            {autoAssignMutation.isPending
+              ? t('admin.roomAssignment.autoAssigning')
+              : t('admin.roomAssignment.autoAssign')}
+          </Button>
+          <Button onClick={() => setImportOpen(true)} className="gap-2">
+            <Upload aria-hidden className="h-4 w-4" />
+            {t('admin.roomAssignment.importBlock')}
+          </Button>
+        </div>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
