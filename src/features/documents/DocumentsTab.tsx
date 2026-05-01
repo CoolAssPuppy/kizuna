@@ -1,3 +1,4 @@
+import { Download, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
@@ -6,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
+import { useStorageImage } from '@/lib/useStorageImage';
 
 import { useDocumentsQuery } from './useDocumentsQuery';
 import type { DocumentWithAck } from './types';
@@ -89,9 +91,7 @@ function DocumentCard({ entry }: DocumentCardProps): JSX.Element {
             </p>
           ) : null}
         </header>
-        <div className="prose prose-sm max-h-40 max-w-none overflow-hidden text-ellipsis">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.body}</ReactMarkdown>
-        </div>
+        <DocumentPreview document={document} />
       </div>
       <div className="flex items-center justify-between pt-2">
         {isSigned ? (
@@ -109,5 +109,64 @@ function DocumentCard({ entry }: DocumentCardProps): JSX.Element {
         ) : null}
       </div>
     </article>
+  );
+}
+
+function DocumentPreview({
+  document,
+}: {
+  document: DocumentWithAck['document'];
+}): JSX.Element {
+  const { t } = useTranslation();
+  const pdfUrl = useStorageImage('documents', document.pdf_path);
+
+  if (document.content_type === 'pdf') {
+    return (
+      <div className="space-y-2">
+        {pdfUrl ? (
+          <iframe
+            src={pdfUrl}
+            title={document.title}
+            className="h-64 w-full rounded-md border bg-background"
+          />
+        ) : (
+          <p className="rounded-md border bg-muted/30 px-3 py-6 text-center text-sm text-muted-foreground">
+            {t('documents.pdf.loading')}
+          </p>
+        )}
+        {pdfUrl ? (
+          <a
+            href={pdfUrl}
+            download
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <Download aria-hidden className="h-3 w-3" />
+            {t('documents.pdf.download')}
+          </a>
+        ) : null}
+      </div>
+    );
+  }
+
+  if (document.content_type === 'notion') {
+    return document.notion_url ? (
+      <a
+        href={document.notion_url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="inline-flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary hover:bg-muted"
+      >
+        <ExternalLink aria-hidden className="h-4 w-4" />
+        {t('documents.notion.open')}
+      </a>
+    ) : (
+      <p className="text-sm text-muted-foreground">{t('documents.pdf.unavailable')}</p>
+    );
+  }
+
+  return (
+    <div className="prose prose-sm max-h-40 max-w-none overflow-hidden text-ellipsis">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{document.body ?? ''}</ReactMarkdown>
+    </div>
   );
 }

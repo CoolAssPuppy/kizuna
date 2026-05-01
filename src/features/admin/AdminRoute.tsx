@@ -7,6 +7,7 @@ import { AdminLayout } from './AdminLayout';
 import { AgendaAdminScreen } from './AgendaAdminScreen';
 import { ComingSoon } from './ComingSoon';
 import { ConflictsScreen } from './ConflictsScreen';
+import { DocumentsScreen } from './DocumentsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { EventsListScreen } from './EventsListScreen';
 import { FeedScreen } from './FeedScreen';
@@ -36,15 +37,7 @@ export function AdminRoute(): JSX.Element {
         <Route path="events/:eventId" element={<EventEditScreen />} />
         <Route path="agenda" element={<AgendaAdminScreen />} />
         <Route path="feed" element={<FeedScreen />} />
-        <Route
-          path="documents"
-          element={
-            <ComingSoon
-              titleKey="admin.documents.title"
-              subtitleKey="admin.documents.subtitle"
-            />
-          }
-        />
+        <Route path="documents" element={<DocumentsScreen />} />
         <Route path="stats" element={<StatsScreen />} />
         <Route
           path="nudges"

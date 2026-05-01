@@ -27,16 +27,36 @@ create or replace function public.is_admin()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
-  select public.auth_role() in ('admin', 'super_admin')
+  -- Prefer the JWT custom claim (zero queries). If the claim is missing —
+  -- e.g. a session minted before the auth hook was wired up, or an
+  -- internal pg session running without claims — fall back to a direct
+  -- read of public.users so admin writes don't fail with RLS errors.
+  select coalesce(
+    public.auth_role() in ('admin', 'super_admin'),
+    false
+  ) or exists (
+    select 1 from public.users
+    where id = auth.uid() and role in ('admin', 'super_admin')
+  )
 $$;
 
 create or replace function public.is_super_admin()
 returns boolean
 language sql
 stable
+security definer
+set search_path = public
 as $$
-  select public.auth_role() = 'super_admin'
+  select coalesce(
+    public.auth_role() = 'super_admin',
+    false
+  ) or exists (
+    select 1 from public.users
+    where id = auth.uid() and role = 'super_admin'
+  )
 $$;
 
 

@@ -81,12 +81,12 @@ Sample code of conduct content. Real content will replace this in production.',
   -- Editorial home-screen feed. Sample items demonstrating both
   -- locations. The SupaCup card was previously hardcoded into the home
   -- screen; it now lives here so admins can swap it out year-over-year.
-  insert into public.feed_items (event_id, location, position, title, subtitle, body, image_url) values
+  insert into public.feed_items (event_id, location, position, title, subtitle, body, image_path) values
     (v_event_id, 'sidebar', 0,
      'Defending SupaCup champion',
      'Tyler Shukert · Champion of Supafest 2026 — Da Nang',
      null,
-     '/supacup-placeholder.png'),
+     null),
     (v_event_id, 'main', 0,
      'Welcome to Supafest 2027',
      'Five days in Banff, January 11-15',

@@ -12,22 +12,36 @@ create table public.documents (
   ),
   version int not null default 1 check (version > 0),
   title text not null,
-  body text not null,
+  content_type document_content_type not null default 'markdown',
+  body text,
+  pdf_path text,
   applies_to document_audience not null default 'all',
   requires_acknowledgement boolean not null default false,
   requires_scroll boolean not null default false,
   notion_page_id text,
+  notion_url text,
   notion_synced_at timestamptz,
   display_order int not null default 0,
   is_active boolean not null default true,
   published_at timestamptz not null default now(),
-  unique (event_id, document_key, version)
+  unique (event_id, document_key, version),
+  constraint documents_content_present check (
+    (content_type = 'markdown' and body is not null and length(body) > 0)
+    or (content_type = 'pdf' and pdf_path is not null and length(pdf_path) > 0)
+    or (content_type = 'notion' and notion_url is not null and length(notion_url) > 0)
+  )
 );
 
 comment on table public.documents is
-  'Versioned content. Legal documents are Kizuna-native (notion_page_id null). Informational documents sync from Notion.';
+  'Versioned content. Markdown is inline; PDFs live in the documents Storage bucket; Notion documents reference an external URL until ingestion ships.';
 comment on column public.documents.event_id is
   'Null event_id means the document applies to all events globally.';
+comment on column public.documents.content_type is
+  'Discriminator that tells the renderer which field to use: body (markdown), pdf_path (Storage object name), or notion_url (external link).';
+comment on column public.documents.pdf_path is
+  'Storage object name inside the documents bucket. Null unless content_type = ''pdf''.';
+comment on column public.documents.notion_url is
+  'External Notion URL. Phase 2 will ingest this into body via a sync job.';
 comment on column public.documents.requires_acknowledgement is
   'True puts this document on the consent gate path. Bumping version forces re-acknowledgement.';
 

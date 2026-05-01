@@ -7,6 +7,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useStorageImage } from '@/lib/useStorageImage';
 
 import { GREETINGS } from './greetings';
 import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
@@ -90,11 +91,12 @@ export function HomeScreen(): JSX.Element {
 }
 
 function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
+  const imageUrl = useStorageImage('feed-images', item.image_path);
   const body = (
     <article className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent">
-      {item.image_url ? (
+      {imageUrl ? (
         <img
-          src={item.image_url}
+          src={imageUrl}
           alt=""
           className="aspect-[3/1] w-full rounded-md object-cover"
         />
@@ -110,11 +112,12 @@ function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
 }
 
 function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
+  const imageUrl = useStorageImage('feed-images', item.image_path);
   return (
     <CardShell title={item.title} {...(item.subtitle ? { description: item.subtitle } : {})}>
-      {item.image_url ? (
+      {imageUrl ? (
         <img
-          src={item.image_url}
+          src={imageUrl}
           alt=""
           className="aspect-[3/2] w-full rounded-md object-cover"
         />

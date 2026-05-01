@@ -37,6 +37,7 @@ create type custom_field_type as enum ('text', 'select', 'boolean', 'number', 'd
 
 -- Documents and consent
 create type document_audience as enum ('all', 'employee', 'guest');
+create type document_content_type as enum ('markdown', 'pdf', 'notion');
 
 -- Guests
 create type guest_relationship as enum ('partner', 'family', 'friend', 'other');

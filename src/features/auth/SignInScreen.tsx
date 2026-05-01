@@ -71,8 +71,8 @@ export function SignInScreen(): JSX.Element {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background p-6">
-      <div className="w-full max-w-md space-y-6">
+    <main className="flex min-h-screen items-center justify-center p-6">
+      <div className="w-full max-w-md space-y-6 rounded-xl border bg-background/95 p-8 shadow-2xl backdrop-blur">
         <header className="space-y-2 text-center">
           <h1 className="text-3xl font-semibold tracking-tight">{t('auth.signInTitle')}</h1>
           <p className="text-sm text-muted-foreground">{t('auth.signInSubtitle')}</p>

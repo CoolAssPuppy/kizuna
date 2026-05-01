@@ -422,7 +422,8 @@ export type Database = {
       documents: {
         Row: {
           applies_to: Database["public"]["Enums"]["document_audience"]
-          body: string
+          body: string | null
+          content_type: Database["public"]["Enums"]["document_content_type"]
           display_order: number
           document_key: string
           event_id: string | null
@@ -430,6 +431,8 @@ export type Database = {
           is_active: boolean
           notion_page_id: string | null
           notion_synced_at: string | null
+          notion_url: string | null
+          pdf_path: string | null
           published_at: string
           requires_acknowledgement: boolean
           requires_scroll: boolean
@@ -438,7 +441,8 @@ export type Database = {
         }
         Insert: {
           applies_to?: Database["public"]["Enums"]["document_audience"]
-          body: string
+          body?: string | null
+          content_type?: Database["public"]["Enums"]["document_content_type"]
           display_order?: number
           document_key: string
           event_id?: string | null
@@ -446,6 +450,8 @@ export type Database = {
           is_active?: boolean
           notion_page_id?: string | null
           notion_synced_at?: string | null
+          notion_url?: string | null
+          pdf_path?: string | null
           published_at?: string
           requires_acknowledgement?: boolean
           requires_scroll?: boolean
@@ -454,7 +460,8 @@ export type Database = {
         }
         Update: {
           applies_to?: Database["public"]["Enums"]["document_audience"]
-          body?: string
+          body?: string | null
+          content_type?: Database["public"]["Enums"]["document_content_type"]
           display_order?: number
           document_key?: string
           event_id?: string | null
@@ -462,6 +469,8 @@ export type Database = {
           is_active?: boolean
           notion_page_id?: string | null
           notion_synced_at?: string | null
+          notion_url?: string | null
+          pdf_path?: string | null
           published_at?: string
           requires_acknowledgement?: boolean
           requires_scroll?: boolean
@@ -645,7 +654,7 @@ export type Database = {
           ends_displaying_at: string | null
           event_id: string
           id: string
-          image_url: string | null
+          image_path: string | null
           link_url: string | null
           location: Database["public"]["Enums"]["feed_location"]
           occurs_at: string | null
@@ -661,7 +670,7 @@ export type Database = {
           ends_displaying_at?: string | null
           event_id: string
           id?: string
-          image_url?: string | null
+          image_path?: string | null
           link_url?: string | null
           location?: Database["public"]["Enums"]["feed_location"]
           occurs_at?: string | null
@@ -677,7 +686,7 @@ export type Database = {
           ends_displaying_at?: string | null
           event_id?: string
           id?: string
-          image_url?: string | null
+          image_path?: string | null
           link_url?: string | null
           location?: Database["public"]["Enums"]["feed_location"]
           occurs_at?: string | null
@@ -1853,6 +1862,7 @@ export type Database = {
       custom_field_type: "text" | "select" | "boolean" | "number" | "date"
       dietary_severity: "preference" | "intolerance" | "allergy"
       document_audience: "all" | "employee" | "guest"
+      document_content_type: "markdown" | "pdf" | "notion"
       event_type: "supafest" | "select" | "meetup"
       external_source_type: "hibob" | "perk"
       feed_location: "main" | "sidebar"
@@ -2061,6 +2071,7 @@ export const Constants = {
       custom_field_type: ["text", "select", "boolean", "number", "date"],
       dietary_severity: ["preference", "intolerance", "allergy"],
       document_audience: ["all", "employee", "guest"],
+      document_content_type: ["markdown", "pdf", "notion"],
       event_type: ["supafest", "select", "meetup"],
       external_source_type: ["hibob", "perk"],
       feed_location: ["main", "sidebar"],

@@ -336,7 +336,7 @@
     "feed": {
       "title": "Feed",
       "subtitle": "Editorial items pinned to the home screen.",
-      "create": "New feed item",
+      "create": "Add feed item",
       "edit": "Edit feed item",
       "save": "Save feed item",
       "saving": "Saving",
@@ -344,9 +344,10 @@
       "delete": "Delete",
       "deleted": "Feed item removed.",
       "deleteConfirm": "Remove this feed item from the home screen?",
-      "newItem": "Add item",
+      "newItem": "Add feed item",
       "empty": "Nothing here yet. Add an item.",
       "alwaysOpen": "always",
+      "noItems": "No feed items yet. Use Add feed item to publish the first one.",
       "locations": {
         "main": "Main feed",
         "sidebar": "Sidebar"
@@ -356,7 +357,7 @@
         "title": "Title",
         "subtitle": "Subtitle",
         "body": "Body",
-        "image": "Image URL",
+        "image": "Image",
         "link": "Link URL",
         "occursAt": "Occurs at",
         "startsDisplayingAt": "Starts displaying",
@@ -607,6 +608,65 @@
     "version": "Version {{version}}",
     "versionBumped": "This document has been updated. Please re-read and confirm.",
     "noDocuments": "No documents to display.",
-    "errorSaving": "We could not record your acknowledgement. Please try again."
+    "errorSaving": "We could not record your acknowledgement. Please try again.",
+    "contentType": {
+      "label": "Content type",
+      "markdown": "Markdown",
+      "pdf": "PDF",
+      "notion": "Notion link"
+    },
+    "pdf": {
+      "label": "PDF file",
+      "openInNewTab": "Open PDF in new tab",
+      "download": "Download PDF",
+      "loading": "Loading PDF",
+      "unavailable": "This PDF is not available right now."
+    },
+    "notion": {
+      "label": "Notion URL",
+      "hint": "Paste a public Notion link. We will display a button that opens it; ingestion ships in a later phase.",
+      "open": "Open in Notion"
+    }
+  },
+  "uploader": {
+    "dropOrClick": "Drop a file here or click to choose",
+    "choose": "Choose file",
+    "remove": "Remove",
+    "limits": "Up to {{mb}} MB",
+    "tooLarge": "File is too large. Limit is {{mb}} MB.",
+    "unsupportedType": "That file type is not supported.",
+    "success": "Uploaded.",
+    "uploading": "Uploading"
+  },
+  "adminDocuments": {
+    "title": "Documents",
+    "subtitle": "Versioned documents shown in registration and the documents tab.",
+    "newDocument": "Add document",
+    "edit": "Edit document",
+    "create": "Add document",
+    "save": "Save document",
+    "saving": "Saving",
+    "saved": "Document saved.",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this document? Acknowledgements will remain in the audit log.",
+    "deleted": "Document deleted.",
+    "empty": "No documents yet. Use Add document to publish the first one.",
+    "fields": {
+      "title": "Title",
+      "documentKey": "Type",
+      "version": "Version",
+      "appliesTo": "Applies to",
+      "displayOrder": "Display order",
+      "isActive": "Active",
+      "requiresAcknowledgement": "Requires acknowledgement",
+      "requiresScroll": "Require scroll-to-end before acknowledging"
+    },
+    "appliesTo": {
+      "all": "Everyone",
+      "employee": "Employees only",
+      "guest": "Guests only"
+    },
+    "previewMarkdown": "Preview",
+    "writeMarkdown": "Write"
   }
 }

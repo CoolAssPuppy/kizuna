@@ -12,24 +12,34 @@ interface Props {
 
 /**
  * Routes that always render minimal chrome regardless of auth state.
- * Sign-in, accept-invitation, and shared report links are immersive
- * flows — the share recipient is a hotel/transport coordinator who
- * has no app account and does not need our header or footer.
+ * Sign-in and accept-invitation are immersive auth flows; shared report
+ * links are immersive too — the share recipient is a hotel/transport
+ * coordinator who has no app account and does not need our header or
+ * footer.
  */
-const ALWAYS_BARE_PATHS = new Set<string>(['/sign-in', '/accept-invitation']);
+const AUTH_PATHS = new Set<string>(['/sign-in', '/accept-invitation']);
 const ALWAYS_BARE_PREFIXES = ['/share/'];
 
 export function AppLayout({ children }: Props): JSX.Element {
   const { pathname } = useLocation();
   const { status } = useAuth();
-  const alwaysBare =
-    ALWAYS_BARE_PATHS.has(pathname) || ALWAYS_BARE_PREFIXES.some((p) => pathname.startsWith(p));
+  const isAuth = AUTH_PATHS.has(pathname);
+  const alwaysBare = isAuth || ALWAYS_BARE_PREFIXES.some((p) => pathname.startsWith(p));
   const signedOut = status === 'unauthenticated';
 
-  // Sign-in and accept-invitation always run bare. Otherwise: signed-in
-  // visitors get header + footer everywhere; signed-out visitors get
-  // nothing (the home hero stands on its own).
   const bare = alwaysBare || signedOut;
+
+  if (isAuth) {
+    return (
+      <div
+        className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url(/auth.jpg)' }}
+      >
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" aria-hidden />
+        <div className="relative z-10">{children}</div>
+      </div>
+    );
+  }
 
   if (bare) {
     return <div className="min-h-screen bg-background">{children}</div>;

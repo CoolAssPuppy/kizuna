@@ -182,7 +182,7 @@ create table public.feed_items (
   subtitle text,
   body text,
   occurs_at timestamptz,
-  image_url text,
+  image_path text,
   link_url text,
   starts_displaying_at timestamptz,
   ends_displaying_at timestamptz,
