@@ -43,12 +43,12 @@ insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider, 
   ('55555555-5555-5555-5555-555555555555', 'guest.alex@kizuna.dev','guest',       null,             '33333333-3333-3333-3333-333333333333','email_password', true)
 on conflict (id) do nothing;
 
-insert into public.employee_profiles (user_id, preferred_name, legal_name, department, team, job_title, start_date, home_country, base_city, slack_handle, years_attended) values
-  ('00000000-0000-0000-0000-0000000000aa', 'Prashant',  'Prashant Sridharan', 'Marketing',  'DevRel',     'Head of DevRel',     '2024-01-15', 'US', 'San Francisco', 'prashant', 3),
-  ('11111111-1111-1111-1111-111111111111', 'Adams',     'Adams Admin',        'Operations', 'Events',     'Head of Events',     '2021-01-15', 'US', 'San Francisco', 'adams',    4),
-  ('22222222-2222-2222-2222-222222222222', 'Lu',        'Lu Liu',             'Operations', 'Events',     'Events Manager',     '2022-03-01', 'CA', 'Toronto',       'lu',       3),
-  ('33333333-3333-3333-3333-333333333333', 'Paul',      'Paul Park',          'Engineering','Database',   'Senior Engineer',    '2023-06-01', 'GB', 'London',        'paul',     2),
-  ('44444444-4444-4444-4444-444444444444', 'Maya',      'Maya Mason',         'Marketing',  'Content',    'Content Lead',       '2024-09-15', 'US', 'New York',      'maya',     1)
+insert into public.employee_profiles (user_id, preferred_name, first_name, last_name, legal_name, department, team, job_title, start_date, home_country, base_city, slack_handle, years_attended) values
+  ('00000000-0000-0000-0000-0000000000aa', 'Prashant',  'Prashant', 'Sridharan', 'Prashant Sridharan', 'Marketing',  'DevRel',     'Head of DevRel',     '2024-01-15', 'US', 'San Francisco', 'prashant', 3),
+  ('11111111-1111-1111-1111-111111111111', 'Adams',     'Adams',    'Admin',     'Adams Admin',        'Operations', 'Events',     'Head of Events',     '2021-01-15', 'US', 'San Francisco', 'adams',    4),
+  ('22222222-2222-2222-2222-222222222222', 'Lu',        'Lu',       'Liu',       'Lu Liu',             'Operations', 'Events',     'Events Manager',     '2022-03-01', 'CA', 'Toronto',       'lu',       3),
+  ('33333333-3333-3333-3333-333333333333', 'Paul',      'Paul',     'Park',      'Paul Park',          'Engineering','Database',   'Senior Engineer',    '2023-06-01', 'GB', 'London',        'paul',     2),
+  ('44444444-4444-4444-4444-444444444444', 'Maya',      'Maya',     'Mason',     'Maya Mason',         'Marketing',  'Content',    'Content Lead',       '2024-09-15', 'US', 'New York',      'maya',     1)
 on conflict (user_id) do nothing;
 
 insert into public.guest_profiles (user_id, sponsor_id, full_name, legal_name, relationship, payment_status, fee_amount) values

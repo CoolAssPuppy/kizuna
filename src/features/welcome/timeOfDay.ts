@@ -15,7 +15,7 @@ export function timeOfDay(now: Date = new Date()): TimeOfDay {
 }
 
 export function backgroundFor(period: TimeOfDay): string {
-  return period === 'day' ? '/backgrounds/day.jpg' : '/backgrounds/night.jpg';
+  return period === 'day' ? '/backgrounds/day.webp' : '/backgrounds/night.webp';
 }
 
 /**

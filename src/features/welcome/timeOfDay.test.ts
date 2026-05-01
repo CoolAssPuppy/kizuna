@@ -29,9 +29,9 @@ describe('timeOfDay', () => {
 
 describe('backgroundFor', () => {
   it('returns the day asset path for day', () => {
-    expect(backgroundFor('day')).toBe('/backgrounds/day.jpg');
+    expect(backgroundFor('day')).toBe('/backgrounds/day.webp');
   });
   it('returns the night asset path for night', () => {
-    expect(backgroundFor('night')).toBe('/backgrounds/night.jpg');
+    expect(backgroundFor('night')).toBe('/backgrounds/night.webp');
   });
 });
