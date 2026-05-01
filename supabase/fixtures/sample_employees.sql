@@ -343,6 +343,24 @@ values
   ('a0000000-0000-0000-0000-000000000046', array['halal'],      array[]::text[],false, 'preference',  null)
 on conflict (user_id) do nothing;
 
+insert into public.accessibility_preferences (user_id, needs, notes)
+values
+  ('a0000000-0000-0000-0000-000000000013', array['mobility'],
+   'Wheelchair user — needs step-free routing through the venue and accessible bathroom on every floor.'),
+  ('a0000000-0000-0000-0000-000000000018', array['neurodivergent'],
+   'Autistic. Quiet space at the venue helps; please flag in advance if a session is unusually loud.'),
+  ('a0000000-0000-0000-0000-000000000022', array['vision'],
+   'Low-vision. Prefers high-contrast slides and large print handouts.'),
+  ('a0000000-0000-0000-0000-000000000031', array['hearing'],
+   'Hard of hearing — captions appreciated for keynotes; FM system would help if available.'),
+  ('a0000000-0000-0000-0000-000000000038', array['chronic'],
+   'Type 1 diabetic — needs predictable meal timing.'),
+  ('a0000000-0000-0000-0000-000000000045', array['mobility','chronic'],
+   'Recovering from knee surgery; reduced walking distance until mid-event.'),
+  ('a0000000-0000-0000-0000-000000000049', array['other'],
+   'Pregnant — would prefer to skip altitude-heavy excursions.')
+on conflict (user_id) do nothing;
+
 insert into public.emergency_contacts (user_id, full_name, relationship, phone_primary, phone_secondary, email, notes)
 values
   ('a0000000-0000-0000-0000-000000000010', 'Anakin Skywalker',  'father',   '+1 415 555 0101', null, 'anakin.skywalker@kizuna.dev', null),

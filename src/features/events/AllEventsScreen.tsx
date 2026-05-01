@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Check, Pencil, Plus } from 'lucide-react';
+import { Calendar, Check, MapPin, Pencil, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -85,78 +85,124 @@ export function AllEventsScreen(): JSX.Element {
           {t('events.empty')}
         </p>
       ) : (
-        <ul className="space-y-3">
-          {events.map((event) => {
-            const viewing = viewingId === event.id;
-            return (
-              <li
-                key={event.id}
-                className={cn(
-                  'rounded-lg border bg-card p-4 shadow-sm transition-colors',
-                  viewing && 'border-primary/40 bg-primary/5',
-                )}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-lg font-semibold">{event.name}</h3>
-                      {event.is_active ? (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                          {t('events.active')}
-                        </span>
-                      ) : null}
-                      {isPast(event) ? (
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          {t('events.past')}
-                        </span>
-                      ) : null}
-                      {viewing && override ? (
-                        <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-600">
-                          {t('events.viewing')}
-                        </span>
-                      ) : null}
-                    </div>
-                    {event.subtitle ? (
-                      <p className="text-sm text-muted-foreground">{event.subtitle}</p>
-                    ) : null}
-                    <p className="text-xs text-muted-foreground">
-                      {mediumDateFormatter.format(new Date(event.start_date))} —{' '}
-                      {mediumDateFormatter.format(new Date(event.end_date))}
-                      {event.location ? ` · ${event.location}` : ''}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant={viewing ? 'outline' : 'default'}
-                      size="sm"
-                      onClick={() => handleView(event.id)}
-                      disabled={viewing && !override}
-                      className="gap-2"
-                    >
-                      {viewing ? (
-                        <>
-                          <Check aria-hidden className="h-4 w-4" />
-                          {t('events.currentlyViewing')}
-                        </>
-                      ) : (
-                        t('events.view')
-                      )}
-                    </Button>
-                    {isAdmin ? (
-                      <Button asChild variant="ghost" size="icon" className="h-9 w-9">
-                        <Link to={`/admin/events/${event.id}`} aria-label={t('actions.edit')}>
-                          <Pencil aria-hidden className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    ) : null}
-                  </div>
-                </div>
-              </li>
-            );
-          })}
+        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => (
+            <EventCard
+              key={event.id}
+              event={event}
+              viewing={viewingId === event.id}
+              isOverriding={!!override}
+              isAdmin={isAdmin}
+              onView={() => handleView(event.id)}
+            />
+          ))}
         </ul>
       )}
     </main>
+  );
+}
+
+interface EventCardProps {
+  event: EventRow;
+  viewing: boolean;
+  isOverriding: boolean;
+  isAdmin: boolean;
+  onView: () => void;
+}
+
+function EventCard({
+  event,
+  viewing,
+  isOverriding,
+  isAdmin,
+  onView,
+}: EventCardProps): JSX.Element {
+  const { t } = useTranslation();
+  const past = isPast(event);
+  return (
+    <li
+      className={cn(
+        'group flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md',
+        viewing && 'ring-2 ring-primary/40',
+      )}
+    >
+      <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-primary/30 via-sky-500/20 to-emerald-500/20">
+        {event.hero_image_url ? (
+          <img
+            src={event.hero_image_url}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : null}
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          {event.is_active ? (
+            <span className="rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-primary-foreground shadow">
+              {t('events.active')}
+            </span>
+          ) : null}
+          {past ? (
+            <span className="rounded-full bg-card/90 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground shadow backdrop-blur">
+              {t('events.past')}
+            </span>
+          ) : null}
+          {viewing && isOverriding ? (
+            <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow">
+              {t('events.viewing')}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold tracking-tight">{event.name}</h3>
+          {event.subtitle ? (
+            <p className="text-sm text-muted-foreground">{event.subtitle}</p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar aria-hidden className="h-3.5 w-3.5" />
+            {mediumDateFormatter.format(new Date(event.start_date))} —{' '}
+            {mediumDateFormatter.format(new Date(event.end_date))}
+          </span>
+          {event.location ? (
+            <span className="inline-flex items-center gap-1.5">
+              <MapPin aria-hidden className="h-3.5 w-3.5" />
+              {event.location}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="mt-auto flex items-center gap-2 pt-2">
+          <Button
+            type="button"
+            variant={viewing ? 'outline' : 'default'}
+            size="sm"
+            onClick={onView}
+            disabled={viewing && !isOverriding}
+            className="flex-1 gap-2"
+          >
+            {viewing ? (
+              <>
+                <Check aria-hidden className="h-4 w-4" />
+                {t('events.currentlyViewing')}
+              </>
+            ) : (
+              t('events.view')
+            )}
+          </Button>
+          {isAdmin ? (
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 shrink-0">
+              <Link to={`/admin/events/${event.id}`} aria-label={t('actions.edit')}>
+                <Pencil aria-hidden className="h-4 w-4" />
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+      </div>
+    </li>
   );
 }

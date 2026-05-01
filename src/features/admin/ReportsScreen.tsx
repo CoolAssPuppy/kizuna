@@ -1,6 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
+import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
@@ -19,7 +20,6 @@ import {
   fetchTransportManifest,
 } from './reports';
 import { ReportTable } from './ReportTable';
-import { ShareReportButton } from './ShareReportButton';
 
 type ReportType = Database['public']['Enums']['report_type'];
 
@@ -72,60 +72,21 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
 const TABS = REPORTS.map((r) => r.key);
 type Tab = (typeof TABS)[number];
 
-interface ReportPanelProps {
-  rows: ReadonlyArray<CsvRow>;
-  filename: string;
-  reportType: ReportType;
-  eventId: string | null;
-}
-
-function ReportPanel({ rows, filename, reportType, eventId }: ReportPanelProps): JSX.Element {
-  const { t } = useTranslation();
-  if (rows.length === 0) {
-    return <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>;
-  }
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <ShareReportButton reportType={reportType} eventId={eventId} />
-        <Button variant="outline" onClick={() => downloadCsv(filename, rowsToCsv(rows))}>
-          {t('admin.exportCsv')}
-        </Button>
-      </div>
-      <ReportTable rows={rows} />
-    </div>
-  );
-}
-
-interface ActiveReportProps {
-  config: ReportConfig;
-  eventId: string | null;
-}
-
-function ActiveReport({ config, eventId }: ActiveReportProps): JSX.Element {
+function useReportRows(
+  config: ReportConfig,
+  eventId: string | null,
+): ReadonlyArray<CsvRow> {
   const query = useQuery({
     queryKey: ['admin', config.key, eventId],
     queryFn: () => config.fetch(getSupabaseClient(), eventId),
   });
-
-  // Reports re-issue the live SQL query whenever any contributing table
-  // changes. Listening on a generous set keeps every tab fresh; the
-  // queryKey carries config.key so only the active report invalidates.
   useRealtimeInvalidation([
     { table: 'registrations', invalidates: ['admin', config.key] },
     { table: 'users', invalidates: ['admin', config.key] },
     { table: 'flights', invalidates: ['admin', config.key] },
     { table: 'transport_requests', invalidates: ['admin', config.key] },
   ]);
-
-  return (
-    <ReportPanel
-      rows={query.data ?? []}
-      filename={config.filename}
-      reportType={config.reportType}
-      eventId={eventId}
-    />
-  );
+  return query.data ?? [];
 }
 
 export function ReportsScreen(): JSX.Element {
@@ -133,13 +94,28 @@ export function ReportsScreen(): JSX.Element {
   const [tab, setTab] = useState<Tab>('registration');
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
-  const activeReport = REPORTS.find((r) => r.key === tab);
+  const activeReport = REPORTS.find((r) => r.key === tab) ?? REPORTS[0]!;
+  const rows = useReportRows(activeReport, eventId);
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight">{t('admin.reports.title')}</h2>
-        <p className="text-sm text-muted-foreground">{t('admin.reports.subtitle')}</p>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold tracking-tight">{t('admin.reports.title')}</h2>
+          <p className="text-sm text-muted-foreground">{t('admin.reports.subtitle')}</p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => downloadCsv(activeReport.filename, rowsToCsv(rows))}
+          disabled={rows.length === 0}
+          className="h-8 w-8 self-start p-0"
+          title={t('admin.exportCsv')}
+          aria-label={t('admin.exportCsv')}
+        >
+          <Download aria-hidden className="h-3.5 w-3.5" />
+        </Button>
       </header>
 
       <div role="tablist" className="flex flex-wrap gap-1 rounded-md border p-1">
@@ -162,7 +138,11 @@ export function ReportsScreen(): JSX.Element {
         ))}
       </div>
 
-      {activeReport ? <ActiveReport config={activeReport} eventId={eventId} /> : null}
+      {rows.length === 0 ? (
+        <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>
+      ) : (
+        <ReportTable rows={rows} />
+      )}
     </section>
   );
 }

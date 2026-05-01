@@ -95,20 +95,6 @@ export function StatsScreen(): JSX.Element {
         </ChartCard>
 
         <ChartCard
-          title={t('admin.stats.dietary.title')}
-          subtitle={t('admin.stats.dietary.subtitle')}
-        >
-          <BarVertical data={stats.dietaryRestrictions} />
-        </ChartCard>
-
-        <ChartCard
-          title={t('admin.stats.allergies.title')}
-          subtitle={t('admin.stats.allergies.subtitle')}
-        >
-          <BarVertical data={stats.allergies} />
-        </ChartCard>
-
-        <ChartCard
           title={t('admin.stats.payments.title')}
           subtitle={t('admin.stats.payments.subtitle')}
         >
@@ -120,6 +106,20 @@ export function StatsScreen(): JSX.Element {
           subtitle={t('admin.stats.tenure.subtitle')}
         >
           <BarDistribution data={stats.yearsAttended} />
+        </ChartCard>
+
+        <ChartCard
+          title={t('admin.stats.dietary.title')}
+          subtitle={t('admin.stats.dietary.subtitle')}
+        >
+          <BarVertical data={stats.dietaryRestrictions} />
+        </ChartCard>
+
+        <ChartCard
+          title={t('admin.stats.allergies.title')}
+          subtitle={t('admin.stats.allergies.subtitle')}
+        >
+          <BarVertical data={stats.allergies} />
         </ChartCard>
 
         <ChartCard
