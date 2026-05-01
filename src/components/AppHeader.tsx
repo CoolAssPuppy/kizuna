@@ -1,4 +1,5 @@
 import { useAuth } from '@/features/auth/AuthContext';
+import { NotificationBell } from '@/features/notifications/NotificationBell';
 
 import { HeaderBrand } from './HeaderBrand';
 import { HeaderNav } from './HeaderNav';
@@ -11,7 +12,10 @@ export function AppHeader(): JSX.Element {
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-8 py-3">
         <HeaderBrand />
         {user ? <HeaderNav /> : null}
-        <HeaderUserMenu />
+        <div className="flex items-center gap-1">
+          {user ? <NotificationBell /> : null}
+          <HeaderUserMenu />
+        </div>
       </div>
     </header>
   );

@@ -969,6 +969,7 @@ export type Database = {
           event_id: string | null
           id: string
           notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at: string | null
           sent_at: string
           sent_by: string | null
           subject: string
@@ -982,6 +983,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           notification_type: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
           sent_at?: string
           sent_by?: string | null
           subject: string
@@ -995,6 +997,7 @@ export type Database = {
           event_id?: string | null
           id?: string
           notification_type?: Database["public"]["Enums"]["notification_type"]
+          read_at?: string | null
           sent_at?: string
           sent_by?: string | null
           subject?: string
@@ -1712,6 +1715,11 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      mark_all_notifications_read: { Args: never; Returns: number }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: undefined
+      }
       set_passport: {
         Args: {
           p_expiry_date: string

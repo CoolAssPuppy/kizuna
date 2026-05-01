@@ -278,19 +278,26 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [ ] HiBob webhook receiver (deferred to M8b)
 - [ ] Manual sync trigger button in admin dashboard (deferred to M8b)
 
-### M9 - Notifications
+### M9 - Notifications [complete]
 
 **Goal:** Slack DM (employees), Resend email (guests), nudge rate-limiting, deadline reminders.
 
-- [ ] Edge function: `send_notification` (channel router)
-- [ ] Slack DM API wrapper (graceful when no key)
-- [ ] Resend templates: invite, waiver, confirm, payment, reminder, itinerary
-- [ ] Nudge rate limiting (3 days per task)
-- [ ] Cron edge function: deadline reminders
-- [ ] In-app notification center
-- [ ] `notifications` table append
-- [ ] Vitest: rate limiting, channel routing
-- [ ] Commit: `feat(notifications): slack and email with rate-limited nudges`
+- [x] Edge function `send-notification` (channel router) — landed pre-M9
+- [x] Slack DM wrapper (graceful when SLACK_BOT_TOKEN missing)
+- [x] Resend wrapper (graceful when RESEND_API_KEY missing)
+- [x] Nudge rate limiting (3 days per task)
+- [x] Cron edge function `send-deadline-reminders` — walks open registrations whose event closes within 7 days, finds pending tasks, sends per-channel
+- [x] In-app notification center: NotificationBell in header with unread badge + dropdown
+- [x] `notifications` table gains `read_at` column + `mark_notification_read()` and `mark_all_notifications_read()` SECURITY DEFINER RPCs (so users can't tamper with subject/body via RLS update)
+- [x] Realtime subscription on notifications for the current user — bell updates live
+- [x] Vitest: 3 new tests for unreadCount counter
+- [x] Commit: `feat(m9): in-app notification center + deadline reminder cron`
+
+**M9 review:**
+- 118/118 vitest, lint clean, typecheck clean.
+- The cron function authenticates via `x-cron-secret` header (CRON_SECRET env), avoiding the need for an admin JWT for unattended runs. Locally defaults to `dev-cron-secret` so manual testing is one curl away.
+- Channel routing matches the brief: employees with a slack_handle get a DM, everyone else gets email. The notification log row is written regardless of delivery outcome — admin audit needs both successes and failures.
+- Sender path duplicated between `send-notification` and `send-deadline-reminders`. Flagged for the post-M9 refactoring audit.
 
 ### M10 - Hardening and launch prep
 

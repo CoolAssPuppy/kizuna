@@ -408,6 +408,10 @@ create policy notifications_admin_write on public.notifications
   for all using (public.is_admin())
   with check (public.is_admin());
 
+-- Recipients flip the read flag via mark_notification_read(); a direct
+-- UPDATE policy would let them tamper with subject/body/channel. The
+-- function is SECURITY DEFINER so it can write through RLS.
+
 
 create policy hibob_sync_log_admin_only on public.hibob_sync_log
   for all using (public.is_admin())

@@ -384,3 +384,48 @@ $$;
 
 revoke all on function public.get_passport_number(uuid) from public;
 grant execute on function public.get_passport_number(uuid) to authenticated;
+
+
+-- =====================================================================
+-- Notifications: recipient marks one (or all) as read
+-- =====================================================================
+
+create or replace function public.mark_notification_read(p_notification_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.notifications
+     set read_at = now()
+   where id = p_notification_id
+     and user_id = auth.uid()
+     and read_at is null;
+end
+$$;
+
+revoke all on function public.mark_notification_read(uuid) from public;
+grant execute on function public.mark_notification_read(uuid) to authenticated;
+
+
+create or replace function public.mark_all_notifications_read()
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_updated int;
+begin
+  update public.notifications
+     set read_at = now()
+   where user_id = auth.uid()
+     and read_at is null;
+  get diagnostics v_updated = row_count;
+  return v_updated;
+end
+$$;
+
+revoke all on function public.mark_all_notifications_read() from public;
+grant execute on function public.mark_all_notifications_read() to authenticated;

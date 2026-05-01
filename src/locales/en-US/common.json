@@ -316,6 +316,14 @@
       "payment_reconciliation": "Payment reconciliation"
     }
   },
+  "notifications": {
+    "title": "Notifications",
+    "toggle_one": "Notifications, {{count}} unread",
+    "toggle_other": "Notifications, {{count}} unread",
+    "toggle_zero": "Notifications, none unread",
+    "markAllRead": "Mark all read",
+    "empty": "Nothing yet. We will let you know when there is."
+  },
   "itinerary": {
     "title": "Your Itinerary",
     "subtitle": "Your schedule for the event.",

@@ -35,13 +35,18 @@ create table public.notifications (
   body text not null,
   sent_at timestamptz not null default now(),
   delivered boolean not null default false,
+  read_at timestamptz,
   sent_by uuid references public.users(id) on delete set null
 );
 
 comment on table public.notifications is
   'Full log of every nudge and system message. Drives admin nudge dashboard and audit.';
+comment on column public.notifications.read_at is
+  'Set by the recipient when the in-app notification center marks it read. NULL means unread.';
 
 create index notifications_user_id_sent_at_idx on public.notifications(user_id, sent_at desc);
+create index notifications_user_unread_idx
+  on public.notifications(user_id) where read_at is null;
 create index notifications_task_id_idx on public.notifications(task_id) where task_id is not null;
 
 
