@@ -409,6 +409,27 @@ create policy swag_selections_self_all on public.swag_selections
   with check (public.is_self_or_admin(user_id));
 
 
+-- Sponsor or admin can read/write swag selections for their additional
+-- guests. Uses an EXISTS join on additional_guests to gate by sponsor.
+create policy additional_guest_swag_sponsor_or_admin on public.additional_guest_swag_selections
+  for all using (
+    public.is_admin()
+    or exists (
+      select 1 from public.additional_guests g
+      where g.id = additional_guest_id
+        and g.sponsor_id = auth.uid()
+    )
+  )
+  with check (
+    public.is_admin()
+    or exists (
+      select 1 from public.additional_guests g
+      where g.id = additional_guest_id
+        and g.sponsor_id = auth.uid()
+    )
+  );
+
+
 -- Documents
 create policy documents_authenticated_read on public.documents
   for select using (auth.role() = 'authenticated');

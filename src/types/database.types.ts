@@ -121,6 +121,57 @@ export type Database = {
           },
         ]
       }
+      additional_guest_swag_selections: {
+        Row: {
+          additional_guest_id: string
+          exchange_notes: string | null
+          fit_preference: string | null
+          fulfilled: boolean
+          id: string
+          opted_in: boolean
+          size: string | null
+          swag_item_id: string
+          updated_at: string
+        }
+        Insert: {
+          additional_guest_id: string
+          exchange_notes?: string | null
+          fit_preference?: string | null
+          fulfilled?: boolean
+          id?: string
+          opted_in?: boolean
+          size?: string | null
+          swag_item_id: string
+          updated_at?: string
+        }
+        Update: {
+          additional_guest_id?: string
+          exchange_notes?: string | null
+          fit_preference?: string | null
+          fulfilled?: boolean
+          id?: string
+          opted_in?: boolean
+          size?: string | null
+          swag_item_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "additional_guest_swag_selections_additional_guest_id_fkey"
+            columns: ["additional_guest_id"]
+            isOneToOne: false
+            referencedRelation: "additional_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "additional_guest_swag_selections_swag_item_id_fkey"
+            columns: ["swag_item_id"]
+            isOneToOne: false
+            referencedRelation: "swag_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       additional_guests: {
         Row: {
           age: number
@@ -1541,6 +1592,7 @@ export type Database = {
       }
       swag_items: {
         Row: {
+          audience: Database["public"]["Enums"]["swag_audience"]
           available_sizes: string[]
           description: string | null
           display_order: number
@@ -1552,6 +1604,7 @@ export type Database = {
           sizing_guide_url: string | null
         }
         Insert: {
+          audience?: Database["public"]["Enums"]["swag_audience"]
           available_sizes?: string[]
           description?: string | null
           display_order?: number
@@ -1563,6 +1616,7 @@ export type Database = {
           sizing_guide_url?: string | null
         }
         Update: {
+          audience?: Database["public"]["Enums"]["swag_audience"]
           available_sizes?: string[]
           description?: string | null
           display_order?: number
@@ -1927,6 +1981,7 @@ export type Database = {
         | "activity"
         | "transport"
         | "social"
+      swag_audience: "all" | "employee" | "guest" | "child"
       sync_status: "success" | "partial" | "failed"
       task_audience: "all" | "employee_only" | "guest_only"
       transport_direction: "arrival" | "departure"
@@ -2137,6 +2192,7 @@ export const Constants = {
         "transport",
         "social",
       ],
+      swag_audience: ["all", "employee", "guest", "child"],
       sync_status: ["success", "partial", "failed"],
       task_audience: ["all", "employee_only", "guest_only"],
       transport_direction: ["arrival", "departure"],

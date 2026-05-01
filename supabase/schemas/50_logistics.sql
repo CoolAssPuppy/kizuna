@@ -121,6 +121,7 @@ create table public.swag_items (
   id uuid primary key default gen_random_uuid(),
   event_id uuid not null references public.events(id) on delete cascade,
   name text not null,
+  audience swag_audience not null default 'all',
   requires_sizing boolean not null default false,
   has_fit_options boolean not null default false,
   sizing_guide_url text,
@@ -131,6 +132,8 @@ create table public.swag_items (
 
 comment on column public.swag_items.has_fit_options is
   'True for gender-cut items where fit_preference (fitted | relaxed) is collected.';
+comment on column public.swag_items.audience is
+  'Who can select this item. Children swag is offered separately so it does not clutter the adult menu.';
 
 create index swag_items_event_id_idx on public.swag_items(event_id);
 
@@ -147,6 +150,25 @@ create table public.swag_selections (
   updated_at timestamptz not null default now(),
   unique (user_id, swag_item_id)
 );
+
+-- Swag for additional_guests (children, dependents). They aren't full
+-- Kizuna users so selections live in their own table keyed off the
+-- additional_guests row instead of users.
+create table public.additional_guest_swag_selections (
+  id uuid primary key default gen_random_uuid(),
+  additional_guest_id uuid not null references public.additional_guests(id) on delete cascade,
+  swag_item_id uuid not null references public.swag_items(id) on delete cascade,
+  opted_in boolean not null default true,
+  size text,
+  fit_preference text check (fit_preference is null or fit_preference in ('fitted', 'relaxed')),
+  fulfilled boolean not null default false,
+  exchange_notes text,
+  updated_at timestamptz not null default now(),
+  unique (additional_guest_id, swag_item_id)
+);
+
+create index additional_guest_swag_selections_guest_idx
+  on public.additional_guest_swag_selections(additional_guest_id);
 
 comment on column public.swag_selections.fulfilled is
   'Set true when the swag bag is QR-scanned and packed at check-in.';

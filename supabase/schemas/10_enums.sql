@@ -47,6 +47,9 @@ create type guest_invitation_status as enum ('pending', 'accepted', 'expired', '
 -- Dietary
 create type dietary_severity as enum ('preference', 'intolerance', 'allergy');
 
+-- Swag
+create type swag_audience as enum ('all', 'employee', 'guest', 'child');
+
 -- Logistics
 create type flight_direction as enum ('inbound', 'outbound');
 create type flight_source_type as enum ('perk_sync', 'perk_csv', 'manual_obs');
