@@ -714,12 +714,12 @@ export type Database = {
         Row: {
           airport_iata: string | null
           end_date: string
-          hero_image_url: string | null
+          hero_image_path: string | null
           id: string
           invite_all_employees: boolean
           is_active: boolean
           location: string | null
-          logo_url: string | null
+          logo_path: string | null
           name: string
           reg_closes_at: string | null
           reg_opens_at: string | null
@@ -731,12 +731,12 @@ export type Database = {
         Insert: {
           airport_iata?: string | null
           end_date: string
-          hero_image_url?: string | null
+          hero_image_path?: string | null
           id?: string
           invite_all_employees?: boolean
           is_active?: boolean
           location?: string | null
-          logo_url?: string | null
+          logo_path?: string | null
           name: string
           reg_closes_at?: string | null
           reg_opens_at?: string | null
@@ -748,12 +748,12 @@ export type Database = {
         Update: {
           airport_iata?: string | null
           end_date?: string
-          hero_image_url?: string | null
+          hero_image_path?: string | null
           id?: string
           invite_all_employees?: boolean
           is_active?: boolean
           location?: string | null
-          logo_url?: string | null
+          logo_path?: string | null
           name?: string
           reg_closes_at?: string | null
           reg_opens_at?: string | null
@@ -2016,6 +2016,10 @@ export type Database = {
       set_user_leadership: {
         Args: { p_user_id: string; p_value: boolean }
         Returns: undefined
+      }
+      storage_caller_can_read_event: {
+        Args: { object_name: string }
+        Returns: boolean
       }
       update_accommodation_special_requests: {
         Args: { p_accommodation_id: string; p_requests: string }

@@ -23,15 +23,15 @@ create table public.events (
   reg_opens_at timestamptz,
   reg_closes_at timestamptz check (reg_closes_at is null or reg_opens_at is null or reg_closes_at > reg_opens_at),
   is_active boolean not null default false,
-  hero_image_url text check (hero_image_url is null or hero_image_url ~ '^https?://'),
-  logo_url text check (logo_url is null or logo_url ~ '^https?://'),
+  hero_image_path text,
+  logo_path text,
   invite_all_employees boolean not null default false
 );
 
-comment on column public.events.hero_image_url is
-  'Background image used on the welcome screen and admin event header.';
-comment on column public.events.logo_url is
-  'Event logo (small square or wordmark). Renders next to the event name in admin and home.';
+comment on column public.events.hero_image_path is
+  'Storage object path inside the event-content bucket — e.g. <event_id>/about/cover.jpg. Resolved to a signed URL at read time.';
+comment on column public.events.logo_path is
+  'Storage object path inside the event-content bucket — e.g. <event_id>/about/logo.png. Resolved to a signed URL at read time.';
 comment on column public.events.invite_all_employees is
   'When true, every active employee is implicitly invited (RLS extends visibility to role=employee). When false, only users with a registrations row see the event.';
 

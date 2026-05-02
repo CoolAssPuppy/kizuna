@@ -44,8 +44,8 @@ interface FormState {
   end_date: string;
   reg_opens_at: string;
   reg_closes_at: string;
-  hero_image_url: string;
-  logo_url: string;
+  hero_image_path: string;
+  logo_path: string;
   invite_all_employees: boolean;
   is_active: boolean;
 }
@@ -60,8 +60,8 @@ const EMPTY: FormState = {
   end_date: '',
   reg_opens_at: '',
   reg_closes_at: '',
-  hero_image_url: '',
-  logo_url: '',
+  hero_image_path: '',
+  logo_path: '',
   invite_all_employees: false,
   is_active: false,
 };
@@ -112,8 +112,8 @@ export function EventEditScreen({
       end_date: row.end_date,
       reg_opens_at: fromIso(row.reg_opens_at),
       reg_closes_at: fromIso(row.reg_closes_at),
-      hero_image_url: row.hero_image_url ?? '',
-      logo_url: row.logo_url ?? '',
+      hero_image_path: row.hero_image_path ?? '',
+      logo_path: row.logo_path ?? '',
       invite_all_employees: row.invite_all_employees,
       is_active: row.is_active,
     };
@@ -131,8 +131,8 @@ export function EventEditScreen({
         end_date: state.end_date,
         reg_opens_at: toIsoOrNull(state.reg_opens_at),
         reg_closes_at: toIsoOrNull(state.reg_closes_at),
-        hero_image_url: state.hero_image_url || null,
-        logo_url: state.logo_url || null,
+        hero_image_path: state.hero_image_path || null,
+        logo_path: state.logo_path || null,
         invite_all_employees: state.invite_all_employees,
         is_active: state.is_active,
       };
@@ -259,16 +259,16 @@ export function EventEditScreen({
           <Field label={t('admin.events.fields.heroImage')}>
             <Input
               type="url"
-              value={form.hero_image_url}
-              onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })}
+              value={form.hero_image_path}
+              onChange={(e) => setForm({ ...form, hero_image_path: e.target.value })}
               placeholder="https://..."
             />
           </Field>
           <Field label={t('admin.events.fields.logo')}>
             <Input
               type="url"
-              value={form.logo_url}
-              onChange={(e) => setForm({ ...form, logo_url: e.target.value })}
+              value={form.logo_path}
+              onChange={(e) => setForm({ ...form, logo_path: e.target.value })}
               placeholder="https://..."
             />
           </Field>

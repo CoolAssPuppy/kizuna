@@ -1,14 +1,104 @@
--- Storage buckets and policies.
+-- Storage buckets, layout, and RLS.
 --
--- Convention: bucket-level helpers `is_admin()` and `auth.uid()` gate writes.
+-- Convention (the one place to land changes):
+--
+--   * Identity content lives in `avatars`, keyed on the user — same person
+--     across many events. Path: <user_id>/<file>.
+--
+--   * Every other bucket is event-scoped via path prefix, NOT bucket-per-
+--     event. Object names start with the event_id; RLS enforces that the
+--     caller has a registration row for that event (or is an admin).
+--
+--   * Three event-scoped buckets:
+--       - event-content     admin-managed branding + editorial (logo,
+--                           hero, feed)
+--       - documents         admin-uploaded PDFs (waiver, code of conduct)
+--       - community-media   user-uploaded chat media + photo gallery
+--
+-- Object name shapes the app MUST honour:
+--
+--   avatars/<user_id>/avatar.<ext>
+--
+--   event-content/<event_id>/about/logo.<ext>
+--   event-content/<event_id>/about/cover.<ext>
+--   event-content/<event_id>/feed/<feed_item_id>/<file>
+--
+--   documents/<event_id>/<document_id>.pdf
+--
+--   community-media/<event_id>/chats/<channel_slug>/<message_id>/<file>
+--   community-media/<event_id>/gallery/<user_id>/<media_item_id>/<file>
+--
 -- All buckets stay private; clients use createSignedUrl for display.
--- A small `_public_bucket_read` exception lets authenticated users read from
--- buckets that hold globally-visible content (event covers, feed images,
--- documents) without per-row signed URLs — convenient for the home feed and
--- documents tab while still requiring an authenticated session.
+-- Adding a new bucket? Mirror the helper + policy block below and update
+-- README.md, CLAUDE.md, AGENTS.md so the convention spreads cleanly.
+
+-- ---------------------------------------------------------------------
+-- Helper: extract the event_id (first path segment) and check that the
+-- caller is registered for that event. SECURITY DEFINER keeps the inner
+-- joins bypass-free; the function only ever returns true/false and is
+-- granted to authenticated only — anon callers are never reading any of
+-- the event-scoped buckets.
+-- ---------------------------------------------------------------------
+create or replace function public.storage_caller_can_read_event(object_name text)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_event_id uuid;
+  v_caller uuid;
+begin
+  v_caller := auth.uid();
+  if v_caller is null then
+    return false;
+  end if;
+
+  -- (storage.foldername(name))[1] is the first folder segment. Cast must
+  -- not raise — the bucket policy returns false on a malformed prefix
+  -- rather than 500-ing the entire signed-URL call.
+  begin
+    v_event_id := ((storage.foldername(object_name))[1])::uuid;
+  exception when others then
+    return false;
+  end;
+
+  -- Admins read every event regardless of registration.
+  if public.is_admin() then
+    return true;
+  end if;
+
+  -- A registration row gates per-attendee visibility. invite_all_employees
+  -- is honoured the same way RLS on `events` does it: an active employee
+  -- can read content for any event flagged as company-wide.
+  return exists (
+    select 1
+    from public.registrations r
+    where r.user_id = v_caller and r.event_id = v_event_id
+  )
+  or exists (
+    select 1
+    from public.events e
+    join public.users u on u.id = v_caller
+    where e.id = v_event_id
+      and e.invite_all_employees
+      and u.role = 'employee'
+      and u.is_active
+  );
+end
+$$;
+
+revoke all on function public.storage_caller_can_read_event(text) from public;
+grant execute on function public.storage_caller_can_read_event(text) to authenticated;
+
+comment on function public.storage_caller_can_read_event(text) is
+  'Storage RLS helper. Pulls the event_id from a leading <event_id>/... object path and returns true when the caller is admin or registered for that event.';
+
 
 -- ---------------------------------------------------------------------
 -- Avatars: each user owns a folder named after their auth.uid().
+-- This bucket stays IDENTITY-scoped (cross-event) on purpose.
 -- ---------------------------------------------------------------------
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', false)
@@ -20,148 +110,86 @@ drop policy if exists avatars_self_update on storage.objects;
 drop policy if exists avatars_self_delete on storage.objects;
 
 create policy avatars_self_read on storage.objects
-  for select
-  to authenticated
+  for select to authenticated
   using (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
 create policy avatars_self_write on storage.objects
-  for insert
-  to authenticated
+  for insert to authenticated
   with check (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
 create policy avatars_self_update on storage.objects
-  for update
-  to authenticated
+  for update to authenticated
   using (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
 create policy avatars_self_delete on storage.objects
-  for delete
-  to authenticated
+  for delete to authenticated
   using (
     bucket_id = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
--- ---------------------------------------------------------------------
--- Feed images: admin-managed editorial assets shown on the home screen.
--- ---------------------------------------------------------------------
-insert into storage.buckets (id, name, public)
-values ('feed-images', 'feed-images', false)
-on conflict (id) do nothing;
-
-drop policy if exists feed_images_authenticated_read on storage.objects;
-drop policy if exists feed_images_admin_write on storage.objects;
-drop policy if exists feed_images_admin_update on storage.objects;
-drop policy if exists feed_images_admin_delete on storage.objects;
-
-create policy feed_images_authenticated_read on storage.objects
-  for select to authenticated
-  using (bucket_id = 'feed-images');
-
-create policy feed_images_admin_write on storage.objects
-  for insert to authenticated
-  with check (bucket_id = 'feed-images' and public.is_admin());
-
-create policy feed_images_admin_update on storage.objects
-  for update to authenticated
-  using (bucket_id = 'feed-images' and public.is_admin());
-
-create policy feed_images_admin_delete on storage.objects
-  for delete to authenticated
-  using (bucket_id = 'feed-images' and public.is_admin());
 
 -- ---------------------------------------------------------------------
--- Event covers and logos: admin-managed branding assets per event.
+-- event-content: admin-managed branding + editorial assets (logo, cover,
+-- feed images) scoped per event by leading path segment.
 -- ---------------------------------------------------------------------
 insert into storage.buckets (id, name, public)
-values ('event-covers', 'event-covers', false)
+values ('event-content', 'event-content', false)
 on conflict (id) do nothing;
 
-drop policy if exists event_covers_authenticated_read on storage.objects;
-drop policy if exists event_covers_admin_write on storage.objects;
-drop policy if exists event_covers_admin_update on storage.objects;
-drop policy if exists event_covers_admin_delete on storage.objects;
+drop policy if exists event_content_event_read on storage.objects;
+drop policy if exists event_content_admin_write on storage.objects;
+drop policy if exists event_content_admin_update on storage.objects;
+drop policy if exists event_content_admin_delete on storage.objects;
 
-create policy event_covers_authenticated_read on storage.objects
+create policy event_content_event_read on storage.objects
   for select to authenticated
-  using (bucket_id = 'event-covers');
-
-create policy event_covers_admin_write on storage.objects
-  for insert to authenticated
-  with check (bucket_id = 'event-covers' and public.is_admin());
-
-create policy event_covers_admin_update on storage.objects
-  for update to authenticated
-  using (bucket_id = 'event-covers' and public.is_admin());
-
-create policy event_covers_admin_delete on storage.objects
-  for delete to authenticated
-  using (bucket_id = 'event-covers' and public.is_admin());
-
--- ---------------------------------------------------------------------
--- Community media: any authenticated attendee can drop an image into a
--- channel message. Files live under <auth.uid()>/<filename> so it's easy
--- to revoke an individual user's uploads later.
--- ---------------------------------------------------------------------
-insert into storage.buckets (id, name, public)
-values ('community-media', 'community-media', false)
-on conflict (id) do nothing;
-
-drop policy if exists community_media_authenticated_read on storage.objects;
-drop policy if exists community_media_self_write on storage.objects;
-drop policy if exists community_media_self_update on storage.objects;
-drop policy if exists community_media_self_delete on storage.objects;
-
-create policy community_media_authenticated_read on storage.objects
-  for select to authenticated
-  using (bucket_id = 'community-media');
-
-create policy community_media_self_write on storage.objects
-  for insert to authenticated
-  with check (
-    bucket_id = 'community-media'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
-create policy community_media_self_update on storage.objects
-  for update to authenticated
   using (
-    bucket_id = 'community-media'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    bucket_id = 'event-content'
+    and public.storage_caller_can_read_event(name)
   );
 
-create policy community_media_self_delete on storage.objects
+create policy event_content_admin_write on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'event-content' and public.is_admin());
+
+create policy event_content_admin_update on storage.objects
+  for update to authenticated
+  using (bucket_id = 'event-content' and public.is_admin());
+
+create policy event_content_admin_delete on storage.objects
   for delete to authenticated
-  using (
-    bucket_id = 'community-media'
-    and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin())
-  );
+  using (bucket_id = 'event-content' and public.is_admin());
 
 
 -- ---------------------------------------------------------------------
--- Documents: admin-uploaded PDFs (waiver, code of conduct, etc).
+-- documents: admin-uploaded PDFs (waiver, code of conduct, etc).
+-- Object names: <event_id>/<document_id>.pdf
 -- ---------------------------------------------------------------------
 insert into storage.buckets (id, name, public)
 values ('documents', 'documents', false)
 on conflict (id) do nothing;
 
-drop policy if exists documents_authenticated_read on storage.objects;
+drop policy if exists documents_event_read on storage.objects;
 drop policy if exists documents_admin_write on storage.objects;
 drop policy if exists documents_admin_update on storage.objects;
 drop policy if exists documents_admin_delete on storage.objects;
 
-create policy documents_authenticated_read on storage.objects
+create policy documents_event_read on storage.objects
   for select to authenticated
-  using (bucket_id = 'documents');
+  using (
+    bucket_id = 'documents'
+    and public.storage_caller_can_read_event(name)
+  );
 
 create policy documents_admin_write on storage.objects
   for insert to authenticated
@@ -174,3 +202,94 @@ create policy documents_admin_update on storage.objects
 create policy documents_admin_delete on storage.objects
   for delete to authenticated
   using (bucket_id = 'documents' and public.is_admin());
+
+
+-- ---------------------------------------------------------------------
+-- community-media: user-uploaded chat media + future photo gallery,
+-- scoped per event in path. Writers must own the user_id in the chat
+-- subpath (chats/<channel>/<message_id>/...) or in the gallery subpath
+-- (gallery/<user_id>/...).
+-- ---------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('community-media', 'community-media', false)
+on conflict (id) do nothing;
+
+drop policy if exists community_media_event_read on storage.objects;
+drop policy if exists community_media_self_write on storage.objects;
+drop policy if exists community_media_self_update on storage.objects;
+drop policy if exists community_media_self_delete on storage.objects;
+
+create policy community_media_event_read on storage.objects
+  for select to authenticated
+  using (
+    bucket_id = 'community-media'
+    and public.storage_caller_can_read_event(name)
+  );
+
+-- Writers must be registered for the event AND the gallery subpath must
+-- match auth.uid(). For chat messages the message_id is generated server
+-- side and the user owns the message via messages.sender_id, so we just
+-- require event registration. The chat sender check is enforced by the
+-- messages table RLS, not here.
+create policy community_media_self_write on storage.objects
+  for insert to authenticated
+  with check (
+    bucket_id = 'community-media'
+    and public.storage_caller_can_read_event(name)
+    and (
+      -- gallery subpath: <event_id>/gallery/<user_id>/...
+      (storage.foldername(name))[2] = 'chats'
+      or (
+        (storage.foldername(name))[2] = 'gallery'
+        and (storage.foldername(name))[3] = auth.uid()::text
+      )
+    )
+  );
+
+create policy community_media_self_update on storage.objects
+  for update to authenticated
+  using (
+    bucket_id = 'community-media'
+    and public.storage_caller_can_read_event(name)
+    and (
+      (storage.foldername(name))[2] = 'chats'
+      or (storage.foldername(name))[3] = auth.uid()::text
+    )
+  );
+
+-- Delete: gallery owner can delete their own; admins can delete any.
+create policy community_media_self_delete on storage.objects
+  for delete to authenticated
+  using (
+    bucket_id = 'community-media'
+    and (
+      public.is_admin()
+      or (
+        public.storage_caller_can_read_event(name)
+        and (storage.foldername(name))[2] = 'gallery'
+        and (storage.foldername(name))[3] = auth.uid()::text
+      )
+    )
+  );
+
+
+-- ---------------------------------------------------------------------
+-- Cleanup: previous incarnation had a `feed-images` bucket and an
+-- `event-covers` bucket. Drop them here so a re-applied schema converges
+-- on the four-bucket layout above. Idempotent — DELETE FROM storage.objects
+-- with WHERE bucket_id is the only path Supabase exposes for a bucket
+-- wipe; storage.buckets DELETE then succeeds because nothing references
+-- it.
+-- ---------------------------------------------------------------------
+do $$
+begin
+  if exists (select 1 from storage.buckets where id = 'feed-images') then
+    delete from storage.objects where bucket_id = 'feed-images';
+    delete from storage.buckets where id = 'feed-images';
+  end if;
+  if exists (select 1 from storage.buckets where id = 'event-covers') then
+    delete from storage.objects where bucket_id = 'event-covers';
+    delete from storage.buckets where id = 'event-covers';
+  end if;
+end
+$$;

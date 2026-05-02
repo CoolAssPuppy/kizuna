@@ -9,6 +9,7 @@ import { useIsAdmin } from '@/features/auth/hooks';
 import { fetchAllEvents, type EventRow } from '@/features/admin/api/events';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useStorageImage } from '@/lib/useStorageImage';
 import { cn } from '@/lib/utils';
 
 import { clearEventOverride, setEventOverride, useEventOverride } from './eventOverride';
@@ -109,6 +110,7 @@ interface EventCardProps {
 function EventCard({ event, viewing, isOverriding, isAdmin, onView }: EventCardProps): JSX.Element {
   const { t } = useTranslation();
   const past = isPast(event);
+  const heroUrl = useStorageImage('event-content', event.hero_image_path);
   return (
     <li
       className={cn(
@@ -117,13 +119,8 @@ function EventCard({ event, viewing, isOverriding, isAdmin, onView }: EventCardP
       )}
     >
       <div className="relative aspect-[16/9] w-full bg-gradient-to-br from-primary/30 via-sky-500/20 to-emerald-500/20">
-        {event.hero_image_url ? (
-          <img
-            src={event.hero_image_url}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
+        {heroUrl ? (
+          <img src={heroUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
         ) : null}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {event.is_active ? (

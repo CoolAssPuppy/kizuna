@@ -19,8 +19,8 @@ declare
   v_end_date date := '2027-01-15';
   v_reg_opens_at timestamptz := '2026-08-01 00:00:00+00';
   v_reg_closes_at timestamptz := '2026-12-15 23:59:59+00';
-  v_hero_image_url text := 'https://kizuna.dev/banff-hero.jpg';
-  v_logo_url text := 'https://kizuna.dev/supafest-2027-logo.svg';
+  v_hero_image_path text := null;
+  v_logo_path text := null;
   -- ===== End event constants =====
 begin
   if exists (select 1 from public.events where id = v_event_id) then
@@ -31,11 +31,11 @@ begin
   insert into public.events (
     id, name, subtitle, type, location, airport_iata, time_zone,
     start_date, end_date, reg_opens_at, reg_closes_at,
-    is_active, hero_image_url, logo_url, invite_all_employees
+    is_active, hero_image_path, logo_path, invite_all_employees
   ) values (
     v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, 'YYC', v_event_tz,
     v_start_date, v_end_date, v_reg_opens_at, v_reg_closes_at,
-    true, v_hero_image_url, v_logo_url, true
+    true, v_hero_image_path, v_logo_path, true
   );
 
   -- Documents that every attendee must read and sign.
