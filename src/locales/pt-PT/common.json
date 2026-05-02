@@ -92,8 +92,8 @@
       "connected": "LIGADO",
       "greeting": "olá",
       "fallbackName": "você",
-      "summary": "{{count}} itens na sua fila desde o último início de sessão.",
-      "summaryEmpty": "A fila está vazia. Volte a verificar à medida que o evento se aproxima.",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Bem-vindo a {{event}}.",
       "queueLabel": "FILA · {{count}} ITENS",
       "queueSort": "ordem:prazo ↓",
       "live": "em direto"
@@ -607,7 +607,7 @@
       "active": "Ativo",
       "past": "Anterior",
       "empty": "Ainda sem eventos. Crie o primeiro para começar.",
-      "formHint": "Edite o básico aqui. Os convites estão no separador seguinte.",
+      "formHint": "Informações básicas sobre o seu evento.",
       "fields": {
         "name": "Nome",
         "subtitle": "Subtítulo",
@@ -765,7 +765,7 @@
     },
     "nudges": {
       "title": "Comunicação",
-      "subtitle": "Envie comunicados e lembretes e consulte o registo completo.",
+      "subtitle": "Envie comunicados e lembretes.",
       "send": "Enviar mensagem",
       "sendCta": "Enviar",
       "sending": "A enviar",

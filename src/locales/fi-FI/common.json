@@ -92,8 +92,8 @@
       "connected": "YHTEYDESSÄ",
       "greeting": "hei",
       "fallbackName": "sinä",
-      "summary": "{{count}} kohdetta jonossasi viime kirjautumisen jälkeen.",
-      "summaryEmpty": "Jono on tyhjä. Palaa, kun tapahtuma lähestyy.",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Tervetuloa: {{event}}.",
       "queueLabel": "JONO · {{count}} KOHDETTA",
       "queueSort": "järjestys:määräaika ↓",
       "live": "live"
@@ -607,7 +607,7 @@
       "active": "Aktiivinen",
       "past": "Mennyt",
       "empty": "Ei vielä tapahtumia. Luo ensimmäinen aloittaaksesi.",
-      "formHint": "Muokkaa perustietoja täällä. Kutsut ovat seuraavalla välilehdellä.",
+      "formHint": "Perustiedot tapahtumastasi.",
       "fields": {
         "name": "Nimi",
         "subtitle": "Alaotsikko",
@@ -765,7 +765,7 @@
     },
     "nudges": {
       "title": "Viestintä",
-      "subtitle": "Lähetä ilmoituksia ja muistutuksia ja tarkastele koko lokia.",
+      "subtitle": "Lähetä ilmoituksia ja muistutuksia.",
       "send": "Lähetä viesti",
       "sendCta": "Lähetä",
       "sending": "Lähetetään",

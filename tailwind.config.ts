@@ -64,6 +64,8 @@ const config: Config = {
           'surface-soft': 'var(--c-surface-soft)',
           warn: 'var(--c-warn)',
           cursor: 'var(--c-cursor)',
+          'map-land': 'var(--c-map-land)',
+          'map-stroke': 'var(--c-map-stroke)',
         },
       },
       fontFamily: {

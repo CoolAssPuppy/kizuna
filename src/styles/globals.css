@@ -65,6 +65,8 @@
     --c-surface-soft: #fbfcfb;
     --c-warn: #c2410c;
     --c-cursor: #16a34a;
+    --c-map-land: #cdd2c6;
+    --c-map-stroke: #ffffff;
   }
 
   /* === Supa: CRT black × phosphor green === */
@@ -110,6 +112,8 @@
     --c-surface-soft: #0f140d;
     --c-warn: #ffb347;
     --c-cursor: #3fe489;
+    --c-map-land: #2b3329;
+    --c-map-stroke: #0b0f0a;
   }
 
   /* === Hermione: cocoa × gold (dark academia) === */
@@ -155,6 +159,8 @@
     --c-surface-soft: #2a1410;
     --c-warn: #a33b2c;
     --c-cursor: #e8b53a;
+    --c-map-land: #4d2e22;
+    --c-map-stroke: #1f0f0a;
   }
 
   /* === Kirk: cream × command gold + science blue === */
@@ -200,6 +206,8 @@
     --c-surface-soft: #fffcf1;
     --c-warn: #d8453e;
     --c-cursor: #e8b83a;
+    --c-map-land: #d9cfa8;
+    --c-map-stroke: #faf6e8;
   }
 
   /* === Barbie: rose × hot pink === */
@@ -245,6 +253,8 @@
     --c-surface-soft: #fffafc;
     --c-warn: #b91c1c;
     --c-cursor: #e5378c;
+    --c-map-land: #f9b7cb;
+    --c-map-stroke: #fff1f5;
   }
 }
 

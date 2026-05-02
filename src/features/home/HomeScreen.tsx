@@ -75,10 +75,9 @@ export function HomeScreen(): JSX.Element {
 
   const slug = eventSlug(event?.name, event?.location, event?.start_date);
   const queueCount = feed.length + editorial.main.length;
-  const summary =
-    queueCount === 0
-      ? t('home.terminal.summaryEmpty')
-      : t('home.terminal.summary', { count: queueCount });
+  const summary = t('home.terminal.welcome', {
+    event: event?.name ?? t('home.terminal.fallbackEvent'),
+  });
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pt-10 pb-12 sm:px-8">

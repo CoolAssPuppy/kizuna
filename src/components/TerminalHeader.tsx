@@ -33,11 +33,10 @@ export function TerminalHeader(): JSX.Element {
             aria-hidden
             className="flex h-7 w-7 items-center justify-center"
             style={{
-              backgroundColor: 'var(--c-fg)',
-              color: 'var(--c-bg)',
+              color: 'var(--c-fg)',
               fontFamily: 'system-ui, sans-serif',
               fontWeight: 700,
-              fontSize: 14,
+              fontSize: 18,
             }}
           >
             絆

@@ -92,8 +92,8 @@
       "connected": "CONNESSO",
       "greeting": "ciao",
       "fallbackName": "tu",
-      "summary": "{{count}} elementi nella tua coda dal tuo ultimo accesso.",
-      "summaryEmpty": "La coda è vuota. Torna a controllare quando l'evento si avvicina.",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Benvenuto a {{event}}.",
       "queueLabel": "CODA · {{count}} ELEMENTI",
       "queueSort": "ordine:scadenza ↓",
       "live": "live"
@@ -600,7 +600,7 @@
       "active": "Attivo",
       "past": "Passato",
       "empty": "Nessun evento ancora. Crea il primo per iniziare.",
-      "formHint": "Modifica le basi qui. Gli inviti sono nella prossima scheda.",
+      "formHint": "Informazioni di base sul tuo evento.",
       "fields": {
         "name": "Nome",
         "subtitle": "Sottotitolo",
@@ -758,7 +758,7 @@
     },
     "nudges": {
       "title": "Comunicazione",
-      "subtitle": "Invia annunci e promemoria e consulta l'intero log di audit.",
+      "subtitle": "Invia annunci e promemoria.",
       "send": "Invia messaggio",
       "sendCta": "Invia",
       "sending": "Invio in corso",

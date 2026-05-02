@@ -92,8 +92,8 @@
       "connected": "CONNECTÉ",
       "greeting": "bonjour",
       "fallbackName": "vous",
-      "summary": "{{count}} éléments dans votre file depuis votre dernière connexion.",
-      "summaryEmpty": "La file est vide. Repassez quand l'événement approchera.",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Bienvenue à {{event}}.",
       "queueLabel": "FILE · {{count}} ÉLÉMENTS",
       "queueSort": "tri:échéance ↓",
       "live": "en direct"
@@ -607,7 +607,7 @@
       "active": "Actif",
       "past": "Passé",
       "empty": "Aucun événement pour le moment. Créez le premier pour commencer.",
-      "formHint": "Modifiez les bases ici. Les invitations se trouvent dans l'onglet suivant.",
+      "formHint": "Informations de base sur votre événement.",
       "fields": {
         "name": "Nom",
         "subtitle": "Sous-titre",
@@ -765,7 +765,7 @@
     },
     "nudges": {
       "title": "Communication",
-      "subtitle": "Envoyez des annonces et des rappels et consultez l'ensemble du journal.",
+      "subtitle": "Envoyez des annonces et des rappels.",
       "send": "Envoyer un message",
       "sendCta": "Envoyer",
       "sending": "Envoi",
