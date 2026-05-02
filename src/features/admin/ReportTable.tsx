@@ -2,6 +2,7 @@ import { ChevronDown, ChevronUp, ChevronsUpDown } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmailField } from '@/components/EmailField';
 import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { Button } from '@/components/ui/button';
 
@@ -185,6 +186,9 @@ function Cell({ column, value }: CellProps): JSX.Element {
   }
   if (column === 'is_leadership' && typeof value === 'boolean') {
     return value ? <LeadershipPill /> : <span />;
+  }
+  if ((column === 'email' || column.endsWith('_email')) && typeof value === 'string') {
+    return <EmailField email={value} />;
   }
   if ((column === 'status' || column.endsWith('_status')) && typeof value === 'string') {
     return <span>{sentenceCase(value)}</span>;

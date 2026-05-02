@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "kirjoita / avataksesi komentopaletti"
   },
+  "email": {
+    "copy": "Kopioi sähköposti",
+    "copied": "Sähköposti kopioitu leikepöydälle.",
+    "copyFailed": "Kopiointi epäonnistui. Yritä uudelleen.",
+    "slack": "Avaa Slack-DM"
+  },
   "home": {
     "feedTitle": "Sinun Syötteesi",
     "itemsLabel": "kohdetta",
@@ -238,6 +244,12 @@
       "matchedHobbies": "Yhteiset harrastukset",
       "name": "Nimi",
       "email": "Sähköposti"
+    },
+    "person": {
+      "back": "Takaisin yhteisöön",
+      "notFound": "Henkilöä ei löytynyt.",
+      "fromLabel": "Kotoisin: {{value}}",
+      "nowLabel": "Nykyään: {{value}}"
     },
     "channels": {
       "title": "Yhteisön kanavat",
@@ -1046,7 +1058,7 @@
     },
     "notion": {
       "label": "Notion-URL",
-      "hint": "Liitä julkinen Notion-linkki. Näytämme painikkeen, joka avaa sen; sisällön tuonti tulee myöhemmässä vaiheessa.",
+      "hint": "Notion-dokumenttisi aukeaa uudessa ikkunassa, kun sitä napsautetaan.",
       "open": "Avaa Notionissa"
     }
   },

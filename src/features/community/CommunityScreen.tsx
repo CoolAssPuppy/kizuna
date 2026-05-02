@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { Avatar } from '@/components/Avatar';
+import { EmailField } from '@/components/EmailField';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -208,16 +209,36 @@ function PeopleSection({
               {people.map((p) => (
                 <tr key={p.user_id} className="border-t">
                   <td className="px-3 py-2">
-                    <Avatar
-                      url={p.avatar_url}
-                      fallback={`${p.first_name.charAt(0)}${p.last_name.charAt(0)}`}
-                      size={32}
-                    />
+                    <Link
+                      to={`/community/p/${p.user_id}`}
+                      aria-label={`${p.first_name} ${p.last_name}`}
+                    >
+                      <Avatar
+                        url={p.avatar_url}
+                        fallback={`${p.first_name.charAt(0)}${p.last_name.charAt(0)}`}
+                        size={32}
+                      />
+                    </Link>
                   </td>
                   <td className="px-3 py-2">
-                    {p.first_name} {p.last_name}
+                    <span className="inline-flex items-center gap-1.5">
+                      <Link
+                        to={`/community/p/${p.user_id}`}
+                        className="hover:underline"
+                      >
+                        {p.first_name}
+                      </Link>
+                      <Link
+                        to={`/community/p/${p.user_id}`}
+                        className="hover:underline"
+                      >
+                        {p.last_name}
+                      </Link>
+                    </span>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{p.email}</td>
+                  <td className="px-3 py-2 text-muted-foreground">
+                    <EmailField email={p.email} textClassName="text-c-muted" />
+                  </td>
                   {showMatched ? (
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       {(p.matched ?? []).join(', ')}

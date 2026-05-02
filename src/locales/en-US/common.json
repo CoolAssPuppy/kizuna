@@ -39,6 +39,12 @@
   "terminal": {
     "palettePlaceholder": "type / for command palette"
   },
+  "email": {
+    "copy": "Copy email",
+    "copied": "Email copied to clipboard.",
+    "copyFailed": "Could not copy. Try again.",
+    "slack": "Open Slack DM"
+  },
   "events": {
     "title": "All events",
     "subtitle": "Switch which event the app is showing. The active event applies by default.",
@@ -241,6 +247,12 @@
       "matchedHobbies": "Hobbies matched",
       "name": "Name",
       "email": "Email"
+    },
+    "person": {
+      "back": "Back to community",
+      "notFound": "We could not find that person.",
+      "fromLabel": "From {{value}}",
+      "nowLabel": "Now {{value}}"
     },
     "channels": {
       "title": "Community channels",
@@ -1067,7 +1079,7 @@
     },
     "notion": {
       "label": "Notion URL",
-      "hint": "Paste a public Notion link. We will display a button that opens it; ingestion ships in a later phase.",
+      "hint": "Your Notion document will open in a new window when clicked.",
       "open": "Open in Notion"
     },
     "fullNamePrompt": "Type this exact name to sign: {{name}}",

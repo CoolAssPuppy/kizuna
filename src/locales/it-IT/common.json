@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "scrivi / per aprire la palette"
   },
+  "email": {
+    "copy": "Copia email",
+    "copied": "Email copiata negli appunti.",
+    "copyFailed": "Copia non riuscita. Riprova.",
+    "slack": "Apri DM Slack"
+  },
   "home": {
     "feedTitle": "Il Tuo Feed",
     "itemsLabel": "elementi",
@@ -238,6 +244,12 @@
       "matchedHobbies": "Hobby in comune",
       "name": "Nome",
       "email": "Email"
+    },
+    "person": {
+      "back": "Torna alla community",
+      "notFound": "Persona non trovata.",
+      "fromLabel": "Da {{value}}",
+      "nowLabel": "Ora a {{value}}"
     },
     "channels": {
       "title": "Canali della community",
@@ -1039,7 +1051,7 @@
     },
     "notion": {
       "label": "URL Notion",
-      "hint": "Incolla un link Notion pubblico. Mostreremo un pulsante che lo apre; l'integrazione arriverà in una fase successiva.",
+      "hint": "Il tuo documento Notion si aprirà in una nuova finestra al clic.",
       "open": "Apri in Notion"
     }
   },

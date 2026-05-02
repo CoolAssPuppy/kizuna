@@ -30,6 +30,11 @@ const ChannelScreen = lazy(() =>
     default: m.ChannelScreen,
   })),
 );
+const CommunityPersonScreen = lazy(() =>
+  import('@/features/community/CommunityPersonScreen').then((m) => ({
+    default: m.CommunityPersonScreen,
+  })),
+);
 const ConsentRoute = lazy(() =>
   import('@/features/documents/ConsentRoute').then((m) => ({ default: m.ConsentRoute })),
 );
@@ -167,6 +172,14 @@ export function AppRouter(): JSX.Element {
             element={
               <RequireAuth>
                 <CommunityScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/community/p/:userId"
+            element={
+              <RequireAuth>
+                <CommunityPersonScreen />
               </RequireAuth>
             }
           />
