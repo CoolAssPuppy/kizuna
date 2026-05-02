@@ -5,6 +5,7 @@ import {
   Baby,
   HeartPulse,
   IdCard,
+  KeyRound,
   Plane,
   Salad,
   Shirt,
@@ -19,6 +20,7 @@ import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { CommunityProfileSection } from '@/features/community/CommunityProfileSection';
 import { listAdditionalGuests } from '@/features/guests/api';
+import { ApiKeysSection } from '@/features/profile/api-keys/ApiKeysSection';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { DependentsSection } from '@/features/registration/sections/DependentsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
@@ -48,7 +50,8 @@ type SectionId =
   | 'guests'
   | 'dependents'
   | 'swag'
-  | 'transport';
+  | 'transport'
+  | 'api-keys';
 
 interface ProfileSection {
   id: SectionId;
@@ -129,6 +132,13 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     labelKey: 'profile.nav.transport',
     render: () => <TransportSection mode={PROFILE_MODE} />,
     subject: 'shared',
+  },
+  {
+    id: 'api-keys',
+    icon: KeyRound,
+    labelKey: 'profile.nav.apiKeys',
+    render: () => <ApiKeysSection />,
+    subject: 'self',
   },
 ];
 

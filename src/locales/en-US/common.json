@@ -347,7 +347,43 @@
       "guests": "Guests",
       "dependents": "Dependents",
       "swag": "Swag",
-      "transport": "Transport"
+      "transport": "Transport",
+      "apiKeys": "API Keys"
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "description": "Create scoped tokens for the Kizuna CLI and agent integrations.",
+      "empty": "API keys let trusted local tools read your Kizuna data through the same permissions you have in the app.",
+      "create": "Create API Key",
+      "createFirst": "Create your first API key",
+      "createDescription": "Create a personal access token for scripts, local agents, or the Kizuna CLI.",
+      "name": "Name",
+      "nameHelp": "What is this key for? You can rename it later.",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke {{name}}? Apps using this key will lose access immediately.",
+      "revoked": "Revoked",
+      "created": "Created {{date}}",
+      "lastUsed": "Last used {{date}}",
+      "neverUsed": "Never used",
+      "scope": {
+        "label": "Scope",
+        "read": "Read-only",
+        "write": "Read + write",
+        "admin": "Admin"
+      },
+      "expiry": {
+        "label": "Expiry",
+        "30d": "30 days",
+        "90d": "90 days",
+        "1y": "1 year",
+        "never": "Never"
+      },
+      "revealOnce": {
+        "title": "Copy Your API Key",
+        "warning": "This is the only time this token will be shown.",
+        "copy": "Copy token",
+        "copied": "Token copied"
+      }
     },
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",
