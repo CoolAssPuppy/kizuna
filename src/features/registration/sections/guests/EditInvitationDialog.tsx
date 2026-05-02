@@ -12,12 +12,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { GuestInvitationRow } from '@/features/guests/types';
-import { joinFullName, splitFullName } from '@/lib/fullName';
 
 interface EditInvitationDialogProps {
   target: GuestInvitationRow | null;
   onClose: () => void;
-  onSubmit: (payload: { id: string; fullName: string; guestEmail: string }) => void;
+  onSubmit: (payload: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    guestEmail: string;
+  }) => void;
 }
 
 // Editing is blocked at the call site once status='accepted' — by then
@@ -34,12 +38,10 @@ export function EditInvitationDialog({
   const [lastId, setLastId] = useState<string | null>(null);
   if (target && target.id !== lastId) {
     setLastId(target.id);
-    const split = splitFullName(target.full_name);
-    setFirst(split.first);
-    setLast(split.last);
+    setFirst(target.first_name);
+    setLast(target.last_name);
     setEmail(target.guest_email);
   }
-  const fullName = joinFullName(first, last);
   const valid = first.trim().length >= 1 && last.trim().length >= 1 && email.trim().includes('@');
 
   return (
@@ -96,7 +98,12 @@ export function EditInvitationDialog({
             disabled={!target || !valid}
             onClick={() => {
               if (target) {
-                onSubmit({ id: target.id, fullName, guestEmail: email.trim() });
+                onSubmit({
+                  id: target.id,
+                  firstName: first.trim(),
+                  lastName: last.trim(),
+                  guestEmail: email.trim(),
+                });
                 onClose();
               }
             }}

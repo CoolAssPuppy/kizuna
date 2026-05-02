@@ -62,7 +62,7 @@ interface FlightRowShape {
       last_name: string | null;
       legal_name: string | null;
     }>;
-    guest_profiles: Joined<{ full_name: string }>;
+    guest_profiles: Joined<{ first_name: string; last_name: string }>;
     attendee_profiles: Joined<{
       ground_transport_need: Database['public']['Enums']['ground_transport_need'];
     }>;
@@ -81,13 +81,15 @@ function displayName(user: FlightRowShape['user']): { name: string; email: strin
   const flat = flatJoin(user);
   const employee = flatJoin(flat?.employee_profiles);
   const guest = flatJoin(flat?.guest_profiles);
+  const guestName =
+    guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
   const name =
     employee?.preferred_name ??
     employee?.legal_name ??
     (employee?.first_name && employee?.last_name
       ? `${employee.first_name} ${employee.last_name}`
       : null) ??
-    guest?.full_name ??
+    guestName ??
     flat?.email ??
     '';
   return { name, email: flat?.email ?? '' };
@@ -140,7 +142,7 @@ export async function fetchPassengers(
       user:users!flights_user_id_fkey (
         email,
         employee_profiles ( preferred_name, first_name, last_name, legal_name ),
-        guest_profiles!guest_profiles_user_id_fkey ( full_name ),
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name ),
         attendee_profiles ( ground_transport_need )
       ),
       transport_requests ( id, direction, passenger_count, bag_count, assigned_vehicle_id, needs_review )

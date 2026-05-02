@@ -23,7 +23,7 @@ interface FlightShape {
       last_name: string | null;
       legal_name: string | null;
     };
-    guest_profiles: { full_name: string };
+    guest_profiles: { first_name: string; last_name: string };
     attendee_profiles: { ground_transport_need: 'none' | 'arrival' | 'departure' | 'both' };
   };
   transport_requests: Array<{
@@ -81,7 +81,7 @@ function flight(overrides: Partial<FlightShape> = {}): FlightShape {
         last_name: 'Anderson',
         legal_name: 'Alice Anderson',
       },
-      guest_profiles: { full_name: '' },
+      guest_profiles: { first_name: '', last_name: '' },
       attendee_profiles: { ground_transport_need: 'both' },
     },
     transport_requests: [],
@@ -113,7 +113,7 @@ describe('fetchPassengers', () => {
             last_name: 'Brown',
             legal_name: 'Bob Brown',
           },
-          guest_profiles: { full_name: '' },
+          guest_profiles: { first_name: '', last_name: '' },
           attendee_profiles: { ground_transport_need: 'departure' },
         },
       }),
@@ -135,7 +135,7 @@ describe('fetchPassengers', () => {
             last_name: 'Me',
             legal_name: 'Keep Me',
           },
-          guest_profiles: { full_name: '' },
+          guest_profiles: { first_name: '', last_name: '' },
           attendee_profiles: { ground_transport_need: 'arrival' },
         },
       }),
@@ -149,7 +149,7 @@ describe('fetchPassengers', () => {
             last_name: 'Me',
             legal_name: 'Drop Me',
           },
-          guest_profiles: { full_name: '' },
+          guest_profiles: { first_name: '', last_name: '' },
           attendee_profiles: { ground_transport_need: 'departure' },
         },
       }),

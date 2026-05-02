@@ -35,11 +35,11 @@ const AVATAR_BUCKET = 'avatars';
 
 /**
  * Resolve a scanned user_id to the display surface the door staff
- * needs: name + photo + base city. Names live on profile tables —
- * employees have first_name + last_name on employee_profiles, guests
- * have full_name on guest_profiles. We try employee first because
- * 99% of scans are employees, then fall back to guest. Returns null
- * when neither has a row.
+ * needs: name + photo + base city. Names live on profile tables:
+ * both employee_profiles and guest_profiles carry first_name +
+ * last_name. We try employee first because 99% of scans are
+ * employees, then fall back to guest. Returns null when neither
+ * has a row.
  */
 export async function fetchScannedAttendee(
   client: AppSupabaseClient,
@@ -74,10 +74,13 @@ export async function fetchScannedAttendee(
   } else {
     const { data: guestRow } = await client
       .from('guest_profiles')
-      .select('full_name')
+      .select('first_name, last_name')
       .eq('user_id', userId)
       .maybeSingle();
-    displayName = guestRow?.full_name ?? null;
+    if (guestRow) {
+      const composed = [guestRow.first_name, guestRow.last_name].filter(Boolean).join(' ').trim();
+      displayName = composed.length > 0 ? composed : null;
+    }
   }
 
   let avatarSignedUrl: string | null = null;

@@ -6,7 +6,8 @@ import { saveAdditionalGuests } from './additionalGuests';
 
 interface Existing {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   age_bracket: 'under_12' | 'teen';
   special_needs: string[];
   notes: string | null;
@@ -47,19 +48,34 @@ describe('saveAdditionalGuests', () => {
     const updateSpy = vi.fn();
     const client = makeClient({
       existing: [
-        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
-        { id: 'b', full_name: 'B', age_bracket: 'under_12', special_needs: [], notes: null },
+        {
+          id: 'a',
+          first_name: 'A',
+          last_name: '',
+          age_bracket: 'under_12',
+          special_needs: [],
+          notes: null,
+        },
+        {
+          id: 'b',
+          first_name: 'B',
+          last_name: '',
+          age_bracket: 'under_12',
+          special_needs: [],
+          notes: null,
+        },
       ],
       deleteSpy,
       updateSpy,
     });
     await saveAdditionalGuests(client, 'u', [
-      { id: 'a', full_name: 'A renamed', special_needs: ['allergy'], notes: null },
+      { id: 'a', first_name: 'A', last_name: 'renamed', special_needs: ['allergy'], notes: null },
     ]);
     expect(deleteSpy).toHaveBeenCalledWith('id', ['b']);
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
-      full_name: 'A renamed',
+      first_name: 'A',
+      last_name: 'renamed',
       special_needs: ['allergy'],
       notes: null,
     });
@@ -70,7 +86,14 @@ describe('saveAdditionalGuests', () => {
     const updateSpy = vi.fn();
     const client = makeClient({
       existing: [
-        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
+        {
+          id: 'a',
+          first_name: 'A',
+          last_name: '',
+          age_bracket: 'under_12',
+          special_needs: [],
+          notes: null,
+        },
       ],
       deleteSpy,
       updateSpy,
@@ -85,13 +108,20 @@ describe('saveAdditionalGuests', () => {
     const updateSpy = vi.fn();
     const client = makeClient({
       existing: [
-        { id: 'a', full_name: 'A', age_bracket: 'under_12', special_needs: [], notes: null },
+        {
+          id: 'a',
+          first_name: 'A',
+          last_name: '',
+          age_bracket: 'under_12',
+          special_needs: [],
+          notes: null,
+        },
       ],
       deleteSpy,
       updateSpy,
     });
     await saveAdditionalGuests(client, 'u', [
-      { id: 'a', full_name: 'A', special_needs: [], notes: null },
+      { id: 'a', first_name: 'A', last_name: '', special_needs: [], notes: null },
     ]);
     expect(deleteSpy).not.toHaveBeenCalled();
     expect(updateSpy).toHaveBeenCalledTimes(1);

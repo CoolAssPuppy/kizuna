@@ -27,12 +27,13 @@ insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-000000007a01', 'sponsor.lifecycle@example.com', 'employee', 'h_lifecycle', 'sso');
 
 insert into public.guest_invitations (
-  id, sponsor_id, guest_email, full_name, age_bracket, fee_amount, signed_token, expires_at
+  id, sponsor_id, guest_email, first_name, last_name, age_bracket, fee_amount, signed_token, expires_at
 ) values (
   '00000000-0000-0000-0000-000000007b01',
   '00000000-0000-0000-0000-000000007a01',
   'invitee.lifecycle@example.com',
-  'Lifecycle Invitee',
+  'Lifecycle',
+  'Invitee',
   'adult',
   0,
   'lifecycle-token',

@@ -42,11 +42,12 @@ values ('00000000-0000-0000-0000-000000001100', 'sponsor-fee@example.com', 'auth
 insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-000000001100', 'sponsor-fee@example.com', 'employee', 'h_sponsor_fee', 'sso');
 
-insert into public.additional_guests (id, sponsor_id, full_name, age_bracket, fee_amount)
+insert into public.additional_guests (id, sponsor_id, first_name, last_name, age_bracket, fee_amount)
 values (
   '00000000-0000-0000-0000-000000001110',
   '00000000-0000-0000-0000-000000001100',
-  'Tiny Human',
+  'Tiny',
+  'Human',
   'under_12',
   -- The BIU trigger overwrites this; pass an obviously wrong number to
   -- prove the fee tier always wins.
@@ -63,12 +64,13 @@ select is(
 -- the SQL boundary must be overwritten by the bracket price (covers
 -- set_guest_invitation_fee_biu specifically).
 insert into public.guest_invitations (
-  id, sponsor_id, guest_email, full_name, age_bracket, fee_amount, signed_token, expires_at
+  id, sponsor_id, guest_email, first_name, last_name, age_bracket, fee_amount, signed_token, expires_at
 ) values (
   '00000000-0000-0000-0000-000000001112',
   '00000000-0000-0000-0000-000000001100',
   'invitee-fee@example.com',
-  'Adult Invitee',
+  'Adult',
+  'Invitee',
   'adult',
   -- Pass an under-quoted fee. The trigger should overwrite to the
   -- adult bracket price ($950) before the row lands.
@@ -88,10 +90,11 @@ select is(
 -- 3. additional_guests CHECK rejects adult.
 -- =====================================================================
 prepare insert_adult_minor as
-insert into public.additional_guests (sponsor_id, full_name, age_bracket, fee_amount)
+insert into public.additional_guests (sponsor_id, first_name, last_name, age_bracket, fee_amount)
 values (
   '00000000-0000-0000-0000-000000001100',
-  'Should Fail',
+  'Should',
+  'Fail',
   'adult',
   950.00
 );
@@ -127,12 +130,13 @@ update public.additional_guests
    set payment_status = 'paid'
  where id = '00000000-0000-0000-0000-000000001110';
 
-insert into public.guest_profiles (id, user_id, sponsor_id, full_name, legal_name, relationship, fee_amount, payment_status)
+insert into public.guest_profiles (id, user_id, sponsor_id, first_name, last_name, legal_name, relationship, fee_amount, payment_status)
 values (
   '00000000-0000-0000-0000-000000001130',
   '00000000-0000-0000-0000-000000001120',
   '00000000-0000-0000-0000-000000001100',
-  'Adult Guest',
+  'Adult',
+  'Guest',
   'Adult Guest',
   'partner',
   950.00,
@@ -142,11 +146,12 @@ values (
 -- Now add a NEW unpaid minor and try to bump the existing guest's
 -- legal_name. The trigger should refuse because the new minor's fee is
 -- pending.
-insert into public.additional_guests (id, sponsor_id, full_name, age_bracket)
+insert into public.additional_guests (id, sponsor_id, first_name, last_name, age_bracket)
 values (
   '00000000-0000-0000-0000-000000001140',
   '00000000-0000-0000-0000-000000001100',
-  'Brand New Minor',
+  'Brand New',
+  'Minor',
   'teen'
 );
 
@@ -197,11 +202,11 @@ values (
 
 prepare insert_minor_in_adult_table as
 insert into public.guest_profiles (
-  user_id, sponsor_id, full_name, legal_name, relationship, age_bracket, fee_amount, payment_status
+  user_id, sponsor_id, first_name, last_name, legal_name, relationship, age_bracket, fee_amount, payment_status
 ) values (
   '00000000-0000-0000-0000-000000001150',
   '00000000-0000-0000-0000-000000001100',
-  'Minor', 'Minor',
+  'Minor', 'Person', 'Minor Person',
   'family',
   'teen',
   500.00,
@@ -227,11 +232,11 @@ insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider) 
 
 prepare insert_self_unpaid as
 insert into public.guest_profiles (
-  user_id, sponsor_id, full_name, legal_name, relationship, fee_amount, payment_status
+  user_id, sponsor_id, first_name, last_name, legal_name, relationship, fee_amount, payment_status
 ) values (
   '00000000-0000-0000-0000-000000001160',
   '00000000-0000-0000-0000-000000001100',
-  'Own Unpaid', 'Own Unpaid Legal',
+  'Own', 'Unpaid', 'Own Unpaid Legal',
   'partner',
   950.00,
   'pending'

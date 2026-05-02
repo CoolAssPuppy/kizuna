@@ -12,7 +12,7 @@ export interface MessageWithSender {
   sender: {
     email: string;
     employee_profiles: { preferred_name: string | null; avatar_url: string | null } | null;
-    guest_profiles: { full_name: string } | null;
+    guest_profiles: { first_name: string; last_name: string } | null;
   } | null;
 }
 
@@ -21,7 +21,7 @@ const SELECT = `
   sender:users!messages_sender_id_fkey (
     email,
     employee_profiles ( preferred_name, avatar_url ),
-    guest_profiles!guest_profiles_user_id_fkey ( full_name )
+    guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
   )
 `;
 
@@ -45,7 +45,7 @@ export async function fetchMessages(
         sender: Joined<{
           email: string;
           employee_profiles: Joined<{ preferred_name: string | null; avatar_url: string | null }>;
-          guest_profiles: Joined<{ full_name: string }>;
+          guest_profiles: Joined<{ first_name: string; last_name: string }>;
         }>;
         reactions: Record<string, string[]> | null;
       }
@@ -58,7 +58,7 @@ export async function fetchMessages(
         const u = flatJoin<{
           email: string;
           employee_profiles: Joined<{ preferred_name: string | null; avatar_url: string | null }>;
-          guest_profiles: Joined<{ full_name: string }>;
+          guest_profiles: Joined<{ first_name: string; last_name: string }>;
         }>(row.sender);
         if (!u) return null;
         return {

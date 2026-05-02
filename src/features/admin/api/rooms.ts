@@ -50,7 +50,7 @@ type JoinedUser = Joined<{
     last_name: string | null;
     legal_name: string | null;
   }>;
-  guest_profiles: Joined<{ full_name: string }>;
+  guest_profiles: Joined<{ first_name: string; last_name: string }>;
 }>;
 
 interface OccupantShape {
@@ -62,13 +62,15 @@ function nameFromUserShape(user: JoinedUser): { name: string; email: string } {
   const flat = flatJoin(user);
   const employee = flatJoin(flat?.employee_profiles);
   const guest = flatJoin(flat?.guest_profiles);
+  const guestName =
+    guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
   const name =
     employee?.preferred_name ??
     employee?.legal_name ??
     (employee?.first_name && employee?.last_name
       ? `${employee.first_name} ${employee.last_name}`
       : null) ??
-    guest?.full_name ??
+    guestName ??
     flat?.email ??
     '';
   return { name, email: flat?.email ?? '' };
@@ -89,7 +91,7 @@ export async function fetchRooms(
         user:users!accommodation_occupants_user_id_fkey (
           email,
           employee_profiles ( preferred_name, first_name, last_name, legal_name ),
-          guest_profiles!guest_profiles_user_id_fkey ( full_name )
+          guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
         )
       )
     `,
@@ -131,7 +133,7 @@ export async function fetchAssignableAttendees(
       user:users!registrations_user_id_fkey (
         id, email, role, is_leadership,
         employee_profiles ( preferred_name, first_name, last_name, legal_name ),
-        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
       )
     `,
     )
@@ -156,7 +158,7 @@ export async function fetchAssignableAttendees(
         last_name: string | null;
         legal_name: string | null;
       }>;
-      guest_profiles: Joined<{ full_name: string }>;
+      guest_profiles: Joined<{ first_name: string; last_name: string }>;
     }>;
   };
   return ((data ?? []) as unknown as Row[])

@@ -149,7 +149,7 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
           {guests.map((guest) => (
             <SizingFieldset
               key={guest.id}
-              title={`${guest.full_name} (${t(`registration.guests.brackets.${guest.age_bracket}`)})`}
+              title={`${guest.first_name} ${guest.last_name} (${t(`registration.guests.brackets.${guest.age_bracket}`)})`}
               value={guestState[guest.id] ?? EMPTY_SIZING}
               onChange={(next) => setGuestSizing(guest.id, next)}
               // Under-12 fits the youth t-shirt size grid; teens and

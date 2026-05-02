@@ -17,7 +17,7 @@ interface AttendeeRow {
       legal_name: string | null;
       avatar_url: string | null;
     }>;
-    guest_profiles: Joined<{ full_name: string }>;
+    guest_profiles: Joined<{ first_name: string; last_name: string }>;
   }>;
 }
 
@@ -43,7 +43,7 @@ export async function loadCommunityPeople(client: AppSupabaseClient): Promise<Pr
       user:users!attendee_profiles_user_id_fkey (
         email,
         employee_profiles ( preferred_name, legal_name, avatar_url ),
-        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
       )
     `,
     )
@@ -55,13 +55,21 @@ export async function loadCommunityPeople(client: AppSupabaseClient): Promise<Pr
     const user = flatJoin(row.user);
     const employee = flatJoin(user?.employee_profiles);
     const guest = flatJoin(user?.guest_profiles);
-    const fullName =
-      employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? user?.email ?? '';
-    const { first, last } = splitName(fullName);
+    let firstName = '';
+    let lastName = '';
+    if (guest?.first_name || guest?.last_name) {
+      firstName = guest.first_name ?? '';
+      lastName = guest.last_name ?? '';
+    } else {
+      const display = employee?.preferred_name ?? employee?.legal_name ?? user?.email ?? '';
+      const split = splitName(display);
+      firstName = split.first;
+      lastName = split.last;
+    }
     return {
       user_id: row.user_id,
-      first_name: first,
-      last_name: last,
+      first_name: firstName,
+      last_name: lastName,
       email: user?.email ?? '',
       avatar_url: employee?.avatar_url ?? null,
       hobbies: row.hobbies,

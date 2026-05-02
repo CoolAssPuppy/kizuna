@@ -42,7 +42,11 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [renameTarget, setRenameTarget] = useState<{ id: string; fullName: string } | null>(null);
+  const [renameTarget, setRenameTarget] = useState<{
+    id: string;
+    firstName: string;
+    lastName: string;
+  } | null>(null);
   const [editTarget, setEditTarget] = useState<GuestInvitationRow | null>(null);
   const [payOpen, setPayOpen] = useState(false);
 
@@ -78,7 +82,7 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
   });
 
   const renameMinor = useMutation({
-    mutationFn: (args: { id: string; fullName: string }) =>
+    mutationFn: (args: { id: string; firstName: string; lastName: string }) =>
       renameAdditionalGuest(getSupabaseClient(), args),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['additional-guests'] });
@@ -88,7 +92,7 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
   });
 
   const editInvite = useMutation({
-    mutationFn: (args: { id: string; fullName: string; guestEmail: string }) =>
+    mutationFn: (args: { id: string; firstName: string; lastName: string; guestEmail: string }) =>
       updateGuestInvitation(getSupabaseClient(), args),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['guest-invitations'] });
@@ -137,7 +141,7 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
                   >
                     <div className="min-w-0 flex-1 space-y-1">
                       <p className="truncate text-sm font-medium">
-                        {inv.full_name}
+                        {inv.first_name} {inv.last_name}
                         <span className="ml-1 text-xs text-muted-foreground">
                           · {inv.guest_email}
                         </span>
@@ -199,7 +203,9 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
                   <div className="flex min-w-0 flex-1 items-start gap-2">
                     <Baby aria-hidden className="mt-0.5 h-4 w-4 text-muted-foreground" />
                     <div className="min-w-0 space-y-0.5">
-                      <p className="truncate text-sm font-medium">{minor.full_name}</p>
+                      <p className="truncate text-sm font-medium">
+                        {minor.first_name} {minor.last_name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {t(`registration.guests.brackets.${minor.age_bracket}`)}
                         {' · '}
@@ -214,7 +220,13 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
                       variant="ghost"
                       className="h-8 w-8"
                       aria-label={t('registration.guests.renameMinor')}
-                      onClick={() => setRenameTarget({ id: minor.id, fullName: minor.full_name })}
+                      onClick={() =>
+                        setRenameTarget({
+                          id: minor.id,
+                          firstName: minor.first_name,
+                          lastName: minor.last_name,
+                        })
+                      }
                     >
                       <Pencil aria-hidden className="h-3.5 w-3.5" />
                     </Button>
@@ -227,7 +239,9 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
                       onClick={() => {
                         if (
                           confirm(
-                            t('registration.guests.confirmRemoveMinor', { name: minor.full_name }),
+                            t('registration.guests.confirmRemoveMinor', {
+                              name: `${minor.first_name} ${minor.last_name}`,
+                            }),
                           )
                         ) {
                           removeMinor.mutate(minor.id);

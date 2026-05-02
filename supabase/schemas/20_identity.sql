@@ -108,7 +108,9 @@ create table public.guest_profiles (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null unique references public.users(id) on delete cascade,
   sponsor_id uuid not null references public.users(id) on delete restrict,
-  full_name text not null,
+  first_name text not null,
+  last_name text not null,
+  preferred_name text,
   legal_name text not null,
   relationship guest_relationship not null,
   age_bracket guest_age_bracket not null default 'adult'
@@ -137,7 +139,8 @@ create table public.guest_invitations (
   id uuid primary key default gen_random_uuid(),
   sponsor_id uuid not null references public.users(id) on delete cascade,
   guest_email citext not null,
-  full_name text not null,
+  first_name text not null,
+  last_name text not null,
   age_bracket guest_age_bracket not null default 'adult'
     check (age_bracket = 'adult'),
   fee_amount numeric(10, 2) not null check (fee_amount >= 0),
@@ -171,7 +174,8 @@ create table public.additional_guests (
   -- The trigger ensure_additional_guest_user mints the row on insert
   -- when the caller doesn't supply one.
   user_id uuid unique references public.users(id) on delete cascade,
-  full_name text not null,
+  first_name text not null,
+  last_name text not null,
   legal_name text,
   age_bracket guest_age_bracket not null
     check (age_bracket in ('under_12', 'teen')),

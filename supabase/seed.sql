@@ -54,8 +54,8 @@ on conflict (user_id) do nothing;
 -- Seed guest is marked 'paid' so the guard_guest_profile_completion
 -- trigger (which gates legal_name on the sponsor's full settlement)
 -- does not block this canonical sample row.
-insert into public.guest_profiles (user_id, sponsor_id, full_name, legal_name, relationship, payment_status, fee_amount) values
-  ('55555555-5555-5555-5555-555555555555', '33333333-3333-3333-3333-333333333333', 'Alex Guest', 'Alexander Guest', 'partner', 'paid', 950.00)
+insert into public.guest_profiles (user_id, sponsor_id, first_name, last_name, legal_name, relationship, payment_status, fee_amount) values
+  ('55555555-5555-5555-5555-555555555555', '33333333-3333-3333-3333-333333333333', 'Alex', 'Guest', 'Alexander Guest', 'partner', 'paid', 950.00)
 on conflict (user_id) do nothing;
 
 

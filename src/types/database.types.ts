@@ -138,8 +138,9 @@ export type Database = {
           age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
           dietary_restrictions: string[]
           fee_amount: number
-          full_name: string
+          first_name: string
           id: string
+          last_name: string
           legal_name: string | null
           notes: string | null
           payment_status: Database["public"]["Enums"]["guest_payment_status"]
@@ -153,8 +154,9 @@ export type Database = {
           age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
           dietary_restrictions?: string[]
           fee_amount: number
-          full_name: string
+          first_name: string
           id?: string
+          last_name: string
           legal_name?: string | null
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["guest_payment_status"]
@@ -168,8 +170,9 @@ export type Database = {
           age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           dietary_restrictions?: string[]
           fee_amount?: number
-          full_name?: string
+          first_name?: string
           id?: string
+          last_name?: string
           legal_name?: string | null
           notes?: string | null
           payment_status?: Database["public"]["Enums"]["guest_payment_status"]
@@ -895,9 +898,10 @@ export type Database = {
           created_user_id: string | null
           expires_at: string
           fee_amount: number
-          full_name: string
+          first_name: string
           guest_email: string
           id: string
+          last_name: string
           sent_at: string
           signed_token: string
           sponsor_id: string
@@ -909,9 +913,10 @@ export type Database = {
           created_user_id?: string | null
           expires_at: string
           fee_amount: number
-          full_name: string
+          first_name: string
           guest_email: string
           id?: string
+          last_name: string
           sent_at?: string
           signed_token: string
           sponsor_id: string
@@ -923,9 +928,10 @@ export type Database = {
           created_user_id?: string | null
           expires_at?: string
           fee_amount?: number
-          full_name?: string
+          first_name?: string
           guest_email?: string
           id?: string
+          last_name?: string
           sent_at?: string
           signed_token?: string
           sponsor_id?: string
@@ -952,11 +958,13 @@ export type Database = {
         Row: {
           age_bracket: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount: number | null
-          full_name: string
+          first_name: string
           id: string
+          last_name: string
           legal_name: string
           payment_status: Database["public"]["Enums"]["guest_payment_status"]
           perk_profile_created: boolean
+          preferred_name: string | null
           relationship: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id: string
           stripe_payment_id: string | null
@@ -966,11 +974,13 @@ export type Database = {
         Insert: {
           age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount?: number | null
-          full_name: string
+          first_name: string
           id?: string
+          last_name: string
           legal_name: string
           payment_status?: Database["public"]["Enums"]["guest_payment_status"]
           perk_profile_created?: boolean
+          preferred_name?: string | null
           relationship: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id: string
           stripe_payment_id?: string | null
@@ -980,11 +990,13 @@ export type Database = {
         Update: {
           age_bracket?: Database["public"]["Enums"]["guest_age_bracket"]
           fee_amount?: number | null
-          full_name?: string
+          first_name?: string
           id?: string
+          last_name?: string
           legal_name?: string
           payment_status?: Database["public"]["Enums"]["guest_payment_status"]
           perk_profile_created?: boolean
+          preferred_name?: string | null
           relationship?: Database["public"]["Enums"]["guest_relationship"]
           sponsor_id?: string
           stripe_payment_id?: string | null

@@ -20,7 +20,8 @@ const SPECIAL_NEEDS_OPTIONS = ['crib', 'high_chair', 'allergy', 'mobility', 'oth
 
 interface MinorEntry {
   id: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   ageBracketLabel: string;
   specialNeeds: string[];
   notes: string;
@@ -49,7 +50,8 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
     (loaded) =>
       (loaded ?? []).map((row) => ({
         id: row.id,
-        fullName: row.full_name,
+        firstName: row.first_name,
+        lastName: row.last_name,
         ageBracketLabel: t(`registration.guests.brackets.${row.age_bracket}`),
         specialNeeds: row.special_needs,
         notes: row.notes ?? '',
@@ -73,7 +75,8 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
         user.id,
         minors.map((m) => ({
           id: m.id,
-          full_name: m.fullName,
+          first_name: m.firstName,
+          last_name: m.lastName,
           special_needs: m.specialNeeds,
           notes: m.notes.trim() || null,
         })),
@@ -99,14 +102,25 @@ export function DependentsSection({ mode }: SectionProps): JSX.Element {
 
       {minors.map((minor, index) => (
         <fieldset key={minor.id} className="space-y-3 rounded-md border p-4">
-          <div className="space-y-2">
-            <Label htmlFor={`minor-name-${index}`}>{t('registration.dependents.fullName')}</Label>
-            <Input
-              id={`minor-name-${index}`}
-              required
-              value={minor.fullName}
-              onChange={(e) => update(index, { fullName: e.target.value })}
-            />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor={`minor-first-${index}`}>{t('registration.guests.firstName')}</Label>
+              <Input
+                id={`minor-first-${index}`}
+                required
+                value={minor.firstName}
+                onChange={(e) => update(index, { firstName: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`minor-last-${index}`}>{t('registration.guests.lastName')}</Label>
+              <Input
+                id={`minor-last-${index}`}
+                required
+                value={minor.lastName}
+                onChange={(e) => update(index, { lastName: e.target.value })}
+              />
+            </div>
           </div>
           <p className="text-xs text-muted-foreground">
             {t('registration.dependents.ageBracketLabel', { bracket: minor.ageBracketLabel })}

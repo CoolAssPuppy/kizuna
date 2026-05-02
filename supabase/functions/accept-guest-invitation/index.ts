@@ -86,11 +86,18 @@ Deno.serve(async (req) => {
   // already been settled. Stamp 'paid' on the new guest_profiles row
   // so guard_guest_profile_completion doesn't immediately block
   // legal_name from landing.
+  // Pull first/last from the invitation row the sponsor filled in;
+  // legal_name is whatever the sponsor typed verbatim (the guest can
+  // refine it from the registration UI later).
+  const composedName = [invitation.first_name, invitation.last_name]
+    .filter((part): part is string => typeof part === 'string' && part.length > 0)
+    .join(' ');
   const { error: guestProfilesError } = await admin.from('guest_profiles').insert({
     user_id: newUserId,
     sponsor_id: verification.claims.sub,
-    full_name: verification.claims.email,
-    legal_name: verification.claims.email,
+    first_name: invitation.first_name,
+    last_name: invitation.last_name,
+    legal_name: composedName.length > 0 ? composedName : verification.claims.email,
     relationship: 'partner',
     payment_status: 'paid',
   });

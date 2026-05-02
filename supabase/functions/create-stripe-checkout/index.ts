@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
 
   const { data: profile, error: profileError } = await client
     .from('guest_profiles')
-    .select('full_name, payment_status, fee_amount')
+    .select('payment_status, fee_amount')
     .eq('user_id', guestUserId)
     .maybeSingle();
   if (profileError || !profile) {

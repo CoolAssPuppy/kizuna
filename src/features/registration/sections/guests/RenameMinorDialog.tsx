@@ -11,12 +11,17 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { joinFullName, splitFullName } from '@/lib/fullName';
+
+interface RenameMinorTarget {
+  id: string;
+  firstName: string;
+  lastName: string;
+}
 
 interface RenameMinorDialogProps {
-  target: { id: string; fullName: string } | null;
+  target: RenameMinorTarget | null;
   onClose: () => void;
-  onSubmit: (payload: { id: string; fullName: string }) => void;
+  onSubmit: (payload: RenameMinorTarget) => void;
 }
 
 export function RenameMinorDialog({
@@ -30,9 +35,8 @@ export function RenameMinorDialog({
   const [lastId, setLastId] = useState<string | null>(null);
   if (target && target.id !== lastId) {
     setLastId(target.id);
-    const split = splitFullName(target.fullName);
-    setFirst(split.first);
-    setLast(split.last);
+    setFirst(target.firstName);
+    setLast(target.lastName);
   }
   const valid = first.trim().length >= 1 && last.trim().length >= 1;
   return (
@@ -74,7 +78,7 @@ export function RenameMinorDialog({
             disabled={!target || !valid}
             onClick={() => {
               if (target) {
-                onSubmit({ id: target.id, fullName: joinFullName(first, last) });
+                onSubmit({ id: target.id, firstName: first.trim(), lastName: last.trim() });
                 onClose();
               }
             }}

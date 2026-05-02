@@ -24,7 +24,8 @@ type AgeBracket = 'under_12' | 'teen' | 'adult';
 
 interface RequestBody {
   age_bracket?: AgeBracket;
-  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   guest_email?: string;
 }
 
@@ -58,9 +59,13 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'invalid_age_bracket' }, { status: 400 });
   }
 
-  const fullName = body.full_name?.trim();
-  if (!fullName || fullName.length < 2) {
-    return jsonResponse({ error: 'invalid_full_name' }, { status: 400 });
+  const firstName = body.first_name?.trim();
+  const lastName = body.last_name?.trim();
+  if (!firstName || firstName.length < 1) {
+    return jsonResponse({ error: 'invalid_first_name' }, { status: 400 });
+  }
+  if (!lastName || lastName.length < 1) {
+    return jsonResponse({ error: 'invalid_last_name' }, { status: 400 });
   }
 
   // ------- Minor branch: write straight into additional_guests -------
@@ -69,7 +74,8 @@ Deno.serve(async (req) => {
       .from('additional_guests')
       .insert({
         sponsor_id: sponsorUserId,
-        full_name: fullName,
+        first_name: firstName,
+        last_name: lastName,
         age_bracket: ageBracket,
         // fee_amount is overwritten by the BIU trigger; pass 0 so the
         // NOT NULL constraint is satisfied without us guessing the
@@ -96,7 +102,8 @@ Deno.serve(async (req) => {
     .insert({
       sponsor_id: sponsorUserId,
       guest_email: guestEmail,
-      full_name: fullName,
+      first_name: firstName,
+      last_name: lastName,
       age_bracket: 'adult',
       // BIU trigger overwrites with guest_fee_for_bracket('adult').
       fee_amount: 0,

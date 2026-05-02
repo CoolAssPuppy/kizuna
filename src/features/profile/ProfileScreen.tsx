@@ -186,7 +186,7 @@ function ProfileScreenInner(): JSX.Element {
         <SubjectSelector
           minors={minors.map((m) => ({
             userId: m.user_id ?? '',
-            displayName: m.full_name,
+            displayName: `${m.first_name} ${m.last_name}`.trim(),
           }))}
         />
       ) : null}

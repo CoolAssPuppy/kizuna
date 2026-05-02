@@ -43,7 +43,7 @@ describe('loadCommunityPeople', () => {
     });
   });
 
-  it('falls back to guest_profiles full_name when employee record is absent', async () => {
+  it('falls back to guest_profiles first_name + last_name when employee record is absent', async () => {
     const client = makeClient([
       {
         user_id: 'u2',
@@ -55,7 +55,7 @@ describe('loadCommunityPeople', () => {
         user: {
           email: 'guest@example.com',
           employee_profiles: null,
-          guest_profiles: { full_name: 'Alex Guest' },
+          guest_profiles: { first_name: 'Alex', last_name: 'Guest' },
         },
       },
     ]);

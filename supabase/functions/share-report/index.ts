@@ -45,7 +45,7 @@ const FETCHERS: Record<string, ReportFetcher> = {
           users (
             email,
             employee_profiles ( preferred_name, legal_name ),
-            guest_profiles!guest_profiles_user_id_fkey ( full_name )
+            guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
           )
         )
       `,
@@ -71,7 +71,11 @@ const FETCHERS: Record<string, ReportFetcher> = {
         const user = occ.users;
         const employee = user?.employee_profiles;
         const guest = user?.guest_profiles;
-        const name = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+        const guestName = guest
+          ? [guest.first_name, guest.last_name].filter(Boolean).join(' ').trim()
+          : '';
+        const name =
+          employee?.preferred_name ?? employee?.legal_name ?? (guestName.length > 0 ? guestName : '');
         return {
           ...base,
           guest_name: name || (user?.email ?? ''),

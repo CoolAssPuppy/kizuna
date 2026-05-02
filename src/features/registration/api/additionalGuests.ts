@@ -10,7 +10,8 @@ import type { AdditionalGuestRow } from '../types';
  */
 export interface AdditionalGuestInput {
   id: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   special_needs: string[];
   notes: string | null;
 }
@@ -23,7 +24,7 @@ export async function loadAdditionalGuests(
     .from('additional_guests')
     .select('*')
     .eq('sponsor_id', userId)
-    .order('full_name', { ascending: true });
+    .order('last_name', { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
@@ -57,7 +58,8 @@ export async function saveAdditionalGuests(
     const { error } = await client
       .from('additional_guests')
       .update({
-        full_name: row.full_name,
+        first_name: row.first_name,
+        last_name: row.last_name,
         special_needs: row.special_needs,
         notes: row.notes,
       })

@@ -63,7 +63,8 @@ export function InviteGuestDialog({ open, onClose }: InviteGuestDialogProps): JS
         { client: getSupabaseClient() },
         {
           ageBracket: bracket,
-          fullName,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
           ...(bracket === 'adult' ? { guestEmail: email.trim() } : {}),
         },
       );

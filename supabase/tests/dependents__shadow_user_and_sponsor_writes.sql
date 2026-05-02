@@ -15,8 +15,8 @@ insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-0000000d0001', 'sponsor.dep@example.com', 'employee', 'h_dep_sponsor', 'sso');
 
 -- 1. additional_guests insert mints a public.users shadow row.
-insert into public.additional_guests (sponsor_id, full_name, age_bracket, fee_amount)
-values ('00000000-0000-0000-0000-0000000d0001', 'Tiny Dep', 'under_12', 0)
+insert into public.additional_guests (sponsor_id, first_name, last_name, age_bracket, fee_amount)
+values ('00000000-0000-0000-0000-0000000d0001', 'Tiny', 'Dep', 'under_12', 0)
 returning id, user_id \gset
 
 select isnt(

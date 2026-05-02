@@ -38,7 +38,7 @@ export async function fetchRoomingList(
         users (
           email,
           employee_profiles ( preferred_name, legal_name ),
-          guest_profiles!guest_profiles_user_id_fkey ( full_name )
+          guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
         )
       )
     `,
@@ -67,13 +67,14 @@ export async function fetchRoomingList(
       const user = flatJoin<{
         email: string;
         employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
-        guest_profiles: Joined<{ full_name: string }>;
+        guest_profiles: Joined<{ first_name: string; last_name: string }>;
       }>(occ.users);
       const email = user?.email ?? '';
       const employee = flatJoin(user?.employee_profiles);
       const guest = flatJoin(user?.guest_profiles);
-      const displayName =
-        employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? email;
+      const guestName =
+        guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
+      const displayName = employee?.preferred_name ?? employee?.legal_name ?? guestName ?? email;
       rows.push({
         ...baseRow,
         guest_name: displayName,
@@ -131,9 +132,9 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
       user:users!swag_sizes_user_id_fkey (
         email, role,
         employee_profiles ( preferred_name, legal_name ),
-        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
       ),
-      additional_guests ( full_name, sponsor_id, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
+      additional_guests ( first_name, last_name, sponsor_id, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
     `,
   );
   if (error) throw error;
@@ -143,10 +144,11 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
       email: string;
       role: string;
       employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
-      guest_profiles: Joined<{ full_name: string }>;
+      guest_profiles: Joined<{ first_name: string; last_name: string }>;
     }>(row.user);
     const additional = flatJoin<{
-      full_name: string;
+      first_name: string;
+      last_name: string;
       sponsor_id: string;
       sponsor: Joined<{ email: string }>;
     }>(row.additional_guests);
@@ -154,7 +156,7 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
     if (additional) {
       return {
         email: flatJoin<{ email: string }>(additional.sponsor)?.email ?? '',
-        full_name: additional.full_name,
+        full_name: `${additional.first_name} ${additional.last_name}`.trim(),
         attendee_type: 'additional_guest' as const,
         tshirt_size: row.tshirt_size,
         shoe_size_eu: row.shoe_size_eu,
@@ -163,7 +165,9 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
 
     const employee = flatJoin(user?.employee_profiles);
     const guest = flatJoin(user?.guest_profiles);
-    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+    const guestName =
+      guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
+    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guestName ?? '';
     const attendeeType: 'employee' | 'guest' = user?.role === 'guest' ? 'guest' : 'employee';
     return {
       email: user?.email ?? '',
@@ -190,7 +194,7 @@ export async function fetchPaymentReconciliation(
     .from('guest_profiles')
     .select(
       `
-      full_name, payment_status, fee_amount, stripe_payment_id,
+      first_name, last_name, payment_status, fee_amount, stripe_payment_id,
       user:users!guest_profiles_user_id_fkey ( email )
     `,
     )
@@ -199,7 +203,7 @@ export async function fetchPaymentReconciliation(
 
   return (data ?? []).map((row) => ({
     email: flatJoin<{ email: string }>(row.user)?.email ?? '',
-    full_name: row.full_name,
+    full_name: `${row.first_name} ${row.last_name}`.trim(),
     payment_status: row.payment_status,
     fee_amount: row.fee_amount,
     stripe_payment_id: row.stripe_payment_id,
@@ -308,7 +312,7 @@ export async function fetchRegistrationProgress(
       user:users!registrations_user_id_fkey (
         email, role, is_leadership,
         employee_profiles ( first_name, last_name, preferred_name, legal_name ),
-        guest_profiles!guest_profiles_user_id_fkey ( full_name )
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
       )
     `,
     )
@@ -327,16 +331,15 @@ export async function fetchRegistrationProgress(
         preferred_name: string | null;
         legal_name: string | null;
       }>;
-      guest_profiles: Joined<{ full_name: string }>;
+      guest_profiles: Joined<{ first_name: string; last_name: string }>;
     }>(row.user);
     const employee = flatJoin(u?.employee_profiles);
     const guest = flatJoin(u?.guest_profiles);
-    let first = employee?.first_name ?? '';
-    let last = employee?.last_name ?? '';
+    let first = employee?.first_name ?? guest?.first_name ?? '';
+    let last = employee?.last_name ?? guest?.last_name ?? '';
     if (!first && !last) {
-      // Fallback for guest rows (no structured fields) and for any
-      // employee row whose first_name/last_name haven't been filled in.
-      const fullName = employee?.preferred_name ?? employee?.legal_name ?? guest?.full_name ?? '';
+      // Fallback for any row whose structured name fields are blank.
+      const fullName = employee?.preferred_name ?? employee?.legal_name ?? '';
       const split = splitName(fullName);
       first = split.first;
       last = split.last;

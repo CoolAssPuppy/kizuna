@@ -24,7 +24,7 @@ export async function listAdditionalGuests(
     .from('additional_guests')
     .select('*')
     .eq('sponsor_id', sponsorUserId)
-    .order('full_name', { ascending: true });
+    .order('last_name', { ascending: true });
   if (error) throw error;
   return data ?? [];
 }
@@ -42,7 +42,8 @@ export async function cancelGuestInvitation(
 
 export interface UpdateGuestInvitationArgs {
   id: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   guestEmail: string;
 }
 
@@ -60,7 +61,8 @@ export async function updateGuestInvitation(
   const { error } = await client
     .from('guest_invitations')
     .update({
-      full_name: args.fullName,
+      first_name: args.firstName,
+      last_name: args.lastName,
       guest_email: args.guestEmail.toLowerCase(),
     })
     .eq('id', args.id);
@@ -69,11 +71,11 @@ export async function updateGuestInvitation(
 
 export async function renameAdditionalGuest(
   client: AppSupabaseClient,
-  args: { id: string; fullName: string },
+  args: { id: string; firstName: string; lastName: string },
 ): Promise<void> {
   const { error } = await client
     .from('additional_guests')
-    .update({ full_name: args.fullName })
+    .update({ first_name: args.firstName, last_name: args.lastName })
     .eq('id', args.id);
   if (error) throw error;
 }
@@ -89,7 +91,8 @@ interface InvokeContext {
 
 export interface InviteGuestArgs {
   ageBracket: GuestAgeBracket;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   /** Required only when ageBracket = 'adult'. The edge function rejects empty for adults. */
   guestEmail?: string;
 }
@@ -111,7 +114,8 @@ export function inviteGuest(
 ): Promise<InviteGuestResult> {
   return callEdgeFunction<InviteGuestResult>(client, 'create-guest-invitation', {
     age_bracket: args.ageBracket,
-    full_name: args.fullName,
+    first_name: args.firstName,
+    last_name: args.lastName,
     ...(args.guestEmail ? { guest_email: args.guestEmail } : {}),
   });
 }

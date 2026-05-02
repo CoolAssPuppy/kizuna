@@ -38,9 +38,12 @@ const COMMUNITY_MEDIA_BUCKET = 'community-media';
 
 function senderLabel(m: MessageWithSender): string {
   if (!m.sender) return '';
+  const guest = m.sender.guest_profiles;
+  const guestName =
+    guest && guest.first_name && guest.last_name ? `${guest.first_name} ${guest.last_name}` : null;
   return (
     m.sender.employee_profiles?.preferred_name ??
-    m.sender.guest_profiles?.full_name ??
+    guestName ??
     m.sender.email.split('@')[0] ??
     m.sender.email
   );
