@@ -22,6 +22,7 @@
     "leadership": "Dirección"
   },
   "nav": {
+    "label": "Navegación principal",
     "home": "Inicio",
     "itinerary": "Itinerario",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Hacerte pasar por administrador"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "escribe / para abrir la paleta"
+  },
   "home": {
     "feedTitle": "Tu Feed",
     "itemsLabel": "elementos",
-    "feedEmpty": "Nada pendiente para ti.",
+    "feedEmpty": "Tu cola está vacía. Vuelve a consultar cuando se acerque el evento.",
+    "terminal": {
+      "connected": "CONECTADO",
+      "greeting": "hola",
+      "fallbackName": "tú",
+      "summary": "{{count}} elementos en tu cola desde tu última conexión.",
+      "summaryEmpty": "La cola está vacía. Vuelve a consultar cuando se acerque el evento.",
+      "queueLabel": "COLA · {{count}} ELEMENTOS",
+      "queueSort": "orden:plazo ↓",
+      "live": "en vivo"
+    },
     "factsTitle": "Datos Sobre Nuestro Evento",
     "factsSubtitle": "Larga vida a la leyenda del Equipo 18.",
     "facts": {

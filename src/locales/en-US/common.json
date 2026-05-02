@@ -22,6 +22,7 @@
     "leadership": "Leadership"
   },
   "nav": {
+    "label": "Primary",
     "home": "Home",
     "itinerary": "Itinerary",
     "agenda": "Agenda",
@@ -34,6 +35,9 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
+  },
+  "terminal": {
+    "palettePlaceholder": "type / for command palette"
   },
   "events": {
     "title": "All events",
@@ -83,7 +87,17 @@
   "home": {
     "feedTitle": "Your Feed",
     "itemsLabel": "items",
-    "feedEmpty": "Nothing waiting on you.",
+    "feedEmpty": "Your queue is clear. Check back as the event nears.",
+    "terminal": {
+      "connected": "CONNECTED",
+      "greeting": "hello",
+      "fallbackName": "there",
+      "summary": "{{count}} items in your queue since you last logged in.",
+      "summaryEmpty": "Queue is clear. Check back as the event nears.",
+      "queueLabel": "QUEUE · {{count}} ITEMS",
+      "queueSort": "sorted by:deadline ↓",
+      "live": "live"
+    },
     "eventAccess": {
       "label": "Event Access Code:"
     },

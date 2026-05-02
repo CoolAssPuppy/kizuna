@@ -22,6 +22,7 @@
     "leadership": "Johto"
   },
   "nav": {
+    "label": "Päänavigointi",
     "home": "Etusivu",
     "itinerary": "Ohjelma",
     "agenda": "Aikataulu",
@@ -80,10 +81,23 @@
       "asAdmin": "Esiinny ylläpitäjänä"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "kirjoita / avataksesi komentopaletti"
+  },
   "home": {
     "feedTitle": "Sinun Syötteesi",
     "itemsLabel": "kohdetta",
-    "feedEmpty": "Mitään ei odota sinua.",
+    "feedEmpty": "Jonosi on tyhjä. Palaa, kun tapahtuma lähestyy.",
+    "terminal": {
+      "connected": "YHTEYDESSÄ",
+      "greeting": "hei",
+      "fallbackName": "sinä",
+      "summary": "{{count}} kohdetta jonossasi viime kirjautumisen jälkeen.",
+      "summaryEmpty": "Jono on tyhjä. Palaa, kun tapahtuma lähestyy.",
+      "queueLabel": "JONO · {{count}} KOHDETTA",
+      "queueSort": "järjestys:määräaika ↓",
+      "live": "live"
+    },
     "factsTitle": "Faktoja Tapahtumastamme",
     "factsSubtitle": "Eläköön Tiimi 18 -legenda.",
     "facts": {

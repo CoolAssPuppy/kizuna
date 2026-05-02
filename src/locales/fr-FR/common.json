@@ -22,6 +22,7 @@
     "leadership": "Direction"
   },
   "nav": {
+    "label": "Navigation principale",
     "home": "Accueil",
     "itinerary": "Itinéraire",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Faire comme si vous étiez un administrateur"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "tapez / pour la palette"
+  },
   "home": {
     "feedTitle": "Votre Fil",
     "itemsLabel": "éléments",
-    "feedEmpty": "Rien ne vous attend.",
+    "feedEmpty": "Votre file est vide. Repassez quand l'événement approchera.",
+    "terminal": {
+      "connected": "CONNECTÉ",
+      "greeting": "bonjour",
+      "fallbackName": "vous",
+      "summary": "{{count}} éléments dans votre file depuis votre dernière connexion.",
+      "summaryEmpty": "La file est vide. Repassez quand l'événement approchera.",
+      "queueLabel": "FILE · {{count}} ÉLÉMENTS",
+      "queueSort": "tri:échéance ↓",
+      "live": "en direct"
+    },
     "factsTitle": "Faits Sur Notre Événement",
     "factsSubtitle": "Vive la légende de l'Équipe 18.",
     "facts": {

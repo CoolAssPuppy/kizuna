@@ -22,6 +22,7 @@
     "leadership": "Leadership"
   },
   "nav": {
+    "label": "Navigazione principale",
     "home": "Home",
     "itinerary": "Itinerario",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Fingiti un amministratore"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "scrivi / per aprire la palette"
+  },
   "home": {
     "feedTitle": "Il Tuo Feed",
     "itemsLabel": "elementi",
-    "feedEmpty": "Niente in attesa per te.",
+    "feedEmpty": "La tua coda è vuota. Torna a controllare quando l'evento si avvicina.",
+    "terminal": {
+      "connected": "CONNESSO",
+      "greeting": "ciao",
+      "fallbackName": "tu",
+      "summary": "{{count}} elementi nella tua coda dal tuo ultimo accesso.",
+      "summaryEmpty": "La coda è vuota. Torna a controllare quando l'evento si avvicina.",
+      "queueLabel": "CODA · {{count}} ELEMENTI",
+      "queueSort": "ordine:scadenza ↓",
+      "live": "live"
+    },
     "factsTitle": "Curiosità Sul Nostro Evento",
     "factsSubtitle": "Lunga vita alla leggenda del Team 18.",
     "facts": {

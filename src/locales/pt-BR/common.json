@@ -22,6 +22,7 @@
     "leadership": "Liderança"
   },
   "nav": {
+    "label": "Navegação principal",
     "home": "Início",
     "itinerary": "Itinerário",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Finja ser um administrador"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "digite / para abrir a paleta"
+  },
   "home": {
     "feedTitle": "Seu Feed",
     "itemsLabel": "itens",
-    "feedEmpty": "Nada esperando por você.",
+    "feedEmpty": "Sua fila está vazia. Volte mais tarde, conforme o evento se aproxima.",
+    "terminal": {
+      "connected": "CONECTADO",
+      "greeting": "olá",
+      "fallbackName": "você",
+      "summary": "{{count}} itens na sua fila desde o último login.",
+      "summaryEmpty": "A fila está vazia. Volte mais tarde, conforme o evento se aproxima.",
+      "queueLabel": "FILA · {{count}} ITENS",
+      "queueSort": "ordem:prazo ↓",
+      "live": "ao vivo"
+    },
     "factsTitle": "Fatos Sobre Nosso Evento",
     "factsSubtitle": "Salve a lenda do Time 18.",
     "facts": {
