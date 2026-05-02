@@ -263,3 +263,11 @@
 **Why:** I picked the universal-toast contract over the "loud only when no other feedback fires" alternative because saves were silently failing on the user. The downside is double-toast when the next step starts noisy.
 
 **How to apply:** Wizard steps must not emit a welcome toast onMount. If a future step needs one, route through the same `show()` so the deduper (TODO if it ever matters) sees both. For now no wizard step does this — contract is intact.
+
+## 2026-05-02 - Profile saves require explicit cache invalidation
+
+**Rule:** Any Section that loads data via `useQuery` and saves via `useSectionSubmit` MUST pass its `queryKey` through `invalidateQueryKeys` on the hook. Skipping it makes saves look broken.
+
+**Why:** The QueryClient ships with `staleTime: 30_000` and `refetchOnWindowFocus: false`. Without invalidation, after a save: (1) the row in the DB updates, (2) the toast confirms success, (3) the user navigates away, (4) returns within 30s, (5) the cached row is served unchanged, (6) `useHydratedFormState` re-mounts and hydrates from stale data. The user sees their pre-save values and concludes "it didn't save." The PersonalInfo / Dietary / Accessibility / Emergency / Passport / Swag / Transport sections all hit this in prod on 2026-05-02; CommunityProfileSection escaped because it already invalidated inline.
+
+**How to apply:** When calling `useSectionSubmit({ ... })`, pass `invalidateQueryKeys: [['<same-key-as-useQuery>']]`. The hook awaits `Promise.all(keys.map(invalidateQueries))` before showing the toast so the next mount refetches.

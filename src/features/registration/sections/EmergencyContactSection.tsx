@@ -59,6 +59,7 @@ export function EmergencyContactSection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'emergency_contact',
     toastSuccessKey: 'profile.toast.emergencyContactSaved',
+    invalidateQueryKeys: [['emergency-contact', subject.userId]],
   });
 
   function handleSubmit(): void {

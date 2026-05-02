@@ -6,6 +6,7 @@ import {
   Bus,
   CalendarRange,
   FileText,
+  Info,
   Newspaper,
   ScanLine,
   Send,
@@ -24,6 +25,7 @@ interface NavSection {
 }
 
 const SECTIONS: ReadonlyArray<NavSection> = [
+  { to: '/admin/about', icon: Info, labelKey: 'admin.nav.about' },
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
   { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
   { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },

@@ -18,6 +18,20 @@ import {
   type EventInsert,
 } from './api/events';
 
+interface EventEditScreenProps {
+  /**
+   * Override the URL-derived id. The admin About tab passes the active
+   * event so the same form renders without needing an /admin/events/:id
+   * URL hop. Omitted -> the URL params drive (existing /admin/events
+   * routes).
+   */
+  eventId?: string | null;
+  /** When true, render without the destructive Delete button (used in About tab). */
+  hideDelete?: boolean;
+  /** Override the post-save destination. Default: /admin/events/:id. */
+  redirectTo?: ((id: string) => string) | undefined;
+}
+
 type EventTypeEnum = Database['public']['Enums']['event_type'];
 
 interface FormState {
@@ -63,9 +77,14 @@ function fromIso(value: string | null): string {
   return new Date(value).toISOString().slice(0, 16);
 }
 
-export function EventEditScreen(): JSX.Element {
+export function EventEditScreen({
+  eventId: explicitEventId,
+  hideDelete = false,
+  redirectTo,
+}: EventEditScreenProps = {}): JSX.Element {
   const { t } = useTranslation();
-  const { eventId } = useParams<{ eventId?: string }>();
+  const { eventId: paramEventId } = useParams<{ eventId?: string }>();
+  const eventId = explicitEventId === undefined ? paramEventId : (explicitEventId ?? undefined);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { show } = useToast();
@@ -123,8 +142,10 @@ export function EventEditScreen(): JSX.Element {
     },
     onSuccess: async (saved) => {
       await queryClient.invalidateQueries({ queryKey: ['all-events'] });
+      await queryClient.invalidateQueries({ queryKey: ['active-event'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'event', saved.id] });
       show(t('admin.events.saved'));
-      navigate(`/admin/events/${saved.id}`);
+      navigate(redirectTo ? redirectTo(saved.id) : `/admin/events/${saved.id}`);
     },
     onError: (err: Error) => show(err.message, 'error'),
   });
@@ -272,7 +293,7 @@ export function EventEditScreen(): JSX.Element {
         </fieldset>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          {!isNew ? (
+          {!isNew && !hideDelete ? (
             <Button
               type="button"
               variant="destructive"

@@ -71,6 +71,7 @@ export function DietarySection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'dietary',
     toastSuccessKey: 'profile.toast.dietarySaved',
+    invalidateQueryKeys: [['dietary', subject.userId]],
   });
 
   function handleSubmit(): void {

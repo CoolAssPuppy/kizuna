@@ -50,6 +50,7 @@ export function PassportSection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'passport',
     toastSuccessKey: 'profile.toast.passportSaved',
+    invalidateQueryKeys: [['passport-metadata', subject.userId]],
   });
 
   // The set_passport RPC takes p_expiry_date as a NOT-NULL `date`, so an

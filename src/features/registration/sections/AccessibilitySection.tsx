@@ -46,6 +46,7 @@ export function AccessibilitySection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'accessibility',
     toastSuccessKey: 'profile.toast.accessibilitySaved',
+    invalidateQueryKeys: [['accessibility', subject.userId]],
   });
 
   function handleSubmit(): void {

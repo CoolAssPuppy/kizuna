@@ -1,3 +1,4 @@
+import { useQueryClient, type QueryKey } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +15,13 @@ interface UseSectionSubmitOptions {
   taskKey: RegistrationTaskKey | null;
   /** i18n key for the success toast shown in profile mode. */
   toastSuccessKey: string;
+  /**
+   * Query keys to invalidate after a successful save. Without this the
+   * 30s staleTime + cached row mean the user sees their pre-save values
+   * the next time they mount the section, which reads as "save didn't
+   * work." Pass the same keys the section's useQuery uses.
+   */
+  invalidateQueryKeys?: ReadonlyArray<QueryKey>;
 }
 
 interface SubmitState {
@@ -34,9 +42,11 @@ export function useSectionSubmit({
   mode,
   taskKey,
   toastSuccessKey,
+  invalidateQueryKeys,
 }: UseSectionSubmitOptions): SubmitState {
   const { t } = useTranslation();
   const { show } = useToast();
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
   const [errorKey, setErrorKey] = useState<string | null>(null);
 
@@ -50,6 +60,11 @@ export function useSectionSubmit({
           await markTaskComplete(getSupabaseClient(), mode.bundle.registration.id, taskKey);
         }
         mode.onComplete();
+      }
+      if (invalidateQueryKeys && invalidateQueryKeys.length > 0) {
+        await Promise.all(
+          invalidateQueryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        );
       }
       // Every Save click emits a toast — see useSectionSubmit.test.tsx.
       show(t(toastSuccessKey));
