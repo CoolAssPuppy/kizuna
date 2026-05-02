@@ -33,7 +33,11 @@ export function getAdminClient(): SupabaseClient {
 /** User-scoped client that runs through RLS as the caller. Pass the request's Authorization header. */
 export function getUserClient(authHeader: string | null): SupabaseClient {
   const supabaseUrl = requireEnv('SUPABASE_URL', 'VITE_SUPABASE_URL');
-  const anonKey = requireEnv('SUPABASE_ANON_KEY', 'SB_PUBLISHABLE_KEY', 'VITE_SUPABASE_PUBLISHABLE_KEY');
+  const anonKey = requireEnv(
+    'SUPABASE_ANON_KEY',
+    'SB_PUBLISHABLE_KEY',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
+  );
   return createClient(supabaseUrl, anonKey, {
     global: { headers: authHeader ? { Authorization: authHeader } : {} },
     auth: { persistSession: false, autoRefreshToken: false },

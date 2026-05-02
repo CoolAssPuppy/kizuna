@@ -170,6 +170,26 @@ create policy users_admin_all on public.users
   for all using (public.is_admin())
   with check (public.is_admin());
 
+-- CLI personal access tokens. Admins intentionally get no blanket
+-- SELECT policy; users can only see their own token metadata and never
+-- the cleartext token.
+create policy api_keys_self_read on public.api_keys
+  for select using (user_id = auth.uid());
+
+create policy api_keys_self_insert on public.api_keys
+  for insert with check (user_id = auth.uid());
+
+create policy api_keys_self_update_revoke on public.api_keys
+  for update using (user_id = auth.uid())
+  with check (user_id = auth.uid());
+
+create policy oauth_codes_no_client_access on public.oauth_codes
+  for all using (false)
+  with check (false);
+
+create policy cli_audit_admin_read on public.cli_audit_log
+  for select using (public.is_admin());
+
 -- Community read: any authenticated user can resolve email + role +
 -- leadership flag for an attendee with a non-private community profile.
 -- This is the spine of the people-matching tables and channel sender

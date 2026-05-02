@@ -199,6 +199,56 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          last_used_ip: unknown
+          name: string
+          revoked_at: string | null
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          token_hash: string
+          token_last4: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          last_used_ip?: unknown
+          name: string
+          revoked_at?: string | null
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          token_hash: string
+          token_last4: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          last_used_ip?: unknown
+          name?: string
+          revoked_at?: string | null
+          scope?: Database["public"]["Enums"]["api_key_scope"]
+          token_hash?: string
+          token_last4?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendee_profiles: {
         Row: {
           bio: string | null
@@ -293,6 +343,60 @@ export type Database = {
           {
             foreignKeyName: "channels_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cli_audit_log: {
+        Row: {
+          api_key_id: string | null
+          command: string
+          duration_ms: number
+          error_code: string | null
+          id: string
+          outcome: string
+          ran_at: string
+          request_id: string
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          user_id: string | null
+        }
+        Insert: {
+          api_key_id?: string | null
+          command: string
+          duration_ms: number
+          error_code?: string | null
+          id?: string
+          outcome: string
+          ran_at?: string
+          request_id: string
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          user_id?: string | null
+        }
+        Update: {
+          api_key_id?: string | null
+          command?: string
+          duration_ms?: number
+          error_code?: string | null
+          id?: string
+          outcome?: string
+          ran_at?: string
+          request_id?: string
+          scope?: Database["public"]["Enums"]["api_key_scope"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cli_audit_log_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cli_audit_log_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1408,6 +1512,47 @@ export type Database = {
           },
         ]
       }
+      oauth_codes: {
+        Row: {
+          code: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          redirect: string
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          state: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          redirect: string
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          state: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          redirect?: string
+          scope?: Database["public"]["Enums"]["api_key_scope"]
+          state?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_codes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       passport_details: {
         Row: {
           expiry_date: string
@@ -2049,14 +2194,33 @@ export type Database = {
         Args: { p_channel: string; p_uid: string }
         Returns: boolean
       }
+      create_api_key: {
+        Args: {
+          p_expires_at?: string
+          p_name: string
+          p_scope: Database["public"]["Enums"]["api_key_scope"]
+        }
+        Returns: {
+          id: string
+          token: string
+        }[]
+      }
       current_active_event_id: { Args: never; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       delete_event_cascade: { Args: { p_event_id: string }; Returns: boolean }
+      exchange_oauth_code: {
+        Args: { p_code: string; p_state: string }
+        Returns: {
+          id: string
+          token: string
+        }[]
+      }
       get_passport_number: { Args: { p_user_id: string }; Returns: string }
       guest_fee_for_bracket: {
         Args: { p_bracket: Database["public"]["Enums"]["guest_age_bracket"] }
         Returns: number
       }
+      hash_api_key: { Args: { p_token: string }; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_leadership_user: { Args: never; Returns: boolean }
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
@@ -2070,6 +2234,15 @@ export type Database = {
         Args: { p_notification_id: string }
         Returns: undefined
       }
+      mint_oauth_code: {
+        Args: {
+          p_redirect: string
+          p_scope: Database["public"]["Enums"]["api_key_scope"]
+          p_state: string
+        }
+        Returns: string
+      }
+      revoke_api_key: { Args: { p_id: string }; Returns: undefined }
       set_passport: {
         Args: {
           p_expiry_date: string
@@ -2100,8 +2273,30 @@ export type Database = {
         Args: { p_request_id: string; p_requests: string }
         Returns: undefined
       }
+      verify_api_key: {
+        Args: { p_ip?: unknown; p_token: string }
+        Returns: {
+          api_key_id: string
+          scope: Database["public"]["Enums"]["api_key_scope"]
+          user_id: string
+        }[]
+      }
+      write_cli_audit_log: {
+        Args: {
+          p_api_key_id: string
+          p_command: string
+          p_duration_ms: number
+          p_error_code: string
+          p_outcome: string
+          p_request_id: string
+          p_scope: Database["public"]["Enums"]["api_key_scope"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      api_key_scope: "read" | "write" | "admin"
       attendee_visibility: "public" | "attendees_only" | "private"
       auth_provider: "sso" | "email_password"
       conflict_status:
@@ -2314,6 +2509,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      api_key_scope: ["read", "write", "admin"],
       attendee_visibility: ["public", "attendees_only", "private"],
       auth_provider: ["sso", "email_password"],
       conflict_status: [

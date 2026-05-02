@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { CommandPaletteBar } from '@/components/CommandPaletteBar';
 import { StatusDot } from '@/components/StatusDot';
 import { TerminalEyebrow } from '@/components/TerminalEyebrow';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -113,7 +112,6 @@ export function HomeScreen(): JSX.Element {
           {editorial.sidebar.map((item) => (
             <SidebarEditorialCard key={item.id} item={item} />
           ))}
-          <CommandPaletteBar />
         </aside>
       </div>
     </main>
@@ -484,12 +482,13 @@ function EventStatsPanel({ stats }: { stats: EventStats | undefined }): JSX.Elem
 }
 
 function SidebarEditorialCard({ item }: { item: EditorialFeedItem }): JSX.Element {
+  const { t } = useTranslation();
   return (
     <article
       className="border p-5"
       style={{ backgroundColor: 'var(--c-surface)', borderColor: 'var(--c-rule)' }}
     >
-      <TerminalEyebrow label="feed.item" />
+      <TerminalEyebrow label={t('home.terminal.feedItemLabel')} />
       <h3 className="mt-3 text-sm font-medium" style={{ color: 'var(--c-fg)' }}>
         {item.title}
       </h3>

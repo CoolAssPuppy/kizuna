@@ -108,17 +108,15 @@ Deno.serve(async (req) => {
     //    doesn't break this response — we still hand the question
     //    back to the SPA. Conflicts (someone wrote the same key
     //    between our read and write) get swallowed by upsert.
-    await admin
-      .from('icebreaker_rephrasings')
-      .upsert(
-        {
-          fact_key: factKey,
-          fact_original: fact,
-          question,
-          model,
-        },
-        { onConflict: 'fact_key' },
-      );
+    await admin.from('icebreaker_rephrasings').upsert(
+      {
+        fact_key: factKey,
+        fact_original: fact,
+        question,
+        model,
+      },
+      { onConflict: 'fact_key' },
+    );
 
     return jsonResponse({ question, source: 'live' });
   } catch (err) {

@@ -65,6 +65,16 @@ const RegistrationRoute = lazy(() =>
     default: m.RegistrationRoute,
   })),
 );
+const CliAuthorizeScreen = lazy(() =>
+  import('@/features/auth/cli-oauth/AuthorizeScreen').then((m) => ({
+    default: m.AuthorizeScreen,
+  })),
+);
+const CliCallbackScreen = lazy(() =>
+  import('@/features/auth/cli-oauth/CallbackScreen').then((m) => ({
+    default: m.CallbackScreen,
+  })),
+);
 
 /**
  * Home swap: signed-in users land on the dashboard; signed-out viewers
@@ -196,6 +206,22 @@ export function AppRouter(): JSX.Element {
             element={
               <RequireAuth>
                 <ChannelScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/cli/oauth-authorize"
+            element={
+              <RequireAuth>
+                <CliAuthorizeScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/cli/oauth-callback"
+            element={
+              <RequireAuth>
+                <CliCallbackScreen />
               </RequireAuth>
             }
           />

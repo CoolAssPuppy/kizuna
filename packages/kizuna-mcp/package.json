@@ -1,0 +1,22 @@
+{
+  "name": "@strategicnerds/kizuna-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server bridging Kizuna CLI commands to MCP-aware agents (Claude Desktop, Cursor, Claude Code).",
+  "bin": {
+    "kizuna-mcp": "./src/bin/kizuna-mcp.ts"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "tsx src/bin/kizuna-mcp.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.2"
+  }
+}

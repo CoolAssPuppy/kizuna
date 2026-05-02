@@ -78,7 +78,12 @@ Deno.serve(async (req) => {
 
   let directory: HiBobPerson[];
   try {
-    directory = await fetchDirectory({ serviceUserId, serviceUserToken, tshirtFieldId, teamFieldId });
+    directory = await fetchDirectory({
+      serviceUserId,
+      serviceUserToken,
+      tshirtFieldId,
+      teamFieldId,
+    });
   } catch (err: unknown) {
     await admin
       .from('hibob_sync_log')
@@ -93,7 +98,9 @@ Deno.serve(async (req) => {
 
   const { data: profiles, error: profilesError } = await admin
     .from('employee_profiles')
-    .select('user_id, hibob_id, legal_name, legal_name_source, legal_name_locked, department, team, job_title, start_date, home_country');
+    .select(
+      'user_id, hibob_id, legal_name, legal_name_source, legal_name_locked, department, team, job_title, start_date, home_country',
+    );
   if (profilesError) {
     return jsonResponse({ error: profilesError.message }, { status: 500 });
   }

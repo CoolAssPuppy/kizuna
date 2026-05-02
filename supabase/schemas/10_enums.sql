@@ -12,6 +12,7 @@
 -- signs in. RLS routes those writes through sponsor identity.
 create type user_role as enum ('employee', 'guest', 'admin', 'super_admin', 'dependent');
 create type auth_provider as enum ('sso', 'email_password');
+create type api_key_scope as enum ('read', 'write', 'admin');
 
 -- Field provenance and conflict tracking
 create type field_source_type as enum ('hibob', 'perk', 'user_entered', 'admin_set');

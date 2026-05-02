@@ -37,7 +37,127 @@
     "closeMenu": "Close menu"
   },
   "terminal": {
-    "palettePlaceholder": "type / for command palette"
+    "label": "Command line",
+    "placeholder": "type a command, or `/` for the palette · `?` for help",
+    "help": "Type `help` for available commands, or `/` to focus the bar.",
+    "copy": "Copy output",
+    "copied": "Output copied",
+    "format": {
+      "json": "JSON",
+      "md": "Markdown"
+    }
+  },
+  "palette": {
+    "title": "Command Palette",
+    "placeholder": "Search pages",
+    "empty": "No matching pages."
+  },
+  "cli": {
+    "errors": {
+      "forbidden": "You do not have access to that command.",
+      "patScope": "This token does not have the right scope for that command.",
+      "notFound": "Command not found.",
+      "validation": "That command is missing or has invalid flags.",
+      "outputShape": "The command returned an unexpected shape. Report this.",
+      "internal": "The command failed.",
+      "noActiveEvent": "No active event is configured.",
+      "eventNotFound": "Event not found."
+    },
+    "commands": {
+      "help": {
+        "summary": "Print usage.",
+        "description": "Lists available commands, or usage for one command."
+      },
+      "schema": {
+        "summary": "Emit the command registry.",
+        "description": "Returns machine-readable command metadata for clients and agents."
+      },
+      "me": {
+        "summary": "Profile snapshot for the authenticated user.",
+        "description": "Shows your profile identity and role."
+      },
+      "meItinerary": {
+        "summary": "Show your itinerary.",
+        "description": "Lists itinerary items, optionally filtered by day or date."
+      },
+      "meSessions": {
+        "summary": "Show sessions you are connected to.",
+        "description": "Lists registered or favorited sessions."
+      },
+      "meDocuments": {
+        "summary": "Show documents you can sign.",
+        "description": "Lists active documents and whether you have signed them."
+      },
+      "meRoommates": {
+        "summary": "Show your room assignment.",
+        "description": "Shows the current room block and roommate list."
+      },
+      "meTransport": {
+        "summary": "Show transport requests.",
+        "description": "Lists your arrival and departure transfer requests."
+      },
+      "meNotifications": {
+        "summary": "Show notifications.",
+        "description": "Lists your newest notifications."
+      },
+      "attendees": {
+        "summary": "List attendees matching filters.",
+        "description": "Finds attendee profiles by handle, hobby, or team."
+      },
+      "sessions": {
+        "summary": "List sessions for the active event.",
+        "description": "Shows all sessions, optionally filtered by day, track, or capacity."
+      },
+      "events": {
+        "summary": "List events you can access.",
+        "description": "Shows past, future, or all visible events."
+      },
+      "event": {
+        "summary": "Show event details.",
+        "description": "Shows the active event or a specific event."
+      },
+      "agenda": {
+        "summary": "Show the full event agenda.",
+        "description": "Lists agenda sessions for the active event."
+      },
+      "photos": {
+        "summary": "List visible photos.",
+        "description": "Shows gallery photos for the active event."
+      },
+      "channels": {
+        "summary": "List community channels.",
+        "description": "Shows active community channels."
+      }
+    }
+  },
+  "cliOauth": {
+    "authorize": {
+      "title": "Connect a CLI or agent",
+      "subtitle": "{{client}} wants to access your Kizuna data.",
+      "scopeLine": "Requested scope: {{scope}}",
+      "scopeBlurb": {
+        "read": "Read-only access to your itinerary, sessions, documents, and community profile.",
+        "write": "Read access plus the ability to RSVP, favorite sessions, and update your profile.",
+        "admin": "Full read and write access, including admin tools. Only grant this to tools you wrote yourself."
+      },
+      "allow": "Authorize",
+      "allowing": "Authorizing...",
+      "deny": "Cancel",
+      "adminBlocked": "You need an admin role to issue admin-scope tokens.",
+      "malformed": "Missing or invalid authorization parameters.",
+      "unknown": "Could not authorize."
+    },
+    "callback": {
+      "title": "Connecting to your agent",
+      "delivering": "Sending the authorization code to your local agent...",
+      "success": "You are connected. You can close this tab and return to your agent.",
+      "fallback": "We could not reach your local agent. Paste this code into the terminal where you ran the command.",
+      "deliverFailed": "The local callback did not respond.",
+      "codeLabel": "Code:",
+      "copy": "Copy code",
+      "copied": "Copied",
+      "malformed": "Missing or invalid callback parameters."
+    }
   },
   "email": {
     "copy": "Copy email",
@@ -157,7 +277,8 @@
       "welcome": "Welcome to {{event}}.",
       "queueLabel": "QUEUE · {{count}} ITEMS",
       "queueSort": "sorted by:deadline ↓",
-      "live": "live"
+      "live": "live",
+      "feedItemLabel": "News"
     },
     "eventAccess": {
       "label": "Event Access Code:"
@@ -258,7 +379,64 @@
       "guests": "Guests",
       "dependents": "Dependents",
       "swag": "Swag",
-      "transport": "Transport"
+      "transport": "Transport",
+      "apiKeys": "API Keys"
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "description": "Create scoped tokens for the Kizuna CLI and agent integrations.",
+      "empty": "You don't have any API keys yet.",
+      "create": "Create API Key",
+      "createDescription": "Create a personal access token for scripts, local agents, or the Kizuna CLI.",
+      "name": "Name",
+      "nameHelp": "What is this key for? You can rename it later.",
+      "revoke": "Revoke",
+      "revokeConfirm": "Revoke {{name}}? Apps using this key will lose access immediately.",
+      "revoked": "Revoked",
+      "created": "Created {{date}}",
+      "lastUsed": "Last used {{date}}",
+      "neverUsed": "Never used",
+      "scope": {
+        "label": "Scope",
+        "read": "Read-only",
+        "write": "Read + write",
+        "admin": "Admin"
+      },
+      "expiry": {
+        "label": "Expiry",
+        "30d": "30 days",
+        "90d": "90 days",
+        "1y": "1 year",
+        "never": "Never"
+      },
+      "revealOnce": {
+        "title": "Copy Your API Key",
+        "warning": "This is the only time this token will be shown.",
+        "copy": "Copy token",
+        "copied": "Token copied"
+      }
+    },
+    "cli": {
+      "title": "Using the CLI",
+      "description": "Talk to Kizuna from a terminal or hand it to your AI agent. The CLI uses the API keys above for authentication.",
+      "copy": "Copy command",
+      "copied": "Copied",
+      "step1": {
+        "title": "Install the CLI",
+        "body": "Once installed, the kizuna binary lives on your PATH. Requires Node.js 20 or newer."
+      },
+      "step2": {
+        "title": "Log in",
+        "body": "Opens a browser tab for you to authorize the CLI. The token is saved to ~/.kizuna/config.json with private file permissions."
+      },
+      "step3": {
+        "title": "Run a command",
+        "body": "Every command from your kizuna schema output is fair game. Add --format md for human-readable output, --format json (the default) for piping into jq or another tool."
+      },
+      "step4": {
+        "title": "Plug into an AI agent",
+        "body": "The MCP server bridges Kizuna into Claude Desktop, Cursor, and Claude Code. Add this block to your agent's MCP configuration, swap in a token from above, and restart the agent."
+      }
     },
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",

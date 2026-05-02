@@ -34,11 +34,7 @@ async function verifyStripeSignature(
     false,
     ['sign'],
   );
-  const expected = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    ENCODER.encode(`${timestamp}.${rawBody}`),
-  );
+  const expected = await crypto.subtle.sign('HMAC', key, ENCODER.encode(`${timestamp}.${rawBody}`));
   const expectedHex = Array.from(new Uint8Array(expected))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');

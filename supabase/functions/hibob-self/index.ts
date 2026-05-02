@@ -99,7 +99,10 @@ Deno.serve(async (req) => {
     .from('employee_profiles')
     .upsert(profileUpsert, { onConflict: 'user_id' });
   if (profileError) {
-    return jsonResponse({ error: 'profile_upsert_failed', detail: profileError.message }, { status: 500 });
+    return jsonResponse(
+      { error: 'profile_upsert_failed', detail: profileError.message },
+      { status: 500 },
+    );
   }
 
   // hibob_id lives on public.users; sync it across so reconciliation
@@ -187,7 +190,8 @@ async function fetchHiBob(
     hibobId: head.id ?? '',
     workEmail: head.email ?? email,
     privateEmail: head.home?.privateEmail ?? null,
-    legalName: head.fullName ?? head.displayName ?? `${head.firstName ?? ''} ${head.surname ?? ''}`.trim(),
+    legalName:
+      head.fullName ?? head.displayName ?? `${head.firstName ?? ''} ${head.surname ?? ''}`.trim(),
     preferredName: head.displayName ?? null,
     firstName: head.firstName ?? null,
     lastName: head.surname ?? null,

@@ -44,6 +44,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] First commit: `chore: scaffold project foundation`
 
 **M0 review:**
+
 - Quality gates green: typecheck, lint, 5/5 vitest, 2/2 playwright, format, build (275 KB JS gzipped 88 KB).
 - Refactor-scan flagged 11 unused production deps (now removed; will be added back per-feature), tsconfig.node.json strictness gap (fixed), QueryClient lifecycle in renderWithProviders (fixed), legacy withTranslation HOC in ErrorBoundary (refactored to functional ErrorFallback + class ErrorBoundary), speculative /api/itinerary cache (removed).
 - Lessons captured in tasks/lessons.md.
@@ -78,6 +79,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(db): declarative schema with full RLS and pgTAP coverage`
 
 **M1 review:**
+
 - 33 tables (spec lists "35" but two — photos, ideas — are P3 territory; deferred)
 - 62 RLS policies, 18 triggers, 9 SQL functions
 - pgTAP tests: 9 files, 25 assertions, all green
@@ -106,6 +108,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(auth): role-aware authentication with SSO stub`
 
 **M2 review:**
+
 - Architectural cleanups during refactor-scan: removed race between manual getSession() and onAuthStateChange (now listener-only), fixed wrong OAuth provider call (was 'azure', now signInWithSSO with Okta domain), removed double dispatch on signOut, surfaced loadAppUser errors via AuthState.error instead of swallowing into console.warn.
 - renderWithProviders default flipped: withAuth now defaults to false to prevent test leakage of the Supabase singleton; tests opt in.
 - Quality gates green: typecheck, lint, format, 14/14 vitest, 4/4 playwright, build.
@@ -130,6 +133,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(consent): document gate with legal audit trail`
 
 **M3 review:**
+
 - 34 vitest tests across 8 files passing; 6 playwright specs passing
 - ConsentGate enforces scroll-to-bottom AND explicit checkbox before submit; both signals plus device type travel to acknowledge() so the audit trail is complete
 - Document version bump flow validated: when documents.version > latest acknowledgements row, needsAcknowledgement flips back to true
@@ -154,17 +158,20 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commits: feat(registration) part 1 + part 2
 
 **Deferred from M4 (deliberately, not blockers for Phase 1 employee registration):**
+
 - Custom fields step (profile_custom_fields driven, can be admin-only Phase 2)
 - Guest details step (belongs with M5 invitation lifecycle)
 - ChildrenStep marking a children-specific registration_task (would require enum extension)
 
 **M4 review:**
+
 - All gates green: typecheck, lint, format, 47/47 vitest, 8/8 playwright, build
 - Pure helpers (wizardSteps, expiryWarning) tested in isolation
 - exactOptionalPropertyTypes lessons captured in api.ts (conditional spread for id field)
 - Each step hydrates from DB before allowing submit — prevents accidental empty overwrites
 
 **M4.1 — Section unification (post-M4 dedup) [complete]:**
+
 - Collapsed each registration domain into a single `Section` component used by both wizard and profile.
 - New layer at `src/features/registration/sections/`: SectionChrome (mode-aware shell), useSectionSubmit (busy/error + toast vs markTaskComplete branching), and 7 sections (PersonalInfo, Dietary, EmergencyContact, Passport, Children, Swag, Transport).
 - Deleted 7 *Step.tsx files and 3 *Card.tsx files.
@@ -173,6 +180,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - 105/105 vitest, lint clean, typecheck clean.
 
 **M4.2 — Identity, profile, accessibility, openai, api split [complete]:**
+
 - Renamed `children` table → `additional_guests`, replaced date_of_birth with age int, dropped child_meal_tier enum.
 - Profile collapse: `/profile` now renders the editor directly (no more `/profile/edit`). Avatar in header.
 - New AccessibilitySection (mobility, vision, hearing, neurodivergent, chronic, other) inserted after Dietary in the wizard and present on Profile. accessibility_preferences table + RLS + i18n.
@@ -182,6 +190,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - db-apply auto-applies fixtures (sample_employees) so the dev sign-in shortcut works after every reset.
 
 **M4.3 — Itinerary, timezones, event config [complete]:**
+
 - New Itinerary screen: gradient Hero with live countdown, day-grouped vertical timeline with per-type icon chips and `kizuna-fade-in` stagger animation.
 - ImportItineraryDialog (paste / upload / email tabs; paste live, others coming soon). Calls parse-itinerary edge function (graceful 404 fallback).
 - saveParsedFlights persists into public.flights with IATA → IANA timezone lookup.
@@ -207,12 +216,14 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: feat(guests) invitation lifecycle with stripe payment
 
 **Deferred from M5 (intentional, follow-up milestones):**
+
 - Sponsoring-employee notification on guest accept (M9 notifications)
 - Receipt + confirmation email after payment success (M9)
 - Guest list and invite-management UI for employees (M7 admin)
 - Children fee tier (lands when ChildrenStep gets dedicated registration_task_key)
 
 **M5 review:**
+
 - 62 vitest tests across 13 files (15 new for integrations); 8/8 playwright
 - Edge functions excluded from ESLint since they're Deno-runtime modules. They share the invitationToken implementation byte-for-byte with the SPA, eliminating drift.
 - Graceful-degradation pattern fully proven for Resend and Stripe: each module logs once at boot and returns deterministic stub data without throwing.
@@ -234,6 +245,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(itinerary): offline cache and admin transport manifest`
 
 **M6 review:**
+
 - Service worker now caches the full operational dataset the bus operator needs offline (itinerary, flights, accommodations, transport, sessions, events). Cache name bumped to v2 to invalidate stale entries.
 - Realtime push already worked — the existing useItinerary subscription invalidates the TanStack query on any postgres_changes event for the user's itinerary_items rows.
 - Admin transport manifest joins flights + transport_vehicles + users so the bus operator handoff has flight number, airline, passenger/bag counts, special equipment, and assigned vehicle in a single CSV row.
@@ -259,11 +271,12 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(m7): live shareable report links with public view`
 
 **M7 review:**
+
 - 115/115 vitest, lint clean, typecheck clean.
 - Spec is explicit that shared links render LIVE data, not snapshots. The `report_snapshots` table is a token holder; the edge function joins live tables on every request and returns rows + last_modified.
 - AdminScreen was simplified by extracting REPORTS config + ActiveReport sub-component (post-simplify pass). Adding the 7th report (or share-mapping a new one) is a one-line append.
 - Token format: 32 random bytes → 43 unpadded base64url chars. URL-safe, effectively unguessable, no JWT signing key needed because the token itself is the secret.
-- Recipient experience: hits /share/reports/:token. AppLayout strips chrome on /share/* prefix so no Kizuna nav/footer leaks into the hotel coordinator's view.
+- Recipient experience: hits /share/reports/:token. AppLayout strips chrome on /share/\* prefix so no Kizuna nav/footer leaks into the hotel coordinator's view.
 
 ### M8 - HiBob and Perk sync [partial]
 
@@ -294,6 +307,7 @@ Paper MCP hit its weekly limit on the first call (2026-04-30). When the user upg
 - [x] Commit: `feat(m9): in-app notification center + deadline reminder cron`
 
 **M9 review:**
+
 - 118/118 vitest, lint clean, typecheck clean.
 - The cron function authenticates via `x-cron-secret` header (CRON_SECRET env), avoiding the need for an admin JWT for unattended runs. Locally defaults to `dev-cron-secret` so manual testing is one curl away.
 - Channel routing matches the brief: employees with a slack_handle get a DM, everyone else gets email. The notification log row is written regardless of delivery outcome — admin audit needs both successes and failures.
@@ -312,7 +326,7 @@ fill in the registration sections for their dependents.
 - [x] F005 GuestsSection split (542 → 277 LOC) + EditInvitationDialog
 - [x] F006 userScopedRepository docstring on the as-never cast
 - [x] F007 32KB / 2KB body caps on parse-itinerary + rephrase-icebreaker
-- [x] F008 CORS justification comment in _shared/cors.ts
+- [x] F008 CORS justification comment in \_shared/cors.ts
 - [x] F009 Sentry TODO replaced with reportError shim
 - [x] F010-F015 knip dead-export sweep
 - [x] Email-on-payment: pending → sent → accepted lifecycle, sponsor
@@ -324,6 +338,7 @@ fill in the registration sections for their dependents.
 - [x] Dependents-as-full-attendees: shadow users + active-subject context
 
 **Definition of done:**
+
 - typecheck/lint clean (0 warnings)
 - 316 vitest, 75 pgTAP
 - production build clean (0 vulnerabilities per `npm audit`)
@@ -348,6 +363,7 @@ fill in the registration sections for their dependents.
 - [x] Low 10: `transport_vehicles.pickup_tz` / `transport_requests.pickup_tz` defaults removed
 
 **Definition of done:**
+
 - typecheck/lint/test/build clean (314 vitest, 66 pgTAP)
 - single commit at sweep boundary
 
@@ -392,16 +408,17 @@ fill in the registration sections for their dependents.
 
 ## Sequencing
 
-| # | Track | Why this slot |
-|---|---|---|
-| 1 | **Stripe (live mode)** | Already 70% built. Closing the bundled-checkout loop unblocks real registration. |
-| 2 | **Resend (live mode)** | Stripe success → invite email. Resend is the dependency under the dependency. |
-| 3 | **HiBob bulk + cron** | Replaces the seeded fixture roster with real employees. |
-| 4 | **Okta SSO** | Once HiBob seeds `auth.users`, SSO has bodies to attach to. |
-| 5 | **Slack notifications** | Cheap, high-signal. Slot it whenever an evening is free. |
-| 6 | **Perk sync** | Hardest API access. Start the procurement clock now; ship integration when keys arrive. |
-| 7 | **Photo gallery** | Pure feature work, no dependency on the integrations above. |
-| 8 | **UI revamp** | Pick a Paper variant, port tokens, sweep `src/components/ui/`. |
+| #   | Track                   | Why this slot                                                                                                                                                                       |
+| --- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Stripe (live mode)**  | Already 70% built. Closing the bundled-checkout loop unblocks real registration.                                                                                                    |
+| 2   | **Resend (live mode)**  | Stripe success → invite email. Resend is the dependency under the dependency.                                                                                                       |
+| 3   | **HiBob bulk + cron**   | Replaces the seeded fixture roster with real employees.                                                                                                                             |
+| 4   | **Okta SSO**            | Once HiBob seeds `auth.users`, SSO has bodies to attach to.                                                                                                                         |
+| 5   | **Slack notifications** | Cheap, high-signal. Slot it whenever an evening is free.                                                                                                                            |
+| 6   | **Perk sync**           | Hardest API access. Start the procurement clock now; ship integration when keys arrive.                                                                                             |
+| 7   | **Photo gallery**       | Pure feature work, no dependency on the integrations above.                                                                                                                         |
+| 8   | **UI revamp**           | Pick a Paper variant, port tokens, sweep `src/components/ui/`.                                                                                                                      |
+| 9   | **Agentic CLI surface** | The lead-magnet feature. Cmd-K is a nav gimmick; the CLI is the agent showcase. Detailed plan in `tasks/cli-spec.md`. Read-only flows first, then PAT + HTTP + MCP, then mutations. |
 
 Each track below has: **current state · API research · phased plan · gotchas · MVP checklist.**
 
@@ -411,12 +428,12 @@ Each track below has: **current state · API research · phased plan · gotchas 
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| `supabase/functions/create-stripe-checkout/index.ts` | Single-guest fallback. |
-| `supabase/functions/create-sponsor-fees-checkout/index.ts` | Bundled-checkout entry. Existing logic but lacks idempotency keys and uses raw `fetch` instead of the SDK. |
-| `supabase/functions/stripe-webhook/index.ts` | Receives the success event. Signature verification in place; row updates need to move into a transactional Postgres function. |
-| `supabase/functions/_shared/sponsorPaymentFanOut.ts` | Webhook → guest-invitation status fan-out. |
+| Asset                                                                     | Status                                                                                                                        |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `supabase/functions/create-stripe-checkout/index.ts`                      | Single-guest fallback.                                                                                                        |
+| `supabase/functions/create-sponsor-fees-checkout/index.ts`                | Bundled-checkout entry. Existing logic but lacks idempotency keys and uses raw `fetch` instead of the SDK.                    |
+| `supabase/functions/stripe-webhook/index.ts`                              | Receives the success event. Signature verification in place; row updates need to move into a transactional Postgres function. |
+| `supabase/functions/_shared/sponsorPaymentFanOut.ts`                      | Webhook → guest-invitation status fan-out.                                                                                    |
 | Env: `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (Doppler, all configs). |
 
 ### Research summary
@@ -443,6 +460,7 @@ Each track below has: **current state · API research · phased plan · gotchas 
 - Webhook handler must return 200 within 30s. If `mark_guest_paid` is slow under load, push to `pg_net` and ack immediately.
 
 ### MVP checklist
+
 - [ ] `npm:stripe@17` wired in `create-sponsor-fees-checkout`
 - [ ] Idempotency-Key on every `sessions.create`
 - [ ] Per-line `product_data.metadata` carries both ids
@@ -456,12 +474,12 @@ Each track below has: **current state · API research · phased plan · gotchas 
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| `supabase/functions/send-notification/index.ts` | Exists. Verify content. |
+| Asset                                                 | Status                  |
+| ----------------------------------------------------- | ----------------------- |
+| `supabase/functions/send-notification/index.ts`       | Exists. Verify content. |
 | `supabase/functions/send-deadline-reminders/index.ts` | Exists. Verify content. |
 | Env: `RESEND_API_KEY`, `RESEND_FROM_EMAIL` (Doppler). |
-| No verified domain, no template system. |
+| No verified domain, no template system.               |
 
 ### Research summary
 
@@ -499,6 +517,7 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
 - Always set tag `category` (`transactional` / `broadcast` / `system`).
 
 ### MVP checklist
+
 - [ ] Sender domain verified, SPF + DKIM + DMARC live
 - [ ] `_shared/resend.ts` with stub mode
 - [ ] `sent_emails` + `email_suppressions` tables migrated
@@ -511,11 +530,11 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| `supabase/functions/sync-hibob/index.ts` | Real bulk-pull wired. Uses `btoa(${id}:${token})` Basic auth. |
-| `supabase/functions/hibob-self/index.ts` | Self-lookup endpoint, same auth. |
-| `supabase/functions/_shared/hibobStub.ts` | Deterministic fixtures. |
+| Asset                                                                                                                                                | Status                                                        |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `supabase/functions/sync-hibob/index.ts`                                                                                                             | Real bulk-pull wired. Uses `btoa(${id}:${token})` Basic auth. |
+| `supabase/functions/hibob-self/index.ts`                                                                                                             | Self-lookup endpoint, same auth.                              |
+| `supabase/functions/_shared/hibobStub.ts`                                                                                                            | Deterministic fixtures.                                       |
 | Env: `HIBOB_API_KEY`, `HIBOB_WEBHOOK_SECRET`. **Rename to `HIBOB_SERVICE_USER_ID` + `HIBOB_SERVICE_USER_TOKEN`** to match HiBob's actual auth model. |
 
 ### Research summary
@@ -527,21 +546,21 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
   - `GET /v1/avatars/{employeeId}` — avatar URL.
 - **Field mapping** (HiBob → `employee_profiles`):
 
-| kizuna column | HiBob path |
-|---|---|
-| `first_name` | `root.firstName` |
-| `last_name` | `root.surname` |
-| `preferred_name` | `root.displayName` |
-| `legal_name` | `root.fullName` |
-| `alternate_email` | `home.privateEmail` |
-| `phone_number` | `home.mobilePhone` |
-| `department` | `work.department` |
-| `team` | `work.custom.<HIBOB_TEAM_FIELD_ID>` |
-| `job_title` | `work.title` |
-| `start_date` | `work.startDate` |
-| `home_country` | `address.country` (ISO-2) |
-| `base_city` | `address.city`, fallback `work.site` |
-| `slack_handle` | `work.custom.<HIBOB_SLACK_FIELD_ID>` |
+| kizuna column     | HiBob path                           |
+| ----------------- | ------------------------------------ |
+| `first_name`      | `root.firstName`                     |
+| `last_name`       | `root.surname`                       |
+| `preferred_name`  | `root.displayName`                   |
+| `legal_name`      | `root.fullName`                      |
+| `alternate_email` | `home.privateEmail`                  |
+| `phone_number`    | `home.mobilePhone`                   |
+| `department`      | `work.department`                    |
+| `team`            | `work.custom.<HIBOB_TEAM_FIELD_ID>`  |
+| `job_title`       | `work.title`                         |
+| `start_date`      | `work.startDate`                     |
+| `home_country`    | `address.country` (ISO-2)            |
+| `base_city`       | `address.city`, fallback `work.site` |
+| `slack_handle`    | `work.custom.<HIBOB_SLACK_FIELD_ID>` |
 
 - **Webhooks:** `employee-left`, `employee-inactivated`, hire, per-field update events. Signature: **HMAC-SHA512** in **`Bob-Signature`** header. Constant-time compare.
 - **Avatars:** `GET /v1/avatars/{id}` returns a URL string. Stream into `avatars` Storage bucket at `avatars/<user_id>.jpg`. Don't store HiBob URLs directly — they expire and require auth.
@@ -564,6 +583,7 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
 - Rate limits unpublished; reports put it at 10–100 req/min/service-user. Prefer one bulk search over per-employee GETs.
 
 ### MVP checklist
+
 - [ ] Doppler secrets renamed
 - [ ] `HiBobClient` interface + factory
 - [ ] Bulk pull verified against production tenant
@@ -577,12 +597,12 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| Env: `VITE_OKTA_CLIENT_ID`, `VITE_OKTA_DOMAIN` (Doppler). | Configured but no callers. |
-| `src/features/auth/AuthContext.tsx` | Uses `signInWithPassword` only. |
-| `src/features/auth/SignInScreen.tsx` | Email + password form. Has dev-only shortcuts. |
-| Greenfield for SSO. |
+| Asset                                                     | Status                                         |
+| --------------------------------------------------------- | ---------------------------------------------- |
+| Env: `VITE_OKTA_CLIENT_ID`, `VITE_OKTA_DOMAIN` (Doppler). | Configured but no callers.                     |
+| `src/features/auth/AuthContext.tsx`                       | Uses `signInWithPassword` only.                |
+| `src/features/auth/SignInScreen.tsx`                      | Email + password form. Has dev-only shortcuts. |
+| Greenfield for SSO.                                       |
 
 ### Research summary
 
@@ -595,6 +615,7 @@ Start at `p=none`, tighten to `quarantine` after the first 30 days clean.
   - Attribute statements: `email`, `first_name`, `last_name`, `groups` (filter regex `supafest-.*`)
   - Toggle "Sign assertions" — Supabase rejects unsigned.
 - **Supabase side** (CLI; dashboard SSO UI is read-only):
+
 ```bash
 supabase sso add --type saml \
   --project-ref <ref> \
@@ -602,6 +623,7 @@ supabase sso add --type saml \
   --domains supabase.com \
   --attribute-mapping-file mapping.json
 ```
+
 - **JIT, not pre-seeded.** Supabase's SAML flow auto-creates `auth.users` on first successful assertion; existing `ensure_public_user_for_auth_ai` trigger handles the `public.users` mirror.
 - **Group mapping:** extend `custom_access_token_hook` to read `auth.users.raw_user_meta_data->'groups'`, write to `public.users.role` and `is_leadership`. Honor `field_source = 'okta'` so we never overwrite a manually-set role.
 - **Coexistence:** `/sign-in` checks email domain — `@supabase.com` → `signInWithSSO`, everything else → `signInWithPassword`. Sample employees + dev users keep working.
@@ -623,6 +645,7 @@ supabase sso add --type saml \
 - **The hook fires on EVERY token mint** including refresh. Cheap, but make the role write a no-op when nothing changed.
 
 ### MVP checklist
+
 - [ ] Okta SAML app provisioned, sign-assertions ON
 - [ ] `supabase sso add` registered
 - [ ] `custom_access_token_hook` translates `groups` → role + leadership
@@ -635,10 +658,10 @@ supabase sso add --type saml \
 
 ### Current state
 
-| Asset | Status |
-|---|---|
+| Asset                                                     | Status      |
+| --------------------------------------------------------- | ----------- |
 | Env: `SLACK_BOT_TOKEN`, `SLACK_SIGNING_SECRET` (Doppler). | Configured. |
-| No edge function or callers yet. Greenfield. |
+| No edge function or callers yet. Greenfield.              |
 
 ### Research summary
 
@@ -664,6 +687,7 @@ supabase sso add --type saml \
 - Slack event subscription URL is challenged on first registration; the edge function must echo the challenge token.
 
 ### MVP checklist
+
 - [ ] Slack app installed, `xoxb-` in Doppler
 - [ ] `_shared/slack.ts` with stub mode
 - [ ] Registration-complete admin ping live
@@ -675,12 +699,12 @@ supabase sso add --type saml \
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| Env: `PERK_API_KEY` (Doppler). | Configured but unused. |
-| `flights.perk_booking_ref` column exists. | Schema-ready. |
-| `flights.source` enum has `'perk'`. | Schema-ready. |
-| No client, no edge function. Greenfield. |
+| Asset                                     | Status                 |
+| ----------------------------------------- | ---------------------- |
+| Env: `PERK_API_KEY` (Doppler).            | Configured but unused. |
+| `flights.perk_booking_ref` column exists. | Schema-ready.          |
+| `flights.source` enum has `'perk'`.       | Schema-ready.          |
+| No client, no edge function. Greenfield.  |
 
 ### Research summary
 
@@ -692,16 +716,16 @@ supabase sso add --type saml \
   - `GET /users` — to map TravelPerk user → kizuna `user_id` by email
 - **Field mapping** (booking.segments[i] → kizuna `flights`):
 
-| kizuna column | TravelPerk source |
-|---|---|
-| `user_id` | lookup `traveller.email` against `auth.users.email` |
-| `perk_booking_ref` | `booking.id` |
-| `direction` | derived: outbound if `departure_at < event.start`, else return |
-| `origin` / `destination` | `segment.origin.iata` / `segment.destination.iata` |
-| `departure_at` / `arrival_at` | `segment.departure_datetime` / `segment.arrival_datetime` |
-| `airline` | `segment.carrier.name` |
-| `flight_number` | `segment.carrier_code` + `segment.flight_number` |
-| `source` | `'perk'` |
+| kizuna column                 | TravelPerk source                                              |
+| ----------------------------- | -------------------------------------------------------------- |
+| `user_id`                     | lookup `traveller.email` against `auth.users.email`            |
+| `perk_booking_ref`            | `booking.id`                                                   |
+| `direction`                   | derived: outbound if `departure_at < event.start`, else return |
+| `origin` / `destination`      | `segment.origin.iata` / `segment.destination.iata`             |
+| `departure_at` / `arrival_at` | `segment.departure_datetime` / `segment.arrival_datetime`      |
+| `airline`                     | `segment.carrier.name`                                         |
+| `flight_number`               | `segment.carrier_code` + `segment.flight_number`               |
+| `source`                      | `'perk'`                                                       |
 
 - **Sync model:** webhooks primary + nightly cron backstop. `GET /bookings?updated_since=...` reconciles missed deliveries.
 - **Webhooks:** trip-changed events. HMAC-SHA256 over raw body. Header name not in public docs; confirm with support once creds issue.
@@ -726,6 +750,7 @@ supabase sso add --type saml \
 - Email mismatches (`name+travel@supabase.com` vs. `name@supabase.com`) — surface a `data_conflicts` row when no match.
 
 ### MVP checklist
+
 - [ ] Vendor confirmed + sandbox requested
 - [ ] `_shared/perkStub.ts`
 - [ ] `_shared/perkClient.ts` switching on env
@@ -739,9 +764,9 @@ supabase sso add --type saml \
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| `community_media` Storage bucket | Exists with admin/self RLS policies. |
+| Asset                                                  | Status                               |
+| ------------------------------------------------------ | ------------------------------------ |
+| `community_media` Storage bucket                       | Exists with admin/self RLS policies. |
 | No `media_items` table, no UI, no tagging. Greenfield. |
 
 ### Plan
@@ -787,6 +812,7 @@ RLS: `event_only` visible to attendees; `public` to all signed-in; `private` to 
 - **EXIF.** Strip GPS before storing. Some users will share photos taken at home.
 
 ### MVP checklist
+
 - [ ] `media_items` + `media_tags` tables + RLS
 - [ ] Upload pipeline with EXIF strip + derivatives
 - [ ] `/community/gallery` masonry view
@@ -799,10 +825,10 @@ RLS: `event_only` visible to attendees; `public` to all signed-in; `private` to 
 
 ### Current state
 
-| Asset | Status |
-|---|---|
-| `src/components/ui/` | 9 files: button, checkbox, dialog, dropzone, input, label, progress, textarea, toast. Pure shadcn. |
-| `src/styles/globals.css` | 6 themes wired: light, dark, barbie, supa, hermione, kirk. Token system in place via CSS variables. |
+| Asset                                                                                                                        | Status                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `src/components/ui/`                                                                                                         | 9 files: button, checkbox, dialog, dropzone, input, label, progress, textarea, toast. Pure shadcn.  |
+| `src/styles/globals.css`                                                                                                     | 6 themes wired: light, dark, barbie, supa, hermione, kirk. Token system in place via CSS variables. |
 | Verdict: theme infrastructure is solid. The "very shadcn" feel is from default radius / shadow / typography, not the tokens. |
 
 ### Three Paper variants
@@ -827,11 +853,100 @@ Live in the `Kizuna` Paper file, on the canvas next to the existing Home Desktop
 - shadcn Toast and Dialog have animation defaults that look default-shadcn. Override `data-[state=open]:animate-in` keyframes too.
 
 ### MVP checklist
+
 - [ ] Paper variant picked, brand-voice doc locked
 - [ ] Token migration in `globals.css`
 - [ ] All 9 shadcn primitives swept
 - [ ] HomeScreen + ItineraryHero hero treatments shipped
 - [ ] Playwright visual baseline
+
+---
+
+## P2-9 · Agentic CLI surface
+
+> Detailed implementation spec lives in `tasks/cli-spec.md`. Read that file first.
+
+### Thesis
+
+Two unrelated features sharing a footer:
+
+- **Cmd-K palette** is a navigation gimmick. Routes only. One small PR, never grows.
+- **CLI** is the actual product. An agent surface for an offsite app that proves the bet that every SaaS will need one. The in-app footer is the human-typeable demo of that surface; the same registry powers an HTTP edge function, an `npx` package, and a standalone MCP server.
+
+For the open-source-clone story this is the headline screenshot. Permissioning rides on RLS; agents inherit their user's row-level access with no service-role escape hatch. That is the Supabase angle.
+
+### Architecture
+
+```
+            ┌──────────────────────────────────────┐
+            │   src/lib/cli/registry.ts            │
+            │   typed command registry             │
+            │   zod schemas for input + output     │
+            │   dispatcher hits Postgres via RLS   │
+            └──────────────────────────────────────┘
+                      │            │              │
+        ┌─────────────┘            │              └─────────────┐
+        ▼                          ▼                            ▼
+  Footer CLI            supabase/functions/cli/        packages/kizuna-mcp/
+  (in-app demo)         (REST + PAT + npx wrap)        (separate npm package)
+```
+
+### Milestones
+
+#### M1 — Cmd-K palette gimmick (½ day)
+
+- [ ] Install `cmdk`, add `src/components/CommandPalette.tsx`
+- [ ] Auto-derive route manifest from `src/app/router.tsx` so palette stays in sync
+- [ ] Cmd-K opens palette, fuzzy nav, escape closes
+- [ ] Palette is purely cosmetic — never dispatches commands. Never grows.
+
+#### M2 — Registry + footer CLI, read-only (1 week)
+
+- [ ] `src/lib/cli/registry.ts` — typed `Command<TInput, TOutput>` registry, zod schemas, scopes, examples
+- [ ] `src/lib/cli/parser.ts` — verb-noun tokenizer with `@user`, `:id`, `--flag` support
+- [ ] `src/lib/cli/dispatcher.ts` — parse → validate → authorize → handle → format (JSON or MD)
+- [ ] Replace `CommandPaletteBar.tsx` with a working footer terminal: input, history, output panel, copy, format toggle
+- [ ] Implement v1 read commands: `help`, `schema`, `me`, `me itinerary`, `me sessions`, `me documents`, `me roommates`, `me transport`, `me notifications`, `attendees`, `sessions`, `events`, `event`, `agenda`, `photos`, `channels`
+- [ ] Vitest coverage for parser + dispatcher + every command
+- [ ] pgTAP coverage for any new SQL functions
+- [ ] Playwright spec: open footer, run `me itinerary --format=md`, copy output
+
+#### M3 — HTTP edge function + PAT auth + npx package (1 week)
+
+- [ ] `api_keys` table + RLS + pgTAP (see spec for schema)
+- [ ] `/profile/api-keys` page, slotted at the bottom of profile nav under Transport, called "API Keys"
+- [ ] PAT create / list / revoke flow with one-time-show secret modal
+- [ ] `supabase/functions/cli/index.ts` — POST endpoint that accepts PAT or session JWT
+- [ ] OAuth code-flow for agent auth (`/cli/oauth-authorize` + `/cli/oauth-callback`) with Kizuna-chromed callback page
+- [ ] `packages/kizuna-cli/` — `npx kizuna ...` thin wrapper around HTTP
+- [ ] Edge function tests for unauthorized, forbidden, validation, success
+- [ ] Playwright: PAT issue → revoke flow
+
+#### M4 — MCP server (1 week)
+
+- [ ] `packages/kizuna-mcp/` — separate npm package, standalone MCP server
+- [ ] Auto-converts each command's zod schema to MCP tool definition
+- [ ] `KIZUNA_URL` + `KIZUNA_TOKEN` env config; OAuth bootstrap flow if no token
+- [ ] Configuration recipes: Claude Desktop, Cursor, Claude Code
+- [ ] Smoke test: `kizuna://schema` resource returns the catalog
+- [ ] 60-second screencast deliverable: "Hey Claude, who at the offsite likes snowboarding?"
+
+#### M5 — Mutations + admin commands (1 week)
+
+- [ ] Mutation pattern locked: handlers call existing Postgres functions; never duplicate business logic
+- [ ] `me favorite-session`, `me rsvp`, `me sign-document`, `me set-hobby`, `me update-dietary`
+- [ ] `admin nudge`, `admin assign-room`, `admin conflicts approve|reject`, `admin reports <kind>`
+- [ ] All admin commands gated by `app_role` claim, surfaced in `schema` only when authorized
+- [ ] Audit-log every mutation to a new `cli_audit_log` table
+
+### Definition of done for each milestone
+
+The standard project gates plus:
+
+- [ ] Footer CLI works on every authenticated route
+- [ ] `npm run gen:types` re-run, no drift
+- [ ] `tasks/cli-spec.md` updated if architecture diverged
+- [ ] One screencast per milestone, posted in the project Notion
 
 ---
 
