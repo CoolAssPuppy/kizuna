@@ -58,14 +58,13 @@ export function HomeMemoriesSection({ eventId, eventName }: Props): JSX.Element 
         </Link>
       </header>
 
-      <div
-        className="columns-2 gap-2 sm:columns-3 md:columns-4 lg:columns-5"
-        style={{ columnFill: 'balance' }}
-      >
+      <ul className="flex flex-wrap gap-2">
         {morphed.map(({ photo, leaving }) => (
-          <SmallTile key={photo.id} photo={photo} leaving={leaving} />
+          <li key={photo.id} className="shrink-0">
+            <SmallTile photo={photo} leaving={leaving} />
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
@@ -141,34 +140,38 @@ interface SmallTileProps {
   leaving: boolean;
 }
 
+// Fixed square tile so 60% smaller is exact and predictable. The
+// flex-wrap parent lets rows pack as many as fit per row at any
+// breakpoint.
+const TILE_PX = 96;
+
 function SmallTile({ photo, leaving }: SmallTileProps): JSX.Element {
   const url = useStorageImage(PHOTOS_BUCKET, `${photo.storage_prefix}/thumb.webp`);
-  const ratio = photo.width && photo.height ? photo.height / photo.width : 1;
   return (
     <Link
       to={`/community/photos/${photo.id}`}
-      className="mb-2 block break-inside-avoid border"
+      className="block overflow-hidden border"
       style={{
+        width: TILE_PX,
+        height: TILE_PX,
         borderColor: 'var(--c-rule)',
         backgroundColor: 'var(--c-surface)',
         opacity: leaving ? 0 : 1,
-        transform: leaving ? 'scale(0.98)' : 'scale(1)',
+        transform: leaving ? 'scale(0.92)' : 'scale(1)',
         transition: `opacity ${EXIT_MS}ms ease, transform ${EXIT_MS}ms ease`,
         animation: leaving ? undefined : 'kizuna-fade-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both',
       }}
     >
-      <div style={{ aspectRatio: `${1} / ${ratio || 1}` }} className="w-full">
-        {url ? (
-          <img
-            src={url}
-            alt={photo.caption ?? ''}
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-full w-full" style={{ backgroundColor: 'var(--c-rule)' }} />
-        )}
-      </div>
+      {url ? (
+        <img
+          src={url}
+          alt={photo.caption ?? ''}
+          loading="lazy"
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <div className="h-full w-full" style={{ backgroundColor: 'var(--c-rule)' }} />
+      )}
     </Link>
   );
 }
