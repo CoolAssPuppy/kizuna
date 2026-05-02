@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { CommandPaletteBar } from '@/components/CommandPaletteBar';
 import { StatusDot } from '@/components/StatusDot';
 import { TerminalEyebrow } from '@/components/TerminalEyebrow';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -105,7 +104,6 @@ export function HomeScreen(): JSX.Element {
           {editorial.sidebar.map((item) => (
             <SidebarEditorialCard key={item.id} item={item} />
           ))}
-          <CommandPaletteBar />
         </aside>
       </div>
     </main>

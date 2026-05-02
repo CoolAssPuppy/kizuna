@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 import { AppFooter } from '@/components/AppFooter';
 import { CommandPalette } from '@/components/CommandPalette';
+import { FooterTerminal } from '@/components/FooterTerminal';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { TerminalHeader } from '@/components/TerminalHeader';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -55,6 +56,7 @@ export function AppLayout({ children }: Props): JSX.Element {
       <CommandPalette />
       <TerminalHeader />
       <div className="flex-1">{children}</div>
+      <FooterTerminal />
       <AppFooter />
     </div>
   );

@@ -37,7 +37,15 @@
     "closeMenu": "Close menu"
   },
   "terminal": {
-    "palettePlaceholder": "type / for command palette"
+    "label": "Command line",
+    "placeholder": "type a command, or `/` for the palette · `?` for help",
+    "help": "Type `help` for available commands, or `/` to focus the bar.",
+    "copy": "Copy output",
+    "copied": "Output copied",
+    "format": {
+      "json": "JSON",
+      "md": "Markdown"
+    }
   },
   "palette": {
     "title": "Command Palette",
