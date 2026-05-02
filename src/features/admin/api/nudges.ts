@@ -1,4 +1,5 @@
 import { callEdgeFunction } from '@/lib/edgeFunction';
+import { resolveProfileName } from '@/lib/fullName';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -42,12 +43,13 @@ export async function fetchNudgeHistory(client: AppSupabaseClient): Promise<Nudg
 }
 
 export type NudgeAudience =
+  | { kind: 'everyone' }
   | { kind: 'all_employees' }
   | { kind: 'all_guests' }
-  | { kind: 'user'; userId: string };
+  | { kind: 'users'; userIds: string[] };
 
 export interface SendNudgePayload {
-  channel: NotificationChannel;
+  channels: NotificationChannel[];
   type: NotificationType;
   subject: string;
   body: string;
@@ -62,27 +64,34 @@ interface SendNudgeResult {
 const SEND_CONCURRENCY = 8;
 
 /**
- * Fan out a manual nudge to every resolved recipient. Uses bounded
- * concurrency (Promise.allSettled in chunks) so that "all employees"
- * doesn't tie up the Supabase functions endpoint with 60+ serialised
- * requests, but also doesn't try to flood it with every recipient at
- * once.
+ * Fan out a manual nudge to every resolved recipient across every
+ * selected channel. Bounded concurrency keeps "all employees + 3
+ * channels" from flooding the functions endpoint, but parallelises
+ * enough that admin sends finish in seconds rather than minutes.
  */
 export async function sendNudge(
   client: AppSupabaseClient,
   payload: SendNudgePayload,
 ): Promise<SendNudgeResult> {
+  if (payload.channels.length === 0) return { attempted: 0, delivered: 0 };
   const recipientIds = await resolveRecipients(client, payload.audience);
   if (recipientIds.length === 0) return { attempted: 0, delivered: 0 };
 
+  const jobs: Array<{ userId: string; channel: NotificationChannel }> = [];
+  for (const userId of recipientIds) {
+    for (const channel of payload.channels) {
+      jobs.push({ userId, channel });
+    }
+  }
+
   let delivered = 0;
-  for (let i = 0; i < recipientIds.length; i += SEND_CONCURRENCY) {
-    const slice = recipientIds.slice(i, i + SEND_CONCURRENCY);
+  for (let i = 0; i < jobs.length; i += SEND_CONCURRENCY) {
+    const slice = jobs.slice(i, i + SEND_CONCURRENCY);
     const settled = await Promise.allSettled(
-      slice.map((userId) =>
+      slice.map(({ userId, channel }) =>
         callEdgeFunction<{ delivered: boolean }>(client, 'send-notification', {
           userId,
-          channel: payload.channel,
+          channel,
           type: payload.type,
           subject: payload.subject,
           body: payload.body,
@@ -93,21 +102,28 @@ export async function sendNudge(
       if (result.status === 'fulfilled' && result.value.delivered) delivered += 1;
     }
   }
-  return { attempted: recipientIds.length, delivered };
+  return { attempted: jobs.length, delivered };
 }
 
 async function resolveRecipients(
   client: AppSupabaseClient,
   audience: NudgeAudience,
 ): Promise<string[]> {
-  if (audience.kind === 'user') return [audience.userId];
-
-  const role = audience.kind === 'all_guests' ? 'guest' : 'employee';
-  const { data, error } = await client
-    .from('users')
-    .select('id')
-    .eq('role', role)
-    .eq('is_active', true);
+  if (audience.kind === 'users') {
+    return Array.from(new Set(audience.userIds));
+  }
+  const base = client.from('users').select('id').eq('is_active', true);
+  const filtered = (() => {
+    switch (audience.kind) {
+      case 'everyone':
+        return base.in('role', ['employee', 'guest']);
+      case 'all_employees':
+        return base.eq('role', 'employee');
+      case 'all_guests':
+        return base.eq('role', 'guest');
+    }
+  })();
+  const { data, error } = await filtered;
   if (error) throw error;
   return (data ?? []).map((u) => u.id);
 }
@@ -115,6 +131,21 @@ async function resolveRecipients(
 export interface UserSearchResult {
   id: string;
   email: string;
+  name: string;
+  role: string;
+}
+
+interface UserSearchRow {
+  id: string;
+  email: string;
+  role: string;
+  employee_profiles: Array<{
+    first_name: string | null;
+    last_name: string | null;
+    preferred_name: string | null;
+    legal_name: string | null;
+  }> | null;
+  guest_profiles: Array<{ first_name: string; last_name: string }> | null;
 }
 
 export async function searchUsers(
@@ -126,10 +157,24 @@ export async function searchUsers(
   if (!trimmed) return [];
   const { data, error } = await client
     .from('users')
-    .select('id, email')
+    .select(
+      `
+      id, email, role,
+      employee_profiles ( first_name, last_name, preferred_name, legal_name ),
+      guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
+    `,
+    )
     .ilike('email', `%${trimmed}%`)
     .eq('is_active', true)
     .limit(limit);
   if (error) throw error;
-  return data ?? [];
+  return ((data ?? []) as UserSearchRow[]).map((row) => {
+    const { full } = resolveProfileName(row.employee_profiles?.[0], row.guest_profiles?.[0]);
+    return {
+      id: row.id,
+      email: row.email,
+      name: full || row.email,
+      role: row.role,
+    };
+  });
 }

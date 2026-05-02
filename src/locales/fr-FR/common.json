@@ -496,12 +496,13 @@
     "nav": {
       "label": "Sections admin",
       "agenda": "Agenda",
-      "groundTransport": "Outil de Transport Terrestre",
-      "roomAssignment": "Outil d'Attribution des Chambres",
+      "groundTransport": "Transport Terrestre",
+      "roomAssignment": "Attribuer les Chambres",
       "feed": "Fil",
       "documents": "Documents",
       "stats": "Statistiques",
-      "nudges": "Rappels",
+      "nudges": "Communication",
+      "communication": "Communication",
       "reports": "Rapports",
       "conflicts": "Conflits"
     },
@@ -749,17 +750,21 @@
       }
     },
     "nudges": {
-      "title": "Rappels",
-      "subtitle": "Rappels manuels, échéances et journal d'audit complet.",
-      "send": "Envoyer un rappel",
+      "title": "Communication",
+      "subtitle": "Envoyez des annonces et des rappels et consultez l'ensemble du journal.",
+      "send": "Envoyer un message",
       "sendCta": "Envoyer",
       "sending": "Envoi",
       "sent": "Envoyé : {{delivered}} sur {{attempted}}.",
-      "empty": "Aucun rappel n'a encore été envoyé.",
-      "clearUser": "Effacer",
+      "empty": "Aucun message n'a encore été envoyé.",
       "userPlaceholder": "Rechercher par e-mail",
+      "removeUser": "Retirer {{value}}",
+      "errors": {
+        "noAudience": "Choisissez un public avant l'envoi.",
+        "noChannel": "Choisissez au moins un canal avant l'envoi."
+      },
       "fields": {
-        "channel": "Canal",
+        "channels": "Canaux",
         "type": "Type",
         "audience": "Public",
         "subject": "Objet",
@@ -779,14 +784,17 @@
         "checkin_reminder": "Rappel d'enregistrement"
       },
       "audiences": {
+        "everyone": "Tout le monde",
         "all_employees": "Tous les employés",
         "all_guests": "Tous les invités",
-        "user": "Utilisateur spécifique"
+        "users": "Personnes spécifiques"
       }
     },
     "reports": {
       "title": "Rapports",
-      "subtitle": "Rapports en direct pour l'hôtel, le transport, la cuisine et la finance."
+      "subtitle": "Rapports en direct pour l'hôtel, le transport, la cuisine et la finance.",
+      "downloadAll": "Télécharger tous les rapports en CSV",
+      "downloadFailed": "Impossible de télécharger les rapports. Réessayez."
     },
     "tabs": {
       "registration": "Avancement des inscriptions",

@@ -1,3 +1,4 @@
+import { joinFullName, resolveProfileName } from '@/lib/fullName';
 import { type AppSupabaseClient, flatJoin, type Joined } from '@/lib/supabase';
 
 import type { CsvRow } from './csv';
@@ -13,16 +14,114 @@ import type { CsvRow } from './csv';
  */
 
 export interface RoomingRow extends CsvRow {
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  employee: string;
+  arrival_at: string | null;
+  arrival_flight: string | null;
   hotel: string;
   room_number: string | null;
   room_type: string;
   check_in: string;
   check_out: string;
-  guest_name: string;
-  guest_email: string;
   is_primary: boolean;
   special_requests: string | null;
 }
+
+interface NameProfile {
+  first_name: string | null;
+  last_name: string | null;
+  preferred_name: string | null;
+  legal_name: string | null;
+}
+
+interface FlightLeg {
+  direction: 'inbound' | 'outbound';
+  arrival_at: string;
+  flight_number: string | null;
+}
+
+interface InboundFlight {
+  arrival_at: string;
+  flight_number: string | null;
+}
+
+/**
+ * Pick the user's final inbound flight leg. For multi-leg trips, the
+ * latest arrival_at is the one that lands at the event hub.
+ */
+function pickInboundFlight(
+  flights: ReadonlyArray<FlightLeg> | null | undefined,
+): InboundFlight | null {
+  if (!flights || flights.length === 0) return null;
+  let latest: FlightLeg | null = null;
+  for (const flight of flights) {
+    if (flight.direction !== 'inbound') continue;
+    if (!latest || flight.arrival_at > latest.arrival_at) latest = flight;
+  }
+  return latest ? { arrival_at: latest.arrival_at, flight_number: latest.flight_number } : null;
+}
+
+interface TravelerJoin {
+  email: string;
+  role: string;
+  employee_profiles: Joined<NameProfile>;
+  guest_profiles: Joined<{ first_name: string; last_name: string }>;
+  sponsor: Joined<{
+    email: string;
+    employee_profiles: Joined<NameProfile>;
+  }>;
+  flights: FlightLeg[] | null;
+}
+
+interface TravelerFields {
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  employee: string;
+  arrival_at: string | null;
+  arrival_flight: string | null;
+}
+
+/**
+ * Resolve the seven identity + arrival columns the rooming and
+ * transport reports share. `employee` is the sponsor's display name
+ * for guests/dependents, empty for direct attendees.
+ */
+function resolveTraveler(user: TravelerJoin | null): TravelerFields {
+  const { first, last } = resolveProfileName(
+    flatJoin(user?.employee_profiles),
+    flatJoin(user?.guest_profiles),
+  );
+  const sponsor = flatJoin(user?.sponsor);
+  const sponsorName = sponsor
+    ? resolveProfileName(flatJoin(sponsor.employee_profiles), null).full || sponsor.email
+    : '';
+  const inbound = pickInboundFlight(user?.flights);
+  return {
+    first_name: first,
+    last_name: last,
+    email: user?.email ?? '',
+    role: user?.role ?? '',
+    employee: sponsorName,
+    arrival_at: inbound?.arrival_at ?? null,
+    arrival_flight: inbound?.flight_number ?? null,
+  };
+}
+
+const TRAVELER_USER_SELECT = `
+  email, role,
+  employee_profiles ( first_name, last_name, preferred_name, legal_name ),
+  guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name ),
+  sponsor:users!users_sponsor_id_fkey (
+    email,
+    employee_profiles ( first_name, last_name, preferred_name, legal_name )
+  ),
+  flights ( direction, arrival_at, flight_number )
+`;
 
 export async function fetchRoomingList(
   client: AppSupabaseClient,
@@ -35,11 +134,7 @@ export async function fetchRoomingList(
       hotel_name, room_number, room_type, check_in, check_out, special_requests,
       accommodation_occupants (
         is_primary,
-        users (
-          email,
-          employee_profiles ( preferred_name, legal_name ),
-          guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
-        )
+        users ( ${TRAVELER_USER_SELECT} )
       )
     `,
     )
@@ -50,7 +145,7 @@ export async function fetchRoomingList(
 
   const rows: RoomingRow[] = [];
   for (const room of data ?? []) {
-    const baseRow = {
+    const roomFields = {
       hotel: room.hotel_name,
       room_number: room.room_number,
       room_type: room.room_type,
@@ -60,33 +155,30 @@ export async function fetchRoomingList(
     } as const;
     const occupants = room.accommodation_occupants ?? [];
     if (occupants.length === 0) {
-      rows.push({ ...baseRow, guest_name: '(unassigned)', guest_email: '', is_primary: false });
+      rows.push({
+        first_name: '(unassigned)',
+        last_name: '',
+        email: '',
+        role: '',
+        employee: '',
+        arrival_at: null,
+        arrival_flight: null,
+        ...roomFields,
+        is_primary: false,
+      });
       continue;
     }
     for (const occ of occupants) {
-      const user = flatJoin<{
-        email: string;
-        employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
-        guest_profiles: Joined<{ first_name: string; last_name: string }>;
-      }>(occ.users);
-      const email = user?.email ?? '';
-      const employee = flatJoin(user?.employee_profiles);
-      const guest = flatJoin(user?.guest_profiles);
-      const guestName =
-        guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
-      const displayName = employee?.preferred_name ?? employee?.legal_name ?? guestName ?? email;
-      rows.push({
-        ...baseRow,
-        guest_name: displayName,
-        guest_email: email,
-        is_primary: occ.is_primary,
-      });
+      const traveler = resolveTraveler(flatJoin<TravelerJoin>(occ.users));
+      rows.push({ ...traveler, ...roomFields, is_primary: occ.is_primary });
     }
   }
   return rows;
 }
 
 export interface DietaryRow extends CsvRow {
+  first_name: string;
+  last_name: string;
   email: string;
   restrictions: string;
   allergies: string;
@@ -101,27 +193,43 @@ export async function fetchDietarySummary(client: AppSupabaseClient): Promise<Di
     .select(
       `
       restrictions, allergies, alcohol_free, severity, notes,
-      users ( email )
+      users (
+        email,
+        employee_profiles ( first_name, last_name, preferred_name, legal_name ),
+        guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
+      )
     `,
     )
     .order('severity', { ascending: false });
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    email: flatJoin<{ email: string }>(row.users)?.email ?? '',
-    restrictions: row.restrictions.join(', '),
-    allergies: row.allergies.join(', '),
-    alcohol_free: row.alcohol_free,
-    severity: row.severity,
-    notes: row.notes,
-  }));
+  return (data ?? []).map((row) => {
+    const user = flatJoin<{
+      email: string;
+      employee_profiles: Joined<NameProfile>;
+      guest_profiles: Joined<{ first_name: string; last_name: string }>;
+    }>(row.users);
+    const { first, last } = resolveProfileName(
+      flatJoin(user?.employee_profiles),
+      flatJoin(user?.guest_profiles),
+    );
+    return {
+      first_name: first,
+      last_name: last,
+      email: user?.email ?? '',
+      restrictions: row.restrictions.join(', '),
+      allergies: row.allergies.join(', '),
+      alcohol_free: row.alcohol_free,
+      severity: row.severity,
+      notes: row.notes,
+    };
+  });
 }
 
 export interface SwagOrderRow extends CsvRow {
-  email: string;
   first_name: string;
   last_name: string;
-  attendee_type: 'employee' | 'guest' | 'additional_guest';
+  email: string;
   tshirt_size: string | null;
   shoe_size_eu: number | null;
 }
@@ -131,11 +239,11 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
     `
       tshirt_size, shoe_size_eu,
       user:users!swag_sizes_user_id_fkey (
-        email, role,
-        employee_profiles ( preferred_name, legal_name ),
+        email,
+        employee_profiles ( first_name, last_name, preferred_name, legal_name ),
         guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
       ),
-      additional_guests ( first_name, last_name, sponsor_id, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
+      additional_guests ( first_name, last_name, sponsor:users!additional_guests_sponsor_id_fkey ( email ) )
     `,
   );
   if (error) throw error;
@@ -143,41 +251,33 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
   return (data ?? []).map((row) => {
     const user = flatJoin<{
       email: string;
-      role: string;
-      employee_profiles: Joined<{ preferred_name: string | null; legal_name: string | null }>;
+      employee_profiles: Joined<NameProfile>;
       guest_profiles: Joined<{ first_name: string; last_name: string }>;
     }>(row.user);
     const additional = flatJoin<{
       first_name: string;
       last_name: string;
-      sponsor_id: string;
       sponsor: Joined<{ email: string }>;
     }>(row.additional_guests);
 
     if (additional) {
       return {
-        email: flatJoin<{ email: string }>(additional.sponsor)?.email ?? '',
         first_name: additional.first_name,
         last_name: additional.last_name,
-        attendee_type: 'additional_guest' as const,
+        email: flatJoin<{ email: string }>(additional.sponsor)?.email ?? '',
         tshirt_size: row.tshirt_size,
         shoe_size_eu: row.shoe_size_eu,
       };
     }
 
-    const employee = flatJoin(user?.employee_profiles);
-    const guest = flatJoin(user?.guest_profiles);
-    const guestName =
-      guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
-    const fullName = employee?.preferred_name ?? employee?.legal_name ?? guestName ?? '';
-    const [firstName = '', ...rest] = fullName.trim().split(/\s+/);
-    const lastName = rest.join(' ');
-    const attendeeType: 'employee' | 'guest' = user?.role === 'guest' ? 'guest' : 'employee';
+    const { first, last } = resolveProfileName(
+      flatJoin(user?.employee_profiles),
+      flatJoin(user?.guest_profiles),
+    );
     return {
+      first_name: first,
+      last_name: last,
       email: user?.email ?? '',
-      first_name: firstName,
-      last_name: lastName,
-      attendee_type: attendeeType,
       tshirt_size: row.tshirt_size,
       shoe_size_eu: row.shoe_size_eu,
     };
@@ -185,43 +285,108 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
 }
 
 export interface PaymentReconciliationRow extends CsvRow {
-  email: string;
   first_name: string;
   last_name: string;
+  email: string;
+  guests: string;
+  total_due: number;
+  total_received: number;
   payment_status: string;
+  stripe_payment_id: string;
+}
+
+interface GuestPaymentLeg {
+  first_name: string;
+  last_name: string;
   fee_amount: number | null;
+  payment_status: string;
   stripe_payment_id: string | null;
+}
+
+/** Returns null when the employee has no guests so the caller can skip the row. */
+function summarizePaymentLegs(legs: ReadonlyArray<GuestPaymentLeg>): {
+  guests: string;
+  total_due: number;
+  total_received: number;
+  payment_status: string;
+  stripe_payment_id: string;
+} | null {
+  if (legs.length === 0) return null;
+  let totalDue = 0;
+  let totalReceived = 0;
+  const guestNames: string[] = [];
+  const stripeIds: string[] = [];
+  const statusSet = new Set<string>();
+  for (const leg of legs) {
+    const fee = leg.fee_amount ?? 0;
+    totalDue += fee;
+    if (leg.payment_status === 'paid') totalReceived += fee;
+    statusSet.add(leg.payment_status);
+    const fullName = joinFullName(leg.first_name, leg.last_name);
+    if (fullName) guestNames.push(fullName);
+    if (leg.stripe_payment_id) stripeIds.push(leg.stripe_payment_id);
+  }
+  const status = statusSet.size === 1 ? [...statusSet][0]! : 'mixed';
+  return {
+    guests: guestNames.join(', '),
+    total_due: totalDue,
+    total_received: totalReceived,
+    payment_status: status,
+    stripe_payment_id: stripeIds.join(', '),
+  };
 }
 
 export async function fetchPaymentReconciliation(
   client: AppSupabaseClient,
 ): Promise<PaymentReconciliationRow[]> {
   const { data, error } = await client
-    .from('guest_profiles')
+    .from('users')
     .select(
       `
-      first_name, last_name, payment_status, fee_amount, stripe_payment_id,
-      user:users!guest_profiles_user_id_fkey ( email )
+      email,
+      employee_profiles ( first_name, last_name, preferred_name, legal_name ),
+      sponsored_guests:guest_profiles!guest_profiles_sponsor_id_fkey (
+        first_name, last_name, fee_amount, payment_status, stripe_payment_id
+      ),
+      sponsored_dependents:additional_guests!additional_guests_sponsor_id_fkey (
+        first_name, last_name, fee_amount, payment_status, stripe_payment_id
+      )
     `,
     )
-    .order('payment_status', { ascending: true });
+    .eq('role', 'employee');
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    email: flatJoin<{ email: string }>(row.user)?.email ?? '',
-    first_name: row.first_name,
-    last_name: row.last_name,
-    payment_status: row.payment_status,
-    fee_amount: row.fee_amount,
-    stripe_payment_id: row.stripe_payment_id,
-  }));
+  const rows: PaymentReconciliationRow[] = [];
+  for (const row of data ?? []) {
+    const sponsored = [
+      ...(row.sponsored_guests ?? []),
+      ...(row.sponsored_dependents ?? []),
+    ] as GuestPaymentLeg[];
+    const summary = summarizePaymentLegs(sponsored);
+    if (!summary) continue;
+    const { first, last } = resolveProfileName(flatJoin(row.employee_profiles), null);
+    rows.push({
+      first_name: first,
+      last_name: last,
+      email: row.email ?? '',
+      ...summary,
+    });
+  }
+  rows.sort((a, b) => a.payment_status.localeCompare(b.payment_status));
+  return rows;
 }
 
 export interface TransportManifestRow extends CsvRow {
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+  employee: string;
+  arrival_at: string | null;
+  arrival_flight: string | null;
   direction: string;
   pickup_at: string;
   pickup_tz: string;
-  email: string;
   flight_number: string | null;
   airline: string | null;
   origin: string | null;
@@ -243,7 +408,7 @@ export async function fetchTransportManifest(
       `
       direction, pickup_at, pickup_tz, passenger_count, bag_count,
       special_equipment, needs_review,
-      users ( email ),
+      users ( ${TRAVELER_USER_SELECT} ),
       flights ( flight_number, airline, origin, destination ),
       transport_vehicles ( vehicle_name )
     `,
@@ -252,6 +417,7 @@ export async function fetchTransportManifest(
   if (error) throw error;
 
   return (data ?? []).map((row) => {
+    const traveler = resolveTraveler(flatJoin<TravelerJoin>(row.users));
     const flight = flatJoin<{
       flight_number: string | null;
       airline: string | null;
@@ -260,10 +426,10 @@ export async function fetchTransportManifest(
     }>(row.flights);
     const vehicle = flatJoin<{ vehicle_name: string }>(row.transport_vehicles);
     return {
+      ...traveler,
       direction: row.direction,
       pickup_at: row.pickup_at,
       pickup_tz: row.pickup_tz,
-      email: flatJoin<{ email: string }>(row.users)?.email ?? '',
       flight_number: flight?.flight_number ?? null,
       airline: flight?.airline ?? null,
       origin: flight?.origin ?? null,
@@ -287,30 +453,10 @@ export interface RegistrationProgressRow extends CsvRow {
   status: string;
 }
 
-/**
- * Split a single "Display Name" string into first/last on the first
- * space. Used as the fallback when the joined row has no structured
- * first_name / last_name columns (e.g. for guest_profiles where the
- * registration form only collects full_name).
- */
-function splitName(full: string): { first: string; last: string } {
-  const trimmed = full.trim();
-  if (!trimmed) return { first: '', last: '' };
-  const idx = trimmed.indexOf(' ');
-  if (idx === -1) return { first: trimmed, last: '' };
-  return { first: trimmed.slice(0, idx), last: trimmed.slice(idx + 1) };
-}
-
 export async function fetchRegistrationProgress(
   client: AppSupabaseClient,
   eventId: string,
 ): Promise<RegistrationProgressRow[]> {
-  // Read first_name and last_name as their own columns instead of
-  // splitting legal_name. Splitting on the first space corrupts compound
-  // names ("Anakin Solo Skywalker" -> "Anakin" / "Solo Skywalker") and
-  // leaves last_name blank for preferred-only rows ("Maya" -> "Maya" /
-  // ""). The structured columns are populated by the registration
-  // wizard + HiBob sync.
   const { data, error } = await client
     .from('registrations')
     .select(
@@ -332,25 +478,13 @@ export async function fetchRegistrationProgress(
       email: string;
       role: string;
       is_leadership: boolean;
-      employee_profiles: Joined<{
-        first_name: string | null;
-        last_name: string | null;
-        preferred_name: string | null;
-        legal_name: string | null;
-      }>;
+      employee_profiles: Joined<NameProfile>;
       guest_profiles: Joined<{ first_name: string; last_name: string }>;
     }>(row.user);
-    const employee = flatJoin(u?.employee_profiles);
-    const guest = flatJoin(u?.guest_profiles);
-    let first = employee?.first_name ?? guest?.first_name ?? '';
-    let last = employee?.last_name ?? guest?.last_name ?? '';
-    if (!first && !last) {
-      // Fallback for any row whose structured name fields are blank.
-      const fullName = employee?.preferred_name ?? employee?.legal_name ?? '';
-      const split = splitName(fullName);
-      first = split.first;
-      last = split.last;
-    }
+    const { first, last } = resolveProfileName(
+      flatJoin(u?.employee_profiles),
+      flatJoin(u?.guest_profiles),
+    );
     return {
       first_name: first,
       last_name: last,

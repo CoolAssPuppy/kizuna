@@ -1,19 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { Download, Link as LinkIcon } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { type AppSupabaseClient, getSupabaseClient } from '@/lib/supabase';
 import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
-import type { Database } from '@/types/database.types';
-
-import { useToast } from '@/components/ui/toast';
 
 import { downloadCsv, rowsToCsv, type CsvRow } from './csv';
-import { buildShareUrl, generateShareToken } from './sharing';
 import {
   fetchDietarySummary,
   fetchPaymentReconciliation,
@@ -24,12 +21,9 @@ import {
 } from './reports';
 import { ReportTable } from './ReportTable';
 
-type ReportType = Database['public']['Enums']['report_type'];
-
 interface ReportConfig {
   key: string;
   filename: string;
-  reportType: ReportType;
   fetch: (client: AppSupabaseClient, eventId: string | null) => Promise<readonly CsvRow[]>;
 }
 
@@ -37,43 +31,39 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
   {
     key: 'registration',
     filename: 'registration-progress.csv',
-    reportType: 'full_registration',
     fetch: (c, eid) => (eid ? fetchRegistrationProgress(c, eid) : Promise.resolve([])),
   },
   {
     key: 'rooming',
     filename: 'rooming-list.csv',
-    reportType: 'rooming_list',
     fetch: (c, eid) => (eid ? fetchRoomingList(c, eid) : Promise.resolve([])),
   },
   {
     key: 'transport',
     filename: 'transport-manifest.csv',
-    reportType: 'transport_manifest',
     fetch: (c) => fetchTransportManifest(c),
   },
   {
     key: 'dietary',
     filename: 'dietary-summary.csv',
-    reportType: 'dietary_summary',
     fetch: (c) => fetchDietarySummary(c),
   },
   {
     key: 'swag',
     filename: 'swag-order.csv',
-    reportType: 'swag_order',
     fetch: (c) => fetchSwagOrder(c),
   },
   {
     key: 'payments',
     filename: 'payment-reconciliation.csv',
-    reportType: 'payment_reconciliation',
     fetch: (c) => fetchPaymentReconciliation(c),
   },
 ];
 
 const TABS = REPORTS.map((r) => r.key);
 type Tab = (typeof TABS)[number];
+
+const BROWSER_DOWNLOAD_GAP_MS = 120;
 
 interface ReportData {
   rows: ReadonlyArray<CsvRow>;
@@ -98,29 +88,31 @@ export function ReportsScreen(): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const [tab, setTab] = useState<Tab>('registration');
+  const [isDownloading, setIsDownloading] = useState(false);
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
   const activeReport = REPORTS.find((r) => r.key === tab) ?? REPORTS[0]!;
   const { rows, isLoading } = useReportRows(activeReport, eventId);
 
-  async function handleCopyShareLink(): Promise<void> {
-    if (!eventId) return;
+  async function handleDownloadAll(): Promise<void> {
+    setIsDownloading(true);
     try {
-      const token = generateShareToken();
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { error } = await getSupabaseClient().from('report_snapshots').insert({
-        event_id: eventId,
-        report_type: activeReport.reportType,
-        share_token: token,
-        share_expires_at: expiresAt,
-      });
-      if (error) throw error;
-
-      const url = buildShareUrl(window.location.origin, token);
-      await navigator.clipboard.writeText(url);
-      show(t('admin.share.copied'));
+      const client = getSupabaseClient();
+      const fetched = await Promise.all(
+        REPORTS.map(async (report) => ({
+          filename: report.filename,
+          rows: await report.fetch(client, eventId),
+        })),
+      );
+      // Browsers coalesce simultaneous saveAs prompts; pace dispatches.
+      for (const { filename, rows } of fetched) {
+        downloadCsv(filename, rowsToCsv(rows));
+        await new Promise((resolve) => setTimeout(resolve, BROWSER_DOWNLOAD_GAP_MS));
+      }
     } catch {
-      show(t('admin.share.copyFailed'), 'error');
+      show(t('admin.reports.downloadFailed'), 'error');
+    } finally {
+      setIsDownloading(false);
     }
   }
 
@@ -136,21 +128,10 @@ export function ReportsScreen(): JSX.Element {
             type="button"
             variant="outline"
             size="icon"
-            onClick={() => void handleCopyShareLink()}
-            disabled={!eventId}
-            title={t('admin.share.copy')}
-            aria-label={t('admin.share.copy')}
-          >
-            <LinkIcon aria-hidden className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => downloadCsv(activeReport.filename, rowsToCsv(rows))}
-            disabled={rows.length === 0}
-            title={t('admin.exportCsv')}
-            aria-label={t('admin.exportCsv')}
+            onClick={() => void handleDownloadAll()}
+            disabled={isDownloading || !eventId}
+            title={t('admin.reports.downloadAll')}
+            aria-label={t('admin.reports.downloadAll')}
           >
             <Download aria-hidden className="h-4 w-4" />
           </Button>

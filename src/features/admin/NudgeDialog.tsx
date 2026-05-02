@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -35,8 +36,14 @@ const TYPES: ReadonlyArray<NotificationType> = [
   'room_assignment',
   'checkin_reminder',
 ];
-
 type AudienceKind = NudgeAudience['kind'];
+
+const AUDIENCE_KINDS = [
+  'everyone',
+  'all_employees',
+  'all_guests',
+  'users',
+] as const satisfies ReadonlyArray<AudienceKind>;
 
 interface NudgeDialogProps {
   open: boolean;
@@ -44,7 +51,6 @@ interface NudgeDialogProps {
 }
 
 export function NudgeDialog(props: NudgeDialogProps): JSX.Element {
-  // Re-key on open so all local state resets to defaults each time.
   return <NudgeDialogInner key={props.open ? 'open' : 'closed'} {...props} />;
 }
 
@@ -52,18 +58,18 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const queryClient = useQueryClient();
-  const [channel, setChannel] = useState<NotificationChannel>('in_app');
+  const [selectedChannels, setSelectedChannels] = useState<ReadonlyArray<NotificationChannel>>([
+    'in_app',
+  ]);
   const [type, setType] = useState<NotificationType>('announcement');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
-  const [audienceKind, setAudienceKind] = useState<AudienceKind>('all_employees');
-  const [pickedUser, setPickedUser] = useState<UserSearchResult | null>(null);
+  const [audienceKind, setAudienceKind] = useState<AudienceKind>('everyone');
+  const [pickedUsers, setPickedUsers] = useState<ReadonlyArray<UserSearchResult>>([]);
   const [search, setSearch] = useState('');
 
-  // TanStack Query handles cancellation + dedup; per-keystroke is fine
-  // for an admin tool against a narrow people search.
   const trimmedSearch = search.trim();
-  const searchEnabled = audienceKind === 'user' && !pickedUser && trimmedSearch.length > 0;
+  const searchEnabled = audienceKind === 'users' && trimmedSearch.length > 0;
   const { data: results = [] } = useQuery({
     queryKey: ['admin', 'nudges', 'userSearch', trimmedSearch],
     queryFn: () => searchUsers(getSupabaseClient(), trimmedSearch),
@@ -72,15 +78,18 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
   });
 
   const audience = useMemo<NudgeAudience | null>(() => {
-    if (audienceKind === 'user') return pickedUser ? { kind: 'user', userId: pickedUser.id } : null;
+    if (audienceKind === 'users') {
+      return pickedUsers.length > 0 ? { kind: 'users', userIds: pickedUsers.map((u) => u.id) } : null;
+    }
     return { kind: audienceKind };
-  }, [audienceKind, pickedUser]);
+  }, [audienceKind, pickedUsers]);
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!audience) throw new Error('No audience selected');
+      if (!audience) throw new Error(t('admin.nudges.errors.noAudience'));
+      if (selectedChannels.length === 0) throw new Error(t('admin.nudges.errors.noChannel'));
       return sendNudge(getSupabaseClient(), {
-        channel,
+        channels: [...selectedChannels],
         type,
         subject,
         body,
@@ -100,7 +109,25 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
     !subject.trim() ||
     !body.trim() ||
     !audience ||
-    (audienceKind === 'user' && !pickedUser);
+    selectedChannels.length === 0;
+
+  function toggleChannel(channel: NotificationChannel): void {
+    setSelectedChannels((prev) =>
+      prev.includes(channel) ? prev.filter((c) => c !== channel) : [...prev, channel],
+    );
+  }
+
+  function addUser(user: UserSearchResult): void {
+    if (pickedUsers.some((p) => p.id === user.id)) return;
+    setPickedUsers((prev) => [...prev, user]);
+    setSearch('');
+  }
+
+  function removeUser(userId: string): void {
+    setPickedUsers((prev) => prev.filter((p) => p.id !== userId));
+  }
+
+  const filteredResults = results.filter((r) => !pickedUsers.some((p) => p.id === r.id));
 
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
@@ -116,49 +143,54 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
           </DialogHeader>
 
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="nudge-channel">{t('admin.nudges.fields.channel')}</Label>
-                <select
-                  id="nudge-channel"
-                  value={channel}
-                  onChange={(e) => {
-                    const next = CHANNELS.find((c) => c === e.target.value);
-                    if (next) setChannel(next);
-                  }}
-                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                >
-                  {CHANNELS.map((c) => (
-                    <option key={c} value={c}>
+            <div className="space-y-2">
+              <Label>{t('admin.nudges.fields.channels')}</Label>
+              <div className="flex flex-wrap gap-2">
+                {CHANNELS.map((c) => {
+                  const active = selectedChannels.includes(c);
+                  return (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => toggleChannel(c)}
+                      aria-pressed={active}
+                      className={cn(
+                        'rounded-md border px-3 py-1.5 text-sm transition-colors',
+                        active
+                          ? 'border-primary bg-primary text-primary-foreground'
+                          : 'bg-background hover:bg-accent hover:text-accent-foreground',
+                      )}
+                    >
                       {t(`admin.nudges.channels.${c}`)}
-                    </option>
-                  ))}
-                </select>
+                    </button>
+                  );
+                })}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="nudge-type">{t('admin.nudges.fields.type')}</Label>
-                <select
-                  id="nudge-type"
-                  value={type}
-                  onChange={(e) => {
-                    const next = TYPES.find((tp) => tp === e.target.value);
-                    if (next) setType(next);
-                  }}
-                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                >
-                  {TYPES.map((tp) => (
-                    <option key={tp} value={tp}>
-                      {t(`admin.nudges.types.${tp}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="nudge-type">{t('admin.nudges.fields.type')}</Label>
+              <select
+                id="nudge-type"
+                value={type}
+                onChange={(e) => {
+                  const next = TYPES.find((tp) => tp === e.target.value);
+                  if (next) setType(next);
+                }}
+                className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+              >
+                {TYPES.map((tp) => (
+                  <option key={tp} value={tp}>
+                    {t(`admin.nudges.types.${tp}`)}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
               <Label>{t('admin.nudges.fields.audience')}</Label>
               <div className="flex flex-wrap gap-2">
-                {(['all_employees', 'all_guests', 'user'] as const).map((kind) => (
+                {AUDIENCE_KINDS.map((kind) => (
                   <button
                     key={kind}
                     type="button"
@@ -175,50 +207,51 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
                 ))}
               </div>
 
-              {audienceKind === 'user' ? (
+              {audienceKind === 'users' ? (
                 <div className="space-y-2 pt-1">
-                  {pickedUser ? (
-                    <div className="flex items-center justify-between rounded-md border bg-muted/30 px-3 py-2 text-sm">
-                      <span>{pickedUser.email}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setPickedUser(null);
-                          setSearch('');
-                        }}
-                      >
-                        {t('admin.nudges.clearUser')}
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <Input
-                        placeholder={t('admin.nudges.userPlaceholder')}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                      />
-                      {results.length > 0 ? (
-                        <ul className="max-h-40 overflow-y-auto rounded-md border bg-background text-sm">
-                          {results.map((u) => (
-                            <li key={u.id}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setPickedUser(u);
-                                  setSearch('');
-                                }}
-                                className="block w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground"
-                              >
-                                {u.email}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </>
-                  )}
+                  {pickedUsers.length > 0 ? (
+                    <ul className="flex flex-wrap gap-2">
+                      {pickedUsers.map((u) => (
+                        <li
+                          key={u.id}
+                          className="flex items-center gap-1 rounded-full border bg-muted/30 py-1 pl-3 pr-1 text-sm"
+                        >
+                          <span>{u.name || u.email}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeUser(u.id)}
+                            aria-label={t('admin.nudges.removeUser', { value: u.email })}
+                            className="rounded-full p-0.5 hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <X aria-hidden className="h-3.5 w-3.5" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <Input
+                    placeholder={t('admin.nudges.userPlaceholder')}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  {filteredResults.length > 0 ? (
+                    <ul className="max-h-48 overflow-y-auto rounded-md border bg-background text-sm">
+                      {filteredResults.map((u) => (
+                        <li key={u.id}>
+                          <button
+                            type="button"
+                            onClick={() => addUser(u)}
+                            className="block w-full px-3 py-2 text-left hover:bg-accent hover:text-accent-foreground"
+                          >
+                            <span className="font-medium">{u.name || u.email}</span>
+                            {u.name ? (
+                              <span className="ml-2 text-xs text-muted-foreground">{u.email}</span>
+                            ) : null}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </div>
               ) : null}
             </div>

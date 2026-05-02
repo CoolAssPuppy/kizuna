@@ -17,11 +17,6 @@ import { WelcomeScreen } from '@/features/welcome/WelcomeScreen';
 const AdminRoute = lazy(() =>
   import('@/features/admin/AdminRoute').then((m) => ({ default: m.AdminRoute })),
 );
-const SharedReportScreen = lazy(() =>
-  import('@/features/admin/SharedReportScreen').then((m) => ({
-    default: m.SharedReportScreen,
-  })),
-);
 const AgendaRoute = lazy(() =>
   import('@/features/agenda/AgendaRoute').then((m) => ({ default: m.AgendaRoute })),
 );
@@ -199,7 +194,6 @@ export function AppRouter(): JSX.Element {
               </RequireAuth>
             }
           />
-          <Route path="/share/reports/:token" element={<SharedReportScreen />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

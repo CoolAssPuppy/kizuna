@@ -82,16 +82,6 @@ create type itinerary_source as enum ('assigned', 'self_registered', 'self_impor
 create type vote_target_type as enum ('session', 'idea', 'announcement');
 create type attendee_visibility as enum ('public', 'attendees_only', 'private');
 
--- Reports
-create type report_type as enum (
-  'rooming_list',
-  'transport_manifest',
-  'dietary_summary',
-  'swag_order',
-  'full_registration',
-  'payment_reconciliation'
-);
-
 -- Notifications
 create type notification_channel as enum ('slack', 'email', 'in_app');
 create type notification_type as enum (

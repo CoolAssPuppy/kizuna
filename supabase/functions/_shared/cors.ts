@@ -1,14 +1,13 @@
 // CORS helper shared across edge functions. Functions run on a different
 // origin than the SPA, so every endpoint needs to honour preflight.
 //
-// Allow-origin is `*` because every endpoint either:
-//   - requires a Supabase JWT in the Authorization header (any random
-//     page can fetch but won't get past auth), or
-//   - is strictly public (share-report).
-// We do NOT use cookies for auth, so a wide-open allow-origin doesn't
-// expose anything beyond what an authenticated request would already
-// see. Tightening to a single SPA origin is a hardening move for M10
-// once the production hostname is locked in. (TECH_DEBT_AUDIT F008)
+// Allow-origin is `*` because every endpoint requires a Supabase JWT in
+// the Authorization header (any random page can fetch but won't get past
+// auth). We do NOT use cookies for auth, so a wide-open allow-origin
+// doesn't expose anything beyond what an authenticated request would
+// already see. Tightening to a single SPA origin is a hardening move
+// for M10 once the production hostname is locked in. (TECH_DEBT_AUDIT
+// F008)
 
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',

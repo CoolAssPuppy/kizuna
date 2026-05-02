@@ -496,12 +496,13 @@
     "nav": {
       "label": "Secciones de administración",
       "agenda": "Agenda",
-      "groundTransport": "Herramienta de Transporte Terrestre",
-      "roomAssignment": "Herramienta de Asignación de Habitaciones",
+      "groundTransport": "Transporte Terrestre",
+      "roomAssignment": "Asignar Habitaciones",
       "feed": "Feed",
       "documents": "Documentos",
       "stats": "Estadísticas",
-      "nudges": "Recordatorios",
+      "nudges": "Comunicación",
+      "communication": "Comunicación",
       "reports": "Informes",
       "conflicts": "Conflictos"
     },
@@ -749,17 +750,21 @@
       }
     },
     "nudges": {
-      "title": "Recordatorios",
-      "subtitle": "Recordatorios manuales, avisos de plazos y el registro de auditoría completo.",
-      "send": "Enviar recordatorio",
+      "title": "Comunicación",
+      "subtitle": "Envía anuncios y recordatorios y consulta el registro completo.",
+      "send": "Enviar mensaje",
       "sendCta": "Enviar",
       "sending": "Enviando",
       "sent": "Enviados {{delivered}} de {{attempted}}.",
-      "empty": "Aún no se ha enviado ningún recordatorio.",
-      "clearUser": "Limpiar",
+      "empty": "Aún no se ha enviado ningún mensaje.",
       "userPlaceholder": "Buscar por correo electrónico",
+      "removeUser": "Quitar a {{value}}",
+      "errors": {
+        "noAudience": "Elige una audiencia antes de enviar.",
+        "noChannel": "Elige al menos un canal antes de enviar."
+      },
       "fields": {
-        "channel": "Canal",
+        "channels": "Canales",
         "type": "Tipo",
         "audience": "Audiencia",
         "subject": "Asunto",
@@ -779,14 +784,17 @@
         "checkin_reminder": "Aviso de registro"
       },
       "audiences": {
+        "everyone": "Todos",
         "all_employees": "Todos los empleados",
         "all_guests": "Todos los invitados",
-        "user": "Usuario concreto"
+        "users": "Personas concretas"
       }
     },
     "reports": {
       "title": "Informes",
-      "subtitle": "Informes en directo para hotel, transporte, cocina y finanzas."
+      "subtitle": "Informes en directo para hotel, transporte, cocina y finanzas.",
+      "downloadAll": "Descargar todos los informes en CSV",
+      "downloadFailed": "No se pudieron descargar los informes. Inténtalo de nuevo."
     },
     "tabs": {
       "registration": "Progreso de inscripción",

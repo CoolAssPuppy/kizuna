@@ -27,15 +27,15 @@ interface NavSection {
 const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/about', icon: Info, labelKey: 'admin.nav.about' },
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
-  { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
-  { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },
-  { to: '/admin/scan', icon: ScanLine, labelKey: 'admin.nav.scanQr' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },
-  { to: '/admin/nudges', icon: Send, labelKey: 'admin.nav.nudges' },
+  { to: '/admin/nudges', icon: Send, labelKey: 'admin.nav.communication' },
   { to: '/admin/reports', icon: Users, labelKey: 'admin.nav.reports' },
   { to: '/admin/conflicts', icon: AlertTriangle, labelKey: 'admin.nav.conflicts' },
+  { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
+  { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },
+  { to: '/admin/scan', icon: ScanLine, labelKey: 'admin.nav.scanQr' },
 ];
 
 export function AdminLayout(): JSX.Element {

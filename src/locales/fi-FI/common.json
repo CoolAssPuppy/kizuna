@@ -496,12 +496,13 @@
     "nav": {
       "label": "Hallinnan osiot",
       "agenda": "Aikataulu",
-      "groundTransport": "Maakuljetustyökalu",
-      "roomAssignment": "Huoneiden Jakotyökalu",
+      "groundTransport": "Maakuljetus",
+      "roomAssignment": "Määritä huoneet",
       "feed": "Syöte",
       "documents": "Asiakirjat",
       "stats": "Tilastot",
-      "nudges": "Muistutukset",
+      "nudges": "Viestintä",
+      "communication": "Viestintä",
       "reports": "Raportit",
       "conflicts": "Ristiriidat"
     },
@@ -749,17 +750,21 @@
       }
     },
     "nudges": {
-      "title": "Muistutukset",
-      "subtitle": "Manuaaliset muistutukset, määräaikamuistutukset ja koko tarkastusloki.",
-      "send": "Lähetä muistutus",
+      "title": "Viestintä",
+      "subtitle": "Lähetä ilmoituksia ja muistutuksia ja tarkastele koko lokia.",
+      "send": "Lähetä viesti",
       "sendCta": "Lähetä",
       "sending": "Lähetetään",
       "sent": "Lähetetty {{delivered}} / {{attempted}}.",
-      "empty": "Muistutuksia ei ole vielä lähetetty.",
-      "clearUser": "Tyhjennä",
+      "empty": "Viestejä ei ole vielä lähetetty.",
       "userPlaceholder": "Hae sähköpostilla",
+      "removeUser": "Poista {{value}}",
+      "errors": {
+        "noAudience": "Valitse yleisö ennen lähettämistä.",
+        "noChannel": "Valitse vähintään yksi kanava ennen lähettämistä."
+      },
       "fields": {
-        "channel": "Kanava",
+        "channels": "Kanavat",
         "type": "Tyyppi",
         "audience": "Yleisö",
         "subject": "Aihe",
@@ -779,14 +784,17 @@
         "checkin_reminder": "Sisäänkirjautumisen muistutus"
       },
       "audiences": {
+        "everyone": "Kaikki",
         "all_employees": "Kaikki työntekijät",
         "all_guests": "Kaikki vieraat",
-        "user": "Tietty käyttäjä"
+        "users": "Tietyt henkilöt"
       }
     },
     "reports": {
       "title": "Raportit",
-      "subtitle": "Reaaliaikaiset raportit hotellille, kuljetukselle, keittiölle ja taloudelle."
+      "subtitle": "Reaaliaikaiset raportit hotellille, kuljetukselle, keittiölle ja taloudelle.",
+      "downloadAll": "Lataa kaikki raportit CSV-muodossa",
+      "downloadFailed": "Raportteja ei voitu ladata. Yritä uudelleen."
     },
     "tabs": {
       "registration": "Ilmoittautumisen edistyminen",

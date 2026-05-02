@@ -502,13 +502,14 @@
       "label": "Admin sections",
       "about": "About",
       "agenda": "Agenda",
-      "groundTransport": "Ground Transport Tool",
-      "roomAssignment": "Room Assignment Tool",
+      "groundTransport": "Ground Transport",
+      "roomAssignment": "Assign Rooms",
       "scanQr": "Scan QR Code",
       "feed": "Feed",
       "documents": "Documents",
       "stats": "Stats",
-      "nudges": "Nudges",
+      "nudges": "Communication",
+      "communication": "Communication",
       "reports": "Reports",
       "conflicts": "Conflicts"
     },
@@ -769,17 +770,21 @@
       }
     },
     "nudges": {
-      "title": "Nudges",
-      "subtitle": "Manual nudges, deadline reminders, and the full audit log.",
-      "send": "Send nudge",
+      "title": "Communication",
+      "subtitle": "Send announcements and nudges and review the full audit log.",
+      "send": "Send message",
       "sendCta": "Send",
       "sending": "Sending",
       "sent": "Sent {{delivered}} of {{attempted}}.",
-      "empty": "No nudges have been sent yet.",
-      "clearUser": "Clear",
+      "empty": "No messages have been sent yet.",
       "userPlaceholder": "Search by email",
+      "removeUser": "Remove {{value}}",
+      "errors": {
+        "noAudience": "Pick an audience before sending.",
+        "noChannel": "Pick at least one channel before sending."
+      },
       "fields": {
-        "channel": "Channel",
+        "channels": "Channels",
         "type": "Type",
         "audience": "Audience",
         "subject": "Subject",
@@ -799,14 +804,17 @@
         "checkin_reminder": "Check-in reminder"
       },
       "audiences": {
+        "everyone": "Everyone",
         "all_employees": "All employees",
         "all_guests": "All guests",
-        "user": "Specific user"
+        "users": "Specific people"
       }
     },
     "reports": {
       "title": "Reports",
-      "subtitle": "Live reports for hotel, transport, kitchen, and finance."
+      "subtitle": "Live reports for hotel, transport, kitchen, and finance.",
+      "downloadAll": "Download every report as CSV",
+      "downloadFailed": "Could not download reports. Please try again."
     },
     "tabs": {
       "registration": "Registration progress",

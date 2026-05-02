@@ -1,28 +1,8 @@
 -- Infrastructure tables
 --
--- Reports, notifications, sync logs, and conflict tracking. These power
--- admin operations and integration reconciliation.
-
-create table public.report_snapshots (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references public.events(id) on delete cascade,
-  report_type report_type not null,
-  generated_at timestamptz not null default now(),
-  generated_by uuid references public.users(id) on delete set null,
-  share_token text,
-  share_expires_at timestamptz,
-  notes text
-);
-
-comment on table public.report_snapshots is
-  'Live shareable reports. Recipients always see current data plus a last_modified column. Reports are never static exports.';
-comment on column public.report_snapshots.share_token is
-  'Signed token for read-only shareable link. Issued for hotel/transport recipients.';
-
-create index report_snapshots_event_type_idx on public.report_snapshots(event_id, report_type);
-create unique index report_snapshots_share_token_idx
-  on public.report_snapshots(share_token) where share_token is not null;
-
+-- Notifications, sync logs, and conflict tracking. These power admin
+-- operations and integration reconciliation. Reports are admin-only and
+-- read live from the source tables — there is no shareable snapshot.
 
 create table public.notifications (
   id uuid primary key default gen_random_uuid(),

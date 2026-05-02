@@ -489,12 +489,13 @@
     "nav": {
       "label": "Sezioni admin",
       "agenda": "Agenda",
-      "groundTransport": "Strumento Trasporti a Terra",
-      "roomAssignment": "Strumento Assegnazione Camere",
+      "groundTransport": "Trasporti a Terra",
+      "roomAssignment": "Assegna Camere",
       "feed": "Feed",
       "documents": "Documenti",
       "stats": "Statistiche",
-      "nudges": "Promemoria",
+      "nudges": "Comunicazione",
+      "communication": "Comunicazione",
       "reports": "Report",
       "conflicts": "Conflitti"
     },
@@ -742,17 +743,21 @@
       }
     },
     "nudges": {
-      "title": "Promemoria",
-      "subtitle": "Promemoria manuali, ricordi delle scadenze e l'intero log di controllo.",
-      "send": "Invia promemoria",
+      "title": "Comunicazione",
+      "subtitle": "Invia annunci e promemoria e consulta l'intero log di audit.",
+      "send": "Invia messaggio",
       "sendCta": "Invia",
       "sending": "Invio in corso",
       "sent": "Inviati {{delivered}} di {{attempted}}.",
-      "empty": "Nessun promemoria è stato ancora inviato.",
-      "clearUser": "Cancella",
+      "empty": "Nessun messaggio è stato ancora inviato.",
       "userPlaceholder": "Cerca per email",
+      "removeUser": "Rimuovi {{value}}",
+      "errors": {
+        "noAudience": "Seleziona un pubblico prima di inviare.",
+        "noChannel": "Seleziona almeno un canale prima di inviare."
+      },
       "fields": {
-        "channel": "Canale",
+        "channels": "Canali",
         "type": "Tipo",
         "audience": "Pubblico",
         "subject": "Oggetto",
@@ -772,14 +777,17 @@
         "checkin_reminder": "Ricordo del check-in"
       },
       "audiences": {
+        "everyone": "Tutti",
         "all_employees": "Tutti i dipendenti",
         "all_guests": "Tutti gli ospiti",
-        "user": "Utente specifico"
+        "users": "Persone specifiche"
       }
     },
     "reports": {
       "title": "Report",
-      "subtitle": "Report in tempo reale per hotel, trasporti, cucina e finanza."
+      "subtitle": "Report in tempo reale per hotel, trasporti, cucina e finanza.",
+      "downloadAll": "Scarica tutti i report in CSV",
+      "downloadFailed": "Impossibile scaricare i report. Riprova."
     },
     "tabs": {
       "registration": "Avanzamento registrazione",

@@ -496,12 +496,13 @@
     "nav": {
       "label": "Administrationsbereiche",
       "agenda": "Agenda",
-      "groundTransport": "Tool für Bodentransport",
-      "roomAssignment": "Tool für Zimmerzuweisung",
+      "groundTransport": "Bodentransport",
+      "roomAssignment": "Zimmer zuweisen",
       "feed": "Feed",
       "documents": "Dokumente",
       "stats": "Statistiken",
-      "nudges": "Erinnerungen",
+      "nudges": "Kommunikation",
+      "communication": "Kommunikation",
       "reports": "Berichte",
       "conflicts": "Konflikte"
     },
@@ -749,17 +750,21 @@
       }
     },
     "nudges": {
-      "title": "Erinnerungen",
-      "subtitle": "Manuelle Erinnerungen, Fristerinnerungen und das vollständige Audit-Log.",
-      "send": "Erinnerung senden",
+      "title": "Kommunikation",
+      "subtitle": "Sende Ankündigungen und Erinnerungen und sieh dir das gesamte Audit-Log an.",
+      "send": "Nachricht senden",
       "sendCta": "Senden",
       "sending": "Wird gesendet",
       "sent": "{{delivered}} von {{attempted}} gesendet.",
-      "empty": "Es wurden noch keine Erinnerungen gesendet.",
-      "clearUser": "Zurücksetzen",
+      "empty": "Es wurden noch keine Nachrichten gesendet.",
       "userPlaceholder": "Nach E-Mail suchen",
+      "removeUser": "{{value}} entfernen",
+      "errors": {
+        "noAudience": "Wähle eine Zielgruppe aus, bevor du sendest.",
+        "noChannel": "Wähle mindestens einen Kanal aus, bevor du sendest."
+      },
       "fields": {
-        "channel": "Kanal",
+        "channels": "Kanäle",
         "type": "Typ",
         "audience": "Zielgruppe",
         "subject": "Betreff",
@@ -779,14 +784,17 @@
         "checkin_reminder": "Check-in-Erinnerung"
       },
       "audiences": {
+        "everyone": "Alle",
         "all_employees": "Alle Mitarbeiter",
         "all_guests": "Alle Gäste",
-        "user": "Bestimmter Benutzer"
+        "users": "Bestimmte Personen"
       }
     },
     "reports": {
       "title": "Berichte",
-      "subtitle": "Live-Berichte für Hotel, Transport, Küche und Finanzen."
+      "subtitle": "Live-Berichte für Hotel, Transport, Küche und Finanzen.",
+      "downloadAll": "Alle Berichte als CSV herunterladen",
+      "downloadFailed": "Berichte konnten nicht heruntergeladen werden. Bitte versuche es erneut."
     },
     "tabs": {
       "registration": "Registrierungsfortschritt",

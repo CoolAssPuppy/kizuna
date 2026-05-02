@@ -662,11 +662,6 @@ create policy votes_authenticated_read on public.votes
 
 
 -- Infra
-create policy report_snapshots_admin_only on public.report_snapshots
-  for all using (public.is_admin())
-  with check (public.is_admin());
-
-
 create policy notifications_self_read on public.notifications
   for select using (public.is_self_or_admin(user_id));
 
