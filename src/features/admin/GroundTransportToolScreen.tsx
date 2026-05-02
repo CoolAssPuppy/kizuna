@@ -3,6 +3,7 @@ import { AlertTriangle, Bus, Plane, Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AirlineLogo } from '@/components/AirlineLogo';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
@@ -237,16 +238,22 @@ function PassengerLane({
           <ul className="space-y-3">
             {win.flights.map((group) => (
               <li key={group.key} className="rounded-xl border bg-card p-4 shadow-sm">
-                <header className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-                  <p className="text-sm font-semibold">
-                    {group.airline} {group.flightNumber}
-                    <span className="ml-2 text-xs font-normal text-muted-foreground">
-                      {direction === 'arrival'
-                        ? `${group.endpoint} → ${airportCode}`
-                        : `${airportCode} → ${group.endpoint}`}{' '}
-                      · {group.timeLabel}
-                    </span>
-                  </p>
+                <header className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <AirlineLogo
+                      name={group.airline}
+                      className="h-8 w-8 shrink-0 rounded-md bg-card object-contain p-1 ring-1 ring-border"
+                    />
+                    <p className="text-sm font-semibold">
+                      {group.airline} {group.flightNumber}
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        {direction === 'arrival'
+                          ? `${group.endpoint} → ${airportCode}`
+                          : `${airportCode} → ${group.endpoint}`}{' '}
+                        · {group.timeLabel}
+                      </span>
+                    </p>
+                  </div>
                   <span className="text-xs text-muted-foreground">
                     {t('admin.groundTransport.flightSummary', {
                       passengers: group.passengers.length,

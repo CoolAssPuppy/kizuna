@@ -1,9 +1,23 @@
 import { useTranslation } from 'react-i18next';
 
+import { AirlineLogo } from '@/components/AirlineLogo';
 import { cn } from '@/lib/utils';
 
 import { ITEM_META } from './itemMeta';
 import type { ItineraryItemRow } from './types';
+
+/**
+ * The flight->itinerary trigger formats the title as
+ *   "<airline name> <flight number>"
+ * (see supabase/schemas/80_functions_and_triggers.sql:335). The flight
+ * number is the trailing whitespace-delimited token; everything before
+ * it is the airline name. Returns null for any title that doesn't match
+ * — the card falls back to the generic plane chip in that case.
+ */
+function extractAirlineName(title: string): string | null {
+  const match = title.match(/^(.+?)\s+\S+$/);
+  return match?.[1] ?? null;
+}
 
 interface Props {
   item: ItineraryItemRow;
@@ -36,8 +50,14 @@ export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element 
     onClick && 'cursor-pointer',
   );
 
-  const body = (
-    <>
+  const airlineName = item.item_type === 'flight' ? extractAirlineName(item.title) : null;
+  const leading =
+    item.item_type === 'flight' && airlineName ? (
+      <AirlineLogo
+        name={airlineName}
+        className="h-10 w-10 shrink-0 rounded-lg bg-card object-contain p-1 ring-1 ring-border"
+      />
+    ) : (
       <span
         aria-hidden
         className={cn(
@@ -47,6 +67,11 @@ export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element 
       >
         <Icon className="h-5 w-5" />
       </span>
+    );
+
+  const body = (
+    <>
+      {leading}
 
       <div className="flex-1 space-y-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
