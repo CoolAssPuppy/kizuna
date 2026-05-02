@@ -897,18 +897,6 @@
       "today": "Hoje",
       "dayOf": "Dia {{day}} de {{total}}"
     },
-    "nowNext": {
-      "live": "A acontecer agora",
-      "upcoming": "A seguir",
-      "endsIn": "termina {{gap}}",
-      "startsIn": "começa {{gap}}",
-      "inMinutes_one": "em {{count}} min",
-      "inMinutes_other": "em {{count}} min",
-      "inHours_one": "em {{count}} h",
-      "inHours_other": "em {{count}} h",
-      "inDays_one": "em {{count}} dia",
-      "inDays_other": "em {{count}} dias"
-    },
     "guestSync": {
       "label": "Sincronizar com o itinerário do meu padrinho",
       "description": "Quando ativo, o seu itinerário espelha o do colaborador que o convidou. Desligue para gerir o seu próprio programa.",

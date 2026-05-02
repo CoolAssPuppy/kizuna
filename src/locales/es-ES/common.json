@@ -897,18 +897,6 @@
       "today": "Hoy",
       "dayOf": "Día {{day}} de {{total}}"
     },
-    "nowNext": {
-      "live": "Ocurriendo ahora",
-      "upcoming": "A continuación",
-      "endsIn": "termina {{gap}}",
-      "startsIn": "empieza {{gap}}",
-      "inMinutes_one": "en {{count}} min",
-      "inMinutes_other": "en {{count}} min",
-      "inHours_one": "en {{count}} h",
-      "inHours_other": "en {{count}} h",
-      "inDays_one": "en {{count}} día",
-      "inDays_other": "en {{count}} días"
-    },
     "guestSync": {
       "label": "Sincronizar con el itinerario de mi anfitrión",
       "description": "Cuando está activado, tu itinerario sigue al del empleado que te invitó. Desactívalo para gestionar tu propio horario.",

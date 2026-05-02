@@ -897,18 +897,6 @@
       "today": "Heute",
       "dayOf": "Tag {{day}} von {{total}}"
     },
-    "nowNext": {
-      "live": "Findet jetzt statt",
-      "upcoming": "Als Nächstes",
-      "endsIn": "endet {{gap}}",
-      "startsIn": "beginnt {{gap}}",
-      "inMinutes_one": "in {{count}} Min.",
-      "inMinutes_other": "in {{count}} Min.",
-      "inHours_one": "in {{count}} Std.",
-      "inHours_other": "in {{count}} Std.",
-      "inDays_one": "in {{count}} Tag",
-      "inDays_other": "in {{count}} Tagen"
-    },
     "guestSync": {
       "label": "Mit dem Reiseplan meines Sponsors synchronisieren",
       "description": "Wenn aktiviert, spiegelt Ihr Reiseplan den des einladenden Mitarbeiters wider. Deaktivieren Sie es, um Ihren eigenen Zeitplan zu verwalten.",

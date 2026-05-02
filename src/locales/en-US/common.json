@@ -897,18 +897,6 @@
       "today": "Today",
       "dayOf": "Day {{day}} of {{total}}"
     },
-    "nowNext": {
-      "live": "Happening now",
-      "upcoming": "Up next",
-      "endsIn": "ends {{gap}}",
-      "startsIn": "starts {{gap}}",
-      "inMinutes_one": "in {{count}} min",
-      "inMinutes_other": "in {{count}} min",
-      "inHours_one": "in {{count}} hr",
-      "inHours_other": "in {{count}} hrs",
-      "inDays_one": "in {{count}} day",
-      "inDays_other": "in {{count}} days"
-    },
     "guestSync": {
       "label": "Sync with my sponsor's itinerary",
       "description": "When on, your itinerary mirrors the employee who invited you. Turn off to manage your own schedule.",

@@ -890,18 +890,6 @@
       "today": "Oggi",
       "dayOf": "Giorno {{day}} di {{total}}"
     },
-    "nowNext": {
-      "live": "In corso ora",
-      "upcoming": "Prossimo",
-      "endsIn": "finisce {{gap}}",
-      "startsIn": "inizia {{gap}}",
-      "inMinutes_one": "tra {{count}} min",
-      "inMinutes_other": "tra {{count}} min",
-      "inHours_one": "tra {{count}} ora",
-      "inHours_other": "tra {{count}} ore",
-      "inDays_one": "tra {{count}} giorno",
-      "inDays_other": "tra {{count}} giorni"
-    },
     "guestSync": {
       "label": "Sincronizza con l'itinerario del mio sponsor",
       "description": "Quando attivo, il tuo itinerario rispecchia quello del dipendente che ti ha invitato. Disattivalo per gestire il tuo programma.",

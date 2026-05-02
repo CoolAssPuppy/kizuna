@@ -10,7 +10,6 @@ import { GuestSyncToggle } from './GuestSyncToggle';
 import { ImportItineraryDialog } from './ImportItineraryDialog';
 import { ItineraryHero } from './ItineraryHero';
 import { ItineraryTimeline } from './ItineraryTimeline';
-import { NowNextCard } from './NowNextCard';
 import { useItinerary } from './useItinerary';
 
 type EventRow = Database['public']['Tables']['events']['Row'];
@@ -52,8 +51,6 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
       <CheckinCard eventId={event.id} />
 
       <GuestSyncToggle onToggle={invalidate} />
-
-      <NowNextCard items={data ?? []} />
 
       <section className="space-y-4">
         <header className="flex flex-row items-center justify-between gap-3">

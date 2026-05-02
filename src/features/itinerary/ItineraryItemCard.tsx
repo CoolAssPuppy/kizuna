@@ -19,10 +19,15 @@ function extractAirlineName(title: string): string | null {
   return match?.[1] ?? null;
 }
 
+/** Position relative to "now". Currently only 'past' affects rendering (card dims). */
+export type ItineraryItemState = 'past' | 'now' | 'next' | 'future';
+
 interface Props {
   item: ItineraryItemRow;
   /** Stagger index so each row fades in slightly behind the previous one. */
   index: number;
+  /** Where this item sits relative to the wall clock — past rows dim and desaturate. */
+  state?: ItineraryItemState;
   /** Click handler; when set, the card becomes a button. */
   onClick?: (item: ItineraryItemRow) => void;
 }
@@ -35,7 +40,7 @@ function formatTime(iso: string, timeZone: string | null): string {
   }).format(new Date(iso));
 }
 
-export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element {
+export function ItineraryItemCard({ item, index, state = 'future', onClick }: Props): JSX.Element {
   const { t } = useTranslation();
   const meta = ITEM_META[item.item_type];
   const Icon = meta.Icon;
@@ -44,10 +49,13 @@ export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element 
   const startLabel = formatTime(item.starts_at, item.starts_tz);
   const endLabel = item.ends_at ? formatTime(item.ends_at, item.ends_tz ?? item.starts_tz) : null;
 
+  const isPast = state === 'past';
   const cardClass = cn(
     'group flex w-full flex-col gap-3 rounded-xl border bg-card p-4 text-left text-card-foreground shadow-sm transition-all sm:flex-row sm:items-start sm:gap-4',
     'hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md',
     onClick && 'cursor-pointer',
+    // Past items fade and desaturate so the eye snaps to live + upcoming rows.
+    isPast && 'opacity-60 grayscale',
   );
 
   const airlineName = item.item_type === 'flight' ? extractAirlineName(item.title) : null;
@@ -100,17 +108,7 @@ export function ItineraryItemCard({ item, index, onClick }: Props): JSX.Element 
   );
 
   return (
-    <li
-      className="kizuna-fade-in relative pl-12"
-      style={{ animationDelay: `${Math.min(index * 60, 600)}ms` }}
-    >
-      <span
-        aria-hidden
-        className={cn(
-          'absolute left-3 top-5 -ml-px h-3 w-3 rounded-full ring-4 ring-background',
-          meta.dotClass,
-        )}
-      />
+    <li className="kizuna-fade-in" style={{ animationDelay: `${Math.min(index * 60, 600)}ms` }}>
       {onClick ? (
         <button type="button" className={cardClass} onClick={() => onClick(item)}>
           {body}

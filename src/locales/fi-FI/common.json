@@ -897,18 +897,6 @@
       "today": "Tänään",
       "dayOf": "Päivä {{day}} / {{total}}"
     },
-    "nowNext": {
-      "live": "Tapahtumassa nyt",
-      "upcoming": "Seuraavaksi",
-      "endsIn": "päättyy {{gap}}",
-      "startsIn": "alkaa {{gap}}",
-      "inMinutes_one": "{{count}} min kuluttua",
-      "inMinutes_other": "{{count}} min kuluttua",
-      "inHours_one": "{{count}} t kuluttua",
-      "inHours_other": "{{count}} t kuluttua",
-      "inDays_one": "{{count}} päivän kuluttua",
-      "inDays_other": "{{count}} päivän kuluttua"
-    },
     "guestSync": {
       "label": "Synkronoi sponsorini ohjelman kanssa",
       "description": "Kun käytössä, ohjelmasi peilaa sinut kutsuneen työntekijän ohjelmaa. Ota pois käytöstä hallinnoidaksesi omaa aikatauluasi.",

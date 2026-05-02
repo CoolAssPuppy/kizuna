@@ -2,8 +2,11 @@ import { Sparkles } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useMountEffect } from '@/hooks/useMountEffect';
+
 import { EditItineraryElementDialog } from './EditItineraryElementDialog';
 import { groupItineraryByDay } from './grouping';
+import { computeItemStates } from './itemState';
 import { ItineraryItemCard } from './ItineraryItemCard';
 import type { ItineraryItemRow } from './types';
 
@@ -14,7 +17,7 @@ interface Props {
   eventStart?: string | null;
   /** Event end date as YYYY-MM-DD; combined with start gives the day count. */
   eventEnd?: string | null;
-  /** Override now() for tests. Defaults to runtime today. */
+  /** Override now() for tests. When omitted, the timeline ticks every minute. */
   now?: Date;
 }
 
@@ -60,10 +63,20 @@ export function ItineraryTimeline({
   timeZone,
   eventStart,
   eventEnd,
-  now = new Date(),
+  now: providedNow,
 }: Props): JSX.Element {
   const { t } = useTranslation();
+  // When a `now` is passed (test override), trust it; otherwise tick every
+  // minute so past/now/next/future re-evaluate without a manual refresh.
+  const [tickNow, setTickNow] = useState<Date>(() => providedNow ?? new Date());
+  useMountEffect(() => {
+    if (providedNow) return;
+    const id = window.setInterval(() => setTickNow(new Date()), 60_000);
+    return () => window.clearInterval(id);
+  });
+  const now = providedNow ?? tickNow;
   const days = useMemo(() => groupItineraryByDay(items, timeZone), [items, timeZone]);
+  const itemStates = useMemo(() => computeItemStates(items, now), [items, now]);
   const todayKeyValue = DAY_KEY_FMT.format(now);
   const [editing, setEditing] = useState<ItineraryItemRow | null>(null);
 
@@ -112,22 +125,17 @@ export function ItineraryTimeline({
               <h2 className="text-lg font-semibold tracking-tight">{DAY_FMT.format(date)}</h2>
             </header>
 
-            <div className="relative">
-              <span
-                aria-hidden
-                className="absolute left-[18px] top-2 h-[calc(100%-1rem)] w-px bg-border"
-              />
-              <ul className="space-y-3">
-                {day.items.map((item, itemIndex) => (
-                  <ItineraryItemCard
-                    key={item.id}
-                    item={item}
-                    index={itemIndex}
-                    onClick={setEditing}
-                  />
-                ))}
-              </ul>
-            </div>
+            <ul className="space-y-3">
+              {day.items.map((item, itemIndex) => (
+                <ItineraryItemCard
+                  key={item.id}
+                  item={item}
+                  index={itemIndex}
+                  state={itemStates.get(item.id) ?? 'future'}
+                  onClick={setEditing}
+                />
+              ))}
+            </ul>
           </li>
         );
       })}

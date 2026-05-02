@@ -897,18 +897,6 @@
       "today": "Aujourd'hui",
       "dayOf": "Jour {{day}} sur {{total}}"
     },
-    "nowNext": {
-      "live": "En cours",
-      "upcoming": "À suivre",
-      "endsIn": "se termine {{gap}}",
-      "startsIn": "commence {{gap}}",
-      "inMinutes_one": "dans {{count}} min",
-      "inMinutes_other": "dans {{count}} min",
-      "inHours_one": "dans {{count}} h",
-      "inHours_other": "dans {{count}} h",
-      "inDays_one": "dans {{count}} jour",
-      "inDays_other": "dans {{count}} jours"
-    },
     "guestSync": {
       "label": "Synchroniser avec l'itinéraire de mon parrain",
       "description": "Lorsque l'option est activée, votre itinéraire reflète celui de l'employé qui vous a invité. Désactivez pour gérer votre propre programme.",
