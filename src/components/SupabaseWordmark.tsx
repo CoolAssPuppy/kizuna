@@ -12,9 +12,7 @@ export function SupabaseWordmark(): JSX.Element {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const src =
-    theme === 'dark'
-      ? '/supabase-logo-wordmark-dark.svg'
-      : '/supabase-logo-wordmark-light.svg';
+    theme === 'dark' ? '/supabase-logo-wordmark-dark.svg' : '/supabase-logo-wordmark-light.svg';
   return (
     <a
       href="https://supabase.com"

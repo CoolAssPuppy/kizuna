@@ -19,7 +19,11 @@ interface RenameMinorDialogProps {
   onSubmit: (payload: { id: string; fullName: string }) => void;
 }
 
-export function RenameMinorDialog({ target, onClose, onSubmit }: RenameMinorDialogProps): JSX.Element {
+export function RenameMinorDialog({
+  target,
+  onClose,
+  onSubmit,
+}: RenameMinorDialogProps): JSX.Element {
   const { t } = useTranslation();
   const [first, setFirst] = useState('');
   const [last, setLast] = useState('');

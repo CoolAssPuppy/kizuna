@@ -56,7 +56,10 @@ export function TransportSection({ mode }: SectionProps): JSX.Element {
     void submit(async () => {
       const { error } = await getSupabaseClient()
         .from('attendee_profiles')
-        .upsert({ user_id: subject.userId, ground_transport_need: need }, { onConflict: 'user_id' });
+        .upsert(
+          { user_id: subject.userId, ground_transport_need: need },
+          { onConflict: 'user_id' },
+        );
       if (error) throw error;
     });
   }

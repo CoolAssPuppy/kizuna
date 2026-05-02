@@ -40,8 +40,7 @@ export function EditInvitationDialog({
     setEmail(target.guest_email);
   }
   const fullName = joinFullName(first, last);
-  const valid =
-    first.trim().length >= 1 && last.trim().length >= 1 && email.trim().includes('@');
+  const valid = first.trim().length >= 1 && last.trim().length >= 1 && email.trim().includes('@');
 
   return (
     <Dialog

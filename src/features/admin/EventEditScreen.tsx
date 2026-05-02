@@ -71,7 +71,11 @@ export function EventEditScreen(): JSX.Element {
   const { show } = useToast();
   const isNew = eventId === 'new' || !eventId;
 
-  const { data: event, isLoading, isSuccess } = useQuery({
+  const {
+    data: event,
+    isLoading,
+    isSuccess,
+  } = useQuery({
     queryKey: ['admin', 'event', eventId],
     enabled: !isNew && eventId !== undefined,
     queryFn: () => (eventId ? fetchEventById(getSupabaseClient(), eventId) : Promise.resolve(null)),

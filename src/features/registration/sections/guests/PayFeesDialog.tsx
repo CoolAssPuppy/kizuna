@@ -59,9 +59,7 @@ export function PayFeesDialog({ open, onClose, amount }: PayFeesDialogProps): JS
           <p className="text-sm">
             {t('registration.guests.payAmount', { amount: CURRENCY_FMT.format(amount) })}
           </p>
-          <p className="text-sm text-muted-foreground">
-            {t('registration.guests.payHint')}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('registration.guests.payHint')}</p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={busy}>

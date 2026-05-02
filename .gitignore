@@ -35,6 +35,9 @@ coverage/
 # Vitest
 .vitest/
 
+# Deno (root-level cache from running `deno test` against supabase/functions)
+deno.lock
+
 # Playwright
 /test-results/
 /playwright-report/

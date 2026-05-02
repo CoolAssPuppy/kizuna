@@ -20,7 +20,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    reportError(error, { source: 'react_error_boundary', componentStack: errorInfo.componentStack });
+    reportError(error, {
+      source: 'react_error_boundary',
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   private readonly handleReload = (): void => {

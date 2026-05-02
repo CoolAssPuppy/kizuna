@@ -74,7 +74,7 @@ export function ThemePicker(): JSX.Element {
           trigger upward stays in scope (mouseleave doesn't fire). */}
       <div
         className={cn(
-          'absolute bottom-full left-1/2 -translate-x-1/2 pb-2 transform-gpu transition-all duration-200',
+          'absolute bottom-full left-1/2 -translate-x-1/2 transform-gpu pb-2 transition-all duration-200',
           open
             ? 'pointer-events-auto translate-y-0 opacity-100'
             : 'pointer-events-none translate-y-2 opacity-0',

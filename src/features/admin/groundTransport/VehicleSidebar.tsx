@@ -59,11 +59,7 @@ interface VehicleSidebarRowProps {
   timeFmt: Intl.DateTimeFormat;
 }
 
-function VehicleSidebarRow({
-  vehicle,
-  assigned,
-  timeFmt,
-}: VehicleSidebarRowProps): JSX.Element {
+function VehicleSidebarRow({ vehicle, assigned, timeFmt }: VehicleSidebarRowProps): JSX.Element {
   const ratio = assigned / vehicle.capacity_passengers;
   const tone = capacityTone(ratio);
   return (

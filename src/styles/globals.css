@@ -146,8 +146,8 @@
 
   /* === Hermione: Gryffindor red + gold, dark academia paneling. === */
   [data-theme='hermione'] {
-    --background: 17 35% 12%;       /* deep mahogany */
-    --foreground: 42 78% 90%;        /* parchment */
+    --background: 17 35% 12%; /* deep mahogany */
+    --foreground: 42 78% 90%; /* parchment */
 
     --card: 15 32% 16%;
     --card-foreground: 42 78% 90%;
@@ -155,10 +155,10 @@
     --popover: 15 32% 16%;
     --popover-foreground: 42 78% 90%;
 
-    --primary: 42 95% 56%;            /* gold */
+    --primary: 42 95% 56%; /* gold */
     --primary-foreground: 0 60% 20%;
 
-    --secondary: 0 60% 32%;           /* Gryffindor red */
+    --secondary: 0 60% 32%; /* Gryffindor red */
     --secondary-foreground: 42 78% 90%;
 
     --muted: 17 25% 22%;
@@ -177,7 +177,7 @@
 
   /* === Kirk: Bright 60s Star Trek pop. Command gold, science blue. === */
   [data-theme='kirk'] {
-    --background: 36 100% 96%;        /* warm cream */
+    --background: 36 100% 96%; /* warm cream */
     --foreground: 220 60% 18%;
 
     --card: 0 0% 100%;
@@ -186,16 +186,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 60% 18%;
 
-    --primary: 45 100% 55%;           /* command gold */
+    --primary: 45 100% 55%; /* command gold */
     --primary-foreground: 220 60% 18%;
 
-    --secondary: 200 90% 70%;          /* science blue */
+    --secondary: 200 90% 70%; /* science blue */
     --secondary-foreground: 220 60% 18%;
 
     --muted: 36 60% 92%;
     --muted-foreground: 220 30% 40%;
 
-    --accent: 0 90% 70%;               /* operations red */
+    --accent: 0 90% 70%; /* operations red */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 90% 60%;

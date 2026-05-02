@@ -47,12 +47,7 @@ export function SessionDialog(props: SessionDialogProps): JSX.Element {
   return <SessionDialogInner key={key} {...props} />;
 }
 
-function SessionDialogInner({
-  draft,
-  onClose,
-  onSave,
-  saving,
-}: SessionDialogProps): JSX.Element {
+function SessionDialogInner({ draft, onClose, onSave, saving }: SessionDialogProps): JSX.Element {
   const { t } = useTranslation();
   const open = draft !== null;
   const [state, setState] = useState<SessionDraft>(draft ?? emptySessionDraft());

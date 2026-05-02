@@ -31,7 +31,10 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   override componentDidCatch(error: Error, info: { componentStack?: string | null }): void {
-    reportError(error, { source: 'route_error_boundary', componentStack: info.componentStack ?? null });
+    reportError(error, {
+      source: 'route_error_boundary',
+      componentStack: info.componentStack ?? null,
+    });
   }
 
   override render(): ReactNode {

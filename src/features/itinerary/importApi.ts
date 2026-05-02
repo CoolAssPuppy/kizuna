@@ -27,7 +27,10 @@ function isNotDeployed(error: unknown): boolean {
 async function describeFunctionError(error: unknown): Promise<Error> {
   const ctx = (error as { context?: Response | { status?: number } } | null)?.context;
   if (ctx instanceof Response) {
-    const text = await ctx.clone().text().catch(() => '');
+    const text = await ctx
+      .clone()
+      .text()
+      .catch(() => '');
     return new Error(`${ctx.status}: ${text || ctx.statusText}`);
   }
   if (error instanceof Error) return error;

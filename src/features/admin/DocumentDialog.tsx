@@ -95,10 +95,7 @@ export function DocumentDialog(props: DocumentDialogProps): JSX.Element {
   // Re-mount the form when the user switches documents (or new vs edit)
   // so state initialises from the freshly-passed prop. No effect needed.
   return (
-    <DocumentDialogInner
-      key={props.open ? (props.document?.id ?? 'new') : 'closed'}
-      {...props}
-    />
+    <DocumentDialogInner key={props.open ? (props.document?.id ?? 'new') : 'closed'} {...props} />
   );
 }
 
@@ -111,9 +108,7 @@ function DocumentDialogInner({
   const { t } = useTranslation();
   const { show } = useToast();
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<Draft>(() =>
-    document ? rowToDraft(document) : EMPTY_DRAFT,
-  );
+  const [draft, setDraft] = useState<Draft>(() => (document ? rowToDraft(document) : EMPTY_DRAFT));
   const [bodyTab, setBodyTab] = useState<'write' | 'preview'>('write');
 
   const save = useMutation({

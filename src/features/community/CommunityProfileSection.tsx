@@ -263,4 +263,3 @@ function CommunityProfileSectionInner({ mode }: SectionProps): JSX.Element {
     </SectionChrome>
   );
 }
-
