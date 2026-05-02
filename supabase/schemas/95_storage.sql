@@ -276,20 +276,32 @@ create policy community_media_self_delete on storage.objects
 -- ---------------------------------------------------------------------
 -- Cleanup: previous incarnation had a `feed-images` bucket and an
 -- `event-covers` bucket. Drop them here so a re-applied schema converges
--- on the four-bucket layout above. Idempotent — DELETE FROM storage.objects
--- with WHERE bucket_id is the only path Supabase exposes for a bucket
--- wipe; storage.buckets DELETE then succeeds because nothing references
--- it.
+-- on the four-bucket layout above.
+--
+-- Hosted Supabase installs a `storage.protect_delete()` trigger that
+-- blocks raw DELETE on storage.objects (admins are nudged to use the
+-- Storage API). When that fires, we skip the cleanup gracefully — the
+-- legacy buckets stay empty + unreferenced and the rest of the schema
+-- applies cleanly. Local dev doesn't have that trigger, so the
+-- cleanup completes there.
 -- ---------------------------------------------------------------------
 do $$
 begin
   if exists (select 1 from storage.buckets where id = 'feed-images') then
-    delete from storage.objects where bucket_id = 'feed-images';
-    delete from storage.buckets where id = 'feed-images';
+    begin
+      delete from storage.objects where bucket_id = 'feed-images';
+      delete from storage.buckets where id = 'feed-images';
+    exception when others then
+      raise notice 'feed-images bucket cleanup skipped (likely storage.protect_delete trigger): %', sqlerrm;
+    end;
   end if;
   if exists (select 1 from storage.buckets where id = 'event-covers') then
-    delete from storage.objects where bucket_id = 'event-covers';
-    delete from storage.buckets where id = 'event-covers';
+    begin
+      delete from storage.objects where bucket_id = 'event-covers';
+      delete from storage.buckets where id = 'event-covers';
+    exception when others then
+      raise notice 'event-covers bucket cleanup skipped (likely storage.protect_delete trigger): %', sqlerrm;
+    end;
   end if;
 end
 $$;
