@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { SELECT_FEED_ITEMS_BASE } from '@/lib/supabase/columns';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -22,7 +23,7 @@ export function useEditorialFeed(eventId: string | null): Result {
       // ordering matches the rendered order either way.
       const { data, error } = await getSupabaseClient()
         .from('feed_items')
-        .select('*')
+        .select(SELECT_FEED_ITEMS_BASE)
         .eq('event_id', eventId)
         .order('location', { ascending: true })
         .order('position', { ascending: true });

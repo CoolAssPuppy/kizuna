@@ -2,6 +2,7 @@ import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
 export type NotificationRow = Database['public']['Tables']['notifications']['Row'];
+const SELECT_NOTIFICATIONS_BASE = 'id,user_id,channel,title,body,link_url,sent_at,read_at,created_at';
 
 const RECENT_LIMIT = 30;
 
@@ -11,7 +12,7 @@ export async function fetchRecentNotifications(
 ): Promise<NotificationRow[]> {
   const { data, error } = await client
     .from('notifications')
-    .select('*')
+    .select(SELECT_NOTIFICATIONS_BASE)
     .eq('user_id', userId)
     .order('sent_at', { ascending: false })
     .limit(RECENT_LIMIT);

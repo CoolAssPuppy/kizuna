@@ -1,4 +1,5 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
+import { SELECT_FEED_ITEMS_BASE } from '@/lib/supabase/columns';
 import type { Database } from '@/types/database.types';
 
 export type FeedItemRow = Database['public']['Tables']['feed_items']['Row'];
@@ -12,7 +13,7 @@ export async function fetchAllFeedItems(
 ): Promise<FeedItemRow[]> {
   const { data, error } = await client
     .from('feed_items')
-    .select('*')
+    .select(SELECT_FEED_ITEMS_BASE)
     .eq('event_id', eventId)
     .order('location', { ascending: true })
     .order('position', { ascending: true });

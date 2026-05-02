@@ -1,4 +1,5 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
+import { SELECT_SESSIONS_BASE } from '@/lib/supabase/columns';
 import type { Database } from '@/types/database.types';
 
 export type SessionRow = Database['public']['Tables']['sessions']['Row'];
@@ -20,7 +21,7 @@ export async function fetchAgenda(
   const [sessionsRes, favoritesRes] = await Promise.all([
     client
       .from('sessions')
-      .select('*')
+      .select(SELECT_SESSIONS_BASE)
       .eq('event_id', args.eventId)
       .order('starts_at', { ascending: true }),
     client.from('session_favorites').select('session_id').eq('user_id', args.userId),

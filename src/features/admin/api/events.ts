@@ -1,4 +1,5 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
+import { SELECT_EVENTS_BASE } from '@/lib/supabase/columns';
 import type { Database } from '@/types/database.types';
 
 export type EventRow = Database['public']['Tables']['events']['Row'];
@@ -9,7 +10,7 @@ export type EventUpdate = Database['public']['Tables']['events']['Update'];
 export async function fetchAllEvents(client: AppSupabaseClient): Promise<EventRow[]> {
   const { data, error } = await client
     .from('events')
-    .select('*')
+    .select(SELECT_EVENTS_BASE)
     .order('start_date', { ascending: false });
   if (error) throw error;
   return data ?? [];
@@ -19,7 +20,11 @@ export async function fetchEventById(
   client: AppSupabaseClient,
   id: string,
 ): Promise<EventRow | null> {
-  const { data, error } = await client.from('events').select('*').eq('id', id).maybeSingle();
+  const { data, error } = await client
+    .from('events')
+    .select(SELECT_EVENTS_BASE)
+    .eq('id', id)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }

@@ -562,7 +562,18 @@ create policy swag_sizes_self_or_sponsor on public.swag_sizes
 
 -- Documents
 create policy documents_authenticated_read on public.documents
-  for select using (auth.role() = 'authenticated');
+  for select using (
+    public.is_admin()
+    or exists (
+      select 1
+      from public.registrations r
+      where r.user_id = auth.uid()
+        and (
+          documents.event_id is null
+          or r.event_id = documents.event_id
+        )
+    )
+  );
 
 create policy documents_admin_write on public.documents
   for all using (public.is_admin())

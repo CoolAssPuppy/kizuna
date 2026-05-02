@@ -20,6 +20,9 @@ const PLACEHOLDER_SUPABASE_KEY = 'placeholder-publishable-key';
 function readEnv(key: keyof ImportMetaEnv, fallback: string): string {
   const value: unknown = import.meta.env[key];
   if (typeof value === 'string' && value.length > 0) return value;
+  if (import.meta.env.PROD) {
+    throw new Error(`[kizuna] Missing required env var in production: ${key}`);
+  }
   // Single warning per missing key. Using console.error so it's visible
   // in production logs too, not just dev consoles.
   console.error(

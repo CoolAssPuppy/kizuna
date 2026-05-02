@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { SELECT_EVENTS_BASE } from '@/lib/supabase/columns';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -25,7 +26,7 @@ export function useActiveEvent(): {
       if (override) {
         const { data, error } = await getSupabaseClient()
           .from('events')
-          .select('*')
+          .select(SELECT_EVENTS_BASE)
           .eq('id', override)
           .maybeSingle();
         if (error) throw error;
@@ -33,7 +34,7 @@ export function useActiveEvent(): {
       }
       const { data, error } = await getSupabaseClient()
         .from('events')
-        .select('*')
+        .select(SELECT_EVENTS_BASE)
         .eq('is_active', true)
         .eq('type', 'supafest')
         .order('start_date', { ascending: false })

@@ -21,7 +21,9 @@ export async function fetchDocuments(
 ): Promise<DocumentWithAck[]> {
   const { data: documents, error: documentsError } = await client
     .from('documents')
-    .select('*')
+    .select(
+      'id,event_id,document_key,version,title,content_type,body,pdf_path,applies_to,requires_acknowledgement,requires_scroll,notion_url,display_order,is_active,published_at',
+    )
     .eq('is_active', true)
     .in('applies_to', ['all', audience])
     .or(`event_id.eq.${eventId},event_id.is.null`)
@@ -33,7 +35,9 @@ export async function fetchDocuments(
 
   const { data: acks, error: acksError } = await client
     .from('document_acknowledgements')
-    .select('*')
+    .select(
+      'id,user_id,event_id,document_id,document_key,document_version,acknowledged_at,scrolled_to_bottom,explicit_checkbox,device_type,signature_full_name',
+    )
     .eq('user_id', userId)
     .eq('event_id', eventId);
 

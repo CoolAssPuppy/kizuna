@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { SafeExternalLink } from '@/components/SafeExternalLink';
 import { Button } from '@/components/ui/button';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
@@ -146,15 +147,13 @@ function DocumentPreview({ document }: { document: DocumentWithAck['document'] }
 
   if (document.content_type === 'notion') {
     return document.notion_url ? (
-      <a
+      <SafeExternalLink
         href={document.notion_url}
-        target="_blank"
-        rel="noreferrer noopener"
         className="inline-flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2 text-sm text-primary hover:bg-muted"
       >
         <ExternalLink aria-hidden className="h-4 w-4" />
         {t('documents.notion.open')}
-      </a>
+      </SafeExternalLink>
     ) : (
       <p className="text-sm text-muted-foreground">{t('documents.pdf.unavailable')}</p>
     );

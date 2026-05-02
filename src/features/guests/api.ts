@@ -1,4 +1,5 @@
 import { callEdgeFunction } from '@/lib/edgeFunction';
+import { SELECT_ADDITIONAL_GUESTS_BASE, SELECT_GUEST_INVITATIONS_BASE } from '@/lib/supabase/columns';
 import type { AppSupabaseClient } from '@/lib/supabase';
 
 import type { AdditionalGuestRow, GuestAgeBracket, GuestInvitationRow } from './types';
@@ -9,7 +10,7 @@ export async function listGuestInvitations(
 ): Promise<GuestInvitationRow[]> {
   const { data, error } = await client
     .from('guest_invitations')
-    .select('*')
+    .select(SELECT_GUEST_INVITATIONS_BASE)
     .eq('sponsor_id', sponsorUserId)
     .order('sent_at', { ascending: false });
   if (error) throw error;
@@ -22,7 +23,7 @@ export async function listAdditionalGuests(
 ): Promise<AdditionalGuestRow[]> {
   const { data, error } = await client
     .from('additional_guests')
-    .select('*')
+    .select(SELECT_ADDITIONAL_GUESTS_BASE)
     .eq('sponsor_id', sponsorUserId)
     .order('last_name', { ascending: true });
   if (error) throw error;

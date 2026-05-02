@@ -1,4 +1,5 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
+import { SELECT_SESSIONS_BASE } from '@/lib/supabase/columns';
 import type { Database } from '@/types/database.types';
 
 export type SessionRow = Database['public']['Tables']['sessions']['Row'];
@@ -13,7 +14,7 @@ export async function fetchAllSessions(
 ): Promise<SessionRow[]> {
   const { data, error } = await client
     .from('sessions')
-    .select('*')
+    .select(SELECT_SESSIONS_BASE)
     .eq('event_id', eventId)
     .order('starts_at', { ascending: true });
   if (error) throw error;

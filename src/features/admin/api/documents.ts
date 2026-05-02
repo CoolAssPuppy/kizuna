@@ -1,4 +1,5 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
+import { SELECT_DOCUMENTS_BASE } from '@/lib/supabase/columns';
 import type { Database } from '@/types/database.types';
 
 export type DocumentRow = Database['public']['Tables']['documents']['Row'];
@@ -12,7 +13,7 @@ export async function fetchAllDocuments(
 ): Promise<DocumentRow[]> {
   const { data, error } = await client
     .from('documents')
-    .select('*')
+    .select(SELECT_DOCUMENTS_BASE)
     .or(`event_id.eq.${eventId},event_id.is.null`)
     .order('display_order', { ascending: true })
     .order('document_key', { ascending: true });
