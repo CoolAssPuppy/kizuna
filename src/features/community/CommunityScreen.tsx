@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { Avatar } from '@/components/Avatar';
+import { EmailField } from '@/components/EmailField';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,8 +19,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
+import { MemoriesSection } from './photos/MemoriesSection';
 import { WorldMap } from './WorldMap';
 import {
   createChannel,
@@ -40,6 +43,7 @@ type MapMode = 'hometown' | 'current';
 export function CommunityScreen(): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: event } = useActiveEvent();
   const qc = useQueryClient();
   const { show } = useToast();
   const [mapMode, setMapMode] = useState<MapMode>('hometown');
@@ -114,6 +118,8 @@ export function CommunityScreen(): JSX.Element {
       <PeopleSection title={t('community.matches.byHometown')} people={homies} />
 
       <PeopleSection title={t('community.matches.byCurrent')} people={locals} />
+
+      {event ? <MemoriesSection eventId={event.id} eventName={event.name} /> : null}
 
       <section className="space-y-3">
         <header className="flex items-center justify-between">
@@ -197,7 +203,8 @@ function PeopleSection({
             <thead className="bg-muted text-left">
               <tr>
                 <th className="px-3 py-2 font-medium">&nbsp;</th>
-                <th className="px-3 py-2 font-medium">{t('community.matches.name')}</th>
+                <th className="px-3 py-2 font-medium">{t('community.matches.firstName')}</th>
+                <th className="px-3 py-2 font-medium">{t('community.matches.lastName')}</th>
                 <th className="px-3 py-2 font-medium">{t('community.matches.email')}</th>
                 {showMatched ? (
                   <th className="px-3 py-2 font-medium">{t('community.matches.matchedHobbies')}</th>
@@ -208,16 +215,30 @@ function PeopleSection({
               {people.map((p) => (
                 <tr key={p.user_id} className="border-t">
                   <td className="px-3 py-2">
-                    <Avatar
-                      url={p.avatar_url}
-                      fallback={`${p.first_name.charAt(0)}${p.last_name.charAt(0)}`}
-                      size={32}
-                    />
+                    <Link
+                      to={`/community/p/${p.user_id}`}
+                      aria-label={`${p.first_name} ${p.last_name}`}
+                    >
+                      <Avatar
+                        url={p.avatar_url}
+                        fallback={`${p.first_name.charAt(0)}${p.last_name.charAt(0)}`}
+                        size={32}
+                      />
+                    </Link>
                   </td>
                   <td className="px-3 py-2">
-                    {p.first_name} {p.last_name}
+                    <Link to={`/community/p/${p.user_id}`} className="hover:underline">
+                      {p.first_name}
+                    </Link>
                   </td>
-                  <td className="px-3 py-2 text-muted-foreground">{p.email}</td>
+                  <td className="px-3 py-2">
+                    <Link to={`/community/p/${p.user_id}`} className="hover:underline">
+                      {p.last_name}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2 text-muted-foreground">
+                    <EmailField email={p.email} textClassName="text-c-muted" />
+                  </td>
                   {showMatched ? (
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       {(p.matched ?? []).join(', ')}

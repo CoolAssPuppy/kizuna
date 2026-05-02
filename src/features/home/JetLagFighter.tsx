@@ -67,8 +67,7 @@ function JetLagBody({ direction, offset, severity, t }: BodyProps): JSX.Element 
           <Lightbulb aria-hidden className="mt-0.5 h-4 w-4 text-amber-500" />
           <p className="text-sm leading-relaxed">{tip?.text ?? t('home.jetLag.intro')}</p>
         </div>
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">{t('home.jetLag.disclaimer')}</p>
+        <div className="flex items-center justify-end">
           <Button
             type="button"
             size="sm"

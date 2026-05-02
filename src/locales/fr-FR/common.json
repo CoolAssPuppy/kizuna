@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "tapez / pour la palette"
   },
+  "email": {
+    "copy": "Copier l'e-mail",
+    "copied": "E-mail copié dans le presse-papiers.",
+    "copyFailed": "Échec de la copie. Réessayez.",
+    "slack": "Ouvrir le DM Slack"
+  },
   "home": {
     "feedTitle": "Votre Fil",
     "itemsLabel": "éléments",
@@ -239,6 +245,12 @@
       "name": "Nom",
       "email": "E-mail"
     },
+    "person": {
+      "back": "Retour à la communauté",
+      "notFound": "Cette personne est introuvable.",
+      "fromLabel": "De {{value}}",
+      "nowLabel": "Maintenant à {{value}}"
+    },
     "channels": {
       "title": "Canaux communautaires",
       "newChannel": "Démarrer un canal",
@@ -323,7 +335,7 @@
       "firstName": "Prénom",
       "middleInitial": "Deuxième prénom",
       "lastName": "Nom",
-      "legalNameHint": "Exactement comme imprimé sur votre passeport. Nous l'utilisons pour les documents de voyage et le plan de table du dîner.",
+      "legalNameHint": "Exactement comme imprimé sur votre passeport.",
       "alternateEmail": "E-mail Secondaire",
       "phoneNumber": "Numéro de Téléphone",
       "whatsapp": "WhatsApp",
@@ -999,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Documents",
-    "addDocument": "Ajouter un Document",
     "createTitle": "Ajouter un Document",
     "createSubtitle": "Les brouillons sont publiés immédiatement à tout le monde dans cet événement.",
     "documentKey": "Type",
@@ -1046,7 +1057,7 @@
     },
     "notion": {
       "label": "URL Notion",
-      "hint": "Collez un lien Notion public. Nous afficherons un bouton qui l'ouvre ; l'ingestion arrive dans une phase ultérieure.",
+      "hint": "Votre document Notion s'ouvrira dans une nouvelle fenêtre lorsque vous cliquerez.",
       "open": "Ouvrir dans Notion"
     }
   },

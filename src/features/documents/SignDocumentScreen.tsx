@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -112,7 +113,10 @@ export function SignDocumentScreen(): JSX.Element {
         deviceType: detectDeviceType(navigator.userAgent),
       });
       show(t('documents.signSuccess'));
-      await queryClient.invalidateQueries({ queryKey: ['documents', event.id, user.id] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['documents', event.id, user.id] }),
+        queryClient.invalidateQueries({ queryKey: ['profile', 'checklist'] }),
+      ]);
       navigate('/documents');
     } catch {
       show(t('documents.signFailure'), 'error');
@@ -131,6 +135,12 @@ export function SignDocumentScreen(): JSX.Element {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-3">
+        <Link to="/documents" className="inline-flex items-center gap-2">
+          <ArrowLeft aria-hidden className="h-4 w-4" />
+          {t('documents.backToDocuments')}
+        </Link>
+      </Button>
       <header className="mb-10 space-y-3">
         <h1 className="text-3xl font-semibold tracking-tight">{document.title}</h1>
         <p className="text-sm text-muted-foreground">

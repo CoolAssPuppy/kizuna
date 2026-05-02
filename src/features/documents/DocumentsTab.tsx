@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { Button } from '@/components/ui/button';
-import { useIsAdmin } from '@/features/auth/hooks';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { useStorageImage } from '@/lib/useStorageImage';
 
@@ -18,7 +17,6 @@ interface DocumentsTabProps {
 
 export function DocumentsTab({ eventId }: DocumentsTabProps): JSX.Element {
   const { t } = useTranslation();
-  const isAdmin = useIsAdmin();
   const { data, isLoading, error } = useDocumentsQuery({ eventId });
 
   if (isLoading) {
@@ -41,13 +39,8 @@ export function DocumentsTab({ eventId }: DocumentsTabProps): JSX.Element {
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">
-      <header className="flex flex-row items-center justify-between gap-4">
+      <header>
         <h1 className="text-3xl font-semibold tracking-tight">{t('documents.tabTitle')}</h1>
-        {isAdmin ? (
-          <Button asChild>
-            <Link to="/documents/new">{t('documents.addDocument')}</Link>
-          </Button>
-        ) : null}
       </header>
 
       {!data || data.length === 0 ? (

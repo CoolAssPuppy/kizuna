@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "scrivi / per aprire la palette"
   },
+  "email": {
+    "copy": "Copia email",
+    "copied": "Email copiata negli appunti.",
+    "copyFailed": "Copia non riuscita. Riprova.",
+    "slack": "Apri DM Slack"
+  },
   "home": {
     "feedTitle": "Il Tuo Feed",
     "itemsLabel": "elementi",
@@ -239,6 +245,12 @@
       "name": "Nome",
       "email": "Email"
     },
+    "person": {
+      "back": "Torna alla community",
+      "notFound": "Persona non trovata.",
+      "fromLabel": "Da {{value}}",
+      "nowLabel": "Ora a {{value}}"
+    },
     "channels": {
       "title": "Canali della community",
       "newChannel": "Avvia un canale",
@@ -316,7 +328,7 @@
       "firstName": "Nome",
       "middleInitial": "Iniziale",
       "lastName": "Cognome",
-      "legalNameHint": "Esattamente come stampato sul passaporto. Lo usiamo per i documenti di viaggio e per la disposizione dei posti a cena.",
+      "legalNameHint": "Esattamente come stampato sul passaporto.",
       "alternateEmail": "Email Alternativa",
       "phoneNumber": "Numero di Telefono",
       "whatsapp": "WhatsApp",
@@ -992,7 +1004,6 @@
   },
   "documents": {
     "tabTitle": "Documenti",
-    "addDocument": "Aggiungi Documento",
     "createTitle": "Aggiungi un Documento",
     "createSubtitle": "Le bozze vengono pubblicate immediatamente per tutti in questo evento.",
     "documentKey": "Tipo",
@@ -1039,7 +1050,7 @@
     },
     "notion": {
       "label": "URL Notion",
-      "hint": "Incolla un link Notion pubblico. Mostreremo un pulsante che lo apre; l'integrazione arriverà in una fase successiva.",
+      "hint": "Il tuo documento Notion si aprirà in una nuova finestra al clic.",
       "open": "Apri in Notion"
     }
   },

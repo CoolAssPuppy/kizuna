@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "kirjoita / avataksesi komentopaletti"
   },
+  "email": {
+    "copy": "Kopioi sähköposti",
+    "copied": "Sähköposti kopioitu leikepöydälle.",
+    "copyFailed": "Kopiointi epäonnistui. Yritä uudelleen.",
+    "slack": "Avaa Slack-DM"
+  },
   "home": {
     "feedTitle": "Sinun Syötteesi",
     "itemsLabel": "kohdetta",
@@ -239,6 +245,12 @@
       "name": "Nimi",
       "email": "Sähköposti"
     },
+    "person": {
+      "back": "Takaisin yhteisöön",
+      "notFound": "Henkilöä ei löytynyt.",
+      "fromLabel": "Kotoisin: {{value}}",
+      "nowLabel": "Nykyään: {{value}}"
+    },
     "channels": {
       "title": "Yhteisön kanavat",
       "newChannel": "Aloita kanava",
@@ -323,7 +335,7 @@
       "firstName": "Etunimi",
       "middleInitial": "Toinen",
       "lastName": "Sukunimi",
-      "legalNameHint": "Täsmälleen kuten passissasi lukee. Käytämme tätä matkustusasiakirjoissa ja illallisten istumajärjestyksessä.",
+      "legalNameHint": "Täsmälleen kuten passissasi lukee.",
       "alternateEmail": "Vaihtoehtoinen Sähköposti",
       "phoneNumber": "Puhelinnumero",
       "whatsapp": "WhatsApp",
@@ -999,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Asiakirjat",
-    "addDocument": "Lisää Asiakirja",
     "createTitle": "Lisää Asiakirja",
     "createSubtitle": "Luonnokset julkaistaan välittömästi kaikille tässä tapahtumassa.",
     "documentKey": "Tyyppi",
@@ -1046,7 +1057,7 @@
     },
     "notion": {
       "label": "Notion-URL",
-      "hint": "Liitä julkinen Notion-linkki. Näytämme painikkeen, joka avaa sen; sisällön tuonti tulee myöhemmässä vaiheessa.",
+      "hint": "Notion-dokumenttisi aukeaa uudessa ikkunassa, kun sitä napsautetaan.",
       "open": "Avaa Notionissa"
     }
   },

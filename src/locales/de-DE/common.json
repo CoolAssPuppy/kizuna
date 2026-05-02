@@ -84,6 +84,12 @@
   "terminal": {
     "palettePlaceholder": "tippe / für Befehlspalette"
   },
+  "email": {
+    "copy": "E-Mail kopieren",
+    "copied": "E-Mail in die Zwischenablage kopiert.",
+    "copyFailed": "Kopieren fehlgeschlagen. Bitte erneut versuchen.",
+    "slack": "Slack-DM öffnen"
+  },
   "home": {
     "feedTitle": "Ihr Feed",
     "itemsLabel": "Einträge",
@@ -239,6 +245,12 @@
       "name": "Name",
       "email": "E-Mail"
     },
+    "person": {
+      "back": "Zurück zur Community",
+      "notFound": "Diese Person konnten wir nicht finden.",
+      "fromLabel": "Aus {{value}}",
+      "nowLabel": "Jetzt {{value}}"
+    },
     "channels": {
       "title": "Community-Kanäle",
       "newChannel": "Kanal starten",
@@ -323,7 +335,7 @@
       "firstName": "Vorname",
       "middleInitial": "Zweiter Vorname",
       "lastName": "Nachname",
-      "legalNameHint": "Genau wie auf Ihrem Reisepass aufgedruckt. Wir verwenden dies für Reisedokumente und die Sitzordnung beim Abendessen.",
+      "legalNameHint": "Genau wie auf Ihrem Reisepass aufgedruckt.",
       "alternateEmail": "Alternative E-Mail",
       "phoneNumber": "Telefonnummer",
       "whatsapp": "WhatsApp",
@@ -999,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Dokumente",
-    "addDocument": "Dokument hinzufügen",
     "createTitle": "Dokument hinzufügen",
     "createSubtitle": "Entwürfe werden sofort an alle in dieser Veranstaltung veröffentlicht.",
     "documentKey": "Typ",
@@ -1046,7 +1057,7 @@
     },
     "notion": {
       "label": "Notion-URL",
-      "hint": "Fügen Sie einen öffentlichen Notion-Link ein. Wir zeigen eine Schaltfläche an, die ihn öffnet; die Einbindung folgt in einer späteren Phase.",
+      "hint": "Ihr Notion-Dokument öffnet sich beim Klick in einem neuen Fenster.",
       "open": "In Notion öffnen"
     }
   },

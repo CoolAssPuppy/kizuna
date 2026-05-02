@@ -39,6 +39,67 @@
   "terminal": {
     "palettePlaceholder": "type / for command palette"
   },
+  "email": {
+    "copy": "Copy email",
+    "copied": "Email copied to clipboard.",
+    "copyFailed": "Could not copy. Try again.",
+    "slack": "Open Slack DM"
+  },
+  "photos": {
+    "section": {
+      "title": "{{event}} memories",
+      "fallbackEvent": "Kizuna",
+      "recent": "recent",
+      "viewAll": "View all",
+      "add": "Add photos",
+      "empty": "No photos yet. Be the first to drop one in."
+    },
+    "screen": {
+      "back": "Back to community",
+      "title": "{{event}} memories",
+      "searchPlaceholder": "Search captions, #tags, or @people",
+      "searchEmpty": "No matches. Try a different tag or word."
+    },
+    "upload": {
+      "title": "Add photos",
+      "drop": "Drop photos here or pick some",
+      "pick": "Pick photos",
+      "addMore": "Add more",
+      "count": "{{current}} of {{max}} selected",
+      "replace": "Remove",
+      "editFile": "Edit {{name}}",
+      "caption": "Caption",
+      "captionPlaceholder": "Tell the story. Use #tags or @teammates.",
+      "taggedPeople": "Tagged people",
+      "tagPlaceholder": "Search by name or email",
+      "removeTag": "Remove {{value}}",
+      "submit": "Upload",
+      "submitMany": "Upload {{count}}",
+      "success": "Photo uploaded.",
+      "successCount_one": "{{count}} photo uploaded.",
+      "successCount_other": "{{count}} photos uploaded.",
+      "errors": {
+        "type": "That file type isn't supported. Use JPEG, PNG, WebP, or HEIC.",
+        "size": "File is too big. Max {{max}}.",
+        "generic": "Upload failed. Please try again.",
+        "someFailed_one": "{{count}} photo failed to upload.",
+        "someFailed_other": "{{count}} photos failed to upload."
+      }
+    },
+    "lightbox": {
+      "prev": "Previous photo",
+      "next": "Next photo",
+      "close": "Close",
+      "copyLink": "Copy link",
+      "copied": "Link copied.",
+      "copyFailed": "Could not copy. Try again.",
+      "delete": "Delete photo",
+      "deleteConfirm": "Delete this photo?",
+      "deleteFailed": "Could not delete. Try again.",
+      "deleted": "Photo deleted.",
+      "tagged": "Tagged"
+    }
+  },
   "events": {
     "title": "All events",
     "subtitle": "Switch which event the app is showing. The active event applies by default.",
@@ -136,6 +197,9 @@
       "subtitle": "A real fun fact from a fellow attendee. Take a guess, then reveal.",
       "reveal": "Reveal the answer",
       "tryAnother": "Try another"
+    },
+    "memories": {
+      "cta": "Make your own {{event}} memories"
     }
   },
   "welcome": {
@@ -170,6 +234,19 @@
   },
   "profile": {
     "title": "Profile",
+    "checklist": {
+      "label": "Registration progress",
+      "tasks": {
+        "personal_info": "Personal info",
+        "passport": "Passport details",
+        "emergency_contact": "Emergency contact",
+        "dietary": "Dietary preferences",
+        "accessibility": "Accessibility",
+        "swag": "Swag sizes",
+        "transport": "Transport",
+        "documents": "Documents"
+      }
+    },
     "nav": {
       "label": "Profile sections",
       "personal": "Personal info",
@@ -240,7 +317,27 @@
       "empty": "No matches yet — add a few hobbies and a hometown to your community profile.",
       "matchedHobbies": "Hobbies matched",
       "name": "Name",
+      "firstName": "First name",
+      "lastName": "Last name",
       "email": "Email"
+    },
+    "person": {
+      "back": "Back to community",
+      "notFound": "We could not find that person.",
+      "fromLabel": "From {{value}}",
+      "nowLabel": "Now {{value}}",
+      "identity": {
+        "department": "Department",
+        "team": "Team",
+        "title": "Title",
+        "baseCity": "Base city",
+        "startDate": "Start date",
+        "yearsAttended": "Years at Supafest"
+      },
+      "activity": {
+        "messagesHint": "Latest channel messages",
+        "photosTrailing": "tagged or uploaded"
+      }
     },
     "channels": {
       "title": "Community channels",
@@ -325,7 +422,7 @@
       "firstName": "First Name",
       "middleInitial": "Middle",
       "lastName": "Last Name",
-      "legalNameHint": "Exactly as printed on your passport. We use this for travel documents and the dinner seating chart.",
+      "legalNameHint": "Exactly as printed on your passport.",
       "alternateEmail": "Alternate Email",
       "phoneNumber": "Phone Number",
       "whatsapp": "WhatsApp",
@@ -846,6 +943,10 @@
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",
+    "empty": {
+      "rooming": "Room assignments must be completed first.",
+      "transport": "Ground transport assignments must be completed first."
+    },
     "share": {
       "create": "Create share link",
       "creating": "Creating link",
@@ -1020,7 +1121,6 @@
   },
   "documents": {
     "tabTitle": "Documents",
-    "addDocument": "Add Document",
     "createTitle": "Add a Document",
     "createSubtitle": "Drafts publish immediately to everyone in this event.",
     "documentKey": "Type",
@@ -1033,6 +1133,7 @@
     "createSuccess": "Document published.",
     "readAndSign": "Read and Sign",
     "signed": "Signed",
+    "backToDocuments": "Back to documents",
     "signSubtitle": "Read the document below. Type your full legal name to sign once you reach the end.",
     "fullNameLabel": "Your Full Legal Name",
     "signButton": "Sign",
@@ -1067,7 +1168,7 @@
     },
     "notion": {
       "label": "Notion URL",
-      "hint": "Paste a public Notion link. We will display a button that opens it; ingestion ships in a later phase.",
+      "hint": "Your Notion document will open in a new window when clicked.",
       "open": "Open in Notion"
     },
     "fullNamePrompt": "Type this exact name to sign: {{name}}",

@@ -30,13 +30,18 @@ const ChannelScreen = lazy(() =>
     default: m.ChannelScreen,
   })),
 );
+const CommunityPersonScreen = lazy(() =>
+  import('@/features/community/CommunityPersonScreen').then((m) => ({
+    default: m.CommunityPersonScreen,
+  })),
+);
+const PhotosScreen = lazy(() =>
+  import('@/features/community/photos/PhotosScreen').then((m) => ({
+    default: m.PhotosScreen,
+  })),
+);
 const ConsentRoute = lazy(() =>
   import('@/features/documents/ConsentRoute').then((m) => ({ default: m.ConsentRoute })),
-);
-const CreateDocumentScreen = lazy(() =>
-  import('@/features/documents/CreateDocumentScreen').then((m) => ({
-    default: m.CreateDocumentScreen,
-  })),
 );
 const DocumentsRoute = lazy(() =>
   import('@/features/documents/DocumentsRoute').then((m) => ({ default: m.DocumentsRoute })),
@@ -115,14 +120,6 @@ export function AppRouter(): JSX.Element {
             }
           />
           <Route
-            path="/documents/new"
-            element={
-              <RequireAuth allow={['admin', 'super_admin']}>
-                <CreateDocumentScreen />
-              </RequireAuth>
-            }
-          />
-          <Route
             path="/documents/:documentId/sign"
             element={
               <RequireAuth>
@@ -167,6 +164,30 @@ export function AppRouter(): JSX.Element {
             element={
               <RequireAuth>
                 <CommunityScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/community/p/:userId"
+            element={
+              <RequireAuth>
+                <CommunityPersonScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/community/photos"
+            element={
+              <RequireAuth>
+                <PhotosScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/community/photos/:photoId"
+            element={
+              <RequireAuth>
+                <PhotosScreen />
               </RequireAuth>
             }
           />

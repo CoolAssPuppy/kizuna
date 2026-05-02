@@ -699,3 +699,145 @@ create policy data_conflicts_admin_read on public.data_conflicts
 create policy data_conflicts_super_admin_write on public.data_conflicts
   for all using (public.is_super_admin())
   with check (public.is_super_admin());
+
+
+-- ---------------------------------------------------------------------
+-- Photo gallery RLS helper
+-- ---------------------------------------------------------------------
+-- Mirrors storage_caller_can_read_event but takes a uuid event_id
+-- directly. Used by event_photos and child tables. SECURITY DEFINER so
+-- the inline read of registrations/users doesn't fight the surrounding
+-- policy evaluation.
+create or replace function public.caller_can_read_event(p_event_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    public.is_admin()
+    or exists (
+      select 1 from public.registrations r
+      where r.user_id = auth.uid() and r.event_id = p_event_id
+    )
+    or exists (
+      select 1
+      from public.events e
+      join public.users u on u.id = auth.uid()
+      where e.id = p_event_id
+        and e.invite_all_employees
+        and u.role = 'employee'
+        and u.is_active
+    )
+$$;
+
+revoke all on function public.caller_can_read_event(uuid) from public;
+grant execute on function public.caller_can_read_event(uuid) to authenticated;
+
+
+-- event_photos: any registered attendee (or admin) can SELECT non-deleted
+-- rows. Uploader inserts their own row. Uploader and admin update.
+-- Soft-delete via UPDATE deleted_at — direct DELETE is gated to admin so
+-- moderation is auditable.
+--
+-- All auth.uid() / is_admin() / caller_can_read_event() calls live inside
+-- `(select ...)` so the planner treats them as InitPlan and evaluates
+-- once per query. Beyond the perf win Supabase docs recommend, this also
+-- dodges a planner case where the cached STABLE return value lags
+-- SET LOCAL changes to request.jwt.claims and trips an UPDATE WITH CHECK
+-- false-negative.
+drop policy if exists event_photos_event_read on public.event_photos;
+drop policy if exists event_photos_admin_read_all on public.event_photos;
+drop policy if exists event_photos_self_insert on public.event_photos;
+drop policy if exists event_photos_owner_update on public.event_photos;
+drop policy if exists event_photos_admin_delete on public.event_photos;
+
+create policy event_photos_event_read on public.event_photos
+  for select using (
+    deleted_at is null
+    and (select public.caller_can_read_event(event_id))
+  );
+
+create policy event_photos_admin_read_all on public.event_photos
+  for select using ((select public.is_admin()));
+
+create policy event_photos_self_insert on public.event_photos
+  for insert with check (
+    uploader_id = (select auth.uid())
+    and (select public.caller_can_read_event(event_id))
+  );
+
+create policy event_photos_owner_update on public.event_photos
+  for update using (
+    uploader_id = (select auth.uid()) or (select public.is_admin())
+  )
+  with check (
+    uploader_id = (select auth.uid()) or (select public.is_admin())
+  );
+
+create policy event_photos_admin_delete on public.event_photos
+  for delete using ((select public.is_admin()));
+
+
+-- event_photo_tags: tag visibility follows photo visibility. The photo's
+-- uploader writes tags; admins can write tags on any photo.
+drop policy if exists event_photo_tags_event_read on public.event_photo_tags;
+drop policy if exists event_photo_tags_owner_write on public.event_photo_tags;
+drop policy if exists event_photo_tags_owner_delete on public.event_photo_tags;
+
+create policy event_photo_tags_event_read on public.event_photo_tags
+  for select using (
+    exists (
+      select 1 from public.event_photos p
+      where p.id = photo_id
+        and p.deleted_at is null
+        and (select public.caller_can_read_event(p.event_id))
+    )
+  );
+
+create policy event_photo_tags_owner_write on public.event_photo_tags
+  for insert with check (
+    exists (
+      select 1 from public.event_photos p
+      where p.id = photo_id
+        and (
+          p.uploader_id = (select auth.uid())
+          or (select public.is_admin())
+        )
+    )
+  );
+
+create policy event_photo_tags_owner_delete on public.event_photo_tags
+  for delete using (
+    exists (
+      select 1 from public.event_photos p
+      where p.id = photo_id
+        and (
+          p.uploader_id = (select auth.uid())
+          or (select public.is_admin())
+        )
+    )
+  );
+
+
+-- event_photo_hashtags: read same as photo. Maintained by trigger so
+-- there's no app-level write policy.
+drop policy if exists event_photo_hashtags_event_read on public.event_photo_hashtags;
+drop policy if exists event_photo_hashtags_admin_write on public.event_photo_hashtags;
+
+create policy event_photo_hashtags_event_read on public.event_photo_hashtags
+  for select using (
+    exists (
+      select 1 from public.event_photos p
+      where p.id = photo_id
+        and p.deleted_at is null
+        and (select public.caller_can_read_event(p.event_id))
+    )
+  );
+
+-- The trigger runs SECURITY DEFINER so it bypasses RLS; this admin
+-- policy is just a safety net for ad-hoc admin re-syncs.
+create policy event_photo_hashtags_admin_write on public.event_photo_hashtags
+  for all using ((select public.is_admin()))
+  with check ((select public.is_admin()));

@@ -710,6 +710,116 @@ export type Database = {
           },
         ]
       }
+      event_photo_hashtags: {
+        Row: {
+          hashtag: string
+          photo_id: string
+        }
+        Insert: {
+          hashtag: string
+          photo_id: string
+        }
+        Update: {
+          hashtag?: string
+          photo_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photo_hashtags_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "event_photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_photo_tags: {
+        Row: {
+          created_at: string
+          photo_id: string
+          tagged_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          photo_id: string
+          tagged_user_id: string
+        }
+        Update: {
+          created_at?: string
+          photo_id?: string
+          tagged_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photo_tags_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "event_photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_photo_tags_tagged_user_id_fkey"
+            columns: ["tagged_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          deleted_at: string | null
+          event_id: string
+          height: number | null
+          id: string
+          storage_prefix: string
+          updated_at: string
+          uploader_id: string
+          width: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          event_id: string
+          height?: number | null
+          id?: string
+          storage_prefix: string
+          updated_at?: string
+          uploader_id: string
+          width?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          event_id?: string
+          height?: number | null
+          id?: string
+          storage_prefix?: string
+          updated_at?: string
+          uploader_id?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_photos_uploader_id_fkey"
+            columns: ["uploader_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           airport_iata: string | null
@@ -1934,6 +2044,7 @@ export type Database = {
     Functions: {
       auth_role: { Args: never; Returns: string }
       broadcast_to_all_channels: { Args: { p_body: string }; Returns: number }
+      caller_can_read_event: { Args: { p_event_id: string }; Returns: boolean }
       channel_has_access: {
         Args: { p_channel: string; p_uid: string }
         Returns: boolean
@@ -1951,6 +2062,10 @@ export type Database = {
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       mark_all_notifications_read: { Args: never; Returns: number }
+      mark_my_registration_task_complete: {
+        Args: { p_task_key: string }
+        Returns: undefined
+      }
       mark_notification_read: {
         Args: { p_notification_id: string }
         Returns: undefined
@@ -1967,6 +2082,10 @@ export type Database = {
       }
       set_user_leadership: {
         Args: { p_user_id: string; p_value: boolean }
+        Returns: undefined
+      }
+      soft_delete_event_photo: {
+        Args: { p_photo_id: string }
         Returns: undefined
       }
       storage_caller_can_read_event: {

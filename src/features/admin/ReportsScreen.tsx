@@ -24,6 +24,8 @@ import { ReportTable } from './ReportTable';
 interface ReportConfig {
   key: string;
   filename: string;
+  /** i18n key shown in place of the generic "no rows" message. */
+  emptyKey?: string;
   fetch: (client: AppSupabaseClient, eventId: string | null) => Promise<readonly CsvRow[]>;
 }
 
@@ -36,11 +38,13 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
   {
     key: 'rooming',
     filename: 'rooming-list.csv',
+    emptyKey: 'admin.empty.rooming',
     fetch: (c, eid) => (eid ? fetchRoomingList(c, eid) : Promise.resolve([])),
   },
   {
     key: 'transport',
     filename: 'transport-manifest.csv',
+    emptyKey: 'admin.empty.transport',
     fetch: (c) => fetchTransportManifest(c),
   },
   {
@@ -161,7 +165,9 @@ export function ReportsScreen(): JSX.Element {
       {isLoading ? (
         <p className="py-8 text-sm text-muted-foreground">{t('app.loading')}</p>
       ) : rows.length === 0 ? (
-        <p className="py-8 text-sm text-muted-foreground">{t('admin.noRows')}</p>
+        <p className="py-8 text-sm text-muted-foreground">
+          {t(activeReport.emptyKey ?? 'admin.noRows')}
+        </p>
       ) : (
         <ReportTable rows={rows} />
       )}

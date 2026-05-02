@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 
 import { ActiveSubjectProvider } from './ActiveSubjectContext';
 import { ProfileAvatar } from './ProfileAvatar';
+import { RegistrationChecklist } from './RegistrationChecklist';
 import { useActiveSubject } from './useActiveSubject';
 
 const PROFILE_MODE = { kind: 'profile' } as const;
@@ -220,7 +221,7 @@ function ProfileScreenInner(): JSX.Element {
       </div>
 
       <div className="flex gap-8">
-        <aside className="hidden w-56 shrink-0 space-y-1 md:block">
+        <aside className="hidden w-56 shrink-0 flex-col gap-6 md:flex">
           <div
             role="tablist"
             aria-label={t('profile.nav.label')}
@@ -248,6 +249,7 @@ function ProfileScreenInner(): JSX.Element {
               </button>
             ))}
           </div>
+          {!subject.isDependent ? <RegistrationChecklist /> : null}
         </aside>
         <section
           id="profile-tabpanel"

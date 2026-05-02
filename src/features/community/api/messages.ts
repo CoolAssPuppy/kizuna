@@ -25,6 +25,30 @@ const SELECT = `
   )
 `;
 
+export interface UserMessageActivity {
+  id: string;
+  channel: string;
+  body: string;
+  sent_at: string;
+}
+
+export async function fetchUserMessages(
+  client: AppSupabaseClient,
+  userId: string,
+  limit = 5,
+): Promise<UserMessageActivity[]> {
+  const { data, error } = await client
+    .from('messages')
+    .select('id, channel, body, sent_at')
+    .eq('sender_id', userId)
+    .is('deleted_at', null)
+    .not('channel', 'like', 'dm:%')
+    .order('sent_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data ?? [];
+}
+
 export async function fetchMessages(
   client: AppSupabaseClient,
   channelSlug: string,

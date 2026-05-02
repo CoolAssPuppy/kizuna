@@ -13,6 +13,7 @@ import { useMountEffect } from '@/hooks/useMountEffect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { CheckinAccessCard } from './CheckinAccessCard';
+import { HomeMemoriesSection } from './HomeMemoriesSection';
 import { JetLagFighter } from './JetLagFighter';
 import { TeammateIcebreaker } from './TeammateIcebreaker';
 import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
@@ -91,8 +92,9 @@ export function HomeScreen(): JSX.Element {
       />
 
       <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12">
-        <section className="lg:col-span-8">
+        <section className="space-y-10 lg:col-span-8">
           <Queue feed={feed} editorial={editorial.main} count={queueCount} />
+          {event ? <HomeMemoriesSection eventId={event.id} eventName={event.name} /> : null}
         </section>
 
         <aside className="space-y-6 lg:col-span-4">

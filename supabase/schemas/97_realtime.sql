@@ -32,7 +32,9 @@ declare
     'transport_vehicles',
     -- Community
     'channels',
-    'messages'
+    'messages',
+    'event_photos',
+    'event_photo_tags'
   ];
 begin
   foreach v_table in array v_tables loop
