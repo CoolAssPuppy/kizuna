@@ -129,33 +129,9 @@ export function RoomAssignmentToolScreen(): JSX.Element {
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            {t('admin.roomAssignment.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground">{t('admin.roomAssignment.subtitle')}</p>
-        </div>
-        <div className="flex flex-wrap gap-2 self-start">
-          <Button
-            type="button"
-            variant="outline"
-            className="gap-2"
-            disabled={
-              autoAssignMutation.isPending || rooms.length === 0 || unassignedAttendees.length === 0
-            }
-            onClick={() => autoAssignMutation.mutate()}
-          >
-            <Wand2 aria-hidden className="h-4 w-4" />
-            {autoAssignMutation.isPending
-              ? t('admin.roomAssignment.autoAssigning')
-              : t('admin.roomAssignment.autoAssign')}
-          </Button>
-          <Button onClick={() => setImportOpen(true)} className="gap-2">
-            <Upload aria-hidden className="h-4 w-4" />
-            {t('admin.roomAssignment.importBlock')}
-          </Button>
-        </div>
+      <header className="space-y-2">
+        <h2 className="text-2xl font-semibold tracking-tight">{t('admin.roomAssignment.title')}</h2>
+        <p className="text-sm text-muted-foreground">{t('admin.roomAssignment.subtitle')}</p>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_18rem]">
@@ -168,7 +144,27 @@ export function RoomAssignmentToolScreen(): JSX.Element {
           onAssign={(args) => assignMutation.mutate(args)}
           onRemove={(args) => removeMutation.mutate(args)}
         />
-        <Sidebar rooms={rooms} unassigned={unassignedAttendees} />
+        <div className="space-y-3">
+          <Sidebar rooms={rooms} unassigned={unassignedAttendees} />
+          <Button onClick={() => setImportOpen(true)} className="w-full gap-2">
+            <Upload aria-hidden className="h-4 w-4" />
+            {t('admin.roomAssignment.importBlock')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            disabled={
+              autoAssignMutation.isPending || rooms.length === 0 || unassignedAttendees.length === 0
+            }
+            onClick={() => autoAssignMutation.mutate()}
+          >
+            <Wand2 aria-hidden className="h-4 w-4" />
+            {autoAssignMutation.isPending
+              ? t('admin.roomAssignment.autoAssigning')
+              : t('admin.roomAssignment.autoAssign')}
+          </Button>
+        </div>
       </div>
 
       <ImportRoomBlockDialog
