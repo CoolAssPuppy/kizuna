@@ -57,11 +57,12 @@ jobs:
             echo "shared_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-          # Distinct function directories that changed (excluding _shared).
-          # Space-separated for the deploy step's loop.
+          # Distinct function directories that changed (excluding _shared
+          # and anything that isn't actually a function directory — top-level
+          # files like deno.json must not be treated as functions).
           changed=$(git diff --name-only HEAD~1 HEAD -- 'supabase/functions/' \
-            | grep -oE 'supabase/functions/[^/]+' \
-            | sed 's|supabase/functions/||' \
+            | grep -oE 'supabase/functions/[^/]+/' \
+            | sed -E 's|supabase/functions/([^/]+)/|\1|' \
             | grep -v '^_shared$' \
             | sort -u \
             | tr '\n' ' ' \
