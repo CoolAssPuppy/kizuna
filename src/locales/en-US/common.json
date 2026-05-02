@@ -44,6 +44,82 @@
     "placeholder": "Search pages",
     "empty": "No matching pages."
   },
+  "cli": {
+    "errors": {
+      "forbidden": "You do not have access to that command.",
+      "notFound": "Command not found.",
+      "validation": "That command is missing or has invalid flags.",
+      "internal": "The command failed.",
+      "noActiveEvent": "No active event is configured.",
+      "eventNotFound": "Event not found."
+    },
+    "commands": {
+      "help": {
+        "summary": "Print usage.",
+        "description": "Lists available commands, or usage for one command."
+      },
+      "schema": {
+        "summary": "Emit the command registry.",
+        "description": "Returns machine-readable command metadata for clients and agents."
+      },
+      "me": {
+        "summary": "Profile snapshot for the authenticated user.",
+        "description": "Shows your profile identity and role."
+      },
+      "meItinerary": {
+        "summary": "Show your itinerary.",
+        "description": "Lists itinerary items, optionally filtered by day or date."
+      },
+      "meSessions": {
+        "summary": "Show sessions you are connected to.",
+        "description": "Lists registered or favorited sessions."
+      },
+      "meDocuments": {
+        "summary": "Show documents you can sign.",
+        "description": "Lists active documents and whether you have signed them."
+      },
+      "meRoommates": {
+        "summary": "Show your room assignment.",
+        "description": "Shows the current room block and roommate list."
+      },
+      "meTransport": {
+        "summary": "Show transport requests.",
+        "description": "Lists your arrival and departure transfer requests."
+      },
+      "meNotifications": {
+        "summary": "Show notifications.",
+        "description": "Lists your newest notifications."
+      },
+      "attendees": {
+        "summary": "List attendees matching filters.",
+        "description": "Finds attendee profiles by handle, hobby, or team."
+      },
+      "sessions": {
+        "summary": "List sessions for the active event.",
+        "description": "Shows all sessions, optionally filtered by day, track, or capacity."
+      },
+      "events": {
+        "summary": "List events you can access.",
+        "description": "Shows past, future, or all visible events."
+      },
+      "event": {
+        "summary": "Show event details.",
+        "description": "Shows the active event or a specific event."
+      },
+      "agenda": {
+        "summary": "Show the full event agenda.",
+        "description": "Lists agenda sessions for the active event."
+      },
+      "photos": {
+        "summary": "List visible photos.",
+        "description": "Shows gallery photos for the active event."
+      },
+      "channels": {
+        "summary": "List community channels.",
+        "description": "Shows active community channels."
+      }
+    }
+  },
   "email": {
     "copy": "Copy email",
     "copied": "Email copied to clipboard.",
