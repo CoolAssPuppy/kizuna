@@ -32,6 +32,7 @@
     "functions:serve": "npm run functions:env && supabase functions serve --env-file supabase/.env",
     "gen:types": "supabase gen types typescript --local --schema public > src/types/database.types.ts",
     "gen:og": "node scripts/generate-og.mjs",
+    "gen:routes": "tsx scripts/build-route-manifest.ts",
     "simulate:community": "bash scripts/with-doppler.sh tsx scripts/simulate-community.ts",
     "seed:remote-users": "tsx scripts/seed-remote-users.ts",
     "prepare": "husky 2>/dev/null || true",
@@ -48,6 +49,7 @@
     "@vitest/ui": "^4.1.5",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "html5-qrcode": "^2.3.8",
     "i18next": "^23.16.0",
     "i18next-browser-languagedetector": "^8.0.0",
@@ -63,7 +65,9 @@
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.5.3",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^4.4.2",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",

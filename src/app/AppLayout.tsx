@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppFooter } from '@/components/AppFooter';
+import { CommandPalette } from '@/components/CommandPalette';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { TerminalHeader } from '@/components/TerminalHeader';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -51,6 +52,7 @@ export function AppLayout({ children }: Props): JSX.Element {
     <div className="flex min-h-screen flex-col bg-background">
       <GlobalRealtime />
       <OfflineBanner />
+      <CommandPalette />
       <TerminalHeader />
       <div className="flex-1">{children}</div>
       <AppFooter />

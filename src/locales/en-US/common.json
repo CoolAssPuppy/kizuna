@@ -39,6 +39,11 @@
   "terminal": {
     "palettePlaceholder": "type / for command palette"
   },
+  "palette": {
+    "title": "Command Palette",
+    "placeholder": "Search pages",
+    "empty": "No matching pages."
+  },
   "email": {
     "copy": "Copy email",
     "copied": "Email copied to clipboard.",
