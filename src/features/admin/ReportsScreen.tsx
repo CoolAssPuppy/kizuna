@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Download } from 'lucide-react';
+import { Download, Link as LinkIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,10 @@ import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
+import { useToast } from '@/components/ui/toast';
+
 import { downloadCsv, rowsToCsv, type CsvRow } from './csv';
+import { buildShareUrl, generateShareToken } from './sharing';
 import {
   fetchDietarySummary,
   fetchPaymentReconciliation,
@@ -93,11 +96,33 @@ function useReportRows(config: ReportConfig, eventId: string | null): ReportData
 
 export function ReportsScreen(): JSX.Element {
   const { t } = useTranslation();
+  const { show } = useToast();
   const [tab, setTab] = useState<Tab>('registration');
   const { data: event } = useActiveEvent();
   const eventId = event?.id ?? null;
   const activeReport = REPORTS.find((r) => r.key === tab) ?? REPORTS[0]!;
   const { rows, isLoading } = useReportRows(activeReport, eventId);
+
+  async function handleCopyShareLink(): Promise<void> {
+    if (!eventId) return;
+    try {
+      const token = generateShareToken();
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await getSupabaseClient().from('report_snapshots').insert({
+        event_id: eventId,
+        report_type: activeReport.reportType,
+        share_token: token,
+        share_expires_at: expiresAt,
+      });
+      if (error) throw error;
+
+      const url = buildShareUrl(window.location.origin, token);
+      await navigator.clipboard.writeText(url);
+      show(t('admin.share.copied'));
+    } catch {
+      show(t('admin.share.copyFailed'), 'error');
+    }
+  }
 
   return (
     <section className="space-y-6">
@@ -106,18 +131,30 @@ export function ReportsScreen(): JSX.Element {
           <h2 className="text-2xl font-semibold tracking-tight">{t('admin.reports.title')}</h2>
           <p className="text-sm text-muted-foreground">{t('admin.reports.subtitle')}</p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          onClick={() => downloadCsv(activeReport.filename, rowsToCsv(rows))}
-          disabled={rows.length === 0}
-          className="self-start"
-          title={t('admin.exportCsv')}
-          aria-label={t('admin.exportCsv')}
-        >
-          <Download aria-hidden className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2 self-start">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => void handleCopyShareLink()}
+            disabled={!eventId}
+            title={t('admin.share.copy')}
+            aria-label={t('admin.share.copy')}
+          >
+            <LinkIcon aria-hidden className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => downloadCsv(activeReport.filename, rowsToCsv(rows))}
+            disabled={rows.length === 0}
+            title={t('admin.exportCsv')}
+            aria-label={t('admin.exportCsv')}
+          >
+            <Download aria-hidden className="h-4 w-4" />
+          </Button>
+        </div>
       </header>
 
       <div role="tablist" className="flex flex-wrap gap-1 rounded-md border p-1">
