@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { StorageImageUploader } from '@/components/StorageImageUploader';
 import { useToast } from '@/components/ui/toast';
 import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -256,22 +257,45 @@ export function EventEditScreen({
               onChange={(e) => setForm({ ...form, reg_closes_at: e.target.value })}
             />
           </Field>
-          <Field label={t('admin.events.fields.heroImage')}>
-            <Input
-              type="url"
-              value={form.hero_image_path}
-              onChange={(e) => setForm({ ...form, hero_image_path: e.target.value })}
-              placeholder="https://..."
-            />
-          </Field>
-          <Field label={t('admin.events.fields.logo')}>
-            <Input
-              type="url"
-              value={form.logo_path}
-              onChange={(e) => setForm({ ...form, logo_path: e.target.value })}
-              placeholder="https://..."
-            />
-          </Field>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Storage uploads only work once the event has an id (the path is
+              <eventId>/about/...). On the "new" form we show the uploader
+              disabled with a hint to save first. */}
+          {isNew || !eventId ? (
+            <>
+              <div className="space-y-1.5">
+                <Label>{t('admin.events.fields.heroImage')}</Label>
+                <p className="rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+                  {t('admin.events.imageUploadAfterSave')}
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>{t('admin.events.fields.logo')}</Label>
+                <p className="rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+                  {t('admin.events.imageUploadAfterSave')}
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <StorageImageUploader
+                bucket="event-content"
+                folder={`${eventId}/about`}
+                value={form.hero_image_path}
+                onChange={(p) => setForm({ ...form, hero_image_path: p })}
+                label={t('admin.events.fields.heroImage')}
+              />
+              <StorageImageUploader
+                bucket="event-content"
+                folder={`${eventId}/about`}
+                value={form.logo_path}
+                onChange={(p) => setForm({ ...form, logo_path: p })}
+                label={t('admin.events.fields.logo')}
+              />
+            </>
+          )}
         </div>
 
         <fieldset className="space-y-3 rounded-lg border bg-muted/30 p-4">

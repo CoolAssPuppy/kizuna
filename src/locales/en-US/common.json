@@ -622,9 +622,10 @@
         "endDate": "End date",
         "regOpensAt": "Registration opens",
         "regClosesAt": "Registration closes",
-        "heroImage": "Hero image URL",
-        "logo": "Logo URL"
+        "heroImage": "Hero image",
+        "logo": "Logo"
       },
+      "imageUploadAfterSave": "Save the event first; image uploads land here once it has an id.",
       "flags": {
         "title": "Visibility and status",
         "isActive": "Active event",
