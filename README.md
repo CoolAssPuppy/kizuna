@@ -491,7 +491,7 @@ If you'd rather skip the dashboard and exercise the OAuth flow, see "Bootstrap v
 ### 3. Try the local CLI without installing it
 
 ```bash
-# From the repo root, with @kizuna/cli installed via npm install:
+# From the repo root, with @strategicnerds/kizuna-cli installed via npm install:
 node --experimental-strip-types packages/kizuna-cli/src/bin/kizuna.ts \
   login --url http://127.0.0.1:54321 --paste <kzn_...> --state manual
 

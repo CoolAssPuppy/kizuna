@@ -14,7 +14,7 @@ function makeClient(rows: unknown[]): AppSupabaseClient {
 }
 
 describe('loadCommunityPeople', () => {
-  it('flattens user joins into the matching Profile shape', async () => {
+  it('uses the dedicated first_name/last_name columns when present', async () => {
     const client = makeClient([
       {
         user_id: 'u1',
@@ -25,7 +25,13 @@ describe('loadCommunityPeople', () => {
         current_country: 'CA',
         user: {
           email: 'lu@kizuna.dev',
-          employee_profiles: { preferred_name: 'Lu', legal_name: 'Lu Liu', avatar_url: null },
+          employee_profiles: {
+            first_name: 'Lu',
+            last_name: 'Liu',
+            preferred_name: 'Lu',
+            legal_name: 'Lu Liu',
+            avatar_url: null,
+          },
           guest_profiles: null,
         },
       },
@@ -35,12 +41,39 @@ describe('loadCommunityPeople', () => {
     expect(out[0]).toMatchObject({
       user_id: 'u1',
       first_name: 'Lu',
-      last_name: '',
+      last_name: 'Liu',
       email: 'lu@kizuna.dev',
       hobbies: ['skiing'],
       hometown_city: 'Banff',
       current_country: 'CA',
     });
+  });
+
+  it('splits legal_name when first_name/last_name columns are null (legacy rows)', async () => {
+    const client = makeClient([
+      {
+        user_id: 'u3',
+        hobbies: [],
+        hometown_city: null,
+        hometown_country: null,
+        current_city: null,
+        current_country: null,
+        user: {
+          email: 'legacy@kizuna.dev',
+          employee_profiles: {
+            first_name: null,
+            last_name: null,
+            preferred_name: null,
+            legal_name: 'Legacy Person',
+            avatar_url: null,
+          },
+          guest_profiles: null,
+        },
+      },
+    ]);
+    const [person] = await loadCommunityPeople(client);
+    expect(person?.first_name).toBe('Legacy');
+    expect(person?.last_name).toBe('Person');
   });
 
   it('falls back to guest_profiles first_name + last_name when employee record is absent', async () => {

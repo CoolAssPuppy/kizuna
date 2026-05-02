@@ -416,6 +416,28 @@
         "copied": "Token copied"
       }
     },
+    "cli": {
+      "title": "Using the CLI",
+      "description": "Talk to Kizuna from a terminal or hand it to your AI agent. The CLI uses the API keys above for authentication.",
+      "copy": "Copy command",
+      "copied": "Copied",
+      "step1": {
+        "title": "Install the CLI",
+        "body": "Once installed, the kizuna binary lives on your PATH. Requires Node.js 20 or newer."
+      },
+      "step2": {
+        "title": "Log in",
+        "body": "Opens a browser tab for you to authorize the CLI. The token is saved to ~/.kizuna/config.json with private file permissions."
+      },
+      "step3": {
+        "title": "Run a command",
+        "body": "Every command from your kizuna schema output is fair game. Add --format md for human-readable output, --format json (the default) for piping into jq or another tool."
+      },
+      "step4": {
+        "title": "Plug into an AI agent",
+        "body": "The MCP server bridges Kizuna into Claude Desktop, Cursor, and Claude Code. Add this block to your agent's MCP configuration, swap in a token from above, and restart the agent."
+      }
+    },
     "cards": {
       "personalInfo": "Name, badge name, and the city you call home.",
       "emergencyContact": "Who we should reach out to if something happens.",

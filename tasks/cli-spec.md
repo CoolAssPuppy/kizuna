@@ -24,7 +24,7 @@ One registry. Three skins.
 | -------------------- | ----------------------------- | --------------------------- | ------------------------------------------ |
 | Attendee at a laptop | Footer CLI in the running app | Session JWT (cookie)        | JSON or Markdown, in a panel above the bar |
 | Scripter or CI run   | `npx kizuna ...`              | PAT in env                  | JSON to stdout, MD with `--format=md`      |
-| Agent                | MCP server (`@kizuna/mcp`)    | PAT, bootstrapped via OAuth | JSON over MCP transport                    |
+| Agent                | MCP server (`@strategicnerds/kizuna-mcp`)    | PAT, bootstrapped via OAuth | JSON over MCP transport                    |
 
 All three call the same dispatcher. Anything you can do in the footer, you can do from the npx CLI or an agent, modulo scope.
 
@@ -425,7 +425,7 @@ Solution: the redirect URI is `https://<kizuna-host>/cli/oauth-callback`, which 
 
 Flow:
 
-1. User runs `npx @kizuna/mcp init` (or the agent prompts on first connect).
+1. User runs `npx @strategicnerds/kizuna-mcp init` (or the agent prompts on first connect).
 2. The local process binds a random port and opens `https://<kizuna-host>/cli/oauth-authorize?scope=read+write&state=<csrf>&redirect=http://localhost:<port>/callback`.
 3. `/cli/oauth-authorize` (a `RequireAuth`-gated React page) shows: "Allow Claude Desktop to access your Kizuna data with read+write permissions?" — buttons "Authorize" and "Cancel".
 4. On Authorize, the page calls a Postgres function `mint_oauth_code(p_scope, p_state, p_redirect)` that returns a short-lived (60s) one-time code. The page redirects to `https://<kizuna-host>/cli/oauth-callback?code=<code>&state=<csrf>&redirect=http://localhost:<port>/callback`.
@@ -621,7 +621,7 @@ The route manifest is generated at build time by a small script `scripts/build-r
 
 Library: `cmdk`. The shadcn `<Command>` primitive is the wrapper.
 
-## NPM package: @kizuna/cli (M3)
+## NPM package: @strategicnerds/kizuna-cli (M3)
 
 ```
 packages/kizuna-cli/
@@ -660,12 +660,12 @@ Config:
 
 `--profile <name>` switches profiles. Useful when an attendee is also an admin of a different event.
 
-## MCP server: @kizuna/mcp (M4)
+## MCP server: @strategicnerds/kizuna-mcp (M4)
 
 Standalone npm package, runs stdio MCP transport.
 
 ```sh
-npx @kizuna/mcp                              # starts MCP server on stdio
+npx @strategicnerds/kizuna-mcp                              # starts MCP server on stdio
 ```
 
 Claude Desktop config:
@@ -675,7 +675,7 @@ Claude Desktop config:
   "mcpServers": {
     "kizuna": {
       "command": "npx",
-      "args": ["@kizuna/mcp"],
+      "args": ["@strategicnerds/kizuna-mcp"],
       "env": {
         "KIZUNA_URL": "https://kizuna.supabase.com",
         "KIZUNA_TOKEN": "kzn_user_xxxxxxxx"

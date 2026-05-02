@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { CardShell } from '@/components/CardShell';
 import { Button } from '@/components/ui/button';
 
+import { CliInstructions } from './CliInstructions';
 import { CreateApiKeyDialog } from './CreateApiKeyDialog';
 import { RevealOnceDialog } from './RevealOnceDialog';
 import { useApiKeys, useRevokeApiKey } from './hooks';
@@ -20,7 +21,7 @@ export function ApiKeysSection(): JSX.Element {
   const revoked = keys.filter((key) => key.revoked_at !== null).slice(0, 20);
 
   return (
-    <>
+    <div className="space-y-6">
       <CardShell
         title={t('profile.apiKeys.title')}
         description={t('profile.apiKeys.description')}
@@ -67,13 +68,14 @@ export function ApiKeysSection(): JSX.Element {
           </details>
         ) : null}
       </CardShell>
+      <CliInstructions />
       <CreateApiKeyDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={setRevealedToken}
       />
       <RevealOnceDialog token={revealedToken} onClose={() => setRevealedToken(null)} />
-    </>
+    </div>
   );
 }
 

@@ -7,7 +7,7 @@ Stdio MCP server for exposing Kizuna commands to local agents.
   "mcpServers": {
     "kizuna": {
       "command": "npx",
-      "args": ["@kizuna/mcp"],
+      "args": ["-p", "@strategicnerds/kizuna-mcp", "kizuna-mcp"],
       "env": {
         "KIZUNA_URL": "https://your-kizuna-host",
         "KIZUNA_TOKEN": "kzn_read_xxx"

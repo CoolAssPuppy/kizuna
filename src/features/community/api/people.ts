@@ -13,6 +13,8 @@ interface AttendeeRow {
   user: Joined<{
     email: string;
     employee_profiles: Joined<{
+      first_name: string | null;
+      last_name: string | null;
       preferred_name: string | null;
       legal_name: string | null;
       avatar_url: string | null;
@@ -33,7 +35,7 @@ const PEOPLE_SELECT = `
   user_id, hobbies, hometown_city, hometown_country, current_city, current_country,
   user:users!attendee_profiles_user_id_fkey (
     email,
-    employee_profiles ( preferred_name, legal_name, avatar_url ),
+    employee_profiles ( first_name, last_name, preferred_name, legal_name, avatar_url ),
     guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )
   )
 `;
@@ -47,7 +49,14 @@ function rowToProfile(row: AttendeeRow): Profile {
   if (guest?.first_name || guest?.last_name) {
     firstName = guest.first_name ?? '';
     lastName = guest.last_name ?? '';
+  } else if (employee?.first_name || employee?.last_name) {
+    // Prefer the dedicated split-name columns. They survive the
+    // case where preferred_name is a single word (the common case
+    // for real employees: "Alice", "Prashant", "Edna").
+    firstName = employee.first_name ?? '';
+    lastName = employee.last_name ?? '';
   } else {
+    // Last resort: derive from preferred_name → legal_name → email.
     const display = employee?.preferred_name ?? employee?.legal_name ?? user?.email ?? '';
     const split = splitName(display);
     firstName = split.first;

@@ -20,7 +20,7 @@ export async function runRemoteCommand(
   const token = process.env.KIZUNA_TOKEN;
   if (!url || !token) {
     throw new Error(
-      'Set KIZUNA_URL and KIZUNA_TOKEN before starting @kizuna/mcp. ' +
+      'Set KIZUNA_URL and KIZUNA_TOKEN before starting @strategicnerds/kizuna-mcp. ' +
         'Run `npx kizuna login` to issue a PAT.',
     );
   }
