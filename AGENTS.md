@@ -1,6 +1,8 @@
-# Kizuna - Claude Code Project Instructions
+# Kizuna - AI Agent Project Instructions
 
 > Kizuna (絆) is the event and community platform powering Supafest, Supabase's annual company retreat. Built natively on Supabase, intended to be open-sourced as a showcase of the product itself.
+
+This file is the agent-agnostic guide for any AI assistant working in this repo (Cursor, Codex, Aider, custom CI agents, ChatGPT, etc). If you are running as Claude Code, read `CLAUDE.md` instead — the two files share most rules but `CLAUDE.md` may carry Claude-specific tooling notes. Otherwise, treat this file as the source of truth.
 
 ## North Star
 
@@ -175,9 +177,9 @@ These are non-negotiable visual conventions. Every new screen and component shou
 - For non-trivial visual work, invoke the `frontend-design` skill.
 - **TODO:** wire up Paper MCP when available for design-tool integration.
 
-## Notes for future Claude sessions
+## Notes for future agent sessions
 
-- This project is autonomous-build-friendly. The main agent should commit aggressively at milestone boundaries and run `/simplify` + `/clean-and-refactor` between milestones.
-- Use subagents liberally to keep main context clean. Delegate research, exploration, and parallel tasks.
+- This project is autonomous-build-friendly. The main agent should commit aggressively at milestone boundaries. If your agent has cleanup/refactor automation analogous to Claude Code's `/simplify` + `/clean-and-refactor`, run it between milestones.
+- Use subagents (or your tool's equivalent) liberally to keep main context clean. Delegate research, exploration, and parallel tasks.
 - After **every** correction from the user, append a rule to `tasks/lessons.md`.
 - The user is non-technical but cares deeply about quality. When in doubt, choose the option a staff engineer would defend in code review.

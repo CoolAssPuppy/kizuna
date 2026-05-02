@@ -302,6 +302,44 @@ Highlights:
 
 The `[auth.hook.custom_access_token]` hook in `supabase/config.toml` injects an `app_role` and `is_leadership` JWT claim from `public.users` so RLS policies can read them without conflicting with Supabase's standard `authenticated` / `anon` mapping.
 
+## Storage layout
+
+Four buckets, all private — clients use `createSignedUrl` for display. Identity content (`avatars`) is keyed on `user_id`; everything else is keyed on `event_id` via the leading path segment, *not* per-event buckets. The four-bucket / path-prefix split keeps RLS in one place and lets the same employee carry their avatar across many events.
+
+```
+avatars/                                 # identity-scoped, cross-event
+  <user_id>/
+    avatar.<ext>
+
+event-content/                           # admin-managed branding + editorial
+  <event_id>/
+    about/
+      logo.<ext>                         # events.logo_path
+      cover.<ext>                        # events.hero_image_path
+    feed/
+      <feed_item_id>/
+        <file>                           # feed_items.image_path
+
+documents/                               # admin-uploaded PDFs
+  <event_id>/
+    <document_id>.pdf                    # documents.pdf_path
+
+community-media/                         # user-uploaded chat + gallery
+  <event_id>/
+    chats/
+      <channel_slug>/
+        <message_id>/
+          <file>                         # messages.media_url
+    gallery/
+      <user_id>/
+        <media_item_id>/
+          <file>
+```
+
+RLS lives in `supabase/schemas/95_storage.sql`. Three of the four buckets share the helper `public.storage_caller_can_read_event(name)` which extracts the leading path segment, casts to `uuid`, and returns true iff the caller is admin OR registered for that event OR the event is `invite_all_employees=true` and the caller is an active employee. Writes are admin-only on `event-content` and `documents`; on `community-media` writes also enforce the gallery sub-folder match against `auth.uid()`. pgTAP coverage is in `supabase/tests/storage__rls.sql`.
+
+**Adding a new bucket?** Mirror the helper + policy block at the top of `95_storage.sql`, document the path shape in this README, in CLAUDE.md, and in AGENTS.md, and add a pgTAP file under `supabase/tests/storage__*.sql` covering at minimum: admin write, non-admin write rejected, and a registered-vs-outsider read pair.
+
 ## Auth model
 
 Two paths in:
