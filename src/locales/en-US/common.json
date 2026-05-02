@@ -353,9 +353,8 @@
     "apiKeys": {
       "title": "API Keys",
       "description": "Create scoped tokens for the Kizuna CLI and agent integrations.",
-      "empty": "API keys let trusted local tools read your Kizuna data through the same permissions you have in the app.",
+      "empty": "You don't have any API keys yet.",
       "create": "Create API Key",
-      "createFirst": "Create your first API key",
       "createDescription": "Create a personal access token for scripts, local agents, or the Kizuna CLI.",
       "name": "Name",
       "nameHelp": "What is this key for? You can rename it later.",

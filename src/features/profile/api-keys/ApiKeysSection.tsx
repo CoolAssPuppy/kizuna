@@ -1,4 +1,4 @@
-import { KeyRound, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -34,12 +34,10 @@ export function ApiKeysSection(): JSX.Element {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">{t('app.loading')}</p>
         ) : active.length === 0 ? (
-          <div className="flex flex-col items-start gap-3 rounded-md border border-dashed p-6">
-            <KeyRound aria-hidden className="h-5 w-5 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{t('profile.apiKeys.empty')}</p>
-            <Button type="button" size="sm" onClick={() => setCreateOpen(true)}>
-              {t('profile.apiKeys.createFirst')}
-            </Button>
+          <div className="flex min-h-[12rem] items-center justify-center">
+            <p className="text-center text-sm text-muted-foreground">
+              {t('profile.apiKeys.empty')}
+            </p>
           </div>
         ) : (
           <div className="divide-y rounded-md border">
