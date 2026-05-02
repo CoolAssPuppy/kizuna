@@ -6,7 +6,7 @@
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { publicUrl } from '../_shared/env.ts';
-import { getUserClient } from '../_shared/supabaseClient.ts';
+import { getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
 const ADULT_FEE_CENTS = 95_000;
 const CHILD_FEE_CENTS = 50_000;
@@ -16,19 +16,15 @@ Deno.serve(async (req) => {
   if (preflight) return preflight;
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
-
   const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
   const baseUrl = publicUrl();
 
   const client = getUserClient(authHeader);
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError || !userData.user) {
+  const caller = await getCallerUser(client, authHeader);
+  if (!caller) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
-  const guestUserId = userData.user.id;
+  const guestUserId = caller.id;
 
   const { data: profile, error: profileError } = await client
     .from('guest_profiles')
@@ -57,7 +53,7 @@ Deno.serve(async (req) => {
     mode: 'payment',
     success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancelUrl,
-    customer_email: userData.user.email ?? '',
+    customer_email: caller.email ?? '',
     'line_items[0][price_data][currency]': 'usd',
     'line_items[0][price_data][unit_amount]': String(amountCents),
     'line_items[0][price_data][product_data][name]': 'Supafest 2027 guest fee',

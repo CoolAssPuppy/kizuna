@@ -31,8 +31,12 @@ export async function requireAdmin(req: Request): Promise<AdminCaller | Response
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
 
+  // Pass the JWT explicitly: edge runtime is stateless so the SDK has
+  // no persisted session to read from. `getUser()` with no args throws
+  // "Auth session missing!"; `getUser(jwt)` validates against GoTrue.
+  const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
   const userClient = getUserClient(authHeader);
-  const { data, error } = await userClient.auth.getUser();
+  const { data, error } = await userClient.auth.getUser(jwt);
   if (error || !data.user) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }

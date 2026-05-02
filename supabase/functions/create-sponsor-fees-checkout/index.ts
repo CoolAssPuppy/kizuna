@@ -6,7 +6,7 @@
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { publicUrl } from '../_shared/env.ts';
 import { dispatchSponsorPaymentSucceeded } from '../_shared/sponsorPaymentFanOut.ts';
-import { getUserClient } from '../_shared/supabaseClient.ts';
+import { getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: {
   env: { get: (k: string) => string | undefined };
@@ -22,15 +22,12 @@ Deno.serve(async (req) => {
   }
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
   const client = getUserClient(authHeader);
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError || !userData.user) {
+  const caller = await getCallerUser(client, authHeader);
+  if (!caller) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
-  const sponsorUserId = userData.user.id;
+  const sponsorUserId = caller.id;
 
   // Pull every fee owing for this sponsor. RLS narrows guest_invitations
   // and additional_guests to the sponsor's own rows.
@@ -87,7 +84,7 @@ Deno.serve(async (req) => {
     mode: 'payment',
     success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: cancelUrl,
-    customer_email: userData.user.email ?? '',
+    customer_email: caller.email ?? '',
     'line_items[0][price_data][currency]': 'usd',
     'line_items[0][price_data][unit_amount]': String(totalCents),
     'line_items[0][price_data][product_data][name]': 'Supafest 2027 guest fees',

@@ -27,7 +27,7 @@
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { HIBOB_STUB_BY_EMAIL, type HiBobStubPerson } from '../_shared/hibobStub.ts';
-import { getAdminClient, getUserClient } from '../_shared/supabaseClient.ts';
+import { getAdminClient, getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
@@ -43,16 +43,13 @@ Deno.serve(async (req) => {
   if (preflight) return preflight;
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
-  }
   const userClient = getUserClient(authHeader);
-  const { data: userResult, error: userError } = await userClient.auth.getUser();
-  if (userError || !userResult.user) {
+  const caller = await getCallerUser(userClient, authHeader);
+  if (!caller) {
     return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
   }
-  const callerId = userResult.user.id;
-  const callerEmail = userResult.user.email;
+  const callerId = caller.id;
+  const callerEmail = caller.email;
   if (!callerEmail) {
     return jsonResponse({ error: 'no_email' }, { status: 400 });
   }

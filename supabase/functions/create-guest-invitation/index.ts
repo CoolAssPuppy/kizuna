@@ -18,7 +18,7 @@
 import { corsHeaders, handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { INVITATION_TTL_SECONDS } from '../_shared/constants.ts';
 import { signInvitationToken } from '../_shared/invitationToken.ts';
-import { getUserClient } from '../_shared/supabaseClient.ts';
+import { getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
 type AgeBracket = 'under_12' | 'teen' | 'adult';
 
@@ -33,10 +33,6 @@ Deno.serve(async (req) => {
   if (preflight) return preflight;
 
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
-  }
-
   const tokenSecret =
     Deno.env.get('KIZUNA_INVITATION_SECRET') ?? Deno.env.get('SUPABASE_JWT_SECRET') ?? '';
   if (!tokenSecret) {
@@ -44,11 +40,11 @@ Deno.serve(async (req) => {
   }
 
   const client = getUserClient(authHeader);
-  const { data: userData, error: userError } = await client.auth.getUser();
-  if (userError || !userData.user) {
+  const caller = await getCallerUser(client, authHeader);
+  if (!caller) {
     return jsonResponse({ error: 'unauthorized' }, { status: 401 });
   }
-  const sponsorUserId = userData.user.id;
+  const sponsorUserId = caller.id;
 
   let body: RequestBody;
   try {

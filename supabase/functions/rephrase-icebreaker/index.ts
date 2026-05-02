@@ -5,7 +5,7 @@
 // heuristic fallback so callers can ignore failures.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
-import { getAdminClient, getUserClient } from '../_shared/supabaseClient.ts';
+import { getAdminClient, getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { env: { get: (k: string) => string | undefined } };
 
@@ -27,12 +27,9 @@ Deno.serve(async (req) => {
   // touch the cache. Without this an anonymous caller can submit
   // arbitrary facts, drive cost, and pollute icebreaker_rephrasings.
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader) {
-    return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
-  }
   const userClient = getUserClient(authHeader);
-  const { data: userResult, error: userError } = await userClient.auth.getUser();
-  if (userError || !userResult.user) {
+  const caller = await getCallerUser(userClient, authHeader);
+  if (!caller) {
     return jsonResponse({ error: 'unauthenticated' }, { status: 401 });
   }
 

@@ -39,3 +39,30 @@ export function getUserClient(authHeader: string | null): SupabaseClient {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+interface CallerUser {
+  id: string;
+  email: string | undefined;
+}
+
+/**
+ * Resolve the caller's auth.users record from the request's
+ * Authorization header. Returns null when the header is missing,
+ * malformed, or the JWT fails validation.
+ *
+ * Why pass the JWT explicitly to `getUser(jwt)`: edge runtime is
+ * stateless, so the SDK has no persisted session. `getUser()` with no
+ * args throws "Auth session missing!"; `getUser(jwt)` validates the
+ * supplied token against GoTrue.
+ */
+export async function getCallerUser(
+  client: SupabaseClient,
+  authHeader: string | null,
+): Promise<CallerUser | null> {
+  if (!authHeader) return null;
+  const jwt = authHeader.replace(/^Bearer\s+/i, '').trim();
+  if (!jwt) return null;
+  const { data, error } = await client.auth.getUser(jwt);
+  if (error || !data.user) return null;
+  return { id: data.user.id, email: data.user.email };
+}
