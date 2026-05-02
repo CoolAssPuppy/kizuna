@@ -22,6 +22,7 @@
     "leadership": "Direction"
   },
   "nav": {
+    "label": "Navigation principale",
     "home": "Accueil",
     "itinerary": "Itinéraire",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Faire comme si vous étiez un administrateur"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "tapez / pour la palette"
+  },
   "home": {
     "feedTitle": "Votre Fil",
     "itemsLabel": "éléments",
-    "feedEmpty": "Rien ne vous attend.",
+    "feedEmpty": "Votre file est vide. Repassez quand l'événement approchera.",
+    "terminal": {
+      "connected": "CONNECTÉ",
+      "greeting": "bonjour",
+      "fallbackName": "vous",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Bienvenue à {{event}}.",
+      "queueLabel": "FILE · {{count}} ÉLÉMENTS",
+      "queueSort": "tri:échéance ↓",
+      "live": "en direct"
+    },
     "factsTitle": "Faits Sur Notre Événement",
     "factsSubtitle": "Vive la légende de l'Équipe 18.",
     "facts": {
@@ -593,7 +607,7 @@
       "active": "Actif",
       "past": "Passé",
       "empty": "Aucun événement pour le moment. Créez le premier pour commencer.",
-      "formHint": "Modifiez les bases ici. Les invitations se trouvent dans l'onglet suivant.",
+      "formHint": "Informations de base sur votre événement.",
       "fields": {
         "name": "Nom",
         "subtitle": "Sous-titre",
@@ -751,7 +765,7 @@
     },
     "nudges": {
       "title": "Communication",
-      "subtitle": "Envoyez des annonces et des rappels et consultez l'ensemble du journal.",
+      "subtitle": "Envoyez des annonces et des rappels.",
       "send": "Envoyer un message",
       "sendCta": "Envoyer",
       "sending": "Envoi",

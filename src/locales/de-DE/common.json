@@ -22,6 +22,7 @@
     "leadership": "Führungsteam"
   },
   "nav": {
+    "label": "Hauptnavigation",
     "home": "Startseite",
     "itinerary": "Reiseplan",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Als Administrator anmelden"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "tippe / für Befehlspalette"
+  },
   "home": {
     "feedTitle": "Ihr Feed",
     "itemsLabel": "Einträge",
-    "feedEmpty": "Nichts wartet auf Sie.",
+    "feedEmpty": "Deine Warteschlange ist leer. Schau wieder vorbei, je näher die Veranstaltung rückt.",
+    "terminal": {
+      "connected": "VERBUNDEN",
+      "greeting": "hallo",
+      "fallbackName": "du",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Willkommen bei {{event}}.",
+      "queueLabel": "WARTESCHLANGE · {{count}} EINTRÄGE",
+      "queueSort": "sortiert nach:Frist ↓",
+      "live": "live"
+    },
     "factsTitle": "Fakten zu unserer Veranstaltung",
     "factsSubtitle": "Es lebe die Legende von Team 18.",
     "facts": {
@@ -593,7 +607,7 @@
       "active": "Aktiv",
       "past": "Vergangen",
       "empty": "Noch keine Veranstaltungen. Erstellen Sie die erste, um zu beginnen.",
-      "formHint": "Bearbeiten Sie hier die Grundlagen. Einladungen befinden sich auf der nächsten Registerkarte.",
+      "formHint": "Grundlegende Informationen zu Ihrer Veranstaltung.",
       "fields": {
         "name": "Name",
         "subtitle": "Untertitel",
@@ -751,7 +765,7 @@
     },
     "nudges": {
       "title": "Kommunikation",
-      "subtitle": "Sende Ankündigungen und Erinnerungen und sieh dir das gesamte Audit-Log an.",
+      "subtitle": "Sende Ankündigungen und Erinnerungen.",
       "send": "Nachricht senden",
       "sendCta": "Senden",
       "sending": "Wird gesendet",

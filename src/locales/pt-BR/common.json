@@ -22,6 +22,7 @@
     "leadership": "Liderança"
   },
   "nav": {
+    "label": "Navegação principal",
     "home": "Início",
     "itinerary": "Itinerário",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Finja ser um administrador"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "digite / para abrir a paleta"
+  },
   "home": {
     "feedTitle": "Seu Feed",
     "itemsLabel": "itens",
-    "feedEmpty": "Nada esperando por você.",
+    "feedEmpty": "Sua fila está vazia. Volte mais tarde, conforme o evento se aproxima.",
+    "terminal": {
+      "connected": "CONECTADO",
+      "greeting": "olá",
+      "fallbackName": "você",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Bem-vindo a {{event}}.",
+      "queueLabel": "FILA · {{count}} ITENS",
+      "queueSort": "ordem:prazo ↓",
+      "live": "ao vivo"
+    },
     "factsTitle": "Fatos Sobre Nosso Evento",
     "factsSubtitle": "Salve a lenda do Time 18.",
     "facts": {
@@ -593,7 +607,7 @@
       "active": "Ativo",
       "past": "Passado",
       "empty": "Ainda sem eventos. Crie o primeiro para começar.",
-      "formHint": "Edite o básico aqui. Os convites ficam na próxima aba.",
+      "formHint": "Informações básicas sobre seu evento.",
       "fields": {
         "name": "Nome",
         "subtitle": "Subtítulo",
@@ -751,7 +765,7 @@
     },
     "nudges": {
       "title": "Comunicação",
-      "subtitle": "Envie comunicados e lembretes e consulte o log completo.",
+      "subtitle": "Envie comunicados e lembretes.",
       "send": "Enviar mensagem",
       "sendCta": "Enviar",
       "sending": "Enviando",

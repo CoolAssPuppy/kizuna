@@ -22,6 +22,7 @@
     "leadership": "Leadership"
   },
   "nav": {
+    "label": "Navigazione principale",
     "home": "Home",
     "itinerary": "Itinerario",
     "agenda": "Agenda",
@@ -80,10 +81,23 @@
       "asAdmin": "Fingiti un amministratore"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "scrivi / per aprire la palette"
+  },
   "home": {
     "feedTitle": "Il Tuo Feed",
     "itemsLabel": "elementi",
-    "feedEmpty": "Niente in attesa per te.",
+    "feedEmpty": "La tua coda è vuota. Torna a controllare quando l'evento si avvicina.",
+    "terminal": {
+      "connected": "CONNESSO",
+      "greeting": "ciao",
+      "fallbackName": "tu",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Benvenuto a {{event}}.",
+      "queueLabel": "CODA · {{count}} ELEMENTI",
+      "queueSort": "ordine:scadenza ↓",
+      "live": "live"
+    },
     "factsTitle": "Curiosità Sul Nostro Evento",
     "factsSubtitle": "Lunga vita alla leggenda del Team 18.",
     "facts": {
@@ -586,7 +600,7 @@
       "active": "Attivo",
       "past": "Passato",
       "empty": "Nessun evento ancora. Crea il primo per iniziare.",
-      "formHint": "Modifica le basi qui. Gli inviti sono nella prossima scheda.",
+      "formHint": "Informazioni di base sul tuo evento.",
       "fields": {
         "name": "Nome",
         "subtitle": "Sottotitolo",
@@ -744,7 +758,7 @@
     },
     "nudges": {
       "title": "Comunicazione",
-      "subtitle": "Invia annunci e promemoria e consulta l'intero log di audit.",
+      "subtitle": "Invia annunci e promemoria.",
       "send": "Invia messaggio",
       "sendCta": "Invia",
       "sending": "Invio in corso",

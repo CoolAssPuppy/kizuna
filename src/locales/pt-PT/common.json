@@ -22,6 +22,7 @@
     "leadership": "Liderança"
   },
   "nav": {
+    "label": "Navegação principal",
     "home": "Início",
     "itinerary": "Itinerário",
     "agenda": "Programa",
@@ -80,10 +81,23 @@
       "asAdmin": "Fingir que é um administrador"
     }
   },
+  "terminal": {
+    "palettePlaceholder": "escreva / para abrir a paleta"
+  },
   "home": {
     "feedTitle": "O Seu Feed",
     "itemsLabel": "itens",
-    "feedEmpty": "Nada à sua espera.",
+    "feedEmpty": "A sua fila está vazia. Volte a verificar à medida que o evento se aproxima.",
+    "terminal": {
+      "connected": "LIGADO",
+      "greeting": "olá",
+      "fallbackName": "você",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Bem-vindo a {{event}}.",
+      "queueLabel": "FILA · {{count}} ITENS",
+      "queueSort": "ordem:prazo ↓",
+      "live": "em direto"
+    },
     "factsTitle": "Factos Sobre o Nosso Evento",
     "factsSubtitle": "Glória à lenda da Equipa 18.",
     "facts": {
@@ -593,7 +607,7 @@
       "active": "Ativo",
       "past": "Anterior",
       "empty": "Ainda sem eventos. Crie o primeiro para começar.",
-      "formHint": "Edite o básico aqui. Os convites estão no separador seguinte.",
+      "formHint": "Informações básicas sobre o seu evento.",
       "fields": {
         "name": "Nome",
         "subtitle": "Subtítulo",
@@ -751,7 +765,7 @@
     },
     "nudges": {
       "title": "Comunicação",
-      "subtitle": "Envie comunicados e lembretes e consulte o registo completo.",
+      "subtitle": "Envie comunicados e lembretes.",
       "send": "Enviar mensagem",
       "sendCta": "Enviar",
       "sending": "A enviar",

@@ -14,11 +14,23 @@ interface CardShellProps {
  */
 export function CardShell({ title, description, actions, children }: CardShellProps): JSX.Element {
   return (
-    <section className="rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
+    <section
+      className="border p-6 text-card-foreground"
+      style={{ backgroundColor: 'var(--c-surface)', borderColor: 'var(--c-rule)' }}
+    >
       <header className="mb-4 flex flex-row items-start justify-between gap-3">
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+          <h2
+            className="text-[11px] font-bold uppercase"
+            style={{ color: 'var(--c-muted)', letterSpacing: '0.18em' }}
+          >
+            {title}
+          </h2>
+          {description ? (
+            <p className="text-sm" style={{ color: 'var(--c-muted)' }}>
+              {description}
+            </p>
+          ) : null}
         </div>
         {actions}
       </header>

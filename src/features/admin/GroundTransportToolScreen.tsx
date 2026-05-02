@@ -1,10 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Bus, Plane, Plus } from 'lucide-react';
+import { AlertTriangle, Bus, Plane } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AirlineLogo } from '@/components/AirlineLogo';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -101,17 +100,11 @@ export function GroundTransportToolScreen(): JSX.Element {
 
   return (
     <section className="space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <h2 className="text-2xl font-semibold tracking-tight">
-            {t('admin.groundTransport.title')}
-          </h2>
-          <p className="text-sm text-muted-foreground">{t('admin.groundTransport.subtitle')}</p>
-        </div>
-        <Button onClick={() => setNewVehicleOpen(true)} className="gap-2 self-start">
-          <Plus aria-hidden className="h-4 w-4" />
-          {t('admin.groundTransport.newVehicle')}
-        </Button>
+      <header className="space-y-2">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          {t('admin.groundTransport.title')}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t('admin.groundTransport.subtitle')}</p>
       </header>
 
       <DirectionTabs value={direction} onChange={setDirection} />
@@ -128,7 +121,12 @@ export function GroundTransportToolScreen(): JSX.Element {
           airportCode={eventAirport}
           timeFmt={timeFmt}
         />
-        <VehicleSidebar vehicleStats={vehicleStats} direction={direction} timeFmt={timeFmt} />
+        <VehicleSidebar
+          vehicleStats={vehicleStats}
+          direction={direction}
+          timeFmt={timeFmt}
+          onNewVehicle={() => setNewVehicleOpen(true)}
+        />
       </div>
 
       <NewVehicleDialog

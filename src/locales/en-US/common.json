@@ -22,6 +22,7 @@
     "leadership": "Leadership"
   },
   "nav": {
+    "label": "Primary",
     "home": "Home",
     "itinerary": "Itinerary",
     "agenda": "Agenda",
@@ -34,6 +35,9 @@
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
+  },
+  "terminal": {
+    "palettePlaceholder": "type / for command palette"
   },
   "events": {
     "title": "All events",
@@ -83,7 +87,17 @@
   "home": {
     "feedTitle": "Your Feed",
     "itemsLabel": "items",
-    "feedEmpty": "Nothing waiting on you.",
+    "feedEmpty": "Your queue is clear. Check back as the event nears.",
+    "terminal": {
+      "connected": "CONNECTED",
+      "greeting": "hello",
+      "fallbackName": "there",
+      "fallbackEvent": "Kizuna",
+      "welcome": "Welcome to {{event}}.",
+      "queueLabel": "QUEUE · {{count}} ITEMS",
+      "queueSort": "sorted by:deadline ↓",
+      "live": "live"
+    },
     "eventAccess": {
       "label": "Event Access Code:"
     },
@@ -611,7 +625,7 @@
       "active": "Active",
       "past": "Past",
       "empty": "No events yet. Create the first one to get started.",
-      "formHint": "Edit the basics here. Invitations live on the next tab.",
+      "formHint": "Basic information about your event.",
       "fields": {
         "name": "Name",
         "subtitle": "Subtitle",
@@ -771,7 +785,7 @@
     },
     "nudges": {
       "title": "Communication",
-      "subtitle": "Send announcements and nudges and review the full audit log.",
+      "subtitle": "Send announcements and nudges.",
       "send": "Send message",
       "sendCta": "Send",
       "sending": "Sending",

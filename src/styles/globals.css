@@ -3,199 +3,258 @@
 @tailwind utilities;
 
 /*
- * Theming notes
- * -------------
- * All design tokens live as CSS variables here. A designer can re-skin the
- * entire app by editing the values below — never by changing component code.
+ * Variant C theme tokens
+ * ----------------------
+ * Five themes ship: light (default Supabase brand), supa (CRT terminal),
+ * hermione (cocoa + gold), kirk (cream + navy + command gold), and
+ * barbie (rose + hot pink). The theme is selected by setting
+ * data-theme="<name>" on <html>; ThemeProvider does this on mount and
+ * any time the user picks a new theme.
  *
- * Three themes ship: light (default Supabase brand), dark (Supabase brand
- * inverted), and barbie (pink playful). The theme is applied as a data
- * attribute on the html element by ThemeProvider.
+ * Standard shadcn tokens (--background, --foreground, --primary, etc.)
+ * stay as HSL channel triples so Tailwind opacity modifiers work.
  *
- * Colors are stored as HSL channel triples (e.g. "0 0% 100%") so Tailwind
- * can wrap them with hsl() and apply opacity modifiers.
+ * Variant-C-specific tokens (--c-*) are stored as plain hex/rgb values
+ * because they're consumed directly by terminal-aesthetic chrome
+ * (header bar, eyebrows, command palette) and never need opacity
+ * modifiers.
  */
 
 @layer base {
-  /* === Light: Supabase brand === */
+  /* === Light: bone × Supabase green === */
   :root,
   [data-theme='light'] {
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 0 0% 4%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 90 14% 97%;
+    --card-foreground: 0 0% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 0 0% 4%;
 
-    --primary: 153 60% 53%;
+    --primary: 142 71% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 90 14% 97%;
+    --secondary-foreground: 0 0% 4%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 90 14% 97%;
+    --muted-foreground: 0 0% 32%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 153 60% 53%;
-
-    --radius: 0.625rem;
-  }
-
-  /* === Barbie: pink confidence, soft surfaces === */
-  [data-theme='barbie'] {
-    --background: 340 100% 97%;
-    --foreground: 332 70% 18%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 332 70% 18%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 332 70% 18%;
-
-    --primary: 332 80% 56%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 340 90% 92%;
-    --secondary-foreground: 332 70% 18%;
-
-    --muted: 340 90% 95%;
-    --muted-foreground: 332 30% 38%;
-
-    --accent: 340 100% 88%;
-    --accent-foreground: 332 70% 18%;
-
-    --destructive: 0 84% 56%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 340 70% 85%;
-    --input: 340 70% 85%;
-    --ring: 332 80% 56%;
-  }
-
-  /* === Supa: Supabase brand. Pure #121212 surface, signature green. === */
-  [data-theme='supa'] {
-    --background: 0 0% 7%; /* #121212 */
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 153 60% 53%;
-    --primary-foreground: 0 0% 7%;
-
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 13%;
-    --muted-foreground: 153 12% 60%;
-
-    --accent: 153 25% 18%;
-    --accent-foreground: 153 60% 80%;
-
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 153 60% 53%;
-  }
-
-  /* === Hermione: Gryffindor red + gold, dark academia paneling. === */
-  [data-theme='hermione'] {
-    --background: 17 35% 12%; /* deep mahogany */
-    --foreground: 42 78% 90%; /* parchment */
-
-    --card: 15 32% 16%;
-    --card-foreground: 42 78% 90%;
-
-    --popover: 15 32% 16%;
-    --popover-foreground: 42 78% 90%;
-
-    --primary: 42 95% 56%; /* gold */
-    --primary-foreground: 0 60% 20%;
-
-    --secondary: 0 60% 32%; /* Gryffindor red */
-    --secondary-foreground: 42 78% 90%;
-
-    --muted: 17 25% 22%;
-    --muted-foreground: 42 30% 70%;
-
-    --accent: 0 60% 32%;
-    --accent-foreground: 42 95% 86%;
-
-    --destructive: 0 75% 50%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 17 25% 24%;
-    --input: 17 25% 24%;
-    --ring: 42 95% 56%;
-  }
-
-  /* === Kirk: Bright 60s Star Trek pop. Command gold, science blue. === */
-  [data-theme='kirk'] {
-    --background: 36 100% 96%; /* warm cream */
-    --foreground: 220 60% 18%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 220 60% 18%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 60% 18%;
-
-    --primary: 45 100% 55%; /* command gold */
-    --primary-foreground: 220 60% 18%;
-
-    --secondary: 200 90% 70%; /* science blue */
-    --secondary-foreground: 220 60% 18%;
-
-    --muted: 36 60% 92%;
-    --muted-foreground: 220 30% 40%;
-
-    --accent: 0 90% 70%; /* operations red */
+    --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 90% 60%;
+    --destructive: 17 89% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 50% 85%;
-    --input: 36 50% 85%;
-    --ring: 45 100% 55%;
+    --border: 102 9% 90%;
+    --input: 102 9% 90%;
+    --ring: 142 71% 45%;
+
+    --radius: 0;
+
+    --c-bg: #ffffff;
+    --c-fg: #0a0a0a;
+    --c-muted: #525252;
+    --c-dim: #94a097;
+    --c-accent: #16a34a;
+    --c-accent-soft: #16a34a;
+    --c-rule: #e5e7e3;
+    --c-surface: #f7f9f6;
+    --c-surface-soft: #fbfcfb;
+    --c-warn: #c2410c;
+    --c-cursor: #16a34a;
+    --c-map-land: #cdd2c6;
+    --c-map-stroke: #ffffff;
   }
 
-  /* Legacy shadcn .dark selector still works for any opt-in dark element */
-  .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 153 60% 53%;
-    --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 0 0% 16%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 153 60% 53%;
+  /* === Supa: CRT black × phosphor green === */
+  [data-theme='supa'] {
+    --background: 92 17% 5%;
+    --foreground: 0 0% 100%;
+
+    --card: 100 15% 7%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 100 15% 7%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 145 73% 57%;
+    --primary-foreground: 92 17% 5%;
+
+    --secondary: 100 15% 11%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 100 15% 11%;
+    --muted-foreground: 95 8% 67%;
+
+    --accent: 145 73% 57%;
+    --accent-foreground: 92 17% 5%;
+
+    --destructive: 33 100% 64%;
+    --destructive-foreground: 92 17% 5%;
+
+    --border: 100 13% 11%;
+    --input: 100 13% 11%;
+    --ring: 145 73% 57%;
+
+    --radius: 0;
+
+    --c-bg: #0b0f0a;
+    --c-fg: #ffffff;
+    --c-muted: #a8b2a2;
+    --c-dim: #4a5247;
+    --c-accent: #3fe489;
+    --c-accent-soft: #3fe489;
+    --c-rule: #1a1f18;
+    --c-surface: #11160f;
+    --c-surface-soft: #0f140d;
+    --c-warn: #ffb347;
+    --c-cursor: #3fe489;
+    --c-map-land: #2b3329;
+    --c-map-stroke: #0b0f0a;
+  }
+
+  /* === Hermione: cocoa × gold (dark academia) === */
+  [data-theme='hermione'] {
+    --background: 17 50% 8%;
+    --foreground: 41 65% 82%;
+
+    --card: 13 44% 11%;
+    --card-foreground: 41 65% 82%;
+
+    --popover: 13 44% 11%;
+    --popover-foreground: 41 65% 82%;
+
+    --primary: 44 80% 57%;
+    --primary-foreground: 17 50% 8%;
+
+    --secondary: 13 44% 11%;
+    --secondary-foreground: 41 65% 82%;
+
+    --muted: 13 44% 11%;
+    --muted-foreground: 38 40% 66%;
+
+    --accent: 44 80% 57%;
+    --accent-foreground: 17 50% 8%;
+
+    --destructive: 6 58% 41%;
+    --destructive-foreground: 41 65% 82%;
+
+    --border: 14 39% 16%;
+    --input: 14 39% 16%;
+    --ring: 44 80% 57%;
+
+    --radius: 0;
+
+    --c-bg: #1f0f0a;
+    --c-fg: #f1dfb1;
+    --c-muted: #c9b687;
+    --c-dim: #7a5c3d;
+    --c-accent: #e8b53a;
+    --c-accent-soft: #e8b53a;
+    --c-rule: #3a2118;
+    --c-surface: #2a1410;
+    --c-surface-soft: #2a1410;
+    --c-warn: #a33b2c;
+    --c-cursor: #e8b53a;
+    --c-map-land: #4d2e22;
+    --c-map-stroke: #1f0f0a;
+  }
+
+  /* === Kirk: cream × command gold + science blue === */
+  [data-theme='kirk'] {
+    --background: 50 60% 95%;
+    --foreground: 39 22% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 39 22% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 39 22% 13%;
+
+    --primary: 45 80% 57%;
+    --primary-foreground: 39 22% 13%;
+
+    --secondary: 50 50% 85%;
+    --secondary-foreground: 39 22% 13%;
+
+    --muted: 50 50% 92%;
+    --muted-foreground: 39 18% 35%;
+
+    --accent: 207 53% 51%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 1 70% 54%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 45 38% 83%;
+    --input: 45 38% 83%;
+    --ring: 207 53% 51%;
+
+    --radius: 0;
+
+    --c-bg: #faf6e8;
+    --c-fg: #2a2418;
+    --c-muted: #6b5f45;
+    --c-dim: #b0a480;
+    --c-accent: #e8b83a;
+    --c-accent-soft: #3d88c7;
+    --c-rule: #e5dec4;
+    --c-surface: #ffffff;
+    --c-surface-soft: #fffcf1;
+    --c-warn: #d8453e;
+    --c-cursor: #e8b83a;
+    --c-map-land: #d9cfa8;
+    --c-map-stroke: #faf6e8;
+  }
+
+  /* === Barbie: rose × hot pink === */
+  [data-theme='barbie'] {
+    --background: 340 100% 97%;
+    --foreground: 332 70% 17%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 332 70% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 332 70% 17%;
+
+    --primary: 332 78% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 340 88% 88%;
+    --secondary-foreground: 332 70% 17%;
+
+    --muted: 340 100% 98%;
+    --muted-foreground: 332 56% 36%;
+
+    --accent: 332 78% 56%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 73% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 340 82% 88%;
+    --input: 340 82% 88%;
+    --ring: 332 78% 56%;
+
+    --radius: 0;
+
+    --c-bg: #fff1f5;
+    --c-fg: #4a0d2c;
+    --c-muted: #8c2a5a;
+    --c-dim: #c68aac;
+    --c-accent: #e5378c;
+    --c-accent-soft: #e5378c;
+    --c-rule: #fcc8d9;
+    --c-surface: #ffffff;
+    --c-surface-soft: #fffafc;
+    --c-warn: #b91c1c;
+    --c-cursor: #e5378c;
+    --c-map-land: #f9b7cb;
+    --c-map-stroke: #fff1f5;
   }
 }
 
@@ -212,6 +271,11 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family:
+      'JetBrains Mono', 'JetBrainsMono-Regular', ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, 'Liberation Mono', 'Courier New', monospace;
+    background-color: var(--c-bg);
+    color: var(--c-fg);
     font-feature-settings:
       'rlig' 1,
       'calt' 1;
@@ -223,12 +287,6 @@
 }
 
 @layer utilities {
-  /*
-   * Cute fade-and-rise used by the itinerary timeline (and any other
-   * staggered list rendering). The combination of `animation-fill-mode:
-   * both` and a tiny vertical translation makes lists feel handcrafted
-   * without resorting to a JS animation library.
-   */
   .kizuna-fade-in {
     animation: kizuna-fade-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -245,6 +303,26 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    background-color: var(--c-cursor);
+    vertical-align: text-bottom;
+    animation: terminal-blink 1.05s steps(2, start) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-cursor {
+      animation: none;
+      opacity: 1;
+    }
+  }
+  @keyframes terminal-blink {
+    to {
+      visibility: hidden;
     }
   }
 }

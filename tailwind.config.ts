@@ -13,6 +13,11 @@ const config: Config = {
       },
     },
     extend: {
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -47,15 +52,25 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-      },
-      borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        c: {
+          bg: 'var(--c-bg)',
+          fg: 'var(--c-fg)',
+          muted: 'var(--c-muted)',
+          dim: 'var(--c-dim)',
+          accent: 'var(--c-accent)',
+          'accent-soft': 'var(--c-accent-soft)',
+          rule: 'var(--c-rule)',
+          surface: 'var(--c-surface)',
+          'surface-soft': 'var(--c-surface-soft)',
+          warn: 'var(--c-warn)',
+          cursor: 'var(--c-cursor)',
+          'map-land': 'var(--c-map-land)',
+          'map-stroke': 'var(--c-map-stroke)',
+        },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['JetBrains Mono', 'JetBrainsMono-Regular', 'ui-monospace', 'monospace'],
+        mono: ['JetBrains Mono', 'JetBrainsMono-Regular', 'ui-monospace', 'monospace'],
       },
       keyframes: {
         'accordion-down': {

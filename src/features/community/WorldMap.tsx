@@ -118,7 +118,10 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
         </div>
       </header>
 
-      <div className="relative mt-3 aspect-[2/1] w-full overflow-hidden rounded-md bg-gradient-to-b from-muted/40 to-muted/10">
+      <div
+        className="relative mt-3 aspect-[2/1] w-full overflow-hidden rounded-md"
+        style={{ backgroundColor: 'var(--c-surface)' }}
+      >
         <ComposableMap
           projection="geoEqualEarth"
           projectionConfig={{ scale: 160 }}
@@ -141,12 +144,12 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
                   <Geography
                     key={geo.rsmKey}
                     geography={geo}
-                    fill="hsl(var(--muted))"
-                    stroke="hsl(var(--border))"
-                    strokeWidth={0.4}
+                    fill="var(--c-map-land)"
+                    stroke="var(--c-map-stroke)"
+                    strokeWidth={0.6}
                     style={{
                       default: { outline: 'none' },
-                      hover: { outline: 'none', fill: 'hsl(var(--muted-foreground) / 0.2)' },
+                      hover: { outline: 'none', fill: 'var(--c-accent)', fillOpacity: 0.45 },
                       pressed: { outline: 'none' },
                     }}
                   />
