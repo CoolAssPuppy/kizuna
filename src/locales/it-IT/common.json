@@ -930,9 +930,10 @@
       "emailComingSoonHint": "Inoltra a itinerary@kizuna.dev una volta che lo avremo configurato."
     },
     "checkin": {
-      "title": "Check-In",
-      "subtitle": "Mostra questo codice alla registrazione per confermare il tuo arrivo.",
-      "noToken": "Il tuo codice di check-in apparirà qui una volta approvata la tua registrazione."
+      "openLabel": "Open check-in QR code",
+      "welcome": "Welcome to {{event}}",
+      "body": "Use this code to get access to the event.",
+      "signInRequired": "Sign in to load your check-in code."
     },
     "itemTypes": {
       "session": "Sessione",

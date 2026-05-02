@@ -937,9 +937,10 @@
       "emailComingSoonHint": "An itinerary@kizuna.dev weiterleiten, sobald es eingerichtet ist."
     },
     "checkin": {
-      "title": "Check-in",
-      "subtitle": "Zeigen Sie diesen Code bei der Anmeldung vor, um Ihre Ankunft zu bestätigen.",
-      "noToken": "Ihr Check-in-Code wird hier angezeigt, sobald Ihre Registrierung genehmigt ist."
+      "openLabel": "Open check-in QR code",
+      "welcome": "Welcome to {{event}}",
+      "body": "Use this code to get access to the event.",
+      "signInRequired": "Sign in to load your check-in code."
     },
     "itemTypes": {
       "session": "Session",

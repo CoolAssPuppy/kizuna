@@ -67,22 +67,3 @@ export async function fetchItinerary(
   if (error) throw error;
   return data ?? [];
 }
-
-/**
- * Loads the registration row to expose the QR check-in token.
- * Returned as the row so callers can also surface completion_pct etc.
- */
-export async function fetchRegistrationForCheckin(
-  client: AppSupabaseClient,
-  { userId, eventId }: FetchArgs,
-): Promise<{ qrToken: string | null; completionPct: number } | null> {
-  const { data, error } = await client
-    .from('registrations')
-    .select('qr_token, completion_pct')
-    .eq('user_id', userId)
-    .eq('event_id', eventId)
-    .maybeSingle();
-  if (error) throw error;
-  if (!data) return null;
-  return { qrToken: data.qr_token, completionPct: data.completion_pct };
-}

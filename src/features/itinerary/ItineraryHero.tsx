@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { EventCountdown } from '@/features/events/EventCountdown';
 import type { Database } from '@/types/database.types';
 
+import { CheckinQrDialog } from './CheckinQrDialog';
+
 type EventRow = Database['public']['Tables']['events']['Row'];
 
 interface Props {
@@ -55,7 +57,10 @@ export function ItineraryHero({ event }: Props): JSX.Element {
           </div>
         </div>
 
-        <EventCountdown startsAt={event.start_date} />
+        <div className="flex items-center gap-3">
+          <CheckinQrDialog eventId={event.id} eventName={event.name} />
+          <EventCountdown startsAt={event.start_date} />
+        </div>
       </div>
     </section>
   );

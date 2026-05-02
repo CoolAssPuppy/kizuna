@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import type { Database } from '@/types/database.types';
 
-import { CheckinCard } from './CheckinCard';
 import { GuestSyncToggle } from './GuestSyncToggle';
 import { ImportItineraryDialog } from './ImportItineraryDialog';
 import { ItineraryHero } from './ItineraryHero';
@@ -47,8 +46,6 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
   return (
     <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
       <ItineraryHero event={event} />
-
-      <CheckinCard eventId={event.id} />
 
       <GuestSyncToggle onToggle={invalidate} />
 

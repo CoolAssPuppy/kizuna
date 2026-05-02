@@ -4,14 +4,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { fetchItinerary, fetchRegistrationForCheckin } from './api';
+import { fetchItinerary } from './api';
 import type { ItineraryItemRow } from './types';
 
 const itineraryKey = (eventId: string, userId: string): readonly unknown[] =>
   ['itinerary', eventId, userId] as const;
-
-const checkinKey = (eventId: string, userId: string): readonly unknown[] =>
-  ['itinerary-checkin', eventId, userId] as const;
 
 interface Args {
   eventId: string;
@@ -80,27 +77,5 @@ export function useItinerary({ eventId }: Args): {
         queryKey: itineraryKey(eventId, userId ?? 'anon'),
       });
     },
-  };
-}
-
-export function useCheckinToken({ eventId }: Args): {
-  qrToken: string | null;
-  isLoading: boolean;
-} {
-  const { user } = useAuth();
-  const userId = user?.id ?? null;
-
-  const query = useQuery({
-    queryKey: checkinKey(eventId, userId ?? 'anon'),
-    enabled: userId !== null,
-    queryFn: () => {
-      if (userId === null) return Promise.resolve(null);
-      return fetchRegistrationForCheckin(getSupabaseClient(), { userId, eventId });
-    },
-  });
-
-  return {
-    qrToken: query.data?.qrToken ?? null,
-    isLoading: query.isLoading,
   };
 }

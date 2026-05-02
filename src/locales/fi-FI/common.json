@@ -937,9 +937,10 @@
       "emailComingSoonHint": "Välitä osoitteeseen itinerary@kizuna.dev, kun se on käytössä."
     },
     "checkin": {
-      "title": "Sisäänkirjautuminen",
-      "subtitle": "Näytä tämä koodi rekisteröinnissä vahvistaaksesi saapumisesi.",
-      "noToken": "Sisäänkirjautumiskoodisi ilmestyy tähän, kun ilmoittautumisesi on hyväksytty."
+      "openLabel": "Open check-in QR code",
+      "welcome": "Welcome to {{event}}",
+      "body": "Use this code to get access to the event.",
+      "signInRequired": "Sign in to load your check-in code."
     },
     "itemTypes": {
       "session": "Sessio",
