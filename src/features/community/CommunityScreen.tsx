@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -21,7 +20,6 @@ import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { CommunityProfileSection } from './CommunityProfileSection';
 import { WorldMap } from './WorldMap';
 import {
   createChannel,
@@ -45,7 +43,6 @@ export function CommunityScreen(): JSX.Element {
   const qc = useQueryClient();
   const { show } = useToast();
   const [mapMode, setMapMode] = useState<MapMode>('hometown');
-  const [profileOpen, setProfileOpen] = useState(false);
   const [newChannelOpen, setNewChannelOpen] = useState(false);
 
   const peopleQ = useQuery({
@@ -100,8 +97,8 @@ export function CommunityScreen(): JSX.Element {
           <h1 className="text-3xl font-semibold tracking-tight">{t('community.title')}</h1>
           <p className="text-sm text-muted-foreground">{t('community.subtitle')}</p>
         </div>
-        <Button onClick={() => setProfileOpen(true)} className="gap-2 self-start">
-          {t('community.editProfile')}
+        <Button asChild className="gap-2 self-start">
+          <Link to="/profile/community">{t('community.editProfile')}</Link>
         </Button>
       </header>
 
@@ -161,16 +158,6 @@ export function CommunityScreen(): JSX.Element {
           ))}
         </ul>
       </section>
-
-      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t('community.profile.title')}</DialogTitle>
-            <DialogDescription>{t('community.profile.description')}</DialogDescription>
-          </DialogHeader>
-          <CommunityProfileSection mode={{ kind: 'profile' }} />
-        </DialogContent>
-      </Dialog>
 
       <NewChannelDialog
         open={newChannelOpen}
