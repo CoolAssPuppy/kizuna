@@ -1139,3 +1139,70 @@ $$;
 
 revoke all on function public.mark_my_registration_task_complete(text) from public;
 grant execute on function public.mark_my_registration_task_complete(text) to authenticated;
+
+
+-- =====================================================================
+-- Auto-tick the "documents" registration task when a user's signed all
+-- the required documents for the active event.
+-- =====================================================================
+-- Required = is_active AND requires_acknowledgement, scoped to the
+-- current event OR the global (event_id IS NULL) bucket. The trigger
+-- runs SECURITY DEFINER so it bypasses RLS on registration_tasks; the
+-- WHERE clauses still narrow writes to the inserter's own rows.
+create or replace function public.maybe_complete_documents_task()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_required_count int;
+  v_signed_count int;
+  v_registration_id uuid;
+begin
+  select id into v_registration_id
+    from public.registrations
+   where user_id = NEW.user_id and event_id = NEW.event_id
+   limit 1;
+  if v_registration_id is null then
+    return NEW;
+  end if;
+
+  select count(*) into v_required_count
+    from public.documents d
+   where d.is_active
+     and d.requires_acknowledgement
+     and (d.event_id is null or d.event_id = NEW.event_id);
+
+  if v_required_count = 0 then
+    return NEW;
+  end if;
+
+  select count(distinct (d.document_key, d.version)) into v_signed_count
+    from public.documents d
+    join public.document_acknowledgements a
+      on a.document_key = d.document_key
+     and a.document_version = d.version
+   where d.is_active
+     and d.requires_acknowledgement
+     and (d.event_id is null or d.event_id = NEW.event_id)
+     and a.user_id = NEW.user_id
+     and a.event_id = NEW.event_id;
+
+  if v_signed_count >= v_required_count then
+    update public.registration_tasks
+       set status = 'complete',
+           completed_at = coalesce(completed_at, now())
+     where registration_id = v_registration_id
+       and task_key = 'documents'
+       and status <> 'complete';
+  end if;
+
+  return NEW;
+end
+$$;
+
+drop trigger if exists document_acks_complete_task on public.document_acknowledgements;
+create trigger document_acks_complete_task
+  after insert on public.document_acknowledgements
+  for each row execute function public.maybe_complete_documents_task();

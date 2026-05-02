@@ -940,6 +940,10 @@
     },
     "exportCsv": "Export CSV",
     "noRows": "No rows to display.",
+    "empty": {
+      "rooming": "Room assignments must be completed first.",
+      "transport": "Ground transport assignments must be completed first."
+    },
     "share": {
       "create": "Create share link",
       "creating": "Creating link",
@@ -1126,6 +1130,7 @@
     "createSuccess": "Document published.",
     "readAndSign": "Read and Sign",
     "signed": "Signed",
+    "backToDocuments": "Back to documents",
     "signSubtitle": "Read the document below. Type your full legal name to sign once you reach the end.",
     "fullNameLabel": "Your Full Legal Name",
     "signButton": "Sign",
