@@ -23,16 +23,24 @@ export function TerminalEyebrow({
   return (
     <div
       className="flex items-center justify-between"
-      style={ruled ? { borderTop: '1px solid var(--c-rule)', borderBottom: '1px solid var(--c-rule)', padding: '14px 0' } : undefined}
+      style={
+        ruled
+          ? {
+              borderTop: '1px solid var(--c-rule)',
+              borderBottom: '1px solid var(--c-rule)',
+              padding: '16px 0',
+            }
+          : undefined
+      }
     >
       <span
-        className="text-[10px] font-bold uppercase"
-        style={{ color: 'var(--c-dim)', letterSpacing: '0.18em' }}
+        className="text-[11px] font-bold uppercase"
+        style={{ color: 'var(--c-muted)', letterSpacing: '0.18em' }}
       >
         {label}
       </span>
       {trailing ? (
-        <span className="text-[10px]" style={{ color: 'var(--c-dim)' }}>
+        <span className="text-[11px]" style={{ color: 'var(--c-muted)' }}>
           {trailing}
         </span>
       ) : null}

@@ -1,6 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  AlertTriangle,
   BarChart3,
   Bed,
   Bus,
@@ -32,7 +31,6 @@ const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },
   { to: '/admin/nudges', icon: Send, labelKey: 'admin.nav.communication' },
   { to: '/admin/reports', icon: Users, labelKey: 'admin.nav.reports' },
-  { to: '/admin/conflicts', icon: AlertTriangle, labelKey: 'admin.nav.conflicts' },
   { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
   { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },
   { to: '/admin/scan', icon: ScanLine, labelKey: 'admin.nav.scanQr' },

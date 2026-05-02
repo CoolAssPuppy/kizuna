@@ -55,7 +55,7 @@ export function AirlineLogo({ iata, icao, name, className }: AirlineLogoProps): 
       <span
         aria-label={finalName ?? 'Airline'}
         className={cn(
-          'inline-flex h-8 w-8 items-center justify-center rounded-md bg-muted text-muted-foreground',
+          'inline-flex h-8 w-8 items-center justify-center rounded-md bg-white text-neutral-700',
           className,
         )}
       >
@@ -64,14 +64,26 @@ export function AirlineLogo({ iata, icao, name, className }: AirlineLogoProps): 
     );
   }
 
+  // Wrap the PNG in a white pill so the dark-on-transparent artwork
+  // stays legible regardless of theme (light, supa, hermione, kirk,
+  // barbie). The pill is the industry-standard "logo on a sticker"
+  // treatment booking apps use; it costs us a few px of horizontal
+  // space but never hides the brand colour.
   return (
-    <img
-      src={`/airline-logos/${finalIata}.png`}
-      alt={finalName ?? finalIata}
-      onError={() => setBroken(true)}
-      className={cn('h-8 w-auto object-contain', className)}
-      loading="lazy"
-    />
+    <span
+      className={cn(
+        'inline-flex h-8 items-center justify-center rounded-md bg-white px-1.5',
+        className,
+      )}
+    >
+      <img
+        src={`/airline-logos/${finalIata}.png`}
+        alt={finalName ?? finalIata}
+        onError={() => setBroken(true)}
+        className="h-5 w-auto object-contain"
+        loading="lazy"
+      />
+    </span>
   );
 }
 

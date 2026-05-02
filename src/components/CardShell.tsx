@@ -21,8 +21,8 @@ export function CardShell({ title, description, actions, children }: CardShellPr
       <header className="mb-4 flex flex-row items-start justify-between gap-3">
         <div className="space-y-1">
           <h2
-            className="text-[10px] font-bold uppercase"
-            style={{ color: 'var(--c-dim)', letterSpacing: '0.18em' }}
+            className="text-[11px] font-bold uppercase"
+            style={{ color: 'var(--c-muted)', letterSpacing: '0.18em' }}
           >
             {title}
           </h2>

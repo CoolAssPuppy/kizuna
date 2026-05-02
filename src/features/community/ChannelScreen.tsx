@@ -185,22 +185,32 @@ export function ChannelScreen(): JSX.Element {
   }
 
   return (
-    <main className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-8 py-6">
-      <header className="flex items-center gap-3 border-b pb-3">
+    <main className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-8 py-10">
+      <header
+        className="flex items-center gap-4 border-b pb-6"
+        style={{ borderColor: 'var(--c-rule)' }}
+      >
         <Button asChild variant="ghost" size="icon" aria-label={t('common.back')}>
           <Link to="/community">
             <ArrowLeft aria-hidden className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="flex-1">
-          <h1 className="text-lg font-semibold tracking-tight">#{channelQ.data?.name ?? slug}</h1>
+        <div className="flex flex-1 flex-col gap-1.5">
+          <h1
+            className="text-2xl font-semibold tracking-tight"
+            style={{ color: 'var(--c-fg)' }}
+          >
+            #{channelQ.data?.name ?? slug}
+          </h1>
           {channelQ.data?.description ? (
-            <p className="text-xs text-muted-foreground">{channelQ.data.description}</p>
+            <p className="text-sm" style={{ color: 'var(--c-muted)', lineHeight: 1.6 }}>
+              {channelQ.data.description}
+            </p>
           ) : null}
         </div>
       </header>
 
-      <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto py-4">
+      <div ref={scrollRef} className="flex-1 space-y-7 overflow-y-auto py-8">
         {groups.map((group) => {
           const sample = group.messages[0]!;
           const senderRow = (messagesQ.data ?? []).find((m) => m.id === sample.id);
