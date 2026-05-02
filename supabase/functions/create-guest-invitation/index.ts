@@ -87,7 +87,10 @@ Deno.serve(async (req) => {
     if (minorError || !minor) {
       return jsonResponse({ error: minorError?.message ?? 'minor_insert_failed' }, { status: 500 });
     }
-    return jsonResponse({ kind: 'minor', additional_guest: minor }, { status: 201, headers: corsHeaders });
+    return jsonResponse(
+      { kind: 'minor', additional_guest: minor },
+      { status: 201, headers: corsHeaders },
+    );
   }
 
   // ------- Adult branch: full email + signed-token invite flow -------
@@ -139,5 +142,8 @@ Deno.serve(async (req) => {
   // sponsor pays the bundled fee — stripe-webhook flips status='sent'
   // and dispatches the mail then. Returning the invitation row lets the
   // SPA render the "Pending payment" badge in GuestsSection.
-  return jsonResponse({ kind: 'adult', invitation: updated }, { status: 201, headers: corsHeaders });
+  return jsonResponse(
+    { kind: 'adult', invitation: updated },
+    { status: 201, headers: corsHeaders },
+  );
 });

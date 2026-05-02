@@ -54,14 +54,10 @@ export function EmailField({ email, className, textClassName }: EmailFieldProps)
 
   return (
     <span className={cn('group inline-flex items-center gap-1.5', className)}>
-      <a
-        href={`mailto:${email}`}
-        className={cn('truncate', textClassName)}
-        title={email}
-      >
+      <a href={`mailto:${email}`} className={cn('truncate', textClassName)} title={email}>
         {email}
       </a>
-      <span className="inline-flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+      <span className="inline-flex items-center gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
         <button
           type="button"
           onClick={() => void handleCopy()}

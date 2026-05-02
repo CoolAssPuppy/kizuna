@@ -79,7 +79,9 @@ function NudgeDialogInner({ open, onClose }: NudgeDialogProps): JSX.Element {
 
   const audience = useMemo<NudgeAudience | null>(() => {
     if (audienceKind === 'users') {
-      return pickedUsers.length > 0 ? { kind: 'users', userIds: pickedUsers.map((u) => u.id) } : null;
+      return pickedUsers.length > 0
+        ? { kind: 'users', userIds: pickedUsers.map((u) => u.id) }
+        : null;
     }
     return { kind: audienceKind };
   }, [audienceKind, pickedUsers]);

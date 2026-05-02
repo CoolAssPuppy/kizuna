@@ -460,6 +460,126 @@ Test counts move every commit, so the badge of truth is CI rather than this READ
 
 The project also enforces a no-`useEffect` discipline for data fetching and state derivation. See `~/.claude/skills/no-use-effect/SKILL.md` and `tasks/lessons.md` for the rule and the five replacement patterns.
 
+## Testing the CLI and MCP server locally
+
+Kizuna ships an agent surface that runs end-to-end against your local Supabase stack — no npm publish required, no production project needed. Three pieces:
+
+- **`supabase/functions/cli/`** — the HTTP edge function that authenticates a PAT and dispatches commands.
+- **`packages/kizuna-cli/`** — a Node bin (`kizuna`) with login, logout, whoami, and pass-through for any registered command.
+- **`packages/kizuna-mcp/`** — an MCP server that bridges the registry to Claude Desktop, Cursor, or Claude Code.
+
+### 1. Start the stack
+
+```bash
+supabase start                    # Postgres + Auth + Storage + Edge runtime
+npm run db:apply                  # schemas + pgTAP + seed + sample fixtures
+supabase functions serve --env-file supabase/.env --no-verify-jwt
+```
+
+`--no-verify-jwt` lets the function accept a PAT in the Authorization header. The function still verifies the PAT against Postgres via `verify_api_key`; it just skips Supabase's anon-key gate for local dev.
+
+### 2. Issue a personal access token
+
+In a separate browser, sign in to the running app at <http://localhost:5173>, then:
+
+1. Open `/profile/api-keys`
+2. Click **Create API Key**, pick a scope (`read` is enough for read commands), and submit.
+3. Copy the token from the one-time reveal dialog. The token starts with `kzn_`.
+
+If you'd rather skip the dashboard and exercise the OAuth flow, see "Bootstrap via OAuth" below.
+
+### 3. Try the local CLI without installing it
+
+```bash
+# From the repo root, with @kizuna/cli installed via npm install:
+node --experimental-strip-types packages/kizuna-cli/src/bin/kizuna.ts \
+  login --url http://127.0.0.1:54321 --paste <kzn_...> --state manual
+
+# Or use tsx if you'd rather:
+npx tsx packages/kizuna-cli/src/bin/kizuna.ts login \
+  --url http://127.0.0.1:54321 --paste <kzn_...> --state manual
+
+# Run a real command:
+npx tsx packages/kizuna-cli/src/bin/kizuna.ts me itinerary --format md
+```
+
+Or `npm link` the package once and the `kizuna` binary lives on your PATH for the duration of the link:
+
+```bash
+cd packages/kizuna-cli && npm link
+kizuna login --url http://127.0.0.1:54321 --paste <kzn_...> --state manual
+kizuna me itinerary --format md
+cd ../.. && npm unlink kizuna   # remove the link when done
+```
+
+The `--paste`/`--state` form is the manual fallback. The full OAuth dance runs without those flags:
+
+```bash
+kizuna login --url http://127.0.0.1:54321 --scope read
+# Browser opens to /cli/oauth-authorize. After clicking Authorize, the
+# callback page POSTs the code to a localhost server the CLI binds for
+# this run. The token lands in ~/.kizuna/config.json (chmod 0600).
+```
+
+### 4. Try the local MCP server
+
+The MCP server is a separate npm package. Point it at your local Kizuna and a PAT:
+
+```bash
+KIZUNA_URL=http://127.0.0.1:54321 \
+KIZUNA_TOKEN=kzn_read_xxxxxx \
+npx tsx packages/kizuna-mcp/src/bin/kizuna-mcp.ts
+```
+
+Wire it into Claude Desktop by editing `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "kizuna-local": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "/absolute/path/to/kizuna/packages/kizuna-mcp/src/bin/kizuna-mcp.ts"
+      ],
+      "env": {
+        "KIZUNA_URL": "http://127.0.0.1:54321",
+        "KIZUNA_TOKEN": "kzn_read_xxxxxx"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop. Kizuna's tools (`kizuna_me`, `kizuna_attendees`, `kizuna_me_itinerary`, etc.) appear in the tool picker. Each tool's input schema is generated from the registry's zod schemas, so the agent sees structured arguments rather than a raw CLI string.
+
+### 5. Verify the wiring
+
+A quick smoke test once everything is live:
+
+```bash
+# Should return the schema as JSON.
+kizuna schema | head -40
+
+# Should return your profile.
+kizuna me
+
+# Should produce Markdown.
+kizuna me itinerary --format md
+```
+
+Errors come back as `{ "ok": false, "error": { "code": "...", "message": "..." } }` with a `request_id` for cross-referencing the edge function logs.
+
+### 6. Run the test suites
+
+```bash
+npm run test:run                   # vitest (registry, parser, dispatcher, every command)
+deno test supabase/functions       # edge function contract tests
+supabase test db                   # pgTAP for api_keys, oauth_codes, cli_audit_log
+```
+
+The CLI does not need to be published to npm to be exercised — `npm link`, `tsx`, or a direct `node` invocation are all first-class paths during development.
+
 ## Deployment
 
 Phase 1 ships locally. Production deploys land with M10:

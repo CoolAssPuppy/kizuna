@@ -1,12 +1,18 @@
 {
-  "name": "kizuna",
+  "name": "@kizuna/cli",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "Command-line and OAuth bootstrap client for the Kizuna agent surface.",
   "bin": {
     "kizuna": "./src/bin/kizuna.ts"
   },
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
+    "start": "tsx src/bin/kizuna.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {}

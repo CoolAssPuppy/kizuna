@@ -225,7 +225,11 @@ function BackLink(): JSX.Element {
   );
 }
 
-function IdentityCard({ identity }: { identity: EmployeeIdentity | null | undefined }): JSX.Element {
+function IdentityCard({
+  identity,
+}: {
+  identity: EmployeeIdentity | null | undefined;
+}): JSX.Element {
   const { t } = useTranslation();
   return (
     <aside
@@ -258,9 +262,7 @@ function IdentityCard({ identity }: { identity: EmployeeIdentity | null | undefi
           icon={<Calendar className="h-3.5 w-3.5" aria-hidden />}
           label={t('community.person.identity.startDate')}
           value={
-            identity?.start_date
-              ? mediumDateFormatter.format(new Date(identity.start_date))
-              : null
+            identity?.start_date ? mediumDateFormatter.format(new Date(identity.start_date)) : null
           }
         />
         <IdentityRow
@@ -326,7 +328,11 @@ function MessagesActivity({
       <TerminalEyebrow label="recent.messages" />
       <ul className="mt-3 space-y-3">
         {messages.map((m) => (
-          <li key={m.id} className="border-b pb-3 last:border-0 last:pb-0" style={{ borderColor: 'var(--c-rule)' }}>
+          <li
+            key={m.id}
+            className="border-b pb-3 last:border-0 last:pb-0"
+            style={{ borderColor: 'var(--c-rule)' }}
+          >
             <Link to={`/community/channels/${m.channel}`} className="block hover:opacity-80">
               <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--c-muted)' }}>
                 #{m.channel} · {new Date(m.sent_at).toLocaleDateString()}
@@ -372,7 +378,12 @@ function PhotoActivityTile({ photo }: { photo: PhotoRecord }): JSX.Element {
       style={{ borderColor: 'var(--c-rule)', backgroundColor: 'var(--c-surface)' }}
     >
       {url ? (
-        <img src={url} alt={photo.caption ?? ''} className="h-full w-full object-cover" loading="lazy" />
+        <img
+          src={url}
+          alt={photo.caption ?? ''}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
       ) : null}
     </Link>
   );

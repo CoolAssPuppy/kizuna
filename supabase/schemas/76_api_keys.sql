@@ -19,6 +19,12 @@ create table public.api_keys (
 create unique index api_keys_token_hash_unique on public.api_keys(token_hash);
 create index api_keys_user_active on public.api_keys(user_id) where revoked_at is null;
 
+-- Defense in depth: 90_rls.sql also enables RLS via a catch-all loop,
+-- but stating it explicitly here makes the security boundary obvious to
+-- anyone reading the table definition.
+alter table public.api_keys enable row level security;
+alter table public.api_keys force row level security;
+
 create table public.oauth_codes (
   code text primary key,
   user_id uuid not null references public.users(id) on delete cascade,
@@ -31,6 +37,9 @@ create table public.oauth_codes (
 );
 
 create index oauth_codes_user_idx on public.oauth_codes(user_id);
+
+alter table public.oauth_codes enable row level security;
+alter table public.oauth_codes force row level security;
 
 create or replace function public.hash_api_key(p_token text)
 returns text

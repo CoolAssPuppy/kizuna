@@ -53,7 +53,10 @@ export async function processImage(file: File): Promise<ProcessedImage> {
   try {
     const width = bitmap.width;
     const height = bitmap.height;
-    const preview = await renderToWebp(bitmap, computeFitDimensions(width, height, PREVIEW_LONG_EDGE));
+    const preview = await renderToWebp(
+      bitmap,
+      computeFitDimensions(width, height, PREVIEW_LONG_EDGE),
+    );
     const thumb = await renderToWebp(bitmap, computeFitDimensions(width, height, THUMB_LONG_EDGE));
     return { original: file, preview, thumb, width, height };
   } finally {

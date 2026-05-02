@@ -1,27 +1,41 @@
-import type { KizunaConfig } from './config';
+import { activeToken, type KizunaConfig } from './config';
+
+interface CliResponse {
+  ok: boolean;
+  data?: unknown;
+  format?: 'json' | 'md';
+  markdown?: string;
+  error?: { code: string; message: string; details?: unknown };
+  request_id?: string;
+}
 
 export async function runRemoteCommand(
   config: KizunaConfig,
   command: string,
   format: 'json' | 'md',
-): Promise<unknown> {
-  const token = config.tokens[config.tokenName]?.value;
+): Promise<CliResponse> {
+  const token = activeToken(config);
   if (!token) {
-    throw new Error('Run `kizuna login --token <token> --url <url>` first.');
+    throw new Error('Run `kizuna login` first.');
+  }
+  if (!config.url) {
+    throw new Error('No Kizuna URL configured. Re-run `kizuna login --url <host>`.');
   }
 
   const response = await fetch(`${config.url.replace(/\/$/, '')}/functions/v1/cli`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${token.value}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ command, format }),
   });
 
-  const payload: unknown = await response.json();
-  if (!response.ok) {
-    throw new Error(JSON.stringify(payload, null, 2));
+  let payload: CliResponse;
+  try {
+    payload = (await response.json()) as CliResponse;
+  } catch {
+    throw new Error(`Kizuna returned a non-JSON response (HTTP ${response.status}).`);
   }
   return payload;
 }

@@ -89,11 +89,12 @@ function renderBody(
   }
 
   if (format === 'md') {
-    const markdown = result.markdown ?? ['```json', JSON.stringify(result.data, null, 2), '```'].join('\n');
+    const markdown =
+      result.markdown ?? ['```json', JSON.stringify(result.data, null, 2), '```'].join('\n');
     return {
       copyText: markdown,
       node: (
-        <div className="prose prose-sm max-w-none dark:prose-invert">
+        <div className="prose prose-sm dark:prose-invert max-w-none">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
         </div>
       ),

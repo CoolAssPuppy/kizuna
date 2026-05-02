@@ -27,8 +27,16 @@ export function useRecentPhotos(eventId: string | null, limit = 20) {
 export function usePhotoSearch(eventId: string | null, queryString: string) {
   const classified = classifyQuery(queryString);
   return useQuery<PhotoRecord[]>({
-    queryKey: ['community', 'photos', 'search', eventId, classified.kind, classified.kind === 'empty' ? '' : classified.value],
-    queryFn: () => searchPhotos(getSupabaseClient(), { eventId: eventId!, query: classified, limit: 60 }),
+    queryKey: [
+      'community',
+      'photos',
+      'search',
+      eventId,
+      classified.kind,
+      classified.kind === 'empty' ? '' : classified.value,
+    ],
+    queryFn: () =>
+      searchPhotos(getSupabaseClient(), { eventId: eventId!, query: classified, limit: 60 }),
     enabled: !!eventId,
   });
 }
@@ -41,7 +49,11 @@ export function usePhotoById(photoId: string | null) {
   });
 }
 
-export function useProfileActivityPhotos(userId: string | null, eventId: string | null, limit = 10) {
+export function useProfileActivityPhotos(
+  userId: string | null,
+  eventId: string | null,
+  limit = 10,
+) {
   return useQuery<PhotoRecord[]>({
     queryKey: ['community', 'photos', 'profile', userId, eventId, limit],
     queryFn: () => loadProfileActivity(getSupabaseClient(), userId!, eventId!, limit),

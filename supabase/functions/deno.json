@@ -3,6 +3,9 @@
     "lib": ["deno.window", "dom"]
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1"
+    "@std/assert": "jsr:@std/assert@1",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.45.4",
+    "zod": "https://esm.sh/zod@4.4.2",
+    "jose": "https://esm.sh/jose@5.9.6"
   }
 }

@@ -55,9 +55,10 @@ export function FooterTerminal(): JSX.Element {
       { raw },
       {
         supabase: getSupabaseClient(),
-        user,
+        user: { id: user.id, email: user.email, role: user.role },
         role: toCommandRole(user.role),
-        t,
+        patScope: null,
+        t: (key, vars) => t(key, vars as Record<string, unknown>),
         signal: controller.signal,
       },
     );

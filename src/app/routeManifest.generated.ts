@@ -9,182 +9,115 @@ export interface RouteManifestEntry {
 
 export const ROUTE_MANIFEST = [
   {
-    "path": "/",
-    "labelKey": "nav.home",
-    "keywords": [
-      "home",
-      "dashboard"
-    ]
+    path: '/',
+    labelKey: 'nav.home',
+    keywords: ['home', 'dashboard'],
   },
   {
-    "path": "/admin/about",
-    "scope": "admin",
-    "labelKey": "admin.nav.about",
-    "keywords": [
-      "admin",
-      "about",
-      "event"
-    ]
+    path: '/admin/about',
+    scope: 'admin',
+    labelKey: 'admin.nav.about',
+    keywords: ['admin', 'about', 'event'],
   },
   {
-    "path": "/admin/agenda",
-    "scope": "admin",
-    "labelKey": "admin.nav.agenda",
-    "keywords": [
-      "admin",
-      "agenda",
-      "sessions"
-    ]
+    path: '/admin/agenda',
+    scope: 'admin',
+    labelKey: 'admin.nav.agenda',
+    keywords: ['admin', 'agenda', 'sessions'],
   },
   {
-    "path": "/admin/conflicts",
-    "scope": "admin",
-    "labelKey": "admin.nav.conflicts",
-    "keywords": [
-      "admin",
-      "conflicts"
-    ]
+    path: '/admin/conflicts',
+    scope: 'admin',
+    labelKey: 'admin.nav.conflicts',
+    keywords: ['admin', 'conflicts'],
   },
   {
-    "path": "/admin/documents",
-    "scope": "admin",
-    "labelKey": "admin.nav.documents",
-    "keywords": [
-      "admin",
-      "documents"
-    ]
+    path: '/admin/documents',
+    scope: 'admin',
+    labelKey: 'admin.nav.documents',
+    keywords: ['admin', 'documents'],
   },
   {
-    "path": "/admin/feed",
-    "scope": "admin",
-    "labelKey": "admin.nav.feed",
-    "keywords": [
-      "admin",
-      "feed",
-      "announcements"
-    ]
+    path: '/admin/feed',
+    scope: 'admin',
+    labelKey: 'admin.nav.feed',
+    keywords: ['admin', 'feed', 'announcements'],
   },
   {
-    "path": "/admin/ground-transport",
-    "scope": "admin",
-    "labelKey": "admin.nav.groundTransport",
-    "keywords": [
-      "admin",
-      "transport",
-      "arrivals"
-    ]
+    path: '/admin/ground-transport',
+    scope: 'admin',
+    labelKey: 'admin.nav.groundTransport',
+    keywords: ['admin', 'transport', 'arrivals'],
   },
   {
-    "path": "/admin/nudges",
-    "scope": "admin",
-    "labelKey": "admin.nav.communication",
-    "keywords": [
-      "admin",
-      "nudges"
-    ]
+    path: '/admin/nudges',
+    scope: 'admin',
+    labelKey: 'admin.nav.communication',
+    keywords: ['admin', 'nudges'],
   },
   {
-    "path": "/admin/reports",
-    "scope": "admin",
-    "labelKey": "admin.nav.reports",
-    "keywords": [
-      "admin",
-      "reports"
-    ]
+    path: '/admin/reports',
+    scope: 'admin',
+    labelKey: 'admin.nav.reports',
+    keywords: ['admin', 'reports'],
   },
   {
-    "path": "/admin/rooms",
-    "scope": "admin",
-    "labelKey": "admin.nav.roomAssignment",
-    "keywords": [
-      "admin",
-      "rooms"
-    ]
+    path: '/admin/rooms',
+    scope: 'admin',
+    labelKey: 'admin.nav.roomAssignment',
+    keywords: ['admin', 'rooms'],
   },
   {
-    "path": "/admin/scan",
-    "scope": "admin",
-    "labelKey": "admin.nav.scanQr",
-    "keywords": [
-      "admin",
-      "scan",
-      "qr"
-    ]
+    path: '/admin/scan',
+    scope: 'admin',
+    labelKey: 'admin.nav.scanQr',
+    keywords: ['admin', 'scan', 'qr'],
   },
   {
-    "path": "/admin/stats",
-    "scope": "admin",
-    "labelKey": "admin.nav.stats",
-    "keywords": [
-      "admin",
-      "stats"
-    ]
+    path: '/admin/stats',
+    scope: 'admin',
+    labelKey: 'admin.nav.stats',
+    keywords: ['admin', 'stats'],
   },
   {
-    "path": "/agenda",
-    "labelKey": "nav.agenda",
-    "keywords": [
-      "agenda",
-      "sessions",
-      "schedule"
-    ]
+    path: '/agenda',
+    labelKey: 'nav.agenda',
+    keywords: ['agenda', 'sessions', 'schedule'],
   },
   {
-    "path": "/all-events",
-    "labelKey": "nav.allEvents",
-    "keywords": [
-      "events"
-    ],
-    "scope": "admin"
+    path: '/all-events',
+    labelKey: 'nav.allEvents',
+    keywords: ['events'],
+    scope: 'admin',
   },
   {
-    "path": "/community",
-    "labelKey": "nav.community",
-    "keywords": [
-      "community",
-      "people"
-    ]
+    path: '/community',
+    labelKey: 'nav.community',
+    keywords: ['community', 'people'],
   },
   {
-    "path": "/community/photos",
-    "labelKey": "photos.screen.title",
-    "keywords": [
-      "photos",
-      "memories"
-    ]
+    path: '/community/photos',
+    labelKey: 'photos.screen.title',
+    keywords: ['photos', 'memories'],
   },
   {
-    "path": "/documents",
-    "labelKey": "nav.documents",
-    "keywords": [
-      "documents",
-      "waiver",
-      "sign"
-    ]
+    path: '/documents',
+    labelKey: 'nav.documents',
+    keywords: ['documents', 'waiver', 'sign'],
   },
   {
-    "path": "/itinerary",
-    "labelKey": "nav.itinerary",
-    "keywords": [
-      "itinerary",
-      "schedule",
-      "travel"
-    ]
+    path: '/itinerary',
+    labelKey: 'nav.itinerary',
+    keywords: ['itinerary', 'schedule', 'travel'],
   },
   {
-    "path": "/profile",
-    "labelKey": "profile.title",
-    "keywords": [
-      "profile",
-      "account"
-    ]
+    path: '/profile',
+    labelKey: 'profile.title',
+    keywords: ['profile', 'account'],
   },
   {
-    "path": "/registration",
-    "labelKey": "nav.registration",
-    "keywords": [
-      "registration",
-      "tasks"
-    ]
-  }
+    path: '/registration',
+    labelKey: 'nav.registration',
+    keywords: ['registration', 'tasks'],
+  },
 ] as const satisfies ReadonlyArray<RouteManifestEntry>;

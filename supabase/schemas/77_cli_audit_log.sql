@@ -13,6 +13,10 @@ create table public.cli_audit_log (
 
 create index cli_audit_log_user_ran_at_idx on public.cli_audit_log(user_id, ran_at desc);
 
+-- Defense in depth: 90_rls.sql also enables RLS via a catch-all loop.
+alter table public.cli_audit_log enable row level security;
+alter table public.cli_audit_log force row level security;
+
 create or replace function public.write_cli_audit_log(
   p_user_id uuid,
   p_api_key_id uuid,

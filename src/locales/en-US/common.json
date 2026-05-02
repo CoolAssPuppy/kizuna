@@ -55,8 +55,10 @@
   "cli": {
     "errors": {
       "forbidden": "You do not have access to that command.",
+      "patScope": "This token does not have the right scope for that command.",
       "notFound": "Command not found.",
       "validation": "That command is missing or has invalid flags.",
+      "outputShape": "The command returned an unexpected shape. Report this.",
       "internal": "The command failed.",
       "noActiveEvent": "No active event is configured.",
       "eventNotFound": "Event not found."
@@ -126,6 +128,35 @@
         "summary": "List community channels.",
         "description": "Shows active community channels."
       }
+    }
+  },
+  "cliOauth": {
+    "authorize": {
+      "title": "Connect a CLI or agent",
+      "subtitle": "{{client}} wants to access your Kizuna data.",
+      "scopeLine": "Requested scope: {{scope}}",
+      "scopeBlurb": {
+        "read": "Read-only access to your itinerary, sessions, documents, and community profile.",
+        "write": "Read access plus the ability to RSVP, favorite sessions, and update your profile.",
+        "admin": "Full read and write access, including admin tools. Only grant this to tools you wrote yourself."
+      },
+      "allow": "Authorize",
+      "allowing": "Authorizing...",
+      "deny": "Cancel",
+      "adminBlocked": "You need an admin role to issue admin-scope tokens.",
+      "malformed": "Missing or invalid authorization parameters.",
+      "unknown": "Could not authorize."
+    },
+    "callback": {
+      "title": "Connecting to your agent",
+      "delivering": "Sending the authorization code to your local agent...",
+      "success": "You are connected. You can close this tab and return to your agent.",
+      "fallback": "We could not reach your local agent. Paste this code into the terminal where you ran the command.",
+      "deliverFailed": "The local callback did not respond.",
+      "codeLabel": "Code:",
+      "copy": "Copy code",
+      "copied": "Copied",
+      "malformed": "Missing or invalid callback parameters."
     }
   },
   "email": {
@@ -246,7 +277,8 @@
       "welcome": "Welcome to {{event}}.",
       "queueLabel": "QUEUE · {{count}} ITEMS",
       "queueSort": "sorted by:deadline ↓",
-      "live": "live"
+      "live": "live",
+      "feedItemLabel": "News"
     },
     "eventAccess": {
       "label": "Event Access Code:"

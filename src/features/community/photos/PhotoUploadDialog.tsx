@@ -117,7 +117,7 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
       const next = prev.filter((i) => i.id !== id);
       return next;
     });
-    setActiveId((prev) => (prev === id ? items.find((i) => i.id !== id)?.id ?? null : prev));
+    setActiveId((prev) => (prev === id ? (items.find((i) => i.id !== id)?.id ?? null) : prev));
   }
 
   function updateItem(id: string, patch: Partial<DraftItem>): void {
@@ -173,9 +173,7 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
   }
 
   const filteredResults = active
-    ? (attendeeQuery.data ?? []).filter(
-        (r) => !active.tagged.some((p) => p.user_id === r.user_id),
-      )
+    ? (attendeeQuery.data ?? []).filter((r) => !active.tagged.some((p) => p.user_id === r.user_id))
     : [];
 
   return (
@@ -242,17 +240,12 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
                         item.id === activeId ? 'ring-2 ring-offset-2' : '',
                       )}
                       style={{
-                        borderColor:
-                          item.id === activeId ? 'var(--c-accent)' : 'var(--c-rule)',
+                        borderColor: item.id === activeId ? 'var(--c-accent)' : 'var(--c-rule)',
                         backgroundColor: 'var(--c-surface)',
                       }}
                       aria-label={t('photos.upload.editFile', { name: item.file.name })}
                     >
-                      <img
-                        src={item.previewUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
+                      <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />
                     </button>
                   </li>
                 ))}
@@ -284,7 +277,9 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
             disabled={items.length === 0 || upload.isPending}
             onClick={() => void handleSubmit()}
           >
-            {upload.isPending ? <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {upload.isPending ? (
+              <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
             {items.length > 1
               ? t('photos.upload.submitMany', { count: items.length })
               : t('photos.upload.submit')}

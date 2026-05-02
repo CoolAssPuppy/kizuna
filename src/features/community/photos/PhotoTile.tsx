@@ -15,21 +15,24 @@ export function PhotoTile({ photo, onOpen }: Props): JSX.Element {
     <button
       type="button"
       onClick={() => onOpen(photo)}
-      className="group relative mb-3 block w-full overflow-hidden break-inside-avoid border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      className="group relative mb-3 block w-full break-inside-avoid overflow-hidden border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       style={{ borderColor: 'var(--c-rule)', backgroundColor: 'var(--c-surface)' }}
       aria-label={photo.caption ?? `photo ${photo.id}`}
     >
       <div style={{ aspectRatio: `${1} / ${ratio || 1}` }} className="w-full">
         {url ? (
-          <img src={url} alt={photo.caption ?? ''} loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={url}
+            alt={photo.caption ?? ''}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="h-full w-full" style={{ backgroundColor: 'var(--c-rule)' }} />
         )}
       </div>
       {captionPreview ? (
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-black/65 p-3 text-xs text-white transition-transform group-hover:translate-y-0"
-        >
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full bg-black/65 p-3 text-xs text-white transition-transform group-hover:translate-y-0">
           {captionPreview}
           {photo.caption && photo.caption.length > 80 ? '…' : ''}
         </div>

@@ -21,7 +21,10 @@ interface SlackInput {
 export async function sendSlackDm(input: SlackInput): Promise<boolean> {
   const token = Deno.env.get('SLACK_BOT_TOKEN');
   if (!token) {
-    console.info('[kizuna] SLACK_BOT_TOKEN missing — would have DM\'d %s', input.handle ?? '(no handle)');
+    console.info(
+      "[kizuna] SLACK_BOT_TOKEN missing — would have DM'd %s",
+      input.handle ?? '(no handle)',
+    );
     return true;
   }
   if (!input.handle) return false;
@@ -55,7 +58,10 @@ export async function sendResendEmail(input: ResendInput): Promise<boolean> {
   const apiKey = Deno.env.get('RESEND_API_KEY');
   const from = Deno.env.get('RESEND_FROM_EMAIL') ?? 'hello@kizuna.example';
   if (!apiKey) {
-    console.info('[kizuna] RESEND_API_KEY missing — would have emailed %s', input.to ?? '(no email)');
+    console.info(
+      '[kizuna] RESEND_API_KEY missing — would have emailed %s',
+      input.to ?? '(no email)',
+    );
     return true;
   }
   if (!input.to) return false;

@@ -1,8 +1,9 @@
-import './commands';
+import './commands/index.ts';
 
-export type { CommandContext, CommandRole } from './context';
-export { dispatch, resolveCommand, type CommandResult } from './dispatcher';
-export { parseCommand, tokenize } from './parser';
+export type { CommandContext, CommandRole } from './context.ts';
+export { dispatch, resolveCommand, type CommandResult } from './dispatcher.ts';
+export { parseCommand, tokenize } from './parser.ts';
+export { serializeCommand } from './serialize.ts';
 export {
   allCommands,
   commandKey,
@@ -13,4 +14,4 @@ export {
   type Command,
   type CommandFormat,
   type CommandScope,
-} from './registry';
+} from './registry.ts';

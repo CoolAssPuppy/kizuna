@@ -1,8 +1,13 @@
-export function formatOutput(payload: unknown, format: 'json' | 'md'): string {
-  if (format === 'md' && isMarkdownPayload(payload)) return payload.markdown;
-  return JSON.stringify(payload, null, 2);
+interface PayloadShape {
+  ok?: boolean;
+  data?: unknown;
+  markdown?: string;
+  error?: { code: string; message: string };
 }
 
-function isMarkdownPayload(payload: unknown): payload is { markdown: string } {
-  return typeof payload === 'object' && payload !== null && 'markdown' in payload;
+export function formatOutput(payload: PayloadShape, format: 'json' | 'md'): string {
+  if (format === 'md' && typeof payload.markdown === 'string') {
+    return payload.markdown;
+  }
+  return JSON.stringify(payload.ok === true ? (payload.data ?? null) : payload, null, 2);
 }

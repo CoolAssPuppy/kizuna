@@ -54,10 +54,7 @@ Deno.serve(async (req) => {
     (sum, row) => sum + Number(row.fee_amount),
     0,
   );
-  const minorTotal = (minorsResp.data ?? []).reduce(
-    (sum, row) => sum + Number(row.fee_amount),
-    0,
-  );
+  const minorTotal = (minorsResp.data ?? []).reduce((sum, row) => sum + Number(row.fee_amount), 0);
   const totalCents = Math.round((adultTotal + minorTotal) * 100);
 
   if (totalCents <= 0) {
@@ -100,12 +97,13 @@ Deno.serve(async (req) => {
     },
     body: params.toString(),
   });
-  const body = (await response.json()) as { id?: string; url?: string; error?: { message: string } };
+  const body = (await response.json()) as {
+    id?: string;
+    url?: string;
+    error?: { message: string };
+  };
   if (!response.ok || !body.id || !body.url) {
-    return jsonResponse(
-      { error: body.error?.message ?? 'stripe_failed' },
-      { status: 502 },
-    );
+    return jsonResponse({ error: body.error?.message ?? 'stripe_failed' }, { status: 502 });
   }
 
   return jsonResponse({ url: body.url, sessionId: body.id });

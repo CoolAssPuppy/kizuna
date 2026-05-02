@@ -13,9 +13,7 @@ interface InvitationRow {
   signed_token: string;
 }
 
-export async function dispatchSponsorPaymentSucceeded(
-  sponsorUserId: string,
-): Promise<void> {
+export async function dispatchSponsorPaymentSucceeded(sponsorUserId: string): Promise<void> {
   const admin = getAdminClient();
 
   // Atomic flip with RETURNING — one round-trip, no TOCTOU window

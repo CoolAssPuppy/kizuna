@@ -117,7 +117,11 @@ function useMorphingPhotos(photos: ReadonlyArray<PhotoRecord>): MorphedItem[] {
 
       return [
         ...arrivals,
-        ...remaining.map((it) => ({ ...it, leaving: false, photo: photos.find((p) => p.id === it.photo.id) ?? it.photo })),
+        ...remaining.map((it) => ({
+          ...it,
+          leaving: false,
+          photo: photos.find((p) => p.id === it.photo.id) ?? it.photo,
+        })),
         ...exiting.map((it) => ({ ...it, leaving: true })),
       ];
     });

@@ -2,7 +2,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useIsAdmin } from '@/features/auth/hooks';
@@ -112,7 +119,13 @@ export function CreateApiKeyDialog({
   );
 }
 
-function Fieldset({ legend, children }: { legend: string; children: React.ReactNode }): JSX.Element {
+function Fieldset({
+  legend,
+  children,
+}: {
+  legend: string;
+  children: React.ReactNode;
+}): JSX.Element {
   return (
     <fieldset className="space-y-2">
       <legend className="text-sm font-medium">{legend}</legend>
