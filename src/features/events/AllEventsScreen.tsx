@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/toast';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { fetchAllEvents, type EventRow } from '@/features/admin/api/events';
 import { mediumDateFormatter } from '@/lib/formatters';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 import { cn } from '@/lib/utils';
@@ -110,7 +111,7 @@ interface EventCardProps {
 function EventCard({ event, viewing, isOverriding, isAdmin, onView }: EventCardProps): JSX.Element {
   const { t } = useTranslation();
   const past = isPast(event);
-  const heroUrl = useStorageImage('event-content', event.hero_image_path);
+  const heroUrl = useStorageImage(STORAGE_BUCKETS.eventContent, event.hero_image_path);
   return (
     <li
       className={cn(

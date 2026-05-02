@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { StorageImageUploader } from '@/components/StorageImageUploader';
 import { useToast } from '@/components/ui/toast';
 import { useHydratedFormState } from '@/hooks/useHydratedFormState';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { eventAboutFolder } from '@/lib/storagePaths';
 import { getSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -260,36 +262,26 @@ export function EventEditScreen({
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* Storage uploads only work once the event has an id (the path is
-              <eventId>/about/...). On the "new" form we show the uploader
-              disabled with a hint to save first. */}
+          {/* Storage uploads only work once the event has an id (the path
+              starts with <eventId>/about/). On the "new" form we render
+              the placeholder hint instead. */}
           {isNew || !eventId ? (
             <>
-              <div className="space-y-1.5">
-                <Label>{t('admin.events.fields.heroImage')}</Label>
-                <p className="rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
-                  {t('admin.events.imageUploadAfterSave')}
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <Label>{t('admin.events.fields.logo')}</Label>
-                <p className="rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
-                  {t('admin.events.imageUploadAfterSave')}
-                </p>
-              </div>
+              <UploadPlaceholder label={t('admin.events.fields.heroImage')} />
+              <UploadPlaceholder label={t('admin.events.fields.logo')} />
             </>
           ) : (
             <>
               <StorageImageUploader
-                bucket="event-content"
-                folder={`${eventId}/about`}
+                bucket={STORAGE_BUCKETS.eventContent}
+                folder={eventAboutFolder(eventId)}
                 value={form.hero_image_path}
                 onChange={(p) => setForm({ ...form, hero_image_path: p })}
                 label={t('admin.events.fields.heroImage')}
               />
               <StorageImageUploader
-                bucket="event-content"
-                folder={`${eventId}/about`}
+                bucket={STORAGE_BUCKETS.eventContent}
+                folder={eventAboutFolder(eventId)}
                 value={form.logo_path}
                 onChange={(p) => setForm({ ...form, logo_path: p })}
                 label={t('admin.events.fields.logo')}
@@ -371,6 +363,18 @@ function FlagRow({ id, label, hint, checked, onChange }: FlagRowProps): JSX.Elem
         <span className="font-medium">{label}</span>
         <span className="block text-xs text-muted-foreground">{hint}</span>
       </label>
+    </div>
+  );
+}
+
+function UploadPlaceholder({ label }: { label: string }): JSX.Element {
+  const { t } = useTranslation();
+  return (
+    <div className="space-y-1.5">
+      <Label>{label}</Label>
+      <p className="rounded-md border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+        {t('admin.events.imageUploadAfterSave')}
+      </p>
     </div>
   );
 }

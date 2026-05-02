@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -6,12 +5,13 @@ import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/d
 import { Button } from '@/components/ui/button';
 import { useSupabaseUpload } from '@/hooks/useSupabaseUpload';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useStorageImage } from '@/lib/useStorageImage';
 import { cn } from '@/lib/utils';
 
 interface StorageImageUploaderProps {
-  /** Storage bucket name (e.g. 'feed-images', 'event-covers'). */
+  /** Storage bucket name. See `src/lib/storageBuckets.ts` for the four canonical buckets. */
   bucket: string;
-  /** Folder prefix inside the bucket; trailing slash optional. */
+  /** Folder prefix inside the bucket; trailing slash optional. Compose via `src/lib/storagePaths.ts` helpers when possible. */
   folder?: string;
   /** Storage path (object name) currently bound to the field, or '' when empty. */
   value: string;
@@ -29,9 +29,9 @@ const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 /**
  * Form-controlled image uploader backed by the Supabase UI Dropzone. Stores
- * the resulting object path in `value`; callers resolve to a signed URL for
- * display via useStorageImage. The dropzone shows the preview, file list,
- * and an Upload button under the hood.
+ * the resulting object path in `value`; preview is resolved via
+ * `useStorageImage`. The dropzone shows the preview, file list, and an
+ * Upload button under the hood.
  */
 export function StorageImageUploader({
   bucket,
@@ -43,16 +43,7 @@ export function StorageImageUploader({
   className,
 }: StorageImageUploaderProps): JSX.Element {
   const { t } = useTranslation();
-  const { data: previewUrl = null } = useQuery({
-    queryKey: ['storage-signed-url', bucket, value],
-    enabled: !!value,
-    staleTime: 30 * 60_000,
-    queryFn: async () => {
-      if (!value) return null;
-      const { data } = await getSupabaseClient().storage.from(bucket).createSignedUrl(value, 3600);
-      return data?.signedUrl ?? null;
-    },
-  });
+  const previewUrl = useStorageImage(bucket, value, { ttlSeconds: 3600 });
 
   const upload = useSupabaseUpload({
     bucketName: bucket,

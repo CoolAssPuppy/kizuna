@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
 import { useSupabaseUpload } from '@/hooks/useSupabaseUpload';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
@@ -26,10 +27,10 @@ interface PdfUploaderProps {
  */
 export function PdfUploader({ value, onChange, eventId, label }: PdfUploaderProps): JSX.Element {
   const { t } = useTranslation();
-  const signedUrl = useStorageImage('documents', value);
+  const signedUrl = useStorageImage(STORAGE_BUCKETS.documents, value);
 
   const upload = useSupabaseUpload({
-    bucketName: 'documents',
+    bucketName: STORAGE_BUCKETS.documents,
     path: eventId,
     maxFiles: 1,
     maxFileSize: MAX_BYTES,
@@ -43,7 +44,7 @@ export function PdfUploader({ value, onChange, eventId, label }: PdfUploaderProp
   function clear(): void {
     if (!value) return;
     onChange('');
-    void getSupabaseClient().storage.from('documents').remove([value]);
+    void getSupabaseClient().storage.from(STORAGE_BUCKETS.documents).remove([value]);
   }
 
   return (

@@ -47,6 +47,7 @@ security definer
 set search_path = public
 as $$
 declare
+  v_first text;
   v_event_id uuid;
   v_caller uuid;
 begin
@@ -55,14 +56,15 @@ begin
     return false;
   end if;
 
-  -- (storage.foldername(name))[1] is the first folder segment. Cast must
-  -- not raise — the bucket policy returns false on a malformed prefix
-  -- rather than 500-ing the entire signed-URL call.
-  begin
-    v_event_id := ((storage.foldername(object_name))[1])::uuid;
-  exception when others then
+  -- The leading path segment must be a UUID. Pre-check with a regex so
+  -- malformed paths bail without paying for a subtransaction (an
+  -- EXCEPTION-on-cast block opens a savepoint per row, which is
+  -- measurably expensive on the storage SELECT hot path).
+  v_first := (storage.foldername(object_name))[1];
+  if v_first is null or v_first !~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then
     return false;
-  end;
+  end if;
+  v_event_id := v_first::uuid;
 
   -- Admins read every event regardless of registration.
   if public.is_admin() then
@@ -113,28 +115,28 @@ create policy avatars_self_read on storage.objects
   for select to authenticated
   using (
     bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and (storage.foldername(name))[1] = (select auth.uid())::text
   );
 
 create policy avatars_self_write on storage.objects
   for insert to authenticated
   with check (
     bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and (storage.foldername(name))[1] = (select auth.uid())::text
   );
 
 create policy avatars_self_update on storage.objects
   for update to authenticated
   using (
     bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and (storage.foldername(name))[1] = (select auth.uid())::text
   );
 
 create policy avatars_self_delete on storage.objects
   for delete to authenticated
   using (
     bucket_id = 'avatars'
-    and (storage.foldername(name))[1] = auth.uid()::text
+    and (storage.foldername(name))[1] = (select auth.uid())::text
   );
 
 
@@ -241,7 +243,7 @@ create policy community_media_self_write on storage.objects
       (storage.foldername(name))[2] = 'chats'
       or (
         (storage.foldername(name))[2] = 'gallery'
-        and (storage.foldername(name))[3] = auth.uid()::text
+        and (storage.foldername(name))[3] = (select auth.uid())::text
       )
     )
   );
@@ -253,7 +255,7 @@ create policy community_media_self_update on storage.objects
     and public.storage_caller_can_read_event(name)
     and (
       (storage.foldername(name))[2] = 'chats'
-      or (storage.foldername(name))[3] = auth.uid()::text
+      or (storage.foldername(name))[3] = (select auth.uid())::text
     )
   );
 
@@ -267,7 +269,7 @@ create policy community_media_self_delete on storage.objects
       or (
         public.storage_caller_can_read_event(name)
         and (storage.foldername(name))[2] = 'gallery'
-        and (storage.foldername(name))[3] = auth.uid()::text
+        and (storage.foldername(name))[3] = (select auth.uid())::text
       )
     )
   );

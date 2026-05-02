@@ -18,6 +18,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { eventFeedFolder } from '@/lib/storagePaths';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -379,8 +381,8 @@ function FeedDialogInner({
             </div>
             <div className="md:col-span-2">
               <StorageImageUploader
-                bucket="event-content"
-                folder={eventId ? `${eventId}/feed` : ''}
+                bucket={STORAGE_BUCKETS.eventContent}
+                folder={eventId ? eventFeedFolder(eventId) : ''}
                 value={state.image_path}
                 onChange={(p) => setState({ ...state, image_path: p })}
                 label={t('admin.feed.fields.image')}

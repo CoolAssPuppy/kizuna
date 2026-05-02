@@ -20,7 +20,10 @@ import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { communityChatPath } from '@/lib/storagePaths';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useStorageImage } from '@/lib/useStorageImage';
 
 import { MarkdownText } from './MarkdownText';
 import {
@@ -35,7 +38,7 @@ import { groupMessagesForBubbles } from './bubbles';
 import { messageTimeLabel } from './timeLabel';
 import { useTypingPresence } from './useTypingPresence';
 
-const COMMUNITY_MEDIA_BUCKET = 'community-media';
+const COMMUNITY_MEDIA_BUCKET = STORAGE_BUCKETS.communityMedia;
 
 function senderLabel(m: MessageWithSender): string {
   if (!m.sender) return '';
@@ -149,10 +152,13 @@ export function ChannelScreen(): JSX.Element {
       return;
     }
     const ext = file.name.split('.').pop() ?? 'png';
-    // Object-name shape locked by 95_storage.sql:
-    //   <event_id>/chats/<channel_slug>/<message_id>/<filename>
     const messageId = crypto.randomUUID();
-    const path = `${activeEvent.id}/chats/${slug}/${messageId}/${messageId}.${ext}`;
+    const path = communityChatPath({
+      eventId: activeEvent.id,
+      channelSlug: slug,
+      messageId,
+      ext,
+    });
     const { error } = await getSupabaseClient()
       .storage.from(COMMUNITY_MEDIA_BUCKET)
       .upload(path, file, { upsert: false });
@@ -348,16 +354,7 @@ export function ChannelScreen(): JSX.Element {
 }
 
 function ChannelImage({ path }: { path: string }): JSX.Element | null {
-  const { data: src = null } = useQuery({
-    queryKey: ['community', 'media-signed-url', path],
-    staleTime: 30 * 60_000,
-    queryFn: async () => {
-      const { data } = await getSupabaseClient()
-        .storage.from(COMMUNITY_MEDIA_BUCKET)
-        .createSignedUrl(path, 60 * 60);
-      return data?.signedUrl ?? null;
-    },
-  });
+  const src = useStorageImage(COMMUNITY_MEDIA_BUCKET, path);
   if (!src) return null;
   return <img src={src} alt="" className="mb-2 max-h-72 w-full rounded-lg object-cover" />;
 }

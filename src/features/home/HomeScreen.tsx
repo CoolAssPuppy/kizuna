@@ -9,6 +9,7 @@ import { EventCountdown } from '@/features/events/EventCountdown';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
 import { mediumDateFormatter } from '@/lib/formatters';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
@@ -98,7 +99,7 @@ export function HomeScreen(): JSX.Element {
 }
 
 function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
-  const imageUrl = useStorageImage('event-content', item.image_path);
+  const imageUrl = useStorageImage(STORAGE_BUCKETS.eventContent, item.image_path);
   const body = (
     <article className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent">
       {imageUrl ? (
@@ -119,7 +120,7 @@ function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
 }
 
 function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
-  const imageUrl = useStorageImage('event-content', item.image_path);
+  const imageUrl = useStorageImage(STORAGE_BUCKETS.eventContent, item.image_path);
   return (
     <CardShell title={item.title} {...(item.subtitle ? { description: item.subtitle } : {})}>
       {imageUrl ? (
