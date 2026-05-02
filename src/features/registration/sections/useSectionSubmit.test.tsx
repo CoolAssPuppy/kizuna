@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, type QueryKey } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nextProvider } from 'react-i18next';
@@ -19,13 +19,15 @@ import { useSectionSubmit } from './useSectionSubmit';
 
 interface HarnessProps {
   save: () => Promise<void>;
+  invalidateQueryKeys?: ReadonlyArray<QueryKey>;
 }
 
-function Harness({ save }: HarnessProps): JSX.Element {
+function Harness({ save, invalidateQueryKeys }: HarnessProps): JSX.Element {
   const { submit } = useSectionSubmit({
     mode: { kind: 'profile' },
     taskKey: null,
     toastSuccessKey: 'profile.toast.personalInfoSaved',
+    ...(invalidateQueryKeys ? { invalidateQueryKeys } : {}),
   });
   return (
     <button type="button" onClick={() => void submit(save)}>
@@ -34,19 +36,20 @@ function Harness({ save }: HarnessProps): JSX.Element {
   );
 }
 
-function renderHarness(save: () => Promise<void>) {
+function renderHarness(save: () => Promise<void>, invalidateQueryKeys?: ReadonlyArray<QueryKey>) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 }, mutations: { retry: false } },
   });
-  return render(
+  const utils = render(
     <QueryClientProvider client={client}>
       <I18nextProvider i18n={i18n}>
         <ToastProvider>
-          <Harness save={save} />
+          <Harness save={save} {...(invalidateQueryKeys ? { invalidateQueryKeys } : {})} />
         </ToastProvider>
       </I18nextProvider>
     </QueryClientProvider>,
   );
+  return { ...utils, client };
 }
 
 describe('useSectionSubmit', () => {
@@ -72,5 +75,22 @@ describe('useSectionSubmit', () => {
     expect(await screen.findByText('Something went wrong. Please try again.')).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalled();
     consoleError.mockRestore();
+  });
+
+  // Pins the prod regression where saved data appeared lost: the profile
+  // sections cache 30s by default, and without invalidation the next
+  // mount re-hydrates the form from stale data. Anything that takes
+  // invalidateQueryKeys must reach into the QueryClient on success.
+  it('invalidates the supplied query keys after a successful save', async () => {
+    const save = vi.fn(() => Promise.resolve());
+    const { client } = renderHarness(save, [['personal-info', 'user-1']]);
+    const spy = vi.spyOn(client, 'invalidateQueries');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(save).toHaveBeenCalledTimes(1);
+    });
+    expect(spy).toHaveBeenCalledWith({ queryKey: ['personal-info', 'user-1'] });
   });
 });

@@ -1,3 +1,5 @@
+import { utcIsoToZonedDateTimeLocal } from '@/lib/timezone';
+
 import type { SessionAudience, SessionRow, SessionType } from './api/sessions';
 
 export interface SessionDraft {
@@ -6,6 +8,7 @@ export interface SessionDraft {
   subtitle: string;
   type: SessionType;
   audience: SessionAudience;
+  /** Wall-clock "YYYY-MM-DDTHH:mm" in the event's timezone. */
   starts_at: string;
   ends_at: string;
   location: string;
@@ -29,20 +32,20 @@ const EMPTY_DRAFT: SessionDraft = {
   speaker_email: '',
 };
 
-function fromIso(value: string | null): string {
+function fromIso(value: string | null, timeZone: string): string {
   if (!value) return '';
-  return new Date(value).toISOString().slice(0, 16);
+  return utcIsoToZonedDateTimeLocal(value, timeZone);
 }
 
-export function rowToDraft(row: SessionRow): SessionDraft {
+export function rowToDraft(row: SessionRow, timeZone: string): SessionDraft {
   return {
     id: row.id,
     title: row.title,
     subtitle: row.subtitle ?? '',
     type: row.type,
     audience: row.audience,
-    starts_at: fromIso(row.starts_at),
-    ends_at: fromIso(row.ends_at),
+    starts_at: fromIso(row.starts_at, timeZone),
+    ends_at: fromIso(row.ends_at, timeZone),
     location: row.location ?? '',
     capacity: row.capacity != null ? String(row.capacity) : '',
     is_mandatory: row.is_mandatory,

@@ -106,6 +106,7 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'swag',
     toastSuccessKey: 'profile.toast.swagSaved',
+    invalidateQueryKeys: [['swag-sizes', user?.id ?? null]],
   });
 
   function handleSubmit(): void {

@@ -496,8 +496,12 @@
     "subtitle": "Live operational data.",
     "comingSoon": "Coming soon. This section is under construction.",
     "loading": "Loading",
+    "about": {
+      "noEvent": "No active event yet. Create one from All events to edit its metadata here."
+    },
     "nav": {
       "label": "Admin sections",
+      "about": "About",
       "agenda": "Agenda",
       "groundTransport": "Ground Transport Tool",
       "roomAssignment": "Room Assignment Tool",
@@ -656,6 +660,7 @@
         "audience": "Audience",
         "startsAt": "Starts at",
         "endsAt": "Ends at",
+        "timeZoneHint": "Local time at the event ({{timeZone}}).",
         "location": "Location",
         "capacity": "Capacity",
         "speakerEmail": "Speaker email",

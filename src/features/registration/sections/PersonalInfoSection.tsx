@@ -57,6 +57,7 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'personal_info',
     toastSuccessKey: 'profile.toast.personalInfoSaved',
+    invalidateQueryKeys: [['personal-info', user?.id ?? null]],
   });
 
   const legalName = useMemo(

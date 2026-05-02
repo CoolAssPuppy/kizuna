@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useIsAdmin } from '@/features/auth/hooks';
 
+import { AboutScreen } from './AboutScreen';
 import { AdminLayout } from './AdminLayout';
 import { AgendaAdminScreen } from './AgendaAdminScreen';
 import { ConflictsScreen } from './ConflictsScreen';
@@ -33,7 +34,8 @@ export function AdminRoute(): JSX.Element {
   return (
     <Routes>
       <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to="agenda" replace />} />
+        <Route index element={<Navigate to="about" replace />} />
+        <Route path="about" element={<AboutScreen />} />
         <Route path="events" element={<Navigate to="/all-events" replace />} />
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />

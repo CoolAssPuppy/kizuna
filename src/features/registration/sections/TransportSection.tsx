@@ -49,6 +49,7 @@ export function TransportSection({ mode }: SectionProps): JSX.Element {
     mode,
     taskKey: 'transport',
     toastSuccessKey: 'profile.toast.transportSaved',
+    invalidateQueryKeys: [['attendee_profile', 'ground_transport_need', subject.userId]],
   });
 
   function handleSubmit(): void {

@@ -36,6 +36,8 @@ const AUDIENCES: ReadonlyArray<SessionAudience> = [
 
 interface SessionDialogProps {
   draft: SessionDraft | null;
+  /** IANA tz of the event. Both inputs are interpreted as wall-clock here. */
+  timeZone: string;
   onClose: () => void;
   onSave: (draft: SessionDraft) => void;
   saving: boolean;
@@ -47,7 +49,13 @@ export function SessionDialog(props: SessionDialogProps): JSX.Element {
   return <SessionDialogInner key={key} {...props} />;
 }
 
-function SessionDialogInner({ draft, onClose, onSave, saving }: SessionDialogProps): JSX.Element {
+function SessionDialogInner({
+  draft,
+  timeZone,
+  onClose,
+  onSave,
+  saving,
+}: SessionDialogProps): JSX.Element {
   const { t } = useTranslation();
   const open = draft !== null;
   const [state, setState] = useState<SessionDraft>(draft ?? emptySessionDraft());
@@ -138,6 +146,9 @@ function SessionDialogInner({ draft, onClose, onSave, saving }: SessionDialogPro
                 value={state.starts_at}
                 onChange={(e) => setState({ ...state, starts_at: e.target.value })}
               />
+              <p className="text-xs text-muted-foreground">
+                {t('admin.agenda.fields.timeZoneHint', { timeZone })}
+              </p>
             </div>
 
             <div className="space-y-1.5">
@@ -149,6 +160,9 @@ function SessionDialogInner({ draft, onClose, onSave, saving }: SessionDialogPro
                 value={state.ends_at}
                 onChange={(e) => setState({ ...state, ends_at: e.target.value })}
               />
+              <p className="text-xs text-muted-foreground">
+                {t('admin.agenda.fields.timeZoneHint', { timeZone })}
+              </p>
             </div>
 
             <div className="space-y-1.5">

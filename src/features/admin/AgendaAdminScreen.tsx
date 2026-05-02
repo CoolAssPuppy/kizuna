@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
+import { zonedDateTimeLocalToUtcIso } from '@/lib/timezone';
 import { cn } from '@/lib/utils';
 
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
@@ -23,10 +24,6 @@ import {
 import { downloadCsv } from './csv';
 import { SessionDialog } from './SessionDialog';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from './sessionDraft';
-
-function toIso(value: string): string {
-  return new Date(value).toISOString();
-}
 
 interface DayBucket {
   iso: string;
@@ -107,8 +104,8 @@ export function AgendaAdminScreen(): JSX.Element {
         subtitle: draft.subtitle.trim() || null,
         type: draft.type,
         audience: draft.audience,
-        starts_at: toIso(draft.starts_at),
-        ends_at: toIso(draft.ends_at),
+        starts_at: zonedDateTimeLocalToUtcIso(draft.starts_at, timeZone),
+        ends_at: zonedDateTimeLocalToUtcIso(draft.ends_at, timeZone),
         location: draft.location.trim() || null,
         capacity: Number.isFinite(capacity ?? NaN) ? capacity : null,
         is_mandatory: draft.is_mandatory,
@@ -247,7 +244,7 @@ export function AgendaAdminScreen(): JSX.Element {
                 key={s.id}
                 session={s}
                 isPast={new Date(s.ends_at).getTime() < Date.now()}
-                onEdit={() => setEditing(rowToDraft(s))}
+                onEdit={() => setEditing(rowToDraft(s, timeZone))}
                 onDelete={() => {
                   if (confirm(t('admin.agenda.deleteConfirm'))) remove.mutate(s.id);
                 }}
@@ -263,6 +260,7 @@ export function AgendaAdminScreen(): JSX.Element {
 
       <SessionDialog
         draft={editing}
+        timeZone={timeZone}
         onClose={() => setEditing(null)}
         onSave={(d) => save.mutate(d)}
         saving={save.isPending}
