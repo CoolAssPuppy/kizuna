@@ -5,7 +5,10 @@ import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { parseItineraryWithOpenAI } from '../_shared/itineraryParser.ts';
 import { getUserClient } from '../_shared/supabaseClient.ts';
 
-declare const Deno: { serve: (handler: (req: Request) => Response | Promise<Response>) => void };
+declare const Deno: {
+  env: { get: (k: string) => string | undefined };
+  serve: (handler: (req: Request) => Response | Promise<Response>) => void;
+};
 
 const MAX_BODY_BYTES = 32 * 1024;
 
@@ -19,12 +22,21 @@ Deno.serve(async (req: Request) => {
 
   const authHeader = req.headers.get('Authorization');
   if (!authHeader) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
+    console.error('[parse-itinerary] no Authorization header');
+    return jsonResponse({ error: 'unauthorized: missing Authorization header' }, { status: 401 });
   }
   const userClient = getUserClient(authHeader);
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData.user) {
-    return jsonResponse({ error: 'unauthorized' }, { status: 401 });
+    console.error('[parse-itinerary] getUser failed', {
+      message: userError?.message,
+      status: userError?.status,
+      supabaseUrl: Deno.env.get('SUPABASE_URL') ?? Deno.env.get('VITE_SUPABASE_URL') ?? '(unset)',
+    });
+    return jsonResponse(
+      { error: `unauthorized: ${userError?.message ?? 'getUser returned no user'}` },
+      { status: 401 },
+    );
   }
 
   const contentLength = Number(req.headers.get('Content-Length') ?? '0');
