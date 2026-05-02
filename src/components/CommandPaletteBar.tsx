@@ -19,7 +19,7 @@ export function CommandPaletteBar(): JSX.Element {
       <span className="text-xs" style={{ color: 'var(--c-muted)' }}>
         {t('terminal.palettePlaceholder')}
       </span>
-      <span className="ml-auto terminal-cursor" />
+      <span className="terminal-cursor ml-auto" />
     </div>
   );
 }

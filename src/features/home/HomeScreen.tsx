@@ -45,7 +45,11 @@ function diffToCountdown(target: Date): Countdown {
   };
 }
 
-function eventSlug(name: string | null | undefined, location: string | null | undefined, startDate: string | null | undefined): string {
+function eventSlug(
+  name: string | null | undefined,
+  location: string | null | undefined,
+  startDate: string | null | undefined,
+): string {
   const base = (location ?? name ?? 'event').toLowerCase().trim();
   const slug = base.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
   const year = startDate ? new Date(startDate).getUTCFullYear() : new Date().getUTCFullYear();
@@ -53,7 +57,11 @@ function eventSlug(name: string | null | undefined, location: string | null | un
 }
 
 function snakeFile(value: string): string {
-  return value.toLowerCase().trim().replace(/[^a-z0-9.]+/g, '_').replace(/^_+|_+$/g, '');
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9.]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
 
 export function HomeScreen(): JSX.Element {
@@ -81,7 +89,7 @@ export function HomeScreen(): JSX.Element {
   });
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pt-10 pb-12 sm:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-8">
       <Hero
         preferredName={preferredName}
         summary={summary}
@@ -152,7 +160,7 @@ function Hero({
           <span style={{ color: 'var(--c-fg)' }}>&gt; {t('home.terminal.greeting')},</span>
           <br />
           {preferredName ?? t('home.terminal.fallbackName')}
-          <span className="terminal-cursor align-baseline ml-1" />
+          <span className="terminal-cursor ml-1 align-baseline" />
         </h1>
         <p className="max-w-xl text-sm" style={{ color: 'var(--c-muted)', lineHeight: 1.6 }}>
           {summary}
@@ -180,15 +188,8 @@ interface EventEtaPanelProps {
   eventName: string | null;
 }
 
-function EventEtaPanel({
-  slug,
-  startDate,
-  timeZone,
-  eventName,
-}: EventEtaPanelProps): JSX.Element {
-  const [countdown, setCountdown] = useState<Countdown>(() =>
-    diffToCountdown(new Date(startDate)),
-  );
+function EventEtaPanel({ slug, startDate, timeZone, eventName }: EventEtaPanelProps): JSX.Element {
+  const [countdown, setCountdown] = useState<Countdown>(() => diffToCountdown(new Date(startDate)));
 
   useMountEffect(() => {
     const target = new Date(startDate);
@@ -362,10 +363,7 @@ function FeedQueueRow({ item, index }: { item: FeedItem; index: number }): JSX.E
         {KIND_LABELS[item.kind]}
       </span>
       <div className="flex flex-col gap-1.5">
-        <span
-          className="text-base font-medium"
-          style={{ color: 'var(--c-fg)' }}
-        >
+        <span className="text-base font-medium" style={{ color: 'var(--c-fg)' }}>
           {snakeFile(item.title)}
         </span>
         <span className="text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>

@@ -83,7 +83,8 @@ export function RegistrationChecklist(): JSX.Element | null {
       <ul className="space-y-1.5">
         {tasks.map((task) => {
           const isDone = task.status === 'complete' || task.status === 'waived';
-          const labelKey = TASK_LABEL_KEYS[task.task_key] ?? `profile.checklist.tasks.${task.task_key}`;
+          const labelKey =
+            TASK_LABEL_KEYS[task.task_key] ?? `profile.checklist.tasks.${task.task_key}`;
           const targetSection = TASK_TO_PROFILE_SECTION[task.task_key];
           const label = t(labelKey, { defaultValue: task.task_key.replace(/_/g, ' ') });
           const inner = (
@@ -95,9 +96,17 @@ export function RegistrationChecklist(): JSX.Element | null {
               }}
             >
               {isDone ? (
-                <Check aria-hidden className="h-3 w-3 shrink-0" style={{ color: 'var(--c-accent)' }} />
+                <Check
+                  aria-hidden
+                  className="h-3 w-3 shrink-0"
+                  style={{ color: 'var(--c-accent)' }}
+                />
               ) : (
-                <ChevronRight aria-hidden className="h-3 w-3 shrink-0" style={{ color: 'var(--c-muted)' }} />
+                <ChevronRight
+                  aria-hidden
+                  className="h-3 w-3 shrink-0"
+                  style={{ color: 'var(--c-muted)' }}
+                />
               )}
               <span className="truncate">{label}</span>
             </span>
@@ -105,10 +114,7 @@ export function RegistrationChecklist(): JSX.Element | null {
           if (!isDone && targetSection) {
             return (
               <li key={task.task_key}>
-                <Link
-                  to={`/profile/${targetSection}`}
-                  className="block py-0.5 hover:opacity-80"
-                >
+                <Link to={`/profile/${targetSection}`} className="block py-0.5 hover:opacity-80">
                   {inner}
                 </Link>
               </li>

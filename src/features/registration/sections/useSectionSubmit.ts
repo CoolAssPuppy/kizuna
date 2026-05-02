@@ -67,10 +67,9 @@ export function useSectionSubmit({
         // call a SECURITY DEFINER helper that resolves the active
         // registration for the caller.
         try {
-          const { error } = await getSupabaseClient().rpc(
-            'mark_my_registration_task_complete',
-            { p_task_key: taskKey },
-          );
+          const { error } = await getSupabaseClient().rpc('mark_my_registration_task_complete', {
+            p_task_key: taskKey,
+          });
           if (error) throw error;
         } catch (err) {
           console.error('[kizuna] markTaskComplete (profile) failed', err);

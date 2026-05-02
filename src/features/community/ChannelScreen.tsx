@@ -196,10 +196,7 @@ export function ChannelScreen(): JSX.Element {
           </Link>
         </Button>
         <div className="flex flex-1 flex-col gap-1.5">
-          <h1
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: 'var(--c-fg)' }}
-          >
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: 'var(--c-fg)' }}>
             #{channelQ.data?.name ?? slug}
           </h1>
           {channelQ.data?.description ? (

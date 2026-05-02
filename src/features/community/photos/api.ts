@@ -251,10 +251,7 @@ export async function loadProfileActivity(
   return ((data ?? []) as unknown as RawPhotoRow[]).map(rawToRecord);
 }
 
-export async function softDeletePhoto(
-  client: AppSupabaseClient,
-  photoId: string,
-): Promise<void> {
+export async function softDeletePhoto(client: AppSupabaseClient, photoId: string): Promise<void> {
   const { error } = await client.rpc('soft_delete_event_photo', { p_photo_id: photoId });
   if (error) throw error;
 }
@@ -275,7 +272,8 @@ export async function uploadPhoto(
   client: AppSupabaseClient,
   args: UploadPhotoArgs,
 ): Promise<PhotoRecord> {
-  const { eventId, uploaderId, original, preview, thumb, width, height, caption, taggedUserIds } = args;
+  const { eventId, uploaderId, original, preview, thumb, width, height, caption, taggedUserIds } =
+    args;
 
   const ext = (original.name.split('.').pop() ?? 'jpg').toLowerCase();
   // Insert metadata first so we know the photo id; then write storage paths.
@@ -385,7 +383,10 @@ export async function searchAttendees(
   return matched;
 }
 
-export function photoStorageUrls(prefix: string, originalExt: string): {
+export function photoStorageUrls(
+  prefix: string,
+  originalExt: string,
+): {
   originalPath: string;
   previewPath: string;
   thumbPath: string;

@@ -87,7 +87,11 @@ export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): J
         <div className="relative grid grid-cols-1 gap-0 lg:grid-cols-[1fr_320px]">
           <div className="relative flex min-h-[50vh] items-center justify-center">
             {url ? (
-              <img src={url} alt={photo.caption ?? ''} className="max-h-[80vh] w-auto max-w-full object-contain" />
+              <img
+                src={url}
+                alt={photo.caption ?? ''}
+                className="max-h-[80vh] w-auto max-w-full object-contain"
+              />
             ) : null}
             {index > 0 ? (
               <button
@@ -129,7 +133,10 @@ export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): J
                 >
                   <Avatar
                     url={photo.uploader.avatar_url}
-                    fallback={`${photo.uploader.first_name?.charAt(0) ?? ''}${photo.uploader.last_name?.charAt(0) ?? ''}` || '?'}
+                    fallback={
+                      `${photo.uploader.first_name?.charAt(0) ?? ''}${photo.uploader.last_name?.charAt(0) ?? ''}` ||
+                      '?'
+                    }
                     size={32}
                   />
                   <div>
@@ -174,10 +181,7 @@ export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): J
             {photo.hashtags.length > 0 ? (
               <ul className="flex flex-wrap gap-2">
                 {photo.hashtags.map((tag) => (
-                  <li
-                    key={tag}
-                    className="rounded-full border border-white/20 px-2 py-0.5 text-xs"
-                  >
+                  <li key={tag} className="rounded-full border border-white/20 px-2 py-0.5 text-xs">
                     #{tag}
                   </li>
                 ))}
@@ -199,11 +203,15 @@ export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): J
                       >
                         <Avatar
                           url={person.avatar_url}
-                          fallback={`${person.first_name?.charAt(0) ?? ''}${person.last_name?.charAt(0) ?? ''}` || '?'}
+                          fallback={
+                            `${person.first_name?.charAt(0) ?? ''}${person.last_name?.charAt(0) ?? ''}` ||
+                            '?'
+                          }
                           size={24}
                         />
                         <span>
-                          {[person.first_name, person.last_name].filter(Boolean).join(' ') || person.email}
+                          {[person.first_name, person.last_name].filter(Boolean).join(' ') ||
+                            person.email}
                         </span>
                       </Link>
                     </li>

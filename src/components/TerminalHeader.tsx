@@ -25,10 +25,7 @@ export function TerminalHeader(): JSX.Element {
       style={{ backgroundColor: 'var(--c-bg)', borderColor: 'var(--c-rule)' }}
     >
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-8">
-        <Link
-          to="/"
-          className="flex items-center gap-2.5 whitespace-nowrap text-[13px]"
-        >
+        <Link to="/" className="flex items-center gap-2.5 whitespace-nowrap text-[13px]">
           <span
             aria-hidden
             className="flex h-7 w-7 items-center justify-center"

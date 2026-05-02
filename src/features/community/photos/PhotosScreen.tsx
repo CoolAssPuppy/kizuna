@@ -60,7 +60,7 @@ export function PhotosScreen(): JSX.Element {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-8">
-      <Button asChild variant="ghost" size="sm" className="mb-6 -ml-3">
+      <Button asChild variant="ghost" size="sm" className="-ml-3 mb-6">
         <Link to="/community" className="inline-flex items-center gap-2">
           <ArrowLeft aria-hidden className="h-4 w-4" />
           {t('photos.screen.back')}
@@ -83,7 +83,10 @@ export function PhotosScreen(): JSX.Element {
         </Button>
       </header>
 
-      <div className="sticky top-0 z-10 mb-6 -mx-4 px-4 py-3 sm:-mx-8 sm:px-8" style={{ backgroundColor: 'var(--c-bg)' }}>
+      <div
+        className="sticky top-0 z-10 -mx-4 mb-6 px-4 py-3 sm:-mx-8 sm:px-8"
+        style={{ backgroundColor: 'var(--c-bg)' }}
+      >
         <div className="relative">
           <Search
             aria-hidden
@@ -116,7 +119,11 @@ export function PhotosScreen(): JSX.Element {
       )}
 
       {eventId ? (
-        <PhotoUploadDialog open={uploadOpen} onClose={() => setUploadOpen(false)} eventId={eventId} />
+        <PhotoUploadDialog
+          open={uploadOpen}
+          onClose={() => setUploadOpen(false)}
+          eventId={eventId}
+        />
       ) : null}
       <PhotoLightbox
         photos={photos}
