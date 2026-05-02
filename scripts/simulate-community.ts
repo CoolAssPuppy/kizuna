@@ -17,9 +17,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '../src/types/database.types';
 
-const SUPABASE_URL = process.env.SUPABASE_URL ?? 'http://127.0.0.1:54321';
+const SUPABASE_URL = process.env['VITE_SUPABASE_URL'] ?? 'http://127.0.0.1:54321';
 const SUPABASE_PUBLISHABLE_KEY =
-  process.env.SUPABASE_PUBLISHABLE_KEY
+  process.env['VITE_SUPABASE_PUBLISHABLE_KEY']
   ?? 'sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH';
 const PASSWORD = 'kizuna-dev-only';
 const ROUNDS = Number(process.env.ROUNDS ?? '8');

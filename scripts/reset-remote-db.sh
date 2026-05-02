@@ -11,9 +11,12 @@
 #   ./scripts/reset-remote-db.sh prd --yes    # skip the confirm prompt
 #
 # Prerequisites in the chosen Doppler config:
-#   * SUPABASE_URL                — https://<ref>.supabase.co
-#   * SUPABASE_DB_PASSWORD        — Postgres password (Settings -> Database)
-#   * (optional) SUPABASE_DB_REGION — defaults to us-east-1
+#   * VITE_SUPABASE_URL          — https://<ref>.supabase.co
+#   * SB_DB_PASSWORD             — Postgres password (Settings -> Database)
+#   * (optional) SB_DB_REGION    — defaults to us-east-1
+#
+# Doppler reserves the SUPABASE_ prefix for its Supabase sync, so we
+# use SB_ for the secrets we own.
 #
 # The script DROPs schema public, so it is destructive. The
 # `--yes` flag is provided for CI ergonomics; do not script it
@@ -36,13 +39,13 @@ fi
 
 DOPPLER=(doppler --project kizuna --config "$CONFIG")
 
-SUPABASE_URL=$("${DOPPLER[@]}" secrets get SUPABASE_URL --plain)
-DB_PASSWORD=$("${DOPPLER[@]}" secrets get SUPABASE_DB_PASSWORD --plain 2>/dev/null || true)
-DB_REGION=$("${DOPPLER[@]}" secrets get SUPABASE_DB_REGION --plain 2>/dev/null || echo "us-east-1")
+SUPABASE_URL=$("${DOPPLER[@]}" secrets get VITE_SUPABASE_URL --plain)
+DB_PASSWORD=$("${DOPPLER[@]}" secrets get SB_DB_PASSWORD --plain 2>/dev/null || true)
+DB_REGION=$("${DOPPLER[@]}" secrets get SB_DB_REGION --plain 2>/dev/null || echo "us-east-1")
 
 if [[ -z "$DB_PASSWORD" ]]; then
-  echo "SUPABASE_DB_PASSWORD missing in doppler $CONFIG. Add it first:" >&2
-  echo "  doppler secrets set --project kizuna --config $CONFIG SUPABASE_DB_PASSWORD '<your-postgres-password>'" >&2
+  echo "SB_DB_PASSWORD missing in doppler $CONFIG. Add it first:" >&2
+  echo "  doppler secrets set --project kizuna --config $CONFIG SB_DB_PASSWORD '<your-postgres-password>'" >&2
   echo "Find the password in Supabase dashboard > Settings > Database." >&2
   exit 78
 fi

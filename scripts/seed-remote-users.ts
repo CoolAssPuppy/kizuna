@@ -16,8 +16,11 @@
  *   tsx scripts/seed-remote-users.ts prd
  *
  * Requires (in the chosen Doppler config):
- *   SUPABASE_URL
- *   SUPABASE_SECRET_KEY  (the project's service-role key)
+ *   VITE_SUPABASE_URL
+ *   SB_SECRET_KEY  (the project's service-role key)
+ *
+ * Doppler reserves the SUPABASE_ prefix for its native sync target,
+ * so we use SB_ for the secrets we own.
  *
  * Idempotent: if a user already exists, we update their password and
  * confirm their email instead of failing. Delete this script before
@@ -50,8 +53,8 @@ function dopplerSecret(name: string): string {
   }
 }
 
-const supabaseUrl = dopplerSecret('SUPABASE_URL');
-const serviceKey = dopplerSecret('SUPABASE_SECRET_KEY');
+const supabaseUrl = dopplerSecret('VITE_SUPABASE_URL');
+const serviceKey = dopplerSecret('SB_SECRET_KEY');
 
 const admin = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
