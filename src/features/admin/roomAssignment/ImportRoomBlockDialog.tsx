@@ -215,26 +215,25 @@ export function ImportRoomBlockDialog({
           ) : null}
         </div>
         <DialogFooter className="sm:justify-between">
-          {/* Dev-only "TEST ROOM BLOCK" filler so admins can demo the tool
-              without typing 60 rooms by hand. Gated on import.meta.env.DEV
-              so the button never ships to production. */}
-          {import.meta.env.DEV ? (
-            <Button
-              type="button"
-              variant="outline"
-              className="border-purple-500 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
-              onClick={() => {
-                setCsvText(buildTestRoomBlockCsv());
-                setTab('paste');
-                setErrors([]);
-              }}
-            >
-              <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
-              {t('admin.roomAssignment.testBlock')}
-            </Button>
-          ) : (
-            <span />
-          )}
+          {/* "TEST ROOM BLOCK" filler. Temporarily un-gated for prod
+              demos — re-add `import.meta.env.DEV` before launch. */}
+          <Button
+            type="button"
+            variant="outline"
+            className="-rotate-1 border-2 border-dashed border-purple-500 font-bold uppercase tracking-wide text-purple-700 hover:text-purple-900"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(45deg, rgba(168,85,247,0.18) 0 8px, transparent 8px 16px)',
+            }}
+            onClick={() => {
+              setCsvText(buildTestRoomBlockCsv());
+              setTab('paste');
+              setErrors([]);
+            }}
+          >
+            <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
+            {t('admin.roomAssignment.testBlock')}
+          </Button>
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
