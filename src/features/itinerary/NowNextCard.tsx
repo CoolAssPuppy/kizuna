@@ -1,11 +1,23 @@
 import { CircleDot, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
+import { AirlineLogo } from '@/components/AirlineLogo';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { useTranslation } from 'react-i18next';
 
 import { ITEM_META } from './itemMeta';
 import type { ItineraryItemRow } from './types';
+
+/**
+ * Same parser as ItineraryItemCard. Flight titles are formatted as
+ * "<airline name> <flight number>" by the sync_itinerary_for_flight
+ * trigger, so the airline name is everything before the trailing
+ * whitespace-delimited token.
+ */
+function extractAirlineName(title: string): string | null {
+  const match = title.match(/^(.+?)\s+\S+$/);
+  return match?.[1] ?? null;
+}
 
 interface Props {
   items: ReadonlyArray<ItineraryItemRow>;
@@ -75,14 +87,25 @@ export function NowNextCard({ items, now: nowOverride }: Props): JSX.Element | n
     ? t('itinerary.nowNext.endsIn', { gap: formatHumanGap(slot.minutes, t) })
     : t('itinerary.nowNext.startsIn', { gap: formatHumanGap(slot.minutes, t) });
 
-  return (
-    <article className="relative flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm">
+  const airlineName = slot.item.item_type === 'flight' ? extractAirlineName(slot.item.title) : null;
+  const leading =
+    slot.item.item_type === 'flight' && airlineName ? (
+      <AirlineLogo
+        name={airlineName}
+        className="h-12 w-12 shrink-0 rounded-xl bg-card object-contain p-1.5 ring-1 ring-border"
+      />
+    ) : (
       <span
         aria-hidden
         className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${meta.chipClass}`}
       >
         <Icon className="h-6 w-6" />
       </span>
+    );
+
+  return (
+    <article className="relative flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-sm">
+      {leading}
 
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]">
