@@ -11,11 +11,27 @@ import {
 import { timezoneForAirport } from './airportTimezones';
 
 interface MaybeFunctionsHttpError {
-  context?: { status?: number };
+  context?: { status?: number; body?: unknown };
 }
 
 function isNotDeployed(error: unknown): boolean {
   return (error as MaybeFunctionsHttpError | null)?.context?.status === 404;
+}
+
+/**
+ * Pulls the function's JSON body out of the FunctionsHttpError so the
+ * dialog can render the underlying reason ("unauthorized",
+ * "OPENAI_API_KEY missing", etc.) instead of the generic
+ * "Edge Function returned a non-2xx status code".
+ */
+async function describeFunctionError(error: unknown): Promise<Error> {
+  const ctx = (error as { context?: Response | { status?: number } } | null)?.context;
+  if (ctx instanceof Response) {
+    const text = await ctx.clone().text().catch(() => '');
+    return new Error(`${ctx.status}: ${text || ctx.statusText}`);
+  }
+  if (error instanceof Error) return error;
+  return new Error(String(error));
 }
 
 /**
@@ -35,7 +51,7 @@ export async function parseItineraryViaEdge(text: string): Promise<ParsedItinera
 
   if (response.error) {
     if (isNotDeployed(response.error)) return { ...EMPTY_PARSED_ITINERARY };
-    throw response.error;
+    throw await describeFunctionError(response.error);
   }
 
   const data: ParsedItinerary | null = response.data;
