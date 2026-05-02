@@ -1540,54 +1540,6 @@ export type Database = {
           },
         ]
       }
-      report_snapshots: {
-        Row: {
-          event_id: string
-          generated_at: string
-          generated_by: string | null
-          id: string
-          notes: string | null
-          report_type: Database["public"]["Enums"]["report_type"]
-          share_expires_at: string | null
-          share_token: string | null
-        }
-        Insert: {
-          event_id: string
-          generated_at?: string
-          generated_by?: string | null
-          id?: string
-          notes?: string | null
-          report_type: Database["public"]["Enums"]["report_type"]
-          share_expires_at?: string | null
-          share_token?: string | null
-        }
-        Update: {
-          event_id?: string
-          generated_at?: string
-          generated_by?: string | null
-          id?: string
-          notes?: string | null
-          report_type?: Database["public"]["Enums"]["report_type"]
-          share_expires_at?: string | null
-          share_token?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "report_snapshots_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "report_snapshots_generated_by_fkey"
-            columns: ["generated_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       session_favorites: {
         Row: {
           favorited_at: string
@@ -2097,13 +2049,6 @@ export type Database = {
         | "documents"
         | "flight"
       registration_task_status: "pending" | "complete" | "skipped" | "waived"
-      report_type:
-        | "rooming_list"
-        | "transport_manifest"
-        | "dietary_summary"
-        | "swag_order"
-        | "full_registration"
-        | "payment_reconciliation"
       session_audience: "all" | "employees_only" | "guests_only" | "opt_in"
       session_registration_status:
         | "registered"
@@ -2317,14 +2262,6 @@ export const Constants = {
         "flight",
       ],
       registration_task_status: ["pending", "complete", "skipped", "waived"],
-      report_type: [
-        "rooming_list",
-        "transport_manifest",
-        "dietary_summary",
-        "swag_order",
-        "full_registration",
-        "payment_reconciliation",
-      ],
       session_audience: ["all", "employees_only", "guests_only", "opt_in"],
       session_registration_status: [
         "registered",
