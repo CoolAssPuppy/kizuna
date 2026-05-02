@@ -34,7 +34,14 @@ export function HomeScreen(): JSX.Element {
       <Greeting />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <section className="space-y-4 lg:col-span-3">
+        {/* Priority block — first on mobile, top-right on desktop. */}
+        <aside className="order-1 space-y-4 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-start-1">
+          {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
+          {event ? <CheckinAccessCard eventId={event.id} /> : null}
+        </aside>
+
+        {/* Feed — second on mobile, left column on desktop spanning both rows. */}
+        <section className="order-2 space-y-4 lg:order-none lg:col-span-3 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           {editorial.main.length > 0 ? (
             <ul className="space-y-3">
               {editorial.main.map((item) => (
@@ -58,9 +65,8 @@ export function HomeScreen(): JSX.Element {
           ) : null}
         </section>
 
-        <aside className="space-y-4 lg:col-span-2">
-          {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
-          {event ? <CheckinAccessCard eventId={event.id} /> : null}
+        {/* Everything else — last on mobile, below the priority block on desktop. */}
+        <aside className="order-3 space-y-4 lg:order-none lg:col-span-2 lg:col-start-4 lg:row-start-2">
           <TeammateIcebreaker />
           {event ? <JetLagFighter eventTimeZone={event.time_zone} /> : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>
