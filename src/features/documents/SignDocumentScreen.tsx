@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -23,8 +23,30 @@ export function SignDocumentScreen(): JSX.Element {
   const navigate = useNavigate();
   const { documentId } = useParams<{ documentId: string }>();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { data: event } = useActiveEvent();
   const { show } = useToast();
+
+  const { data: expectedFullName = '' } = useQuery({
+    queryKey: ['document-signature-name', user?.id],
+    enabled: !!user,
+    queryFn: async (): Promise<string> => {
+      if (!user) return '';
+      const { data } = await getSupabaseClient()
+        .from('users')
+        .select(
+          `employee_profiles ( preferred_name, legal_name ), guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )`,
+        )
+        .eq('id', user.id)
+        .maybeSingle();
+
+      const employee = data?.employee_profiles;
+      if (employee?.legal_name) return employee.legal_name.trim();
+      if (employee?.preferred_name) return employee.preferred_name.trim();
+      const guest = data?.guest_profiles;
+      return `${guest?.first_name ?? ''} ${guest?.last_name ?? ''}`.trim();
+    },
+  });
 
   const { data: document = null } = useQuery({
     queryKey: ['document', documentId],
@@ -41,6 +63,7 @@ export function SignDocumentScreen(): JSX.Element {
   });
   const [reachedBottom, setReachedBottom] = useState(false);
   const [fullName, setFullName] = useState('');
+  const [nameMismatch, setNameMismatch] = useState(false);
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -65,6 +88,17 @@ export function SignDocumentScreen(): JSX.Element {
     if (!user || !event || !document) return;
     setBusy(true);
     try {
+      const enteredName = fullName.trim();
+      if (
+        expectedFullName.length > 0 &&
+        enteredName.toLocaleLowerCase() !== expectedFullName.toLocaleLowerCase()
+      ) {
+        setNameMismatch(true);
+        show(t('documents.fullNameMismatch'), 'error');
+        return;
+      }
+      setNameMismatch(false);
+
       await signDocument(getSupabaseClient(), {
         userId: user.id,
         eventId: event.id,
@@ -73,11 +107,12 @@ export function SignDocumentScreen(): JSX.Element {
           document_key: document.document_key,
           version: document.version,
         },
-        fullName: fullName.trim(),
+        fullName: enteredName,
         scrolledToBottom: reachedBottom,
         deviceType: detectDeviceType(navigator.userAgent),
       });
       show(t('documents.signSuccess'));
+      await queryClient.invalidateQueries({ queryKey: ['documents', event.id, user.id] });
       navigate('/documents');
     } catch {
       show(t('documents.signFailure'), 'error');
@@ -134,10 +169,23 @@ export function SignDocumentScreen(): JSX.Element {
           <Input
             id="signature"
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value);
+              if (nameMismatch) setNameMismatch(false);
+            }}
             disabled={!reachedBottom}
-            autoComplete="off"
+            autoComplete="name"
+            placeholder={expectedFullName || undefined}
+            aria-invalid={nameMismatch}
           />
+          {expectedFullName ? (
+            <p className="text-xs text-muted-foreground">
+              {t('documents.fullNamePrompt', { name: expectedFullName })}
+            </p>
+          ) : null}
+          {nameMismatch ? (
+            <p className="text-xs text-destructive">{t('documents.fullNameMismatch')}</p>
+          ) : null}
         </div>
 
         <Button

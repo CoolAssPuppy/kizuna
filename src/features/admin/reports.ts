@@ -119,7 +119,8 @@ export async function fetchDietarySummary(client: AppSupabaseClient): Promise<Di
 
 export interface SwagOrderRow extends CsvRow {
   email: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   attendee_type: 'employee' | 'guest' | 'additional_guest';
   tshirt_size: string | null;
   shoe_size_eu: number | null;
@@ -156,7 +157,8 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
     if (additional) {
       return {
         email: flatJoin<{ email: string }>(additional.sponsor)?.email ?? '',
-        full_name: `${additional.first_name} ${additional.last_name}`.trim(),
+        first_name: additional.first_name,
+        last_name: additional.last_name,
         attendee_type: 'additional_guest' as const,
         tshirt_size: row.tshirt_size,
         shoe_size_eu: row.shoe_size_eu,
@@ -168,10 +170,13 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
     const guestName =
       guest?.first_name && guest?.last_name ? `${guest.first_name} ${guest.last_name}` : null;
     const fullName = employee?.preferred_name ?? employee?.legal_name ?? guestName ?? '';
+    const [firstName = '', ...rest] = fullName.trim().split(/\s+/);
+    const lastName = rest.join(' ');
     const attendeeType: 'employee' | 'guest' = user?.role === 'guest' ? 'guest' : 'employee';
     return {
       email: user?.email ?? '',
-      full_name: fullName,
+      first_name: firstName,
+      last_name: lastName,
       attendee_type: attendeeType,
       tshirt_size: row.tshirt_size,
       shoe_size_eu: row.shoe_size_eu,
@@ -181,7 +186,8 @@ export async function fetchSwagOrder(client: AppSupabaseClient): Promise<SwagOrd
 
 export interface PaymentReconciliationRow extends CsvRow {
   email: string;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   payment_status: string;
   fee_amount: number | null;
   stripe_payment_id: string | null;
@@ -203,7 +209,8 @@ export async function fetchPaymentReconciliation(
 
   return (data ?? []).map((row) => ({
     email: flatJoin<{ email: string }>(row.user)?.email ?? '',
-    full_name: `${row.first_name} ${row.last_name}`.trim(),
+    first_name: row.first_name,
+    last_name: row.last_name,
     payment_status: row.payment_status,
     fee_amount: row.fee_amount,
     stripe_payment_id: row.stripe_payment_id,

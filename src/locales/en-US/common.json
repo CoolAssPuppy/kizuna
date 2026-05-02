@@ -1047,7 +1047,9 @@
       "label": "Notion URL",
       "hint": "Paste a public Notion link. We will display a button that opens it; ingestion ships in a later phase.",
       "open": "Open in Notion"
-    }
+    },
+    "fullNamePrompt": "Type this exact name to sign: {{name}}",
+    "fullNameMismatch": "The signature must match your full legal name exactly."
   },
   "uploader": {
     "dropOrClick": "Drop a file here or click to choose",
