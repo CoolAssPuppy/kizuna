@@ -13,6 +13,7 @@ import { useMountEffect } from '@/hooks/useMountEffect';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { CheckinAccessCard } from './CheckinAccessCard';
+import { HomeMemoriesSection } from './HomeMemoriesSection';
 import { JetLagFighter } from './JetLagFighter';
 import { TeammateIcebreaker } from './TeammateIcebreaker';
 import { useEditorialFeed, type EditorialFeedItem } from './useEditorialFeed';
@@ -106,6 +107,12 @@ export function HomeScreen(): JSX.Element {
           <CommandPaletteBar />
         </aside>
       </div>
+
+      {event ? (
+        <div className="mt-12">
+          <HomeMemoriesSection eventId={event.id} eventName={event.name} />
+        </div>
+      ) : null}
     </main>
   );
 }

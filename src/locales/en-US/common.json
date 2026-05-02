@@ -197,6 +197,9 @@
       "subtitle": "A real fun fact from a fellow attendee. Take a guess, then reveal.",
       "reveal": "Reveal the answer",
       "tryAnother": "Try another"
+    },
+    "memories": {
+      "cta": "Make your own {{event}} memories"
     }
   },
   "welcome": {
