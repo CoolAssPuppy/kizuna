@@ -11,6 +11,7 @@
 create or replace function public.touch_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at := now();
@@ -129,6 +130,7 @@ end $$;
 create or replace function public.update_registration_completion()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_registration_id uuid;
@@ -176,6 +178,7 @@ create trigger update_registration_completion_aiud
 create or replace function public.flag_transport_for_review_on_flight_change()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_material_change boolean;
@@ -217,6 +220,7 @@ create or replace function public.current_active_event_id()
 returns uuid
 language sql
 stable
+set search_path = public
 as $$
   select id from public.events
   where is_active
@@ -228,6 +232,7 @@ $$;
 create or replace function public.sync_itinerary_for_session_registration()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_session public.sessions%rowtype;
@@ -273,6 +278,7 @@ create trigger sync_itinerary_for_session_registration_aiud
 create or replace function public.sync_itinerary_for_session()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_tz text;
@@ -306,6 +312,7 @@ create trigger sync_itinerary_for_session_aud
 create or replace function public.sync_itinerary_for_flight()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_event_id uuid;
@@ -353,6 +360,7 @@ create trigger sync_itinerary_for_flight_aiud
 create or replace function public.sync_itinerary_for_transport_request()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_event_id uuid;
@@ -397,6 +405,7 @@ create trigger sync_itinerary_for_transport_request_aiud
 create or replace function public.sync_itinerary_for_accommodation_occupant()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_acc public.accommodations%rowtype;
@@ -529,6 +538,7 @@ grant execute on function public.get_passport_number(uuid) to authenticated;
 create or replace function public.guard_leadership_change()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.is_leadership is distinct from old.is_leadership
@@ -576,6 +586,7 @@ grant execute on function public.set_user_leadership(uuid, boolean) to authentic
 create or replace function public.touch_message_edited_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   if new.body is distinct from old.body then
@@ -689,6 +700,7 @@ create or replace function public.guest_fee_for_bracket(
 returns numeric
 language sql
 immutable
+set search_path = public
 as $$
   select case p_bracket
     when 'under_12' then 200.00
@@ -697,12 +709,14 @@ as $$
   end
 $$;
 
+revoke all on function public.guest_fee_for_bracket(guest_age_bracket) from public, anon;
 grant execute on function public.guest_fee_for_bracket(guest_age_bracket) to authenticated;
 
 
 create or replace function public.set_guest_fee_amount()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   -- Always overwrite on insert so the SPA cannot under-quote. On update
@@ -778,7 +792,11 @@ create trigger ensure_additional_guest_user_bi
 -- registration logic reads `all_paid` to decide whether a guest can
 -- complete their profile or whether they must wait for the sponsor's
 -- card to clear.
-create or replace view public.sponsor_guest_fee_summary as
+-- security_invoker: the underlying tables' RLS evaluates against the
+-- caller's role, not the view owner's, so the view honours per-row
+-- isolation. (Supabase linter 0010_security_definer_view.)
+create or replace view public.sponsor_guest_fee_summary
+with (security_invoker = true) as
   select
     sponsor_id,
     coalesce(sum(fee_amount), 0)::numeric(10, 2) as total_fee,
@@ -816,6 +834,7 @@ comment on view public.sponsor_guest_fee_summary is
 create or replace function public.guard_guest_profile_completion()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 declare
   v_other_unsettled int;

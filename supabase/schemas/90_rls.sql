@@ -13,6 +13,7 @@ create or replace function public.auth_role()
 returns text
 language sql
 stable
+set search_path = public
 as $$
   select coalesce(
     nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'app_role',
@@ -124,6 +125,7 @@ create or replace function public.channel_has_access(p_uid uuid, p_channel text)
 returns boolean
 language plpgsql
 stable
+set search_path = public
 as $$
 begin
   if p_uid is null then return false; end if;
