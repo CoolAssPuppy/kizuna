@@ -7,6 +7,7 @@ import {
   CalendarRange,
   FileText,
   Newspaper,
+  ScanLine,
   Send,
   Users,
 } from 'lucide-react';
@@ -26,6 +27,7 @@ const SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
   { to: '/admin/ground-transport', icon: Bus, labelKey: 'admin.nav.groundTransport' },
   { to: '/admin/rooms', icon: Bed, labelKey: 'admin.nav.roomAssignment' },
+  { to: '/admin/scan', icon: ScanLine, labelKey: 'admin.nav.scanQr' },
   { to: '/admin/feed', icon: Newspaper, labelKey: 'admin.nav.feed' },
   { to: '/admin/documents', icon: FileText, labelKey: 'admin.nav.documents' },
   { to: '/admin/stats', icon: BarChart3, labelKey: 'admin.nav.stats' },

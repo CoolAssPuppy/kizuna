@@ -12,6 +12,7 @@ import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useStorageImage } from '@/lib/useStorageImage';
 
+import { CheckinAccessCard } from './CheckinAccessCard';
 import { GREETINGS } from './greetings';
 import { JetLagFighter } from './JetLagFighter';
 import { TeammateIcebreaker } from './TeammateIcebreaker';
@@ -59,6 +60,7 @@ export function HomeScreen(): JSX.Element {
 
         <aside className="space-y-4 lg:col-span-2">
           {event ? <EventCountdown startsAt={event.start_date} size="sm" fullWidth /> : null}
+          {event ? <CheckinAccessCard eventId={event.id} /> : null}
           <TeammateIcebreaker />
           {event ? <JetLagFighter eventTimeZone={event.time_zone} /> : null}
           <CardShell title={t('home.factsTitle')} description={t('home.factsSubtitle')}>

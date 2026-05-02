@@ -8,23 +8,11 @@ import { ProfileAvatar } from '@/features/profile/ProfileAvatar';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
+import { buildCheckinUrl } from './checkinUrl';
+
 interface Props {
   eventId: string;
   eventName: string;
-}
-
-/**
- * Builds the QR payload as a deep link the venue scanner (and any
- * iPhone Camera app) can resolve. The user_id UUID alone is enough
- * to uniquely identify the attendee — name and city are display
- * attributes the scanner pulls from the DB once it has the id.
- */
-function buildCheckinUrl(userId: string, eventId: string): string {
-  const origin =
-    typeof window !== 'undefined' && window.location?.origin
-      ? window.location.origin
-      : 'https://kizuna.dev';
-  return `${origin}/check-in?u=${encodeURIComponent(userId)}&e=${encodeURIComponent(eventId)}`;
 }
 
 /**

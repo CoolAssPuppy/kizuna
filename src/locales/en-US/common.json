@@ -84,6 +84,9 @@
     "feedTitle": "Your Feed",
     "itemsLabel": "items",
     "feedEmpty": "Nothing waiting on you.",
+    "eventAccess": {
+      "label": "Event Access Code:"
+    },
     "factsTitle": "Facts About Our Event",
     "factsSubtitle": "All hail the legend of Team 18.",
     "facts": {
@@ -498,12 +501,24 @@
       "agenda": "Agenda",
       "groundTransport": "Ground Transport Tool",
       "roomAssignment": "Room Assignment Tool",
+      "scanQr": "Scan QR Code",
       "feed": "Feed",
       "documents": "Documents",
       "stats": "Stats",
       "nudges": "Nudges",
       "reports": "Reports",
       "conflicts": "Conflicts"
+    },
+    "scanQr": {
+      "title": "Scan QR Code",
+      "subtitle": "Point the camera at an attendee's check-in code to verify their entry.",
+      "permission": "Camera access denied. Enable camera permissions in your browser and reload.",
+      "cameraFailed": "Could not start the camera.",
+      "approved": "Approved",
+      "invalid": "That QR code isn't a kizuna check-in code.",
+      "userNotFound": "Attendee not found in the directory.",
+      "lookingUp": "Looking up attendee...",
+      "scanAnother": "Scan another"
     },
     "groundTransport": {
       "title": "Ground Transport Tool",

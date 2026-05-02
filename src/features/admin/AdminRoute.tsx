@@ -13,6 +13,7 @@ import { GroundTransportToolScreen } from './GroundTransportToolScreen';
 import { NudgesScreen } from './NudgesScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { RoomAssignmentToolScreen } from './RoomAssignmentToolScreen';
+import { ScanQrScreen } from './ScanQrScreen';
 import { StatsScreen } from './StatsScreen';
 
 export function AdminRoute(): JSX.Element {
@@ -39,6 +40,7 @@ export function AdminRoute(): JSX.Element {
         <Route path="agenda" element={<AgendaAdminScreen />} />
         <Route path="ground-transport" element={<GroundTransportToolScreen />} />
         <Route path="rooms" element={<RoomAssignmentToolScreen />} />
+        <Route path="scan" element={<ScanQrScreen />} />
         <Route path="arrivals" element={<Navigate to="/admin/ground-transport" replace />} />
         <Route
           path="itinerary-analyzer"
