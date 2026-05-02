@@ -1,0 +1,13 @@
+{
+  "name": "kizuna",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "kizuna": "./src/bin/kizuna.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {}
+}

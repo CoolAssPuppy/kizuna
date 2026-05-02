@@ -25,6 +25,7 @@
     "playwright.config.ts",
     "tailwind.config.ts",
     "postcss.config.js",
-    "eslint.config.js"
+    "eslint.config.js",
+    "packages/**/*.ts"
   ]
 }

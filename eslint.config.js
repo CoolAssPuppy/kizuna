@@ -77,7 +77,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ['vite.config.ts', 'vitest.config.ts', 'playwright.config.ts', 'tailwind.config.ts'],
+    files: [
+      'vite.config.ts',
+      'vitest.config.ts',
+      'playwright.config.ts',
+      'tailwind.config.ts',
+      'packages/**/*.ts',
+    ],
     languageOptions: {
       globals: globals.node,
     },
