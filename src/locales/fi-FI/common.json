@@ -1011,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Asiakirjat",
-    "addDocument": "Lisää Asiakirja",
     "createTitle": "Lisää Asiakirja",
     "createSubtitle": "Luonnokset julkaistaan välittömästi kaikille tässä tapahtumassa.",
     "documentKey": "Tyyppi",

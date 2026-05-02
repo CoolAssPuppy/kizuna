@@ -43,11 +43,6 @@ const PhotosScreen = lazy(() =>
 const ConsentRoute = lazy(() =>
   import('@/features/documents/ConsentRoute').then((m) => ({ default: m.ConsentRoute })),
 );
-const CreateDocumentScreen = lazy(() =>
-  import('@/features/documents/CreateDocumentScreen').then((m) => ({
-    default: m.CreateDocumentScreen,
-  })),
-);
 const DocumentsRoute = lazy(() =>
   import('@/features/documents/DocumentsRoute').then((m) => ({ default: m.DocumentsRoute })),
 );
@@ -121,14 +116,6 @@ export function AppRouter(): JSX.Element {
             element={
               <RequireAuth>
                 <DocumentsRoute />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/documents/new"
-            element={
-              <RequireAuth allow={['admin', 'super_admin']}>
-                <CreateDocumentScreen />
               </RequireAuth>
             }
           />

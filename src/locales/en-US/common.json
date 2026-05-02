@@ -62,20 +62,28 @@
     },
     "upload": {
       "title": "Add photos",
-      "drop": "Drop a photo here or pick one",
-      "pick": "Pick a photo",
-      "replace": "Replace",
+      "drop": "Drop photos here or pick some",
+      "pick": "Pick photos",
+      "addMore": "Add more",
+      "count": "{{current}} of {{max}} selected",
+      "replace": "Remove",
+      "editFile": "Edit {{name}}",
       "caption": "Caption",
       "captionPlaceholder": "Tell the story. Use #tags or @teammates.",
       "taggedPeople": "Tagged people",
       "tagPlaceholder": "Search by name or email",
       "removeTag": "Remove {{value}}",
       "submit": "Upload",
+      "submitMany": "Upload {{count}}",
       "success": "Photo uploaded.",
+      "successCount_one": "{{count}} photo uploaded.",
+      "successCount_other": "{{count}} photos uploaded.",
       "errors": {
         "type": "That file type isn't supported. Use JPEG, PNG, WebP, or HEIC.",
         "size": "File is too big. Max {{max}}.",
-        "generic": "Upload failed. Please try again."
+        "generic": "Upload failed. Please try again.",
+        "someFailed_one": "{{count}} photo failed to upload.",
+        "someFailed_other": "{{count}} photos failed to upload."
       }
     },
     "lightbox": {
@@ -306,6 +314,8 @@
       "empty": "No matches yet — add a few hobbies and a hometown to your community profile.",
       "matchedHobbies": "Hobbies matched",
       "name": "Name",
+      "firstName": "First name",
+      "lastName": "Last name",
       "email": "Email"
     },
     "person": {
@@ -1104,7 +1114,6 @@
   },
   "documents": {
     "tabTitle": "Documents",
-    "addDocument": "Add Document",
     "createTitle": "Add a Document",
     "createSubtitle": "Drafts publish immediately to everyone in this event.",
     "documentKey": "Type",

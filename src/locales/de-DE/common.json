@@ -1011,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Dokumente",
-    "addDocument": "Dokument hinzufügen",
     "createTitle": "Dokument hinzufügen",
     "createSubtitle": "Entwürfe werden sofort an alle in dieser Veranstaltung veröffentlicht.",
     "documentKey": "Typ",

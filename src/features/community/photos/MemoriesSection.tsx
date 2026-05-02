@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
 import { Button } from '@/components/ui/button';
 
 import { type PhotoRecord } from './api';
@@ -27,20 +26,11 @@ export function MemoriesSection({ eventId, eventName, initialPhotoId = null }: P
   const [activeId, setActiveId] = useState<string | null>(initialPhotoId);
 
   return (
-    <section className="space-y-4">
-      <header className="flex items-end justify-between gap-3">
-        <div>
-          <TerminalEyebrow
-            label={`${(eventName ?? 'kizuna').toLowerCase().replace(/[^a-z0-9]+/g, '_')}.memories`}
-            trailing={photos.length > 0 ? `${photos.length} ${t('photos.section.recent')}` : undefined}
-          />
-          <h2
-            className="mt-2 text-2xl font-semibold tracking-tight"
-            style={{ color: 'var(--c-fg)' }}
-          >
-            {t('photos.section.title', { event: eventName ?? t('photos.section.fallbackEvent') })}
-          </h2>
-        </div>
+    <section className="space-y-3">
+      <header className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold tracking-tight">
+          {t('photos.section.title', { event: eventName ?? t('photos.section.fallbackEvent') })}
+        </h2>
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link to="/community/photos">{t('photos.section.viewAll')}</Link>

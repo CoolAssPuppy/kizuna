@@ -1004,7 +1004,6 @@
   },
   "documents": {
     "tabTitle": "Documenti",
-    "addDocument": "Aggiungi Documento",
     "createTitle": "Aggiungi un Documento",
     "createSubtitle": "Le bozze vengono pubblicate immediatamente per tutti in questo evento.",
     "documentKey": "Tipo",

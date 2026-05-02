@@ -1011,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Documents",
-    "addDocument": "Ajouter un Document",
     "createTitle": "Ajouter un Document",
     "createSubtitle": "Les brouillons sont publiés immédiatement à tout le monde dans cet événement.",
     "documentKey": "Type",

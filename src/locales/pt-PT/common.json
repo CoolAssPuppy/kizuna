@@ -1011,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Documentos",
-    "addDocument": "Adicionar Documento",
     "createTitle": "Adicionar um Documento",
     "createSubtitle": "Os rascunhos são publicados imediatamente para todos neste evento.",
     "documentKey": "Tipo",

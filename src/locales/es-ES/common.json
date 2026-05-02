@@ -1011,7 +1011,6 @@
   },
   "documents": {
     "tabTitle": "Documentos",
-    "addDocument": "Añadir Documento",
     "createTitle": "Añadir un Documento",
     "createSubtitle": "Los borradores se publican de inmediato a todos los participantes de este evento.",
     "documentKey": "Tipo",

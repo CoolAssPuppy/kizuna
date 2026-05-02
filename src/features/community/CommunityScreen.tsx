@@ -203,7 +203,8 @@ function PeopleSection({
             <thead className="bg-muted text-left">
               <tr>
                 <th className="px-3 py-2 font-medium">&nbsp;</th>
-                <th className="px-3 py-2 font-medium">{t('community.matches.name')}</th>
+                <th className="px-3 py-2 font-medium">{t('community.matches.firstName')}</th>
+                <th className="px-3 py-2 font-medium">{t('community.matches.lastName')}</th>
                 <th className="px-3 py-2 font-medium">{t('community.matches.email')}</th>
                 {showMatched ? (
                   <th className="px-3 py-2 font-medium">{t('community.matches.matchedHobbies')}</th>
@@ -226,20 +227,14 @@ function PeopleSection({
                     </Link>
                   </td>
                   <td className="px-3 py-2">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Link
-                        to={`/community/p/${p.user_id}`}
-                        className="hover:underline"
-                      >
-                        {p.first_name}
-                      </Link>
-                      <Link
-                        to={`/community/p/${p.user_id}`}
-                        className="hover:underline"
-                      >
-                        {p.last_name}
-                      </Link>
-                    </span>
+                    <Link to={`/community/p/${p.user_id}`} className="hover:underline">
+                      {p.first_name}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-2">
+                    <Link to={`/community/p/${p.user_id}`} className="hover:underline">
+                      {p.last_name}
+                    </Link>
                   </td>
                   <td className="px-3 py-2 text-muted-foreground">
                     <EmailField email={p.email} textClassName="text-c-muted" />
