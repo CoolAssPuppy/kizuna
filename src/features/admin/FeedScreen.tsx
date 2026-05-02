@@ -184,6 +184,7 @@ export function FeedScreen(): JSX.Element {
 
       <FeedDialog
         draft={editing}
+        eventId={eventId}
         onClose={() => setEditing(null)}
         onSave={(d) => save.mutate(d)}
         saving={save.isPending}
@@ -290,6 +291,7 @@ function DisplayWindow({ item }: { item: FeedItemRow }): JSX.Element | null {
 }
 
 interface FeedDialogProps {
+  eventId: string | null;
   draft: DraftItem | null;
   onClose: () => void;
   onSave: (draft: DraftItem) => void;
@@ -302,7 +304,13 @@ function FeedDialog(props: FeedDialogProps): JSX.Element {
   return <FeedDialogInner key={key} {...props} />;
 }
 
-function FeedDialogInner({ draft, onClose, onSave, saving }: FeedDialogProps): JSX.Element {
+function FeedDialogInner({
+  draft,
+  eventId,
+  onClose,
+  onSave,
+  saving,
+}: FeedDialogProps): JSX.Element {
   const { t } = useTranslation();
   const open = draft !== null;
   // Hold a local working copy so typing into fields isn't blocked on parent renders.
@@ -371,7 +379,8 @@ function FeedDialogInner({ draft, onClose, onSave, saving }: FeedDialogProps): J
             </div>
             <div className="md:col-span-2">
               <StorageImageUploader
-                bucket="feed-images"
+                bucket="event-content"
+                folder={eventId ? `${eventId}/feed` : ''}
                 value={state.image_path}
                 onChange={(p) => setState({ ...state, image_path: p })}
                 label={t('admin.feed.fields.image')}

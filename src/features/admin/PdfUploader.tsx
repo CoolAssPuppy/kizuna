@@ -12,6 +12,8 @@ const MAX_BYTES = 25 * 1024 * 1024;
 interface PdfUploaderProps {
   value: string;
   onChange: (path: string) => void;
+  /** Event id the document belongs to. Used as the leading path segment so RLS scopes per event. */
+  eventId: string;
   label?: string;
 }
 
@@ -19,13 +21,16 @@ interface PdfUploaderProps {
  * PDF uploader backed by the Supabase UI Dropzone. Stores the resulting
  * object name in `value`; the consumer resolves it to a signed URL for
  * the inline iframe preview + open/download links.
+ *
+ * Object-name shape: `<eventId>/<filename>` — see supabase/schemas/95_storage.sql.
  */
-export function PdfUploader({ value, onChange, label }: PdfUploaderProps): JSX.Element {
+export function PdfUploader({ value, onChange, eventId, label }: PdfUploaderProps): JSX.Element {
   const { t } = useTranslation();
   const signedUrl = useStorageImage('documents', value);
 
   const upload = useSupabaseUpload({
     bucketName: 'documents',
+    path: eventId,
     maxFiles: 1,
     maxFileSize: MAX_BYTES,
     allowedMimeTypes: ['application/pdf'],

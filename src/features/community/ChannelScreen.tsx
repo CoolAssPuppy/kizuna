@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
+import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { MarkdownText } from './MarkdownText';
@@ -54,6 +55,7 @@ export function ChannelScreen(): JSX.Element {
   const { slug = '' } = useParams<{ slug: string }>();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();
+  const { data: activeEvent } = useActiveEvent();
   const qc = useQueryClient();
   const { show } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -142,8 +144,15 @@ export function ChannelScreen(): JSX.Element {
 
   async function handleFile(file: File): Promise<void> {
     if (!user) return;
+    if (!activeEvent) {
+      show(t('app.noEvent'), 'error');
+      return;
+    }
     const ext = file.name.split('.').pop() ?? 'png';
-    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    // Object-name shape locked by 95_storage.sql:
+    //   <event_id>/chats/<channel_slug>/<message_id>/<filename>
+    const messageId = crypto.randomUUID();
+    const path = `${activeEvent.id}/chats/${slug}/${messageId}/${messageId}.${ext}`;
     const { error } = await getSupabaseClient()
       .storage.from(COMMUNITY_MEDIA_BUCKET)
       .upload(path, file, { upsert: false });

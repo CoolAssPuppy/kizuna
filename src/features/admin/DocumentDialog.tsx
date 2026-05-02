@@ -270,6 +270,7 @@ function DocumentDialogInner({
                 <PdfUploader
                   value={draft.pdf_path}
                   onChange={(p) => setDraft({ ...draft, pdf_path: p })}
+                  eventId={eventId ?? ''}
                   label={t('documents.pdf.label')}
                 />
               </div>

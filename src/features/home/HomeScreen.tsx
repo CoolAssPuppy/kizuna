@@ -98,7 +98,7 @@ export function HomeScreen(): JSX.Element {
 }
 
 function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
-  const imageUrl = useStorageImage('feed-images', item.image_path);
+  const imageUrl = useStorageImage('event-content', item.image_path);
   const body = (
     <article className="flex flex-col gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent">
       {imageUrl ? (
@@ -119,7 +119,7 @@ function EditorialRow({ item }: { item: EditorialFeedItem }): JSX.Element {
 }
 
 function SidebarFeedCard({ item }: { item: EditorialFeedItem }): JSX.Element {
-  const imageUrl = useStorageImage('feed-images', item.image_path);
+  const imageUrl = useStorageImage('event-content', item.image_path);
   return (
     <CardShell title={item.title} {...(item.subtitle ? { description: item.subtitle } : {})}>
       {imageUrl ? (
