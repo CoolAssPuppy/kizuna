@@ -19,8 +19,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
+import { MemoriesSection } from './photos/MemoriesSection';
 import { WorldMap } from './WorldMap';
 import {
   createChannel,
@@ -41,6 +43,7 @@ type MapMode = 'hometown' | 'current';
 export function CommunityScreen(): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { data: event } = useActiveEvent();
   const qc = useQueryClient();
   const { show } = useToast();
   const [mapMode, setMapMode] = useState<MapMode>('hometown');
@@ -115,6 +118,8 @@ export function CommunityScreen(): JSX.Element {
       <PeopleSection title={t('community.matches.byHometown')} people={homies} />
 
       <PeopleSection title={t('community.matches.byCurrent')} people={locals} />
+
+      {event ? <MemoriesSection eventId={event.id} eventName={event.name} /> : null}
 
       <section className="space-y-3">
         <header className="flex items-center justify-between">

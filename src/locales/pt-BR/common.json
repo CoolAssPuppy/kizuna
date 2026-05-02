@@ -335,7 +335,7 @@
       "firstName": "Nome",
       "middleInitial": "Meio",
       "lastName": "Sobrenome",
-      "legalNameHint": "Exatamente como impresso no seu passaporte. Usamos isso para documentos de viagem e o mapa de assentos do jantar.",
+      "legalNameHint": "Exatamente como impresso no seu passaporte.",
       "alternateEmail": "E-mail Alternativo",
       "phoneNumber": "Número de Celular",
       "whatsapp": "WhatsApp",

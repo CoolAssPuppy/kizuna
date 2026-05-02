@@ -335,7 +335,7 @@
       "firstName": "Etunimi",
       "middleInitial": "Toinen",
       "lastName": "Sukunimi",
-      "legalNameHint": "Täsmälleen kuten passissasi lukee. Käytämme tätä matkustusasiakirjoissa ja illallisten istumajärjestyksessä.",
+      "legalNameHint": "Täsmälleen kuten passissasi lukee.",
       "alternateEmail": "Vaihtoehtoinen Sähköposti",
       "phoneNumber": "Puhelinnumero",
       "whatsapp": "WhatsApp",

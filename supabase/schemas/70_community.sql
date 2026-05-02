@@ -112,3 +112,72 @@ comment on column public.votes.value is
   '+1 upvote / -1 downvote.';
 
 create index votes_target_idx on public.votes(target_type, target_id);
+
+
+-- ---------------------------------------------------------------------
+-- Event photo gallery
+-- ---------------------------------------------------------------------
+-- event_photos is the metadata side of the gallery — the actual image
+-- bytes live in storage at
+--   community-media/<event_id>/gallery/<uploader_id>/<photo_id>/{original|preview|thumb}.<ext>
+-- which keeps the existing storage RLS policies in 95_storage.sql in
+-- charge of bytes-level access. The metadata row records the dimensions
+-- so the masonry can avoid layout jank, the caption (used for
+-- live search), and the soft-delete flag so admins moderate without
+-- losing the audit trail.
+create table public.event_photos (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  uploader_id uuid not null references public.users(id) on delete cascade,
+  storage_prefix text not null,
+  width int check (width is null or width > 0),
+  height int check (height is null or height > 0),
+  caption text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+comment on table public.event_photos is
+  'Metadata for community photo gallery uploads. Image bytes live in storage; this row points at the prefix and stores dimensions + caption + soft-delete state.';
+comment on column public.event_photos.storage_prefix is
+  'Path prefix in the community-media bucket: <event_id>/gallery/<uploader_id>/<photo_id>. The renderer concatenates /original.<ext>, /preview.webp, /thumb.webp.';
+
+create index event_photos_event_created_at_idx
+  on public.event_photos(event_id, created_at desc)
+  where deleted_at is null;
+create index event_photos_uploader_id_idx on public.event_photos(uploader_id);
+create index event_photos_caption_trgm_idx
+  on public.event_photos using gin (caption extensions.gin_trgm_ops)
+  where caption is not null and deleted_at is null;
+
+
+-- People tagged in a photo. The tagger owns the photo row; the tagged
+-- user discovers themselves via the activity feed on their community
+-- profile.
+create table public.event_photo_tags (
+  photo_id uuid not null references public.event_photos(id) on delete cascade,
+  tagged_user_id uuid not null references public.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (photo_id, tagged_user_id)
+);
+
+comment on table public.event_photo_tags is
+  'Many-to-many: people tagged in a photo. RLS lets the photo uploader and admins write; everyone who can read the photo can read the tags.';
+
+create index event_photo_tags_user_idx on public.event_photo_tags(tagged_user_id);
+
+
+-- Hashtags parsed out of the caption. Maintained by a trigger on
+-- event_photos so the application never needs to keep them in sync.
+create table public.event_photo_hashtags (
+  photo_id uuid not null references public.event_photos(id) on delete cascade,
+  hashtag text not null
+    check (length(hashtag) between 1 and 64 and hashtag = lower(hashtag)),
+  primary key (photo_id, hashtag)
+);
+
+comment on table public.event_photo_hashtags is
+  'Parsed hashtags. Synced from event_photos.caption by trigger sync_event_photo_hashtags().';
+
+create index event_photo_hashtags_tag_idx on public.event_photo_hashtags(hashtag);

@@ -335,7 +335,7 @@
       "firstName": "Nombre",
       "middleInitial": "Inicial",
       "lastName": "Apellidos",
-      "legalNameHint": "Exactamente como aparece en tu pasaporte. Lo usamos para los documentos de viaje y la disposición de las mesas en la cena.",
+      "legalNameHint": "Exactamente como aparece en tu pasaporte.",
       "alternateEmail": "Correo Alternativo",
       "phoneNumber": "Número de Teléfono",
       "whatsapp": "WhatsApp",

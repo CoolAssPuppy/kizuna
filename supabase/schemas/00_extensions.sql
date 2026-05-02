@@ -12,6 +12,9 @@ grant usage on schema extensions to anon, authenticated, service_role;
 
 create extension if not exists pgcrypto schema extensions;
 create extension if not exists citext schema extensions;
+-- pg_trgm powers ILIKE/word-similarity search over photo captions and is
+-- the standard recommended for free-text search at our scale.
+create extension if not exists pg_trgm schema extensions;
 
 -- If a previous deploy installed citext into `public`, move it. ALTER
 -- EXTENSION ... SET SCHEMA migrates the type definition; existing

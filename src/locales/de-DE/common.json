@@ -335,7 +335,7 @@
       "firstName": "Vorname",
       "middleInitial": "Zweiter Vorname",
       "lastName": "Nachname",
-      "legalNameHint": "Genau wie auf Ihrem Reisepass aufgedruckt. Wir verwenden dies für Reisedokumente und die Sitzordnung beim Abendessen.",
+      "legalNameHint": "Genau wie auf Ihrem Reisepass aufgedruckt.",
       "alternateEmail": "Alternative E-Mail",
       "phoneNumber": "Telefonnummer",
       "whatsapp": "WhatsApp",

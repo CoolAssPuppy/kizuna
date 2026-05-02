@@ -999,3 +999,143 @@ $$;
 
 revoke all on function public.update_transport_request_special_requests(uuid, text) from public;
 grant execute on function public.update_transport_request_special_requests(uuid, text) to authenticated;
+
+
+-- =====================================================================
+-- Photo hashtag sync
+-- =====================================================================
+-- Keep public.event_photo_hashtags in step with public.event_photos.caption.
+-- Hashtags are parsed as #[A-Za-z0-9_]{1,64}; case folded to lowercase
+-- so '#Banff' and '#banff' collide on a single row.
+--
+-- Triggered on insert and on caption update only — leaving the rest of
+-- the row touchable without re-running the parser.
+create or replace function public.sync_event_photo_hashtags()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_tags text[];
+begin
+  v_tags := array(
+    select distinct lower(m[1])
+    from regexp_matches(coalesce(NEW.caption, ''), '#([A-Za-z0-9_]{1,64})', 'g') as m
+  );
+
+  if TG_OP = 'UPDATE' then
+    if NEW.caption is not distinct from OLD.caption then
+      return NEW;
+    end if;
+    delete from public.event_photo_hashtags where photo_id = NEW.id;
+  end if;
+
+  if array_length(v_tags, 1) is not null then
+    insert into public.event_photo_hashtags (photo_id, hashtag)
+    select NEW.id, unnest(v_tags)
+    on conflict do nothing;
+  end if;
+
+  return NEW;
+end
+$$;
+
+drop trigger if exists event_photos_sync_hashtags on public.event_photos;
+create trigger event_photos_sync_hashtags
+  after insert or update of caption on public.event_photos
+  for each row execute function public.sync_event_photo_hashtags();
+
+
+drop trigger if exists event_photos_touch_updated_at on public.event_photos;
+create trigger event_photos_touch_updated_at
+  before update on public.event_photos
+  for each row execute function public.touch_updated_at();
+
+
+-- =====================================================================
+-- Soft-delete an event photo
+-- =====================================================================
+-- PostgreSQL RLS forbids a user from updating a row in a way that makes
+-- it invisible to their own SELECT policy — the canonical "UPDATE that
+-- hides the row" anti-pattern. We want exactly that for a soft delete,
+-- so this SECURITY DEFINER function flips deleted_at on behalf of the
+-- caller after verifying ownership.
+create or replace function public.soft_delete_event_photo(p_photo_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+  v_uploader uuid;
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+  select uploader_id into v_uploader
+    from public.event_photos
+    where id = p_photo_id and deleted_at is null;
+  if v_uploader is null then
+    raise exception 'not found' using errcode = '42501';
+  end if;
+  if not (v_uploader = v_caller or public.is_admin()) then
+    raise exception 'not allowed' using errcode = '42501';
+  end if;
+  update public.event_photos
+     set deleted_at = now()
+   where id = p_photo_id;
+end
+$$;
+
+revoke all on function public.soft_delete_event_photo(uuid) from public;
+grant execute on function public.soft_delete_event_photo(uuid) to authenticated;
+
+
+-- =====================================================================
+-- Mark a registration task complete on behalf of the caller
+-- =====================================================================
+-- Profile-mode saves don't carry the registration bundle, so we can't
+-- call markTaskComplete from useSectionSubmit. This helper resolves the
+-- active registration for the caller (= the row matching their user_id
+-- and the active event) and marks the requested task complete.
+create or replace function public.mark_my_registration_task_complete(p_task_key text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+  v_event_id uuid;
+  v_registration_id uuid;
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+
+  v_event_id := public.current_active_event_id();
+  if v_event_id is null then
+    return;
+  end if;
+
+  select id into v_registration_id
+    from public.registrations
+   where user_id = v_caller and event_id = v_event_id
+   limit 1;
+  if v_registration_id is null then
+    return;
+  end if;
+
+  update public.registration_tasks
+     set status = 'complete',
+         completed_at = coalesce(completed_at, now())
+   where registration_id = v_registration_id
+     and task_key = p_task_key::registration_task_key
+     and status <> 'complete';
+end
+$$;
+
+revoke all on function public.mark_my_registration_task_complete(text) from public;
+grant execute on function public.mark_my_registration_task_complete(text) to authenticated;

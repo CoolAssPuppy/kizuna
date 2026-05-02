@@ -60,12 +60,30 @@ export function useSectionSubmit({
           await markTaskComplete(getSupabaseClient(), mode.bundle.registration.id, taskKey);
         }
         mode.onComplete();
+      } else if (mode.kind === 'profile' && taskKey) {
+        // Profile-mode saves should also tick off the registration task
+        // so users who skip the wizard still see their checklist progress.
+        // We don't have the registration bundle in profile mode, so we
+        // call a SECURITY DEFINER helper that resolves the active
+        // registration for the caller.
+        try {
+          const { error } = await getSupabaseClient().rpc(
+            'mark_my_registration_task_complete',
+            { p_task_key: taskKey },
+          );
+          if (error) throw error;
+        } catch (err) {
+          console.error('[kizuna] markTaskComplete (profile) failed', err);
+        }
       }
       if (invalidateQueryKeys && invalidateQueryKeys.length > 0) {
         await Promise.all(
           invalidateQueryKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey })),
         );
       }
+      // Always invalidate the profile checklist after a save so the
+      // sidebar updates whether or not the section explicitly opts in.
+      await queryClient.invalidateQueries({ queryKey: ['profile', 'checklist'] });
       // Every Save click emits a toast — see useSectionSubmit.test.tsx.
       show(t(toastSuccessKey));
     } catch (err) {
