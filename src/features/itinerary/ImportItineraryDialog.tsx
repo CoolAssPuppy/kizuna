@@ -1,4 +1,4 @@
-import { AlertTriangle, ClipboardPaste, Mail, Upload } from 'lucide-react';
+import { AlertTriangle, ClipboardPaste, FlaskConical, Mail, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -42,6 +42,24 @@ const TAB_ICON: Record<SourceTab, typeof ClipboardPaste> = {
 };
 
 const TABS: ReadonlyArray<SourceTab> = ['paste', 'upload', 'email'];
+
+// Two flights only — round-trip to YYC for the dev flow. No hotel,
+// rental, or shuttle so the smoke-test stays narrow.
+const TEST_ITINERARY = `Outbound flight
+American Airlines AA228
+Friday January 8, 2027
+SFO (San Francisco) departing 7:45am Pacific
+YYC (Calgary) arriving 11:42am Mountain
+Confirmation code: 4XQ2RT
+Seat 14C, economy
+
+Return flight
+American Airlines AA229
+Sunday January 17, 2027
+YYC (Calgary) departing 11:15am Mountain
+SFO (San Francisco) arriving 12:48pm Pacific
+Confirmation code: 4XQ2RT
+Seat 22A, economy`;
 
 /**
  * Dialog for importing itinerary text. Phase 1 supports paste; upload
@@ -162,16 +180,38 @@ export function ImportItineraryDialog({
           )}
         </div>
 
-        <DialogFooter className="border-t px-6 py-4">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
-            {t('actions.cancel')}
-          </Button>
-          <Button
-            onClick={() => void handleParse()}
-            disabled={busy || tab !== 'paste' || pasted.trim().length === 0}
-          >
-            {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
-          </Button>
+        <DialogFooter className="border-t px-6 py-4 sm:justify-between">
+          {/* Dev-only "Add Test Itinerary" filler so the parser flow can
+              be exercised without typing a confirmation by hand.
+              Gated on import.meta.env.DEV — never ships to production. */}
+          {import.meta.env.DEV ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-purple-500 text-purple-600 hover:bg-purple-50 hover:text-purple-700"
+              onClick={() => {
+                setPasted(TEST_ITINERARY);
+                setTab('paste');
+                setErrorMessage(null);
+              }}
+            >
+              <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
+              {t('itinerary.import.testItinerary')}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
+              {t('actions.cancel')}
+            </Button>
+            <Button
+              onClick={() => void handleParse()}
+              disabled={busy || tab !== 'paste' || pasted.trim().length === 0}
+            >
+              {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

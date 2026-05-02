@@ -936,6 +936,7 @@
       "pasteHint": "Works best with the full text of the confirmation email.",
       "parse": "Parse and Add",
       "parsing": "Parsing your itinerary",
+      "testItinerary": "Add Test Itinerary",
       "success": "Imported {{count}} item(s) into your itinerary.",
       "nothingFound": "We could not find anything to import. Try pasting more text.",
       "error": "We could not parse that just now. Try again or import manually.",
