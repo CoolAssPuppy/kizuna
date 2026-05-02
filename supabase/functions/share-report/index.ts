@@ -12,7 +12,7 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
 
-import { corsHeaders, handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 
 declare const Deno: {
   serve: (handler: (req: Request) => Response | Promise<Response>) => void;
@@ -31,6 +31,26 @@ type ReportFetcher = (
   client: SupabaseClient,
   eventId: string,
 ) => Promise<{ rows: unknown[]; lastModified: string | null }>;
+
+function shareCorsHeaders(req: Request): Record<string, string> {
+  const allowed = Deno.env.get('SHARE_REPORT_ALLOWED_ORIGINS') ?? '*';
+  if (allowed.trim() === '*') {
+    return { 'Access-Control-Allow-Origin': '*' };
+  }
+  const requestedOrigin = req.headers.get('Origin');
+  const allowedOrigins = allowed
+    .split(',')
+    .map((v) => v.trim())
+    .filter((v) => v.length > 0);
+  if (requestedOrigin && allowedOrigins.includes(requestedOrigin)) {
+    return { 'Access-Control-Allow-Origin': requestedOrigin, Vary: 'Origin' };
+  }
+  // Non-browser clients (no Origin) are still allowed for partner systems.
+  if (!requestedOrigin) {
+    return { 'Access-Control-Allow-Origin': '*' };
+  }
+  return { 'Access-Control-Allow-Origin': 'null', Vary: 'Origin' };
+}
 
 const FETCHERS: Record<string, ReportFetcher> = {
   rooming_list: async (client, eventId) => {
@@ -142,10 +162,20 @@ const FETCHERS: Record<string, ReportFetcher> = {
     return { rows, lastModified };
   },
 
-  dietary_summary: async (client, _eventId) => {
+  dietary_summary: async (client, eventId) => {
+    const eligibleUsers = await client
+      .from('registrations')
+      .select('user_id')
+      .eq('event_id', eventId);
+    if (eligibleUsers.error) throw eligibleUsers.error;
+    const userIds = (eligibleUsers.data ?? []).map((r) => r.user_id);
+    if (userIds.length === 0) {
+      return { rows: [], lastModified: null };
+    }
     const { data, error } = await client
       .from('dietary_preferences')
       .select(`restrictions, allergies, alcohol_free, severity, notes, updated_at, users(email)`)
+      .in('user_id', userIds)
       .order('severity', { ascending: false });
     if (error) throw error;
     const rows = (data ?? []).map((r) => ({
@@ -177,6 +207,7 @@ function urlToken(req: Request): string | null {
 Deno.serve(async (req: Request) => {
   const preflight = handlePreflight(req);
   if (preflight) return preflight;
+  const cors = shareCorsHeaders(req);
 
   if (req.method !== 'GET') {
     return jsonResponse({ error: 'Method not allowed' }, { status: 405 });
@@ -226,11 +257,11 @@ Deno.serve(async (req: Request) => {
         share_expires_at: snapshot.share_expires_at,
         generated_at: snapshot.generated_at,
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      { headers: { ...cors, 'Content-Type': 'application/json' } },
     );
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Unknown error';
     console.error('[share-report]', message);
-    return jsonResponse({ error: message }, { status: 500 });
+    return jsonResponse({ error: message }, { status: 500, headers: cors });
   }
 });

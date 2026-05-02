@@ -25,6 +25,7 @@ comment on column public.registrations.qr_token is
 
 create index registrations_event_status_idx on public.registrations(event_id, status);
 create index registrations_user_id_idx on public.registrations(user_id);
+create index registrations_event_user_idx on public.registrations(event_id, user_id);
 
 
 create table public.registration_tasks (
@@ -114,3 +115,5 @@ create table public.dietary_preferences (
 
 comment on column public.dietary_preferences.severity is
   'Anaphylactic risk drives kitchen flagging. Admin reports highlight allergy entries.';
+
+create index dietary_preferences_severity_idx on public.dietary_preferences(severity);
