@@ -34,13 +34,20 @@ export function ScanQrScreen(): JSX.Element {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
 
+  // Camera lifecycle. React 18 Strict Mode double-fires this effect in
+  // dev, so we have to be tolerant of `start` resolving after the
+  // cleanup ran. The `cancelled` flag guards every async path; the
+  // started flag tells the cleanup whether stop() will succeed.
   useMountEffect(() => {
     let cancelled = false;
-    const scanner = new Html5Qrcode(SCANNER_ELEMENT_ID);
-    scannerRef.current = scanner;
+    let started = false;
+    let scanner: Html5Qrcode | null = null;
 
     void (async () => {
       try {
+        scanner = new Html5Qrcode(SCANNER_ELEMENT_ID, /* verbose */ false);
+        if (cancelled) return;
+        scannerRef.current = scanner;
         await scanner.start(
           { facingMode: { ideal: 'environment' } },
           { fps: 10, qrbox: { width: 280, height: 280 } },
@@ -52,16 +59,24 @@ export function ScanQrScreen(): JSX.Element {
             } else {
               setResult({ kind: 'invalid', raw: decoded });
             }
-            // Pause the camera while the dialog is up so duplicate
-            // frames don't spam the result state.
             try {
-              scanner.pause(true);
+              scanner?.pause(true);
             } catch {
               /* already paused */
             }
           },
           undefined,
         );
+        if (cancelled) {
+          // The unmount fired while start() was awaiting; tear down now.
+          try {
+            await scanner.stop();
+          } catch {
+            /* never reached running state */
+          }
+          return;
+        }
+        started = true;
       } catch (err) {
         if (cancelled) return;
         const message = err instanceof Error ? err.message : t('admin.scanQr.cameraFailed');
@@ -71,9 +86,9 @@ export function ScanQrScreen(): JSX.Element {
 
     return () => {
       cancelled = true;
-      const current = scannerRef.current;
+      const current = scanner;
       scannerRef.current = null;
-      if (!current) return;
+      if (!current || !started) return;
       void current
         .stop()
         .catch(() => {
