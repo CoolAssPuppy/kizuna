@@ -2,6 +2,8 @@ import { Calendar, MapPin } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { EventCountdown } from '@/features/events/EventCountdown';
+import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { useStorageImage } from '@/lib/useStorageImage';
 import type { Database } from '@/types/database.types';
 
 import { CheckinQrDialog } from './CheckinQrDialog';
@@ -25,6 +27,7 @@ const DATE_FMT = new Intl.DateTimeFormat(undefined, {
 export function ItineraryHero({ event }: Props): JSX.Element {
   const { t } = useTranslation();
   const dateRange = `${DATE_FMT.format(new Date(event.start_date))} – ${DATE_FMT.format(new Date(event.end_date))}`;
+  const logoUrl = useStorageImage(STORAGE_BUCKETS.eventContent, event.logo_path);
 
   return (
     <section
@@ -39,12 +42,21 @@ export function ItineraryHero({ event }: Props): JSX.Element {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             {t('itinerary.hero.eyebrow')}
           </p>
-          <h1
-            id="itinerary-hero-title"
-            className="text-4xl font-semibold tracking-tight md:text-5xl"
-          >
-            {event.name}
-          </h1>
+          <div className="flex items-center gap-4">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt=""
+                className="h-12 w-12 shrink-0 rounded-md bg-card object-contain p-1 ring-1 ring-border md:h-14 md:w-14"
+              />
+            ) : null}
+            <h1
+              id="itinerary-hero-title"
+              className="text-4xl font-semibold tracking-tight md:text-5xl"
+            >
+              {event.name}
+            </h1>
+          </div>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Calendar aria-hidden className="h-4 w-4" />

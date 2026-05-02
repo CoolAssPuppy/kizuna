@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Check, MapPin, Pencil, Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
+import { EventEditScreen } from '@/features/admin/EventEditScreen';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { fetchAllEvents, type EventRow } from '@/features/admin/api/events';
 import { mediumDateFormatter } from '@/lib/formatters';
@@ -24,6 +27,7 @@ export function AllEventsScreen(): JSX.Element {
   const { show } = useToast();
   const isAdmin = useIsAdmin();
   const override = useEventOverride();
+  const [creating, setCreating] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['all-events'],
@@ -69,14 +73,31 @@ export function AllEventsScreen(): JSX.Element {
           <p className="text-sm text-muted-foreground">{t('events.subtitle')}</p>
         </div>
         {isAdmin ? (
-          <Button asChild className="gap-2 self-start">
-            <Link to="/admin/events/new">
-              <Plus aria-hidden className="h-4 w-4" />
-              {t('events.create')}
-            </Link>
+          <Button type="button" className="gap-2 self-start" onClick={() => setCreating(true)}>
+            <Plus aria-hidden className="h-4 w-4" />
+            {t('events.create')}
           </Button>
         ) : null}
       </header>
+
+      {isAdmin ? (
+        <Dialog open={creating} onOpenChange={setCreating}>
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>{t('admin.events.create')}</DialogTitle>
+            </DialogHeader>
+            <EventEditScreen
+              eventId="new"
+              hideDelete
+              hideHeader
+              redirectTo={(id) => {
+                setCreating(false);
+                return `/admin/events/${id}`;
+              }}
+            />
+          </DialogContent>
+        </Dialog>
+      ) : null}
 
       {events.length === 0 ? (
         <p className="rounded-md border border-dashed bg-muted/30 px-6 py-12 text-center text-sm text-muted-foreground">

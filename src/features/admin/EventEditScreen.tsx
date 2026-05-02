@@ -31,6 +31,8 @@ interface EventEditScreenProps {
   eventId?: string | null;
   /** When true, render without the destructive Delete button (used in About tab). */
   hideDelete?: boolean;
+  /** When true, suppress the inner section header — the host (e.g. a Dialog) provides its own title. */
+  hideHeader?: boolean;
   /** Override the post-save destination. Default: /admin/events/:id. */
   redirectTo?: ((id: string) => string) | undefined;
 }
@@ -83,6 +85,7 @@ function fromIso(value: string | null): string {
 export function EventEditScreen({
   eventId: explicitEventId,
   hideDelete = false,
+  hideHeader = false,
   redirectTo,
 }: EventEditScreenProps = {}): JSX.Element {
   const { t } = useTranslation();
@@ -172,12 +175,14 @@ export function EventEditScreen({
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          {isNew ? t('admin.events.create') : t('admin.events.edit')}
-        </h2>
-        <p className="text-sm text-muted-foreground">{t('admin.events.formHint')}</p>
-      </header>
+      {hideHeader ? null : (
+        <header className="space-y-2">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {isNew ? t('admin.events.create') : t('admin.events.edit')}
+          </h2>
+          <p className="text-sm text-muted-foreground">{t('admin.events.formHint')}</p>
+        </header>
+      )}
 
       <form
         className="space-y-5"

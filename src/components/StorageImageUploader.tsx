@@ -43,7 +43,7 @@ export function StorageImageUploader({
   className,
 }: StorageImageUploaderProps): JSX.Element {
   const { t } = useTranslation();
-  const previewUrl = useStorageImage(bucket, value, { ttlSeconds: 3600 });
+  const previewUrl = useStorageImage(bucket, value);
 
   const upload = useSupabaseUpload({
     bucketName: bucket,

@@ -2,17 +2,20 @@ import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '@/app/ThemeContext';
 
+const DARK_THEMES = new Set(['supa', 'hermione']);
+
 /**
  * "Built on Supabase" wordmark for the footer. Swaps the asset based on
  * the active theme so the green logotype always lands on a contrasting
- * surface. Light + barbie themes use the dark-on-light wordmark; dark
- * theme uses the light-on-dark wordmark.
+ * surface. Dark-grounded themes (supa, hermione) use the light-on-dark
+ * wordmark; everything else uses the dark-on-light variant.
  */
 export function SupabaseWordmark(): JSX.Element {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const src =
-    theme === 'dark' ? '/supabase-logo-wordmark-dark.svg' : '/supabase-logo-wordmark-light.svg';
+  const src = DARK_THEMES.has(theme)
+    ? '/supabase-logo-wordmark-dark.svg'
+    : '/supabase-logo-wordmark-light.svg';
   return (
     <a
       href="https://supabase.com"

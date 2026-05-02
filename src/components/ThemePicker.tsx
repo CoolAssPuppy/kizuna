@@ -1,4 +1,4 @@
-import { Heart, Moon, Sun, Wand2, Zap, type LucideIcon } from 'lucide-react';
+import { Heart, Sun, Wand2, Zap, type LucideIcon } from 'lucide-react';
 import { useState, type ComponentType, type SVGProps } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -10,7 +10,6 @@ type IconComponent = LucideIcon | ComponentType<SVGProps<SVGSVGElement>>;
 
 const THEME_ICONS: Record<ThemeId, IconComponent> = {
   light: Sun,
-  dark: Moon,
   barbie: Heart,
   supa: Zap,
   hermione: Wand2,
