@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { Plus, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
@@ -11,6 +11,7 @@ interface VehicleSidebarProps {
   vehicleStats: ReadonlyArray<VehicleStat>;
   direction: TransportDirection;
   timeFmt: Intl.DateTimeFormat;
+  onNewVehicle?: () => void;
 }
 
 /**
@@ -22,14 +23,27 @@ export function VehicleSidebar({
   vehicleStats,
   direction,
   timeFmt,
+  onNewVehicle,
 }: VehicleSidebarProps): JSX.Element {
   const { t } = useTranslation();
   return (
     <aside className="space-y-3">
-      <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        <Sparkles aria-hidden className="h-3 w-3" />
-        {t('admin.groundTransport.vehiclesHeader')}
-      </h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <Sparkles aria-hidden className="h-3 w-3" />
+          {t('admin.groundTransport.vehiclesHeader')}
+        </h3>
+        {onNewVehicle ? (
+          <button
+            type="button"
+            onClick={onNewVehicle}
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:opacity-80"
+          >
+            <Plus aria-hidden className="h-3 w-3" />
+            {t('admin.groundTransport.newVehicle')}
+          </button>
+        ) : null}
+      </div>
       {vehicleStats.length === 0 ? (
         <p className="rounded-md border border-dashed bg-muted/20 p-3 text-xs text-muted-foreground">
           {t('admin.groundTransport.noVehiclesForLeg')}
