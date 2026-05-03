@@ -55,18 +55,30 @@ create table public.sessions (
   subtitle text,
   type session_type not null,
   audience session_audience not null default 'all',
-  starts_at timestamptz not null,
-  ends_at timestamptz not null check (ends_at > starts_at),
+  status session_status not null default 'active',
+  proposed_by uuid references public.users(id) on delete set null,
+  starts_at timestamptz,
+  ends_at timestamptz,
   location text,
   capacity int check (capacity is null or capacity > 0),
   is_mandatory boolean not null default false,
   abstract text,
   speaker_email text,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  -- Active sessions must have a full schedule slot. Proposals do not — admins
+  -- fill in starts_at, ends_at, location, capacity when they promote a proposal.
+  constraint sessions_active_requires_schedule check (
+    status = 'proposed'
+    or (starts_at is not null and ends_at is not null and ends_at > starts_at)
+  )
 );
 
 comment on column public.sessions.audience is
   'Determines who sees the session: everyone, employees only, guests only, or opt-in only.';
+comment on column public.sessions.status is
+  'proposed = community-submitted idea awaiting admin scheduling; active = on the agenda.';
+comment on column public.sessions.proposed_by is
+  'For status=proposed, the user who submitted the idea. Null for admin-authored sessions.';
 comment on column public.sessions.is_mandatory is
   'When true, the session is auto-added to every relevant attendee itinerary.';
 comment on column public.sessions.subtitle is
@@ -79,6 +91,43 @@ comment on column public.sessions.speaker_email is
 create index sessions_event_id_starts_at_idx on public.sessions(event_id, starts_at);
 create index sessions_type_idx on public.sessions(event_id, type);
 create index sessions_speaker_email_idx on public.sessions(speaker_email) where speaker_email is not null;
+create index sessions_event_status_idx on public.sessions(event_id, status);
+
+
+-- Per-event session tags. Drives the colored pill shown on every
+-- session card and the multi-select tag picker in the admin and propose
+-- dialogs. Color is stored as a CSS-resolvable string so designers can
+-- re-skin without touching code. Each event ships with a default set
+-- (General Session, Engineering, Marketing, Sales, Support, People)
+-- materialised by ensure_default_session_tags() in 80_functions_and_triggers.sql.
+create table public.session_tags (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.events(id) on delete cascade,
+  name text not null,
+  color text not null default '#64748b',
+  position int not null default 0,
+  created_at timestamptz not null default now(),
+  unique (event_id, name)
+);
+
+comment on table public.session_tags is
+  'Customizable per-event session tags. Each session has one or more tags rendered as a colored pill.';
+comment on column public.session_tags.color is
+  'CSS color for the tag pill background. Defaults to slate; admins pick a value when creating the tag.';
+
+create index session_tags_event_id_position_idx on public.session_tags(event_id, position);
+
+
+create table public.session_tag_assignments (
+  session_id uuid not null references public.sessions(id) on delete cascade,
+  tag_id uuid not null references public.session_tags(id) on delete cascade,
+  primary key (session_id, tag_id)
+);
+
+comment on table public.session_tag_assignments is
+  'Many-to-many between sessions and session_tags.';
+
+create index session_tag_assignments_tag_id_idx on public.session_tag_assignments(tag_id);
 
 
 -- Per-user favorites for sessions. Drives the "starred" filter on the
@@ -95,6 +144,24 @@ comment on table public.session_favorites is
   'Per-user starred sessions. Used by the agenda viewer to filter "my picks".';
 
 create index session_favorites_user_id_idx on public.session_favorites(user_id);
+
+
+-- Votes on proposed sessions. One row per (session, voter). Votes are
+-- intentionally one-way: there is no UPDATE or DELETE policy. The unique
+-- constraint guarantees idempotency at the DB level.
+create table public.session_proposal_votes (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references public.sessions(id) on delete cascade,
+  user_id uuid not null references public.users(id) on delete cascade,
+  voted_at timestamptz not null default now(),
+  unique (session_id, user_id)
+);
+
+comment on table public.session_proposal_votes is
+  'Thumbs-up votes for proposed sessions. Insert-only — voting is not reversible.';
+
+create index session_proposal_votes_session_id_idx on public.session_proposal_votes(session_id);
+create index session_proposal_votes_user_id_idx on public.session_proposal_votes(user_id);
 
 
 create table public.session_registrations (

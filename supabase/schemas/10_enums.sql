@@ -74,6 +74,7 @@ create type event_type as enum ('supafest', 'select', 'meetup');
 create type session_type as enum ('keynote', 'breakout', 'workshop', 'dinner', 'activity', 'transport', 'social');
 create type session_audience as enum ('all', 'employees_only', 'guests_only', 'opt_in');
 create type session_registration_status as enum ('registered', 'waitlisted', 'attended', 'no_show');
+create type session_status as enum ('proposed', 'active');
 
 -- Itinerary
 create type itinerary_item_type as enum ('session', 'flight', 'transport', 'accommodation', 'announcement', 'reminder');

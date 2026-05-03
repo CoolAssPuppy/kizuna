@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { dayKey, groupSessionsByDay } from './grouping';
+import { dayHeading, dayKey, groupSessionsByDay } from './grouping';
 
 interface Sample {
-  starts_at: string;
+  starts_at: string | null;
 }
 
 describe('agenda grouping', () => {
@@ -28,5 +28,20 @@ describe('agenda grouping', () => {
 
   it('returns an empty list when there are no sessions', () => {
     expect(groupSessionsByDay([] as Sample[], 'UTC')).toEqual([]);
+  });
+
+  it('returns an empty key/heading for null inputs', () => {
+    expect(dayKey(null, 'UTC')).toBe('');
+    expect(dayHeading(null, 'UTC')).toBe('');
+  });
+
+  it('skips sessions with no starts_at (proposals) when grouping', () => {
+    const sessions: Sample[] = [
+      { starts_at: '2027-01-12T16:00:00Z' },
+      { starts_at: null },
+      { starts_at: '2027-01-13T18:00:00Z' },
+    ];
+    const days = groupSessionsByDay(sessions, 'America/Edmonton');
+    expect(days.flatMap((d) => d.sessions)).toHaveLength(2);
   });
 });

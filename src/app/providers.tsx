@@ -31,18 +31,18 @@ export function AppProviders({ children }: AppProvidersProps): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nextProvider i18n={i18n}>
-        <ThemeProvider>
-          <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-            <AuthProvider
-              ssoConfig={{
-                oktaDomain: import.meta.env['VITE_OKTA_DOMAIN'],
-                oktaClientId: import.meta.env['VITE_OKTA_CLIENT_ID'],
-              }}
-            >
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AuthProvider
+            ssoConfig={{
+              oktaDomain: import.meta.env['VITE_OKTA_DOMAIN'],
+              oktaClientId: import.meta.env['VITE_OKTA_CLIENT_ID'],
+            }}
+          >
+            <ThemeProvider>
               <ToastProvider>{children}</ToastProvider>
-            </AuthProvider>
-          </BrowserRouter>
-        </ThemeProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </I18nextProvider>
     </QueryClientProvider>
   );

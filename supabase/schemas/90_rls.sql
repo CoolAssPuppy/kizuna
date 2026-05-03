@@ -341,6 +341,90 @@ create policy sessions_admin_write on public.sessions
   for all using (public.is_admin())
   with check (public.is_admin());
 
+-- Any authenticated user can submit a session proposal for themselves.
+-- Promotion to status='active' is admin-only via sessions_admin_write,
+-- which is the only policy whose UPDATE clause covers active sessions.
+create policy sessions_propose_self on public.sessions
+  for insert
+  with check (
+    auth.role() = 'authenticated'
+    and status = 'proposed'
+    and proposed_by = auth.uid()
+  );
+
+-- Proposers can edit their own proposal (title, abstract, tags) while
+-- it remains in 'proposed' state. The WITH CHECK clause keeps them from
+-- promoting it to 'active' or transferring ownership.
+create policy sessions_propose_self_update on public.sessions
+  for update
+  using (
+    status = 'proposed'
+    and proposed_by = auth.uid()
+  )
+  with check (
+    status = 'proposed'
+    and proposed_by = auth.uid()
+  );
+
+create policy sessions_propose_self_delete on public.sessions
+  for delete
+  using (
+    status = 'proposed'
+    and proposed_by = auth.uid()
+  );
+
+
+-- Proposal votes: any authenticated user can read counts and vote once
+-- for themselves. There is no UPDATE or DELETE policy on purpose — votes
+-- are intentionally one-way.
+create policy session_proposal_votes_authenticated_read on public.session_proposal_votes
+  for select using (auth.role() = 'authenticated');
+
+create policy session_proposal_votes_self_insert on public.session_proposal_votes
+  for insert with check (user_id = auth.uid());
+
+
+-- Session tags: anyone authenticated can read so the agenda can render
+-- pills. Only admins manage the tag list.
+create policy session_tags_authenticated_read on public.session_tags
+  for select using (auth.role() = 'authenticated');
+
+create policy session_tags_admin_write on public.session_tags
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+
+-- Tag assignments: anyone authenticated can read. Admins assign on
+-- behalf of any session; non-admins can only assign tags to a proposal
+-- they themselves own (matches sessions_propose_self).
+create policy session_tag_assignments_authenticated_read on public.session_tag_assignments
+  for select using (auth.role() = 'authenticated');
+
+create policy session_tag_assignments_admin_write on public.session_tag_assignments
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+create policy session_tag_assignments_proposer_write on public.session_tag_assignments
+  for insert with check (
+    auth.role() = 'authenticated'
+    and exists (
+      select 1 from public.sessions s
+      where s.id = session_id
+        and s.status = 'proposed'
+        and s.proposed_by = auth.uid()
+    )
+  );
+
+create policy session_tag_assignments_proposer_delete on public.session_tag_assignments
+  for delete using (
+    exists (
+      select 1 from public.sessions s
+      where s.id = session_id
+        and s.status = 'proposed'
+        and s.proposed_by = auth.uid()
+    )
+  );
+
 
 create policy session_registrations_self_all on public.session_registrations
   for all using (public.is_self_or_admin(user_id))

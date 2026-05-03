@@ -247,26 +247,30 @@ export function sessionsToCsvRows(
   eventStartDate: string,
 ): AgendaCsvRow[] {
   const baseDate = new Date(`${eventStartDate}T00:00:00Z`).getTime();
-  return sessions.map((s) => {
-    const start = new Date(s.starts_at);
-    const end = new Date(s.ends_at);
-    const dayOffset = Math.round(
-      (Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()) - baseDate) /
-        86_400_000,
-    );
-    return {
-      day_offset: dayOffset,
-      start_time: start.toISOString().slice(11, 16),
-      end_time: end.toISOString().slice(11, 16),
-      title: s.title,
-      subtitle: s.subtitle ?? '',
-      abstract: s.abstract ?? '',
-      type: s.type,
-      audience: s.audience,
-      location: s.location ?? '',
-      speaker_email: s.speaker_email ?? '',
-      is_mandatory: s.is_mandatory,
-      capacity: s.capacity ?? '',
-    };
-  });
+  // Proposals carry no schedule — exclude them from CSV export so the
+  // round-trip stays well-formed.
+  return sessions
+    .filter((s) => s.starts_at !== null && s.ends_at !== null)
+    .map((s) => {
+      const start = new Date(s.starts_at!);
+      const end = new Date(s.ends_at!);
+      const dayOffset = Math.round(
+        (Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()) - baseDate) /
+          86_400_000,
+      );
+      return {
+        day_offset: dayOffset,
+        start_time: start.toISOString().slice(11, 16),
+        end_time: end.toISOString().slice(11, 16),
+        title: s.title,
+        subtitle: s.subtitle ?? '',
+        abstract: s.abstract ?? '',
+        type: s.type,
+        audience: s.audience,
+        location: s.location ?? '',
+        speaker_email: s.speaker_email ?? '',
+        is_mandatory: s.is_mandatory,
+        capacity: s.capacity ?? '',
+      };
+    });
 }

@@ -37,7 +37,7 @@ export function AppLayout({ children }: Props): JSX.Element {
     return (
       <div
         className="relative min-h-dvh bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/auth.jpg)' }}
+        style={{ backgroundImage: 'url(/auth.webp)' }}
       >
         <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" aria-hidden />
         <div className="relative z-10">{children}</div>

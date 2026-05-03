@@ -1831,6 +1831,42 @@ export type Database = {
           },
         ]
       }
+      session_proposal_votes: {
+        Row: {
+          id: string
+          session_id: string
+          user_id: string
+          voted_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          user_id: string
+          voted_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          user_id?: string
+          voted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_proposal_votes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_proposal_votes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_registrations: {
         Row: {
           id: string
@@ -1873,18 +1909,85 @@ export type Database = {
           },
         ]
       }
+      session_tag_assignments: {
+        Row: {
+          session_id: string
+          tag_id: string
+        }
+        Insert: {
+          session_id: string
+          tag_id: string
+        }
+        Update: {
+          session_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_tag_assignments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_tag_assignments_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "session_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_tags: {
+        Row: {
+          color: string
+          created_at: string
+          event_id: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          event_id: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_tags_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sessions: {
         Row: {
           abstract: string | null
           audience: Database["public"]["Enums"]["session_audience"]
           capacity: number | null
-          ends_at: string
+          ends_at: string | null
           event_id: string
           id: string
           is_mandatory: boolean
           location: string | null
+          proposed_by: string | null
           speaker_email: string | null
-          starts_at: string
+          starts_at: string | null
+          status: Database["public"]["Enums"]["session_status"]
           subtitle: string | null
           title: string
           type: Database["public"]["Enums"]["session_type"]
@@ -1894,13 +1997,15 @@ export type Database = {
           abstract?: string | null
           audience?: Database["public"]["Enums"]["session_audience"]
           capacity?: number | null
-          ends_at: string
+          ends_at?: string | null
           event_id: string
           id?: string
           is_mandatory?: boolean
           location?: string | null
+          proposed_by?: string | null
           speaker_email?: string | null
-          starts_at: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["session_status"]
           subtitle?: string | null
           title: string
           type: Database["public"]["Enums"]["session_type"]
@@ -1910,13 +2015,15 @@ export type Database = {
           abstract?: string | null
           audience?: Database["public"]["Enums"]["session_audience"]
           capacity?: number | null
-          ends_at?: string
+          ends_at?: string | null
           event_id?: string
           id?: string
           is_mandatory?: boolean
           location?: string | null
+          proposed_by?: string | null
           speaker_email?: string | null
-          starts_at?: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["session_status"]
           subtitle?: string | null
           title?: string
           type?: Database["public"]["Enums"]["session_type"]
@@ -1928,6 +2035,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_proposed_by_fkey"
+            columns: ["proposed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -2225,6 +2339,14 @@ export type Database = {
       is_leadership_user: { Args: never; Returns: boolean }
       is_self_or_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      list_event_attendees_for_typeahead: {
+        Args: { p_event_id: string; p_limit?: number; p_query?: string }
+        Returns: {
+          display_name: string
+          email: string
+          user_id: string
+        }[]
+      }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_my_registration_task_complete: {
         Args: { p_task_key: string }
@@ -2369,6 +2491,7 @@ export type Database = {
         | "waitlisted"
         | "attended"
         | "no_show"
+      session_status: "proposed" | "active"
       session_type:
         | "keynote"
         | "breakout"
@@ -2584,6 +2707,7 @@ export const Constants = {
         "attended",
         "no_show",
       ],
+      session_status: ["proposed", "active"],
       session_type: [
         "keynote",
         "breakout",

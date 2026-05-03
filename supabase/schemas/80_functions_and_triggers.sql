@@ -245,6 +245,13 @@ begin
 
   select * into v_session from public.sessions where id = new.session_id;
 
+  -- Proposed sessions don't have a schedule slot yet; skip materialisation.
+  -- The corresponding row will land here when the admin promotes the
+  -- proposal and the user (re-)registers.
+  if v_session.status <> 'active' or v_session.starts_at is null then
+    return new;
+  end if;
+
   insert into public.itinerary_items (
     user_id, event_id, item_type, source, source_id,
     title, subtitle, starts_at, starts_tz, ends_at, ends_tz, includes_guest
@@ -287,6 +294,21 @@ begin
     delete from public.itinerary_items
      where source_id = old.id and item_type = 'session';
     return old;
+  end if;
+
+  -- Demoted active -> proposed: clear registrations and the materialised
+  -- itinerary rows. The session_registrations DELETE trigger handles the
+  -- itinerary cleanup; the explicit delete here covers any orphaned rows.
+  if new.status = 'proposed' and old.status = 'active' then
+    delete from public.session_registrations where session_id = new.id;
+    delete from public.itinerary_items
+     where source_id = new.id and item_type = 'session';
+    return new;
+  end if;
+
+  -- No materialised rows exist for proposals; nothing to update.
+  if new.status <> 'active' then
+    return new;
   end if;
 
   select time_zone into v_tz from public.events where id = new.event_id;
@@ -1206,3 +1228,91 @@ drop trigger if exists document_acks_complete_task on public.document_acknowledg
 create trigger document_acks_complete_task
   after insert on public.document_acknowledgements
   for each row execute function public.maybe_complete_documents_task();
+
+
+-- Default session tags applied to every new event. Admins can rename,
+-- recolor, reorder, add to, or delete from this set later.
+create or replace function public.ensure_default_session_tags()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  insert into public.session_tags (event_id, name, color, position) values
+    (new.id, 'General Session', '#64748b', 0),
+    (new.id, 'Engineering',     '#3ecf8e', 1),
+    (new.id, 'Marketing',       '#ec4899', 2),
+    (new.id, 'Sales',           '#3b82f6', 3),
+    (new.id, 'Support',         '#a855f7', 4),
+    (new.id, 'People',          '#f97316', 5)
+  on conflict (event_id, name) do nothing;
+  return new;
+end
+$$;
+
+drop trigger if exists ensure_default_session_tags_aiu on public.events;
+create trigger ensure_default_session_tags_aiu
+  after insert on public.events
+  for each row execute function public.ensure_default_session_tags();
+
+
+-- Speaker / proposer typeahead. Returns event attendees (registered users
+-- plus, on invite_all_employees events, every active employee) matching
+-- the substring query on email or name. SECURITY DEFINER so a user with
+-- no direct visibility into another's profile can still browse the
+-- attendee list when picking a speaker — same trust model as the
+-- people-matching directory, narrowed to attendees of one event.
+create or replace function public.list_event_attendees_for_typeahead(
+  p_event_id uuid,
+  p_query text default '',
+  p_limit int default 20
+)
+returns table (
+  user_id uuid,
+  email text,
+  display_name text
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  with attendees as (
+    select u.id, u.email, ep.preferred_name as ep_pref, ep.legal_name as ep_legal,
+           gp.preferred_name as gp_pref, gp.legal_name as gp_legal
+    from public.users u
+    left join public.employee_profiles ep on ep.user_id = u.id
+    left join public.guest_profiles gp on gp.user_id = u.id
+    where u.is_active
+      and (
+        exists (
+          select 1 from public.registrations r
+           where r.user_id = u.id and r.event_id = p_event_id
+        )
+        or exists (
+          select 1 from public.events e
+           where e.id = p_event_id
+             and e.invite_all_employees
+             and u.role = 'employee'
+        )
+      )
+  )
+  select id as user_id,
+         email,
+         coalesce(ep_pref, ep_legal, gp_pref, gp_legal, email) as display_name
+    from attendees
+   where coalesce(p_query, '') = ''
+      or email      ilike '%' || p_query || '%'
+      or coalesce(ep_pref,  '') ilike '%' || p_query || '%'
+      or coalesce(ep_legal, '') ilike '%' || p_query || '%'
+      or coalesce(gp_pref,  '') ilike '%' || p_query || '%'
+      or coalesce(gp_legal, '') ilike '%' || p_query || '%'
+   order by display_name
+   limit p_limit
+$$;
+
+revoke all on function public.list_event_attendees_for_typeahead(uuid, text, int) from public;
+grant execute on function public.list_event_attendees_for_typeahead(uuid, text, int) to authenticated;
+
+comment on function public.list_event_attendees_for_typeahead(uuid, text, int) is
+  'Returns up to p_limit attendees of the event whose email or name matches p_query. Used by the speaker typeahead in session forms.';

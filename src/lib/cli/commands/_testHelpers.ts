@@ -33,6 +33,18 @@ class QueryBuilder {
   select(): QueryBuilder {
     return this;
   }
+  insert(): QueryBuilder {
+    return this;
+  }
+  update(): QueryBuilder {
+    return this;
+  }
+  delete(): QueryBuilder {
+    return this;
+  }
+  upsert(): QueryBuilder {
+    return this;
+  }
   eq(): QueryBuilder {
     return this;
   }
@@ -90,7 +102,7 @@ class QueryBuilder {
 
   private terminal(): TerminalResult {
     const result = this.resolver();
-    if (this.maybe === 'maybe' && Array.isArray(result.data)) {
+    if (this.maybe !== null && Array.isArray(result.data)) {
       const data: unknown = result.data[0] ?? null;
       return { ...result, data };
     }

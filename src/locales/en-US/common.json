@@ -65,7 +65,8 @@
       "outputShape": "The command returned an unexpected shape. Report this.",
       "internal": "The command failed.",
       "noActiveEvent": "No active event is configured.",
-      "eventNotFound": "Event not found."
+      "eventNotFound": "Event not found.",
+      "idRequired": "An id is required."
     },
     "commands": {
       "help": {
@@ -111,6 +112,22 @@
       "sessions": {
         "summary": "List sessions for the active event.",
         "description": "Shows all sessions, optionally filtered by day, track, or capacity."
+      },
+      "sessionsPropose": {
+        "summary": "Propose a new session.",
+        "description": "Submits a session idea for community voting. Admins promote winners onto the agenda."
+      },
+      "sessionsProposeList": {
+        "summary": "List proposed sessions.",
+        "description": "Shows every proposed session for the active event with vote counts."
+      },
+      "sessionsProposeVote": {
+        "summary": "Vote for a proposal.",
+        "description": "Adds your one-time thumbs-up to a proposed session."
+      },
+      "sessionsProposeDelete": {
+        "summary": "Delete a proposal you submitted.",
+        "description": "Removes one of your own proposals. Admin-promoted sessions cannot be deleted this way."
       },
       "events": {
         "summary": "List events you can access.",
@@ -939,6 +956,35 @@
       "errorRow": "Row {{row}}",
       "currentSessions_one": "Current schedule ({{count}} session)",
       "currentSessions_other": "Current schedule ({{count}} sessions)",
+      "proposalsHeader_one": "Proposals ({{count}})",
+      "proposalsHeader_other": "Proposals ({{count}})",
+      "proposalsEmpty": "No proposals yet.",
+      "proposalsVoters": "Voters",
+      "proposalsSearchPlaceholder": "Search by title, abstract, or proposer",
+      "proposalsSearchLabel": "Search proposals",
+      "proposalsSortLabel": "Sort proposals",
+      "proposalsSort": {
+        "votes": "Most votes",
+        "proposer": "Proposed by"
+      },
+      "editTags": "Edit tags",
+      "tags": {
+        "title": "Edit Tags",
+        "description": "Tags appear as colored pills on every session card. Pick a color and a name; reorder later.",
+        "newName": "New tag name",
+        "color": "Color",
+        "placeholder": "e.g. Workshops",
+        "add": "Add tag",
+        "added": "Tag added.",
+        "deleted": "Tag removed.",
+        "deleteConfirm": "Delete the \"{{name}}\" tag? Sessions tagged with it will lose the label.",
+        "colorLabel": "Color for {{name}}",
+        "nameLabel": "Tag name"
+      },
+      "statuses": {
+        "proposed": "Proposed",
+        "active": "On the agenda"
+      },
       "empty": "No sessions yet. Import a CSV or add them via the admin agenda viewer.",
       "addSession": "Add session",
       "editSession": "Edit session",
@@ -952,14 +998,18 @@
         "subtitle": "Subtitle",
         "type": "Type",
         "audience": "Audience",
+        "status": "Status",
+        "statusHint": "Move back to Proposed to clear all registrations and the schedule slot.",
         "startsAt": "Starts at",
         "endsAt": "Ends at",
         "timeZoneHint": "Local time at the event ({{timeZone}}).",
         "location": "Location",
         "capacity": "Capacity",
         "speakerEmail": "Speaker email",
+        "speaker": "Speaker",
+        "speakerPlaceholder": "Start typing a name or email",
         "abstract": "Abstract",
-        "mandatory": "Auto-add to every relevant attendee's itinerary"
+        "mandatory": "Mandatory session for all employees"
       },
       "types": {
         "keynote": "Keynote",
@@ -1161,12 +1211,45 @@
     "noFavorites": "You have not starred any sessions yet.",
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
+    "mandatoryLabel": "Mandatory session — always in your agenda",
     "filters": {
       "all": "All ({{count}})",
-      "favorites": "My picks ({{count}})"
+      "favorites": "My picks ({{count}})",
+      "proposed": "Proposed ({{count}})"
     },
     "allDays": "All days",
-    "dayFilterLabel": "Filter by day"
+    "proposed": "Proposed",
+    "dayFilterLabel": "Filter by day",
+    "tags": {
+      "fieldLabel": "Tags",
+      "fieldHint": "Pick at least one to help attendees filter the agenda.",
+      "empty": "No tags configured for this event yet."
+    },
+    "speakerTypeahead": {
+      "loading": "Searching attendees…",
+      "empty": "No matching attendees."
+    },
+    "proposals": {
+      "proposeButton": "Propose a session",
+      "dialogTitle": "Propose a Session",
+      "editTitle": "Edit Proposal",
+      "editWarning": "Heads up: editing this proposal will erase all of its existing votes.",
+      "editAction": "Edit \"{{title}}\"",
+      "deleteAction": "Delete \"{{title}}\"",
+      "deleteConfirm": "Delete the proposal \"{{title}}\"? This cannot be undone.",
+      "submit": "Submit proposal",
+      "submitted": "Proposal submitted. Thanks!",
+      "updated": "Proposal updated. Votes were cleared.",
+      "deleted": "Proposal deleted.",
+      "empty": "No proposals yet. Be the first to propose a session.",
+      "proposedBy": "Proposed by {{name}}",
+      "unknownProposer": "an attendee",
+      "vote": "Vote",
+      "alreadyVoted_one": "Voted ({{count}} vote)",
+      "alreadyVoted_other": "Voted ({{count}} votes)",
+      "voteCount_one": "{{count}} vote",
+      "voteCount_other": "{{count}} votes"
+    }
   },
   "shareReport": {
     "eyebrow": "Kizuna shared report",

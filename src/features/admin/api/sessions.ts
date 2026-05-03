@@ -6,6 +6,7 @@ type SessionInsert = Database['public']['Tables']['sessions']['Insert'];
 type SessionUpdate = Database['public']['Tables']['sessions']['Update'];
 export type SessionType = Database['public']['Enums']['session_type'];
 export type SessionAudience = Database['public']['Enums']['session_audience'];
+export type SessionStatus = Database['public']['Enums']['session_status'];
 
 export async function fetchAllSessions(
   client: AppSupabaseClient,
@@ -15,7 +16,7 @@ export async function fetchAllSessions(
     .from('sessions')
     .select('*')
     .eq('event_id', eventId)
-    .order('starts_at', { ascending: true });
+    .order('starts_at', { ascending: true, nullsFirst: false });
   if (error) throw error;
   return data ?? [];
 }

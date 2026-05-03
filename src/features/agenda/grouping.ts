@@ -10,7 +10,8 @@ export interface DayBucket<T> {
   sessions: T[];
 }
 
-export function dayKey(iso: string, timeZone: string): string {
+export function dayKey(iso: string | null, timeZone: string): string {
+  if (!iso) return '';
   return new Intl.DateTimeFormat('en-CA', {
     year: 'numeric',
     month: '2-digit',
@@ -19,7 +20,8 @@ export function dayKey(iso: string, timeZone: string): string {
   }).format(new Date(iso));
 }
 
-export function dayHeading(iso: string, timeZone: string): string {
+export function dayHeading(iso: string | null, timeZone: string): string {
+  if (!iso) return '';
   return new Intl.DateTimeFormat(undefined, {
     weekday: 'long',
     month: 'short',
@@ -28,12 +30,13 @@ export function dayHeading(iso: string, timeZone: string): string {
   }).format(new Date(iso));
 }
 
-export function groupSessionsByDay<T extends { starts_at: string }>(
+export function groupSessionsByDay<T extends { starts_at: string | null }>(
   sessions: ReadonlyArray<T>,
   timeZone: string,
 ): DayBucket<T>[] {
   const map = new Map<string, T[]>();
   for (const s of sessions) {
+    if (!s.starts_at) continue;
     const key = dayKey(s.starts_at, timeZone);
     const bucket = map.get(key);
     if (bucket) {

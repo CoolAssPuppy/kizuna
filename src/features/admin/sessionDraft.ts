@@ -1,6 +1,6 @@
 import { utcIsoToZonedDateTimeLocal } from '@/lib/timezone';
 
-import type { SessionAudience, SessionRow, SessionType } from './api/sessions';
+import type { SessionAudience, SessionRow, SessionStatus, SessionType } from './api/sessions';
 
 export interface SessionDraft {
   id?: string;
@@ -8,6 +8,7 @@ export interface SessionDraft {
   subtitle: string;
   type: SessionType;
   audience: SessionAudience;
+  status: SessionStatus;
   /** Wall-clock "YYYY-MM-DDTHH:mm" in the event's timezone. */
   starts_at: string;
   ends_at: string;
@@ -16,6 +17,7 @@ export interface SessionDraft {
   is_mandatory: boolean;
   abstract: string;
   speaker_email: string;
+  tag_ids: string[];
 }
 
 const EMPTY_DRAFT: SessionDraft = {
@@ -23,6 +25,7 @@ const EMPTY_DRAFT: SessionDraft = {
   subtitle: '',
   type: 'breakout',
   audience: 'all',
+  status: 'active',
   starts_at: '',
   ends_at: '',
   location: '',
@@ -30,6 +33,7 @@ const EMPTY_DRAFT: SessionDraft = {
   is_mandatory: false,
   abstract: '',
   speaker_email: '',
+  tag_ids: [],
 };
 
 function fromIso(value: string | null, timeZone: string): string {
@@ -37,13 +41,18 @@ function fromIso(value: string | null, timeZone: string): string {
   return utcIsoToZonedDateTimeLocal(value, timeZone);
 }
 
-export function rowToDraft(row: SessionRow, timeZone: string): SessionDraft {
+export function rowToDraft(
+  row: SessionRow,
+  timeZone: string,
+  tagIds: ReadonlyArray<string> = [],
+): SessionDraft {
   return {
     id: row.id,
     title: row.title,
     subtitle: row.subtitle ?? '',
     type: row.type,
     audience: row.audience,
+    status: row.status,
     starts_at: fromIso(row.starts_at, timeZone),
     ends_at: fromIso(row.ends_at, timeZone),
     location: row.location ?? '',
@@ -51,9 +60,10 @@ export function rowToDraft(row: SessionRow, timeZone: string): SessionDraft {
     is_mandatory: row.is_mandatory,
     abstract: row.abstract ?? '',
     speaker_email: row.speaker_email ?? '',
+    tag_ids: [...tagIds],
   };
 }
 
 export function emptySessionDraft(): SessionDraft {
-  return { ...EMPTY_DRAFT };
+  return { ...EMPTY_DRAFT, tag_ids: [] };
 }
