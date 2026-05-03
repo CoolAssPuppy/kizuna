@@ -59,7 +59,7 @@ export function PhotosScreen(): JSX.Element {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-8 sm:pt-10">
       <Button asChild variant="ghost" size="sm" className="-ml-3 mb-6">
         <Link to="/community" className="inline-flex items-center gap-2">
           <ArrowLeft aria-hidden className="h-4 w-4" />

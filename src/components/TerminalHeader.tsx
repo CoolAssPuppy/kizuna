@@ -5,7 +5,6 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { NotificationBell } from '@/features/notifications/NotificationBell';
 
 import { HeaderUserMenu } from './HeaderUserMenu';
-import { MobileNav } from './MobileNav';
 
 const NAV = [
   { to: '/', i18nKey: 'nav.home', label: 'home' },
@@ -21,10 +20,10 @@ export function TerminalHeader(): JSX.Element {
 
   return (
     <header
-      className="border-b"
+      className="sticky top-0 z-30 border-b pt-[env(safe-area-inset-top)]"
       style={{ backgroundColor: 'var(--c-bg)', borderColor: 'var(--c-rule)' }}
     >
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-8">
+      <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         <Link to="/" className="flex items-center gap-2.5 whitespace-nowrap text-[13px]">
           <span
             aria-hidden
@@ -73,11 +72,6 @@ export function TerminalHeader(): JSX.Element {
         <div className="flex items-center gap-3.5">
           {user ? <NotificationBell /> : null}
           <HeaderUserMenu />
-          {user ? (
-            <span className="lg:hidden">
-              <MobileNav />
-            </span>
-          ) : null}
         </div>
       </div>
     </header>

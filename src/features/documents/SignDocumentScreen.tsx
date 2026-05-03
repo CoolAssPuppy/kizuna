@@ -134,7 +134,7 @@ export function SignDocumentScreen(): JSX.Element {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <Button asChild variant="ghost" size="sm" className="-ml-3 mb-6">
         <Link to="/documents" className="inline-flex items-center gap-2">
           <ArrowLeft aria-hidden className="h-4 w-4" />

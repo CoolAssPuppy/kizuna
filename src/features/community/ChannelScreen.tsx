@@ -185,7 +185,7 @@ export function ChannelScreen(): JSX.Element {
   }
 
   return (
-    <main className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-8 py-10">
+    <main className="mx-auto flex h-[calc(100dvh-4rem)] w-full max-w-7xl flex-col px-4 py-6 sm:px-8 sm:py-10">
       <header
         className="flex items-center gap-4 border-b pb-6"
         style={{ borderColor: 'var(--c-rule)' }}

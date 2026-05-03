@@ -104,7 +104,7 @@ export function CommunityPersonScreen(): JSX.Element {
 
   if (personQ.isLoading || profileQ.isLoading) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
         <p className="text-sm" style={{ color: 'var(--c-muted)' }}>
           {t('app.loading')}
         </p>
@@ -114,7 +114,7 @@ export function CommunityPersonScreen(): JSX.Element {
 
   if (!person) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
         <BackLink />
         <p className="text-sm" style={{ color: 'var(--c-muted)' }}>
           {t('community.person.notFound')}
@@ -129,7 +129,7 @@ export function CommunityPersonScreen(): JSX.Element {
   const current = locationLabel(person.current_city, person.current_country);
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-8 sm:pt-10">
       <BackLink />
 
       <header className="mt-2 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">

@@ -95,7 +95,7 @@ export function CommunityScreen(): JSX.Element {
   }, [me, peopleQ.data]);
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl space-y-8 px-4 py-6 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">{t('community.title')}</h1>
