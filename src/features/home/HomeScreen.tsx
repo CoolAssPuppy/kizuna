@@ -267,7 +267,8 @@ function EventEtaPanel({
   // Stable rotation through the tip pool so attendees know what to expect
   // each morning. Uses tip count from i18n.
   const tipCount = Number.parseInt(t('home.terminal.dayTips.count'), 10) || 0;
-  const tipKey = day !== null && tipCount > 0 ? `home.terminal.dayTips.t${((day - 1) % tipCount) + 1}` : null;
+  const tipKey =
+    day !== null && tipCount > 0 ? `home.terminal.dayTips.t${((day - 1) % tipCount) + 1}` : null;
 
   const startLabel = new Date(startDate).toLocaleString('en-US', {
     timeZone,
@@ -433,9 +434,7 @@ function FeedQueueRow({ item, index }: { item: FeedItem; index: number }): JSX.E
         {KIND_LABELS[item.kind]}
       </span>
       <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
-        <span className="break-words text-base font-medium text-c-fg">
-          {snakeFile(item.title)}
-        </span>
+        <span className="break-words text-base font-medium text-c-fg">{snakeFile(item.title)}</span>
         <span className="break-words text-xs text-c-muted" style={{ lineHeight: 1.5 }}>
           {item.detail}
         </span>

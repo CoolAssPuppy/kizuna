@@ -356,7 +356,8 @@ function PerkPanel({
                       {b.tripName ?? `${b.origin} → ${b.destination}`}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {b.origin} → {b.destination} · {dateRange(b.earliestDeparture, b.latestArrival)}
+                      {b.origin} → {b.destination} ·{' '}
+                      {dateRange(b.earliestDeparture, b.latestArrival)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {t('itinerary.import.perk.legs', { count: b.segmentCount })}

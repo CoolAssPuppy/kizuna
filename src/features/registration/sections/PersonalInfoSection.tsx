@@ -122,9 +122,7 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="personal-middle">
-              {t('registration.personalInfo.middleInitial')}
-            </Label>
+            <Label htmlFor="personal-middle">{t('registration.personalInfo.middleInitial')}</Label>
             <Input
               id="personal-middle"
               maxLength={3}
@@ -207,7 +205,16 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
 function HibobReadOnlyFields({
   row,
 }: {
-  row: { job_title?: string | null; team?: string | null; start_date?: string | null; pronouns?: string | null; hibob_synced_at?: string | null } | null | undefined;
+  row:
+    | {
+        job_title?: string | null;
+        team?: string | null;
+        start_date?: string | null;
+        pronouns?: string | null;
+        hibob_synced_at?: string | null;
+      }
+    | null
+    | undefined;
 }): JSX.Element | null {
   const { t, i18n } = useTranslation();
   if (!row) return null;
@@ -235,7 +242,13 @@ function HibobReadOnlyFields({
   );
 }
 
-function ReadOnlyRow({ label, value }: { label: string; value: string | null | undefined }): JSX.Element | null {
+function ReadOnlyRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | null | undefined;
+}): JSX.Element | null {
   if (!value) return null;
   return (
     <div>
