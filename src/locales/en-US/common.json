@@ -42,6 +42,10 @@
     "help": "Type `help` for available commands, or `/` to focus the bar.",
     "copy": "Copy output",
     "copied": "Output copied",
+    "title": "Prompt",
+    "openPrompt": "Open prompt",
+    "results": "Command results",
+    "resultsLabel": "Results",
     "format": {
       "json": "JSON",
       "md": "Markdown"

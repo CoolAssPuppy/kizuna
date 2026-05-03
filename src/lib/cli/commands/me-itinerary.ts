@@ -72,7 +72,7 @@ registerCommand({
       : output.items
           .map(
             (item) =>
-              `- **${formatDateTime(item.startsAt)}** ${item.title}` +
+              `- **${formatDateTime(item.startsAt)}** [${item.title}](/itinerary)` +
               (item.location ? ` _(${item.location})_` : ''),
           )
           .join('\n'),

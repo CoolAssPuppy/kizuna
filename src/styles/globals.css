@@ -306,6 +306,15 @@
     }
   }
 
+  /* Suppress the global :focus-visible ring on the terminal input. The
+     containing label uses background-color to indicate the active state. */
+  .terminal-input,
+  .terminal-input:focus,
+  .terminal-input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+
   .terminal-cursor {
     display: inline-block;
     width: 0.5em;

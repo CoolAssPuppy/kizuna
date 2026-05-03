@@ -55,9 +55,10 @@ registerCommand({
     output.documents.length === 0
       ? '_No documents need your attention._'
       : output.documents
-          .map(
-            (document) =>
-              `- ${document.signed ? '✓' : '◯'} **${document.title}** _v${document.version}_`,
-          )
+          .map((document) => {
+            const href = document.signed ? '/documents' : `/documents/${document.id}/sign`;
+            const mark = document.signed ? '✓' : '◯';
+            return `- ${mark} [**${document.title}**](${href}) _v${document.version}_`;
+          })
           .join('\n'),
 });

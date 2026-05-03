@@ -107,7 +107,8 @@ registerCommand({
             const meta = [match.team, match.hobbies.join(', ')]
               .filter((part) => part && part.length > 0)
               .join(' · ');
-            return `- **@${match.handle}** ${match.fullName}${meta ? ` _(${meta})_` : ''}`;
+            const link = `[**@${match.handle}**](/community/p/${match.userId})`;
+            return `- ${link} ${match.fullName}${meta ? ` _(${meta})_` : ''}`;
           })
           .join('\n'),
 });

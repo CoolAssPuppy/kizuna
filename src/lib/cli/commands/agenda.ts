@@ -53,6 +53,6 @@ registerCommand({
     output.sessions.length === 0
       ? '_No sessions for this day._'
       : output.sessions
-          .map((session) => `- **${formatDateTime(session.startsAt)}** ${session.title}`)
+          .map((session) => `- **${formatDateTime(session.startsAt)}** [${session.title}](/agenda)`)
           .join('\n'),
 });

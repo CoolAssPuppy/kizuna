@@ -33,5 +33,10 @@ registerCommand({
   toMarkdown: (output) =>
     output.channels.length === 0
       ? '_No channels._'
-      : output.channels.map((channel) => `- **#${channel.slug}** ${channel.name}`).join('\n'),
+      : output.channels
+          .map(
+            (channel) =>
+              `- [**#${channel.slug}**](/community/channels/${channel.slug}) ${channel.name}`,
+          )
+          .join('\n'),
 });

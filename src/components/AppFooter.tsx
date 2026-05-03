@@ -1,5 +1,6 @@
 import { FooterTagline } from './FooterTagline';
 import { LanguagePicker } from './LanguagePicker';
+import { MobilePrompt } from './MobilePrompt';
 import { SupabaseWordmark } from './SupabaseWordmark';
 import { ThemePicker } from './ThemePicker';
 
@@ -10,6 +11,7 @@ export function AppFooter(): JSX.Element {
         <SupabaseWordmark />
         <FooterTagline />
         <div className="flex items-center gap-3 md:ml-auto">
+          <MobilePrompt />
           <LanguagePicker />
           <ThemePicker />
         </div>

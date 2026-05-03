@@ -1,38 +1,20 @@
-import { useMemo, useRef, useState } from 'react';
+import { X } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { CommandOutput } from '@/components/CommandOutput';
-import { useAuth } from '@/features/auth/AuthContext';
+import { TerminalResults } from '@/components/TerminalResults';
 import { useMountEffect } from '@/hooks/useMountEffect';
-import { allCommands, dispatch, type CommandResult } from '@/lib/cli';
-import type { CommandRole } from '@/lib/cli';
-import { getSupabaseClient } from '@/lib/supabase';
+import { useTerminal, type TerminalHistoryEntry } from '@/hooks/useTerminal';
 
-interface HistoryEntry {
-  command: string;
-  durationMs: number;
-  result: CommandResult;
-}
-
-const HISTORY_KEY = 'kizuna.terminal.history';
-const HISTORY_LIMIT = 50;
-const RESULT_LIMIT = 5;
-
+/** Hidden below `lg` — phones use the full-screen `MobilePrompt` instead. */
 export function FooterTerminal(): JSX.Element {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [expanded, setExpanded] = useState(false);
-  const [value, setValue] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [history, setHistory] = useState<string[]>(() => readHistory());
-  const [historyIndex, setHistoryIndex] = useState<number | null>(null);
-  const [results, setResults] = useState<HistoryEntry[]>([]);
-
-  const completions = useMemo(() => allCommands().map((command) => command.path.join(' ')), []);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const { inputRef, value, setValue, busy, results, onKeyDown, expanded, setExpanded } =
+    useTerminal();
 
   useMountEffect(() => {
-    const onKeyDown = (event: KeyboardEvent): void => {
+    const onKey = (event: KeyboardEvent): void => {
       if (isEditableTarget(event.target)) return;
       if (event.key === '/') {
         event.preventDefault();
@@ -40,153 +22,102 @@ export function FooterTerminal(): JSX.Element {
         inputRef.current?.focus();
       }
     };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   });
 
-  const runCommand = async (): Promise<void> => {
-    const raw = value.trim();
-    if (!raw || !user) return;
-
-    setBusy(true);
-    const started = performance.now();
-    const controller = new AbortController();
-    // The web terminal is a UI surface, not an API client — every
-    // command is rendered via the per-command `toMarkdown` formatter so
-    // users see prose, not raw JSON. The format override here forces
-    // the dispatcher to populate `result.markdown` regardless of the
-    // typed `--format` flag.
-    const result = await dispatch(
-      { raw, format: 'md' },
-      {
-        supabase: getSupabaseClient(),
-        user: { id: user.id, email: user.email, role: user.role },
-        role: toCommandRole(user.role),
-        patScope: null,
-        t: (key, vars) => t(key, vars as Record<string, unknown>),
-        signal: controller.signal,
-      },
-    );
-    const entry = {
-      command: raw,
-      durationMs: Math.round(performance.now() - started),
-      result,
-    };
-    setResults((current) => [entry, ...current].slice(0, RESULT_LIMIT));
-    setHistory((current) => writeHistory([raw, ...current.filter((item) => item !== raw)]));
-    setHistoryIndex(null);
-    setValue('');
-    setExpanded(true);
-    setBusy(false);
-  };
-
-  const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
-    if (event.key === 'Escape') {
-      event.currentTarget.blur();
-      setExpanded(false);
-      return;
-    }
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      void runCommand();
-      return;
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      const next = historyIndex === null ? 0 : Math.min(historyIndex + 1, history.length - 1);
-      setHistoryIndex(next);
-      setValue(history[next] ?? '');
-      return;
-    }
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      if (historyIndex === null) return;
-      const next = historyIndex - 1;
-      setHistoryIndex(next >= 0 ? next : null);
-      setValue(next >= 0 ? (history[next] ?? '') : '');
-      return;
-    }
-    if (event.ctrlKey && event.key.toLowerCase() === 'l') {
-      event.preventDefault();
-      setResults([]);
-      return;
-    }
-    if (event.key === 'Tab') {
-      const completion = completions.find((candidate) => candidate.startsWith(value.trim()));
-      if (completion) {
-        event.preventDefault();
-        setValue(completion);
-      }
-    }
-  };
-
   return (
-    <div className="border-t" style={{ borderColor: 'var(--c-rule)' }}>
+    <div
+      ref={wrapperRef}
+      className="relative hidden border-t lg:block"
+      style={{ borderColor: 'var(--c-rule)' }}
+    >
       {expanded ? (
-        <div
-          className="mx-auto flex max-h-80 w-full max-w-7xl flex-col-reverse gap-3 overflow-y-auto px-4 py-3 sm:px-8"
-          aria-live="polite"
-        >
-          {results.length === 0 ? (
-            <p className="text-xs text-muted-foreground">{t('terminal.help')}</p>
-          ) : (
-            results.map((entry) => (
-              <CommandOutput
-                key={`${entry.command}-${entry.durationMs}`}
-                command={entry.command}
-                durationMs={entry.durationMs}
-                result={entry.result}
-              />
-            ))
-          )}
-        </div>
-      ) : null}
-      <label
-        className="flex cursor-text items-center gap-2 px-4 py-3"
-        style={{
-          backgroundColor: 'var(--c-surface-soft)',
-          borderColor: 'var(--c-rule)',
-        }}
-      >
-        <span style={{ color: 'var(--c-accent)' }}>$</span>
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          onFocus={() => setExpanded(true)}
-          onKeyDown={onKeyDown}
-          disabled={busy}
-          placeholder={t('terminal.placeholder')}
-          aria-label={t('terminal.label')}
-          className="min-w-0 flex-1 bg-transparent font-mono text-xs outline-none placeholder:text-muted-foreground"
+        <ResultsPanel
+          containerRef={wrapperRef}
+          onDismiss={() => setExpanded(false)}
+          results={results}
         />
-        <span className="terminal-cursor" />
-      </label>
+      ) : null}
+      <div
+        style={{ backgroundColor: 'var(--c-surface-soft)' }}
+        className="transition-colors has-[input:focus]:[background-color:var(--c-surface)]"
+      >
+        <label className="mx-auto flex w-full max-w-7xl cursor-text items-center gap-2 px-4 py-3 sm:px-8">
+          <span style={{ color: 'var(--c-accent)' }}>$</span>
+          <input
+            ref={inputRef}
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            onFocus={() => setExpanded(true)}
+            onKeyDown={onKeyDown}
+            readOnly={busy}
+            placeholder={t('terminal.placeholder')}
+            aria-label={t('terminal.label')}
+            className="terminal-input min-w-0 flex-1 bg-transparent font-mono text-xs placeholder:text-muted-foreground"
+          />
+          <span className="terminal-cursor" />
+        </label>
+      </div>
     </div>
   );
 }
 
-function readHistory(): string[] {
-  try {
-    return JSON.parse(sessionStorage.getItem(HISTORY_KEY) ?? '[]') as string[];
-  } catch {
-    return [];
-  }
+interface ResultsPanelProps {
+  containerRef: React.RefObject<HTMLDivElement>;
+  onDismiss: () => void;
+  results: TerminalHistoryEntry[];
 }
 
-function writeHistory(history: string[]): string[] {
-  const next = history.slice(0, HISTORY_LIMIT);
-  sessionStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-  return next;
+function ResultsPanel({ containerRef, onDismiss, results }: ResultsPanelProps): JSX.Element {
+  const { t } = useTranslation();
+
+  useMountEffect(() => {
+    const onPointerDown = (event: PointerEvent): void => {
+      if (!containerRef.current) return;
+      if (containerRef.current.contains(event.target as Node)) return;
+      onDismiss();
+    };
+    window.addEventListener('pointerdown', onPointerDown);
+    return () => window.removeEventListener('pointerdown', onPointerDown);
+  });
+
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-full">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-8">
+        <div
+          className="pointer-events-auto mb-2 overflow-hidden rounded-lg border bg-background shadow-[0_-16px_40px_-16px_rgba(0,0,0,0.5)]"
+          style={{ borderColor: 'var(--c-accent)' }}
+          role="dialog"
+          aria-label={t('terminal.results')}
+        >
+          <header
+            className="flex items-center justify-between border-b-2 bg-muted px-3 py-2 text-foreground"
+            style={{ borderColor: 'var(--c-accent)' }}
+          >
+            <span
+              className="font-mono text-xs font-semibold uppercase tracking-widest"
+              style={{ color: 'var(--c-accent)' }}
+            >
+              {t('terminal.resultsLabel')}
+            </span>
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="inline-flex h-7 w-7 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label={t('actions.close')}
+            >
+              <X aria-hidden className="h-4 w-4" />
+            </button>
+          </header>
+          <TerminalResults entries={results} className="max-h-[60vh] px-4 py-3 sm:px-6" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) || target.isContentEditable;
-}
-
-function toCommandRole(role: string): CommandRole {
-  if (role === 'super_admin') return 'super_admin';
-  if (role === 'admin') return 'admin';
-  return 'attendee';
 }

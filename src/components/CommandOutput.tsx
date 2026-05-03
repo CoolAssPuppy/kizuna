@@ -1,7 +1,8 @@
 import { Check, Clipboard } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
+import { Link } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 
 import { Button } from '@/components/ui/button';
@@ -81,11 +82,37 @@ function renderBody(result: CommandResult): RenderedBody {
     copyText: markdown,
     node: (
       <div className="prose prose-sm dark:prose-invert prose-p:my-2 prose-li:my-1 prose-pre:my-2 prose-headings:mb-2 prose-headings:mt-3 max-w-none break-words">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+          {markdown}
+        </ReactMarkdown>
       </div>
     ),
   };
 }
+
+// Route in-app links through React Router so clicking a result does
+// not trigger a full reload.
+const MARKDOWN_COMPONENTS: Components = {
+  a: ({ href, children, ...props }) => {
+    if (typeof href === 'string' && href.startsWith('/')) {
+      return (
+        <Link to={href} {...props}>
+          {children}
+        </Link>
+      );
+    }
+    const isExternal = typeof href === 'string' && /^https?:\/\//i.test(href);
+    return (
+      <a
+        href={href}
+        {...props}
+        {...(isExternal ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
+      >
+        {children}
+      </a>
+    );
+  },
+};
 
 function toFallbackMarkdown(data: unknown): string {
   if (data === null || data === undefined) return '_No data._';

@@ -87,7 +87,7 @@ registerCommand({
       : output.sessions
           .map(
             (session) =>
-              `- **${formatDateTime(session.startsAt)}** ${session.title}` +
+              `- **${formatDateTime(session.startsAt)}** [${session.title}](/agenda)` +
               (session.mandatory ? ' _(mandatory)_' : ''),
           )
           .join('\n'),
