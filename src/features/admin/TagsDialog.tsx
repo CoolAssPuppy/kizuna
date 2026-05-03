@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,7 @@ import {
   createTag,
   deleteTag,
   fetchEventTags,
+  reorderTags,
   updateTag,
 } from '@/features/agenda/tagsApi';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -38,6 +39,7 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(DEFAULT_NEW_COLOR);
+  const [dragId, setDragId] = useState<string | null>(null);
 
   const { data: tags = [] } = useQuery({
     queryKey: ['agenda', 'tags', eventId],
@@ -63,10 +65,16 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
   });
 
   const update = useMutation({
-    mutationFn: (args: {
-      id: string;
-      patch: Partial<Pick<SessionTag, 'name' | 'color' | 'position'>>;
-    }) => updateTag(getSupabaseClient(), args.id, args.patch),
+    mutationFn: (args: { id: string; patch: Partial<Pick<SessionTag, 'name' | 'color'>> }) =>
+      updateTag(getSupabaseClient(), args.id, args.patch),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['agenda', 'tags', eventId] });
+    },
+    onError: (err: Error) => show(err.message, 'error'),
+  });
+
+  const reorder = useMutation({
+    mutationFn: (orderedIds: string[]) => reorderTags(getSupabaseClient(), orderedIds),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['agenda', 'tags', eventId] });
     },
@@ -82,15 +90,17 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
-  // Swap positions with the neighbour above/below so the visible order
-  // mirrors the persisted `position` field. We rewrite both rows so
-  // ties never form.
-  function move(index: number, direction: -1 | 1): void {
-    const target = tags[index + direction];
-    const current = tags[index];
-    if (!target || !current) return;
-    update.mutate({ id: current.id, patch: { position: target.position } });
-    update.mutate({ id: target.id, patch: { position: current.position } });
+  function handleDrop(targetId: string): void {
+    if (!dragId || dragId === targetId) return;
+    const fromIdx = tags.findIndex((tag) => tag.id === dragId);
+    const toIdx = tags.findIndex((tag) => tag.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const next = tags.slice();
+    const [moved] = next.splice(fromIdx, 1);
+    if (!moved) return;
+    next.splice(toIdx, 0, moved);
+    reorder.mutate(next.map((tag) => tag.id));
+    setDragId(null);
   }
 
   return (
@@ -107,32 +117,23 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
 
         <div className="space-y-4 py-2">
           <ul className="space-y-2">
-            {tags.map((tag, index) => (
-              <li key={tag.id} className="flex items-center gap-2">
-                <div className="flex flex-col">
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-6"
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                    aria-label={t('admin.agenda.tags.moveUp', { name: tag.name })}
-                  >
-                    <ArrowUp aria-hidden className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="h-5 w-6"
-                    disabled={index === tags.length - 1}
-                    onClick={() => move(index, 1)}
-                    aria-label={t('admin.agenda.tags.moveDown', { name: tag.name })}
-                  >
-                    <ArrowDown aria-hidden className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+            {tags.map((tag) => (
+              <li
+                key={tag.id}
+                draggable
+                onDragStart={() => setDragId(tag.id)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(tag.id)}
+                onDragEnd={() => setDragId(null)}
+                className={cn(
+                  'flex items-center gap-2 rounded-md border bg-card px-2 py-1.5 transition-shadow',
+                  dragId === tag.id ? 'opacity-60' : 'hover:shadow-sm',
+                )}
+              >
+                <GripVertical
+                  aria-hidden
+                  className="h-4 w-4 shrink-0 cursor-grab text-muted-foreground"
+                />
                 <ColorField
                   value={tag.color}
                   onCommit={(color) => update.mutate({ id: tag.id, patch: { color } })}
@@ -210,19 +211,16 @@ interface ColorFieldProps {
 }
 
 /**
- * Color swatch + hex input bound to the same value. The native picker
- * fires `change` when the user finishes (so we don't churn with every
- * cursor move); the text field commits on blur or Enter and validates
- * against #rrggbb. Anything invalid silently snaps back to the last
- * good value so a stray keystroke can't poison the row.
+ * Color swatch + hex input. The native picker fires on change; the
+ * text field commits on blur or Enter and validates against #rrggbb.
+ * Anything invalid silently snaps back to the last good value so a
+ * stray keystroke can't poison the row.
+ *
+ * Local hex state is keyed on `value`, so when the parent value
+ * changes (after a save round-trip) the input remounts with the
+ * fresh value — no useEffect needed.
  */
 function ColorField({ value, onCommit, ariaLabel }: ColorFieldProps): JSX.Element {
-  const [hex, setHex] = useState(value);
-  // Keep local state in sync when the parent's value changes (e.g. after
-  // a successful save). Render-time sync avoids a banned useEffect.
-  if (hex !== value && !document.activeElement?.matches('input[type="text"]')) {
-    setHex(value);
-  }
   return (
     <div className="flex items-center gap-1">
       <input
@@ -232,27 +230,40 @@ function ColorField({ value, onCommit, ariaLabel }: ColorFieldProps): JSX.Elemen
         aria-label={ariaLabel}
         className="h-9 w-9 cursor-pointer rounded border bg-transparent p-0.5"
       />
-      <Input
-        type="text"
-        value={hex}
-        onChange={(e) => setHex(e.target.value)}
-        onBlur={() => {
-          if (HEX_PATTERN.test(hex) && hex.toLowerCase() !== value.toLowerCase()) {
-            onCommit(hex.toLowerCase());
-          } else {
-            setHex(value);
-          }
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            (e.target as HTMLInputElement).blur();
-          }
-        }}
-        spellCheck={false}
-        aria-label={ariaLabel}
-        className={cn('h-9 w-24 font-mono text-xs')}
-      />
+      <HexInput key={value} initial={value} onCommit={onCommit} ariaLabel={ariaLabel} />
     </div>
+  );
+}
+
+interface HexInputProps {
+  initial: string;
+  onCommit: (next: string) => void;
+  ariaLabel: string;
+}
+
+function HexInput({ initial, onCommit, ariaLabel }: HexInputProps): JSX.Element {
+  const [hex, setHex] = useState(initial);
+  return (
+    <Input
+      type="text"
+      value={hex}
+      onChange={(e) => setHex(e.target.value)}
+      onBlur={() => {
+        if (HEX_PATTERN.test(hex) && hex.toLowerCase() !== initial.toLowerCase()) {
+          onCommit(hex.toLowerCase());
+        } else {
+          setHex(initial);
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          (e.target as HTMLInputElement).blur();
+        }
+      }}
+      spellCheck={false}
+      aria-label={ariaLabel}
+      className="h-9 w-24 font-mono text-xs"
+    />
   );
 }

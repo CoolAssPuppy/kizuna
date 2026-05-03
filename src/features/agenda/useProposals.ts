@@ -55,6 +55,7 @@ export function useProposals(eventId: string): {
     onSettled: () => {
       if (!userId) return;
       void queryClient.invalidateQueries({ queryKey: queryKey(eventId, userId) });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'agenda', 'proposals'] });
     },
   });
 

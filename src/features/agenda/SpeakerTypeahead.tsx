@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Input } from '@/components/ui/input';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -23,12 +24,6 @@ interface Props {
   disabled?: boolean;
 }
 
-/**
- * Speaker picker. Custom popover-style typeahead: as the user types,
- * we query event attendees and render a small dropdown of "Name —
- * email" rows. Click writes the email back. Blur hides the panel
- * (with a brief delay so a click on a suggestion still registers).
- */
 export function SpeakerTypeahead({
   eventId,
   value,
@@ -39,14 +34,15 @@ export function SpeakerTypeahead({
 }: Props): JSX.Element {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const debouncedValue = useDebouncedValue(value, 200);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['agenda', 'speaker-typeahead', eventId, value],
+    queryKey: ['agenda', 'speaker-typeahead', eventId, debouncedValue],
     enabled: !disabled && Boolean(eventId),
     queryFn: async (): Promise<Suggestion[]> => {
       const { data, error } = await getSupabaseClient().rpc('list_event_attendees_for_typeahead', {
         p_event_id: eventId,
-        p_query: value,
+        p_query: debouncedValue,
         p_limit: 20,
       });
       if (error) throw error;

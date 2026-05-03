@@ -36,11 +36,6 @@ export const ProposalItem = z.object({
 const ProposalsListInput = z.object({ format: FormatFlag, args: Args }).strict();
 const ProposalsListOutput = z.object({ proposals: z.array(ProposalItem) });
 
-interface VoteRow {
-  session_id: string;
-  user_id: string;
-}
-
 interface AssignmentRow {
   session_id: string;
   session_tags: { id: string; name: string; color: string } | null;
@@ -88,7 +83,7 @@ registerCommand({
     if (votesRes.error) throw votesRes.error;
     if (assignmentsRes.error) throw assignmentsRes.error;
 
-    const votes = (votesRes.data ?? []) as VoteRow[];
+    const votes = votesRes.data ?? [];
     const assignments = (assignmentsRes.data ?? []) as unknown as AssignmentRow[];
 
     const counts = new Map<string, number>();
@@ -231,8 +226,8 @@ registerCommand({
     const { error } = await ctx.supabase
       .from('session_proposal_votes')
       .insert({ session_id: sessionId, user_id: ctx.user.id });
-    // 23505 = unique violation; user has already voted. Treat as a no-op
-    // success so the command is idempotent.
+    // 23505 = unique violation; user has already voted. Treat as a
+    // no-op so the command stays idempotent.
     if (error && error.code !== '23505') throw error;
     return { id: sessionId, voted: true };
   },

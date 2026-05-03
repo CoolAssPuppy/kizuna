@@ -1,3 +1,4 @@
+import { reorderRowsByPosition } from '@/lib/reorder';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -52,15 +53,10 @@ export async function deleteFeedItem(client: AppSupabaseClient, id: string): Pro
 /**
  * Bulk-renumber positions inside one (event, location) bucket. Called
  * from the admin drag-to-reorder UI: pass the ordered list of ids.
- * Issues parallel updates so the round-trip is one network turn.
  */
 export async function reorderFeedItems(
   client: AppSupabaseClient,
   args: { orderedIds: string[] },
 ): Promise<void> {
-  await Promise.all(
-    args.orderedIds.map((id, position) =>
-      client.from('feed_items').update({ position }).eq('id', id),
-    ),
-  );
+  await reorderRowsByPosition(client, 'feed_items', args.orderedIds);
 }

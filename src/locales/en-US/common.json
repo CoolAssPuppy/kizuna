@@ -993,9 +993,7 @@
         "deleteConfirm": "Delete the \"{{name}}\" tag? Sessions tagged with it will lose the label.",
         "colorLabel": "Color for {{name}}",
         "newColorLabel": "Color for new tag",
-        "nameLabel": "Tag name",
-        "moveUp": "Move {{name}} up",
-        "moveDown": "Move {{name}} down"
+        "nameLabel": "Tag name"
       },
       "statuses": {
         "proposed": "Proposed",

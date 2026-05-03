@@ -48,7 +48,6 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   const [filter, setFilter] = useState<FilterMode>('all');
   const [dayFilter, setDayFilter] = useState<string>('all');
   const [proposeDraft, setProposeDraft] = useState<SessionDraft | null>(null);
-  const [editingProposalId, setEditingProposalId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const { data, isLoading, error, toggleFavorite } = useAgenda(event.id);
   const { proposals, vote, isVoting, refetch } = useProposals(event.id);
@@ -115,7 +114,6 @@ export function AgendaScreen({ event }: Props): JSX.Element {
         show(t('agenda.proposals.submitted'));
       }
       setProposeDraft(null);
-      setEditingProposalId(null);
       void refetch();
     } catch (err) {
       show(err instanceof Error ? err.message : String(err), 'error');
@@ -136,7 +134,6 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   }
 
   function editProposal(proposal: ProposedSession): void {
-    setEditingProposalId(proposal.id);
     setProposeDraft(
       rowToDraft(
         proposal,
@@ -243,11 +240,8 @@ export function AgendaScreen({ event }: Props): JSX.Element {
         timeZone={event.time_zone}
         eventId={event.id}
         mode="propose"
-        warning={editingProposalId ? t('agenda.proposals.editWarning') : null}
-        onClose={() => {
-          setProposeDraft(null);
-          setEditingProposalId(null);
-        }}
+        warning={proposeDraft?.id ? t('agenda.proposals.editWarning') : null}
+        onClose={() => setProposeDraft(null)}
         onSave={(d) => {
           void submitProposal(d);
         }}

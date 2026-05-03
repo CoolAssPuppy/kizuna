@@ -87,8 +87,11 @@ export function AgendaAdminScreen(): JSX.Element {
     queryFn: () => (eventId ? fetchAllSessions(getSupabaseClient(), eventId) : Promise.resolve([])),
   });
 
+  // Keyed on session count so adding/removing a session refetches, but
+  // editing the title of an existing session doesn't churn the cache
+  // entry (the session id list is stable).
   const { data: tagsBySession = new Map<string, SessionTag[]>() } = useQuery({
-    queryKey: ['admin', 'agenda', 'session-tags', eventId, sessions?.map((s) => s.id) ?? []],
+    queryKey: ['admin', 'agenda', 'session-tags', eventId, sessions?.length ?? 0],
     enabled: eventId !== null && Boolean(sessions),
     queryFn: () =>
       fetchTagsForSessions(
@@ -171,8 +174,16 @@ export function AgendaAdminScreen(): JSX.Element {
   const save = useMutation({
     mutationFn: async (draft: SessionDraft) => {
       if (!eventId) throw new Error('No active event');
-      const capacity = draft.capacity.trim() ? Number.parseInt(draft.capacity.trim(), 10) : null;
       const isProposed = draft.status === 'proposed';
+      const capacity = draft.capacity.trim() ? Number.parseInt(draft.capacity.trim(), 10) : null;
+      const scheduleFields = isProposed
+        ? { starts_at: null, ends_at: null, location: null, capacity: null }
+        : {
+            starts_at: zonedDateTimeLocalToUtcIso(draft.starts_at, timeZone),
+            ends_at: zonedDateTimeLocalToUtcIso(draft.ends_at, timeZone),
+            location: draft.location.trim() || null,
+            capacity: Number.isFinite(capacity) ? capacity : null,
+          };
       const payload = {
         event_id: eventId,
         title: draft.title,
@@ -180,13 +191,10 @@ export function AgendaAdminScreen(): JSX.Element {
         type: draft.type,
         audience: draft.audience,
         status: draft.status,
-        starts_at: isProposed ? null : zonedDateTimeLocalToUtcIso(draft.starts_at, timeZone),
-        ends_at: isProposed ? null : zonedDateTimeLocalToUtcIso(draft.ends_at, timeZone),
-        location: isProposed ? null : draft.location.trim() || null,
-        capacity: isProposed ? null : Number.isFinite(capacity ?? NaN) ? capacity : null,
         is_mandatory: draft.is_mandatory,
         abstract: draft.abstract.trim() || null,
         speaker_email: draft.speaker_email.trim().toLowerCase() || null,
+        ...scheduleFields,
       };
       const row = draft.id
         ? await updateSession(getSupabaseClient(), draft.id, payload)

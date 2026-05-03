@@ -1,3 +1,4 @@
+import { reorderRowsByPosition } from '@/lib/reorder';
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
@@ -75,6 +76,13 @@ export async function updateTag(
 export async function deleteTag(client: AppSupabaseClient, id: string): Promise<void> {
   const { error } = await client.from('session_tags').delete().eq('id', id);
   if (error) throw error;
+}
+
+export async function reorderTags(
+  client: AppSupabaseClient,
+  orderedIds: ReadonlyArray<string>,
+): Promise<void> {
+  await reorderRowsByPosition(client, 'session_tags', orderedIds);
 }
 
 /**
