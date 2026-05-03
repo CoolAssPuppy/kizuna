@@ -18,6 +18,7 @@ import './me-notifications.ts';
 import './attendees.ts';
 import './sessions.ts';
 import './sessions-propose.ts';
+import './tags.ts';
 import './events.ts';
 import './agenda.ts';
 import './photos.ts';

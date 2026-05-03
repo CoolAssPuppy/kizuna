@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,7 +12,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/toast';
 import {
   type SessionTag,
@@ -22,8 +21,10 @@ import {
   updateTag,
 } from '@/features/agenda/tagsApi';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 const DEFAULT_NEW_COLOR = '#3ecf8e';
+const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
 
 interface Props {
   open: boolean;
@@ -62,8 +63,10 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
   });
 
   const update = useMutation({
-    mutationFn: (args: { id: string; patch: Partial<Pick<SessionTag, 'name' | 'color'>> }) =>
-      updateTag(getSupabaseClient(), args.id, args.patch),
+    mutationFn: (args: {
+      id: string;
+      patch: Partial<Pick<SessionTag, 'name' | 'color' | 'position'>>;
+    }) => updateTag(getSupabaseClient(), args.id, args.patch),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['agenda', 'tags', eventId] });
     },
@@ -79,6 +82,17 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
+  // Swap positions with the neighbour above/below so the visible order
+  // mirrors the persisted `position` field. We rewrite both rows so
+  // ties never form.
+  function move(index: number, direction: -1 | 1): void {
+    const target = tags[index + direction];
+    const current = tags[index];
+    if (!target || !current) return;
+    update.mutate({ id: current.id, patch: { position: target.position } });
+    update.mutate({ id: target.id, patch: { position: current.position } });
+  }
+
   return (
     <Dialog
       open={open}
@@ -92,17 +106,37 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <p className="text-sm text-muted-foreground">{t('admin.agenda.tags.description')}</p>
-
           <ul className="space-y-2">
-            {tags.map((tag) => (
+            {tags.map((tag, index) => (
               <li key={tag.id} className="flex items-center gap-2">
-                <input
-                  type="color"
+                <div className="flex flex-col">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-6"
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                    aria-label={t('admin.agenda.tags.moveUp', { name: tag.name })}
+                  >
+                    <ArrowUp aria-hidden className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-6"
+                    disabled={index === tags.length - 1}
+                    onClick={() => move(index, 1)}
+                    aria-label={t('admin.agenda.tags.moveDown', { name: tag.name })}
+                  >
+                    <ArrowDown aria-hidden className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+                <ColorField
                   value={tag.color}
-                  onChange={(e) => update.mutate({ id: tag.id, patch: { color: e.target.value } })}
-                  aria-label={t('admin.agenda.tags.colorLabel', { name: tag.name })}
-                  className="h-9 w-12 cursor-pointer rounded border bg-transparent p-0.5"
+                  onCommit={(color) => update.mutate({ id: tag.id, patch: { color } })}
+                  ariaLabel={t('admin.agenda.tags.colorLabel', { name: tag.name })}
                 />
                 <Input
                   defaultValue={tag.name}
@@ -133,32 +167,25 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
           </ul>
 
           <form
-            className="flex items-end gap-2 rounded-md border bg-muted/30 p-3"
+            className="flex items-center gap-2 rounded-md border bg-muted/30 p-3"
             onSubmit={(e) => {
               e.preventDefault();
               if (!newName.trim()) return;
               create.mutate();
             }}
           >
-            <div className="space-y-1.5">
-              <Label htmlFor="new-tag-color">{t('admin.agenda.tags.color')}</Label>
-              <input
-                id="new-tag-color"
-                type="color"
-                value={newColor}
-                onChange={(e) => setNewColor(e.target.value)}
-                className="h-9 w-12 cursor-pointer rounded border bg-transparent p-0.5"
-              />
-            </div>
-            <div className="flex-1 space-y-1.5">
-              <Label htmlFor="new-tag-name">{t('admin.agenda.tags.newName')}</Label>
-              <Input
-                id="new-tag-name"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder={t('admin.agenda.tags.placeholder')}
-              />
-            </div>
+            <ColorField
+              value={newColor}
+              onCommit={setNewColor}
+              ariaLabel={t('admin.agenda.tags.newColorLabel')}
+            />
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder={t('admin.agenda.tags.placeholder')}
+              aria-label={t('admin.agenda.tags.nameLabel')}
+              className="flex-1"
+            />
             <Button type="submit" disabled={!newName.trim() || create.isPending} className="gap-2">
               <Plus aria-hidden className="h-4 w-4" />
               {t('admin.agenda.tags.add')}
@@ -173,5 +200,59 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface ColorFieldProps {
+  value: string;
+  onCommit: (next: string) => void;
+  ariaLabel: string;
+}
+
+/**
+ * Color swatch + hex input bound to the same value. The native picker
+ * fires `change` when the user finishes (so we don't churn with every
+ * cursor move); the text field commits on blur or Enter and validates
+ * against #rrggbb. Anything invalid silently snaps back to the last
+ * good value so a stray keystroke can't poison the row.
+ */
+function ColorField({ value, onCommit, ariaLabel }: ColorFieldProps): JSX.Element {
+  const [hex, setHex] = useState(value);
+  // Keep local state in sync when the parent's value changes (e.g. after
+  // a successful save). Render-time sync avoids a banned useEffect.
+  if (hex !== value && !document.activeElement?.matches('input[type="text"]')) {
+    setHex(value);
+  }
+  return (
+    <div className="flex items-center gap-1">
+      <input
+        type="color"
+        value={value}
+        onChange={(e) => onCommit(e.target.value)}
+        aria-label={ariaLabel}
+        className="h-9 w-9 cursor-pointer rounded border bg-transparent p-0.5"
+      />
+      <Input
+        type="text"
+        value={hex}
+        onChange={(e) => setHex(e.target.value)}
+        onBlur={() => {
+          if (HEX_PATTERN.test(hex) && hex.toLowerCase() !== value.toLowerCase()) {
+            onCommit(hex.toLowerCase());
+          } else {
+            setHex(value);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLInputElement).blur();
+          }
+        }}
+        spellCheck={false}
+        aria-label={ariaLabel}
+        className={cn('h-9 w-24 font-mono text-xs')}
+      />
+    </div>
   );
 }

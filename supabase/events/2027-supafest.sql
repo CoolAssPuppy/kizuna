@@ -72,11 +72,28 @@ Sample code of conduct content. Real content will replace this in production.',
   -- (America/Edmonton in winter = MST, UTC-7) drives display.
   -- 18:00 MST = 01:00 UTC the next day.
   insert into public.sessions (event_id, title, subtitle, type, audience, starts_at, ends_at, location, is_mandatory, abstract, speaker_email) values
-    (v_event_id, 'Welcome dinner',      null, 'dinner',   'all',            '2027-01-12 01:00:00+00', '2027-01-12 04:00:00+00', 'Banff Springs ballroom', true,  'Kick-off dinner. Mandatory for all attendees.', null),
-    (v_event_id, 'Engineering keynote', 'Where we are headed in 2027', 'keynote',  'employees_only', '2027-01-12 16:00:00+00', '2027-01-12 17:30:00+00', 'Main hall',             true,  'A look at the year ahead.', 'paul@kizuna.dev'),
-    (v_event_id, 'Database deep dive',  'Postgres internals', 'breakout', 'opt_in',     '2027-01-12 18:00:00+00', '2027-01-12 19:00:00+00', 'Studio 2',              false, 'How the WAL actually works.', 'paul@kizuna.dev'),
-    (v_event_id, 'Mountain hike',       'Sulphur Mountain summit', 'activity', 'opt_in', '2027-01-13 16:00:00+00', '2027-01-13 20:00:00+00', 'Sulphur Mountain',      false, 'Bring layers and water. Pace is moderate.', null),
-    (v_event_id, 'Closing party',       null, 'social',   'all',           '2027-01-15 02:00:00+00', '2027-01-15 06:00:00+00', 'Hot springs lodge',     true,  'Send-off celebration.', null);
+    (v_event_id, 'Welcome dinner',      'Family-style dinner to kick off the week',     'dinner',   'all',            '2027-01-12 01:00:00+00', '2027-01-12 04:00:00+00', 'Banff Springs ballroom', true,  'Kick-off dinner. Mandatory for all attendees.', null),
+    (v_event_id, 'Engineering keynote', 'Where we are headed in 2027',                  'keynote',  'employees_only', '2027-01-12 16:00:00+00', '2027-01-12 17:30:00+00', 'Main hall',             true,  'A look at the year ahead.', 'paul@kizuna.dev'),
+    (v_event_id, 'Database deep dive',  'Postgres internals: WAL, MVCC, and vacuum',    'breakout', 'opt_in',         '2027-01-12 18:00:00+00', '2027-01-12 19:00:00+00', 'Studio 2',              false, 'How the WAL actually works.', 'paul@kizuna.dev'),
+    (v_event_id, 'Mountain hike',       'Sulphur Mountain summit, moderate pace',       'activity', 'opt_in',         '2027-01-13 16:00:00+00', '2027-01-13 20:00:00+00', 'Sulphur Mountain',      false, 'Bring layers and water. Pace is moderate.', null),
+    (v_event_id, 'Closing party',       'Hot springs send-off with live music',         'social',   'all',            '2027-01-15 02:00:00+00', '2027-01-15 06:00:00+00', 'Hot springs lodge',     true,  'Send-off celebration.', null);
+
+  -- Default tags are already created by the ensure_default_session_tags
+  -- trigger on event insert. Tag each sample session with its primary
+  -- audience so the pills render in the seed data.
+  insert into public.session_tag_assignments (session_id, tag_id)
+  select s.id, t.id
+  from public.sessions s, public.session_tags t
+  where s.event_id = v_event_id
+    and t.event_id = v_event_id
+    and (
+      (s.title = 'Welcome dinner'      and t.name = 'General Session')
+      or (s.title = 'Engineering keynote' and t.name = 'Engineering')
+      or (s.title = 'Database deep dive'  and t.name = 'Engineering')
+      or (s.title = 'Mountain hike'       and t.name = 'General Session')
+      or (s.title = 'Closing party'       and t.name = 'General Session')
+    )
+  on conflict do nothing;
 
   -- Editorial home-screen feed. Sample items demonstrating both
   -- locations. The SupaCup card was previously hardcoded into the home

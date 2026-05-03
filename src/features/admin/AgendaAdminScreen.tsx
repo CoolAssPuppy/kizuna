@@ -441,25 +441,27 @@ function SessionListItem({
       <button
         type="button"
         onClick={onEdit}
-        className="flex flex-1 flex-col items-start gap-0.5 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex flex-1 items-start gap-3 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="flex flex-wrap items-baseline justify-between gap-2 self-stretch">
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
           <span className="font-medium">{session.title}</span>
+          {session.subtitle ? (
+            <p className="text-xs text-muted-foreground">{session.subtitle}</p>
+          ) : null}
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            {t(`admin.agenda.types.${session.type}`)} ·{' '}
+            {t(`admin.agenda.audiences.${session.audience}`)}
+            {session.location ? ` · ${session.location}` : ''}
+          </p>
+        </div>
+        <div className="flex shrink-0 flex-col items-end gap-1">
           {session.starts_at ? (
             <span className="text-xs tabular-nums text-muted-foreground">
               {mediumDateTimeFormatter.format(new Date(session.starts_at))}
             </span>
           ) : null}
+          <TagPills tags={tags} className="justify-end" />
         </div>
-        {session.subtitle ? (
-          <p className="text-xs text-muted-foreground">{session.subtitle}</p>
-        ) : null}
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          {t(`admin.agenda.types.${session.type}`)} ·{' '}
-          {t(`admin.agenda.audiences.${session.audience}`)}
-          {session.location ? ` · ${session.location}` : ''}
-        </p>
-        <TagPills tags={tags} className="pt-1" />
       </button>
       <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <Button

@@ -129,6 +129,22 @@
         "summary": "Delete a proposal you submitted.",
         "description": "Removes one of your own proposals. Admin-promoted sessions cannot be deleted this way."
       },
+      "tagsList": {
+        "summary": "List session tags for the active event.",
+        "description": "Returns each tag with its color and ordering position."
+      },
+      "tagsCreate": {
+        "summary": "Create a session tag.",
+        "description": "Admin only. Pre-populated tags ship with every event; use this to add more."
+      },
+      "tagsUpdate": {
+        "summary": "Rename, recolor, or reorder a session tag.",
+        "description": "Admin only. Pass any combination of --name, --color (#rrggbb), and --position."
+      },
+      "tagsDelete": {
+        "summary": "Delete a session tag.",
+        "description": "Admin only. Sessions tagged with it lose the label."
+      },
       "events": {
         "summary": "List events you can access.",
         "description": "Shows past, future, or all visible events."
@@ -970,16 +986,16 @@
       "editTags": "Edit tags",
       "tags": {
         "title": "Edit Tags",
-        "description": "Tags appear as colored pills on every session card. Pick a color and a name; reorder later.",
-        "newName": "New tag name",
-        "color": "Color",
-        "placeholder": "e.g. Workshops",
+        "placeholder": "Tag name",
         "add": "Add tag",
         "added": "Tag added.",
         "deleted": "Tag removed.",
         "deleteConfirm": "Delete the \"{{name}}\" tag? Sessions tagged with it will lose the label.",
         "colorLabel": "Color for {{name}}",
-        "nameLabel": "Tag name"
+        "newColorLabel": "Color for new tag",
+        "nameLabel": "Tag name",
+        "moveUp": "Move {{name}} up",
+        "moveDown": "Move {{name}} down"
       },
       "statuses": {
         "proposed": "Proposed",
