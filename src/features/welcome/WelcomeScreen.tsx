@@ -25,7 +25,7 @@ export function WelcomeScreen(): JSX.Element {
 
   return (
     <main
-      className="relative flex min-h-screen items-center justify-center p-6 text-white"
+      className="relative flex min-h-dvh items-center justify-center p-6 text-white"
       style={{
         backgroundImage: `${overlay}, url(${backgroundUrl}), ${fallbackGradient}`,
         backgroundSize: 'cover',
@@ -35,7 +35,7 @@ export function WelcomeScreen(): JSX.Element {
       <section className="max-w-xl space-y-6 text-center">
         <span
           aria-hidden
-          className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-2xl font-bold backdrop-blur-sm"
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-2xl font-bold"
         >
           絆
         </span>

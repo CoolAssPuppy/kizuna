@@ -102,7 +102,31 @@
       "welcome": "Benvenuto a {{event}}.",
       "queueLabel": "CODA · {{count}} ELEMENTI",
       "queueSort": "ordine:scadenza ↓",
-      "live": "live"
+      "statsLabel": "EVENTO.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "live",
+      "nowLive": "Ora in diretta",
+      "dayHeading": "Benvenuto al giorno {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Ogni giorno siediti accanto a qualcuno che non conosci.",
+        "t2": "Chiedi a uno sconosciuto della sua città natale e ricorda la risposta.",
+        "t3": "Prendi l'ascensore senza il telefono, anche se è scomodo.",
+        "t4": "Iscriviti all'attività che ti spaventa un po'.",
+        "t5": "Scambia una piccola storia con quella di qualcun altro.",
+        "t6": "Stasera dimentica la posta. Stai presente all'after-party.",
+        "t7": "Prima di dormire, fai un riconoscimento pubblico a un collega.",
+        "t8": "Pranza una volta con un team diverso dal tuo.",
+        "t9": "Scrivi un nome che il primo giorno non conoscevi."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Curiosità Sul Nostro Evento",
     "factsSubtitle": "Lunga vita alla leggenda del Team 18.",

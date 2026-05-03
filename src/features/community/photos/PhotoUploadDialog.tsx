@@ -245,7 +245,13 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
                       }}
                       aria-label={t('photos.upload.editFile', { name: item.file.name })}
                     >
-                      <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />
+                      <img
+                        src={item.previewUrl}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                      />
                     </button>
                   </li>
                 ))}
@@ -321,8 +327,9 @@ function ItemEditor({
         <img
           src={item.previewUrl}
           alt=""
-          className="h-48 w-full object-contain sm:h-44"
-          style={{ backgroundColor: 'var(--c-surface)' }}
+          loading="lazy"
+          decoding="async"
+          className="h-48 w-full bg-c-surface object-contain sm:h-44"
         />
         <button
           type="button"

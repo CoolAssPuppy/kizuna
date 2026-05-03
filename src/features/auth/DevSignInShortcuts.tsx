@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { Button } from '@/components/ui/button';
+
 import { useAuth } from './AuthContext';
 
 interface Props {
@@ -53,22 +55,22 @@ export function DevSignInShortcuts({ disabled }: Props): JSX.Element {
         <p className="text-xs">{t('auth.dev.subtitle')}</p>
       </header>
       <div className="flex flex-col gap-2">
-        <button
+        <Button
           type="button"
+          variant="default"
           onClick={() => void handlePretend(DEV_EMPLOYEE)}
           disabled={disabled || busy}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
         >
           {t('auth.dev.asEmployee')}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="secondary"
           onClick={() => void handlePretend(DEV_ADMIN)}
           disabled={disabled || busy}
-          className="inline-flex h-10 items-center justify-center rounded-md bg-purple-600 px-4 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
         >
           {t('auth.dev.asAdmin')}
-        </button>
+        </Button>
       </div>
       {errorKey ? (
         <p role="alert" className="text-xs font-medium text-destructive">

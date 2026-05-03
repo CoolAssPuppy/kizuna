@@ -102,7 +102,31 @@
       "welcome": "Bienvenue à {{event}}.",
       "queueLabel": "FILE · {{count}} ÉLÉMENTS",
       "queueSort": "tri:échéance ↓",
-      "live": "en direct"
+      "statsLabel": "ÉVÉNEMENT.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "en direct",
+      "nowLive": "En direct",
+      "dayHeading": "Bienvenue au jour {{day}} !",
+      "dayTips": {
+        "count": "9",
+        "t1": "Chaque jour, asseyez-vous à côté de quelqu'un de nouveau.",
+        "t2": "Demandez à un inconnu d'où il vient et retenez la réponse.",
+        "t3": "Prenez l'ascenseur sans votre téléphone, même si c'est gênant.",
+        "t4": "Inscrivez-vous à l'activité qui vous fait un peu peur.",
+        "t5": "Échangez une petite histoire contre celle de quelqu'un d'autre.",
+        "t6": "Laissez la boîte mail ce soir. Soyez présent à l'after.",
+        "t7": "Avant de dormir, faites un éloge public à un coéquipier.",
+        "t8": "Mangez un repas avec une autre équipe que la vôtre.",
+        "t9": "Notez un nom que vous ignoriez au premier jour."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Faits Sur Notre Événement",
     "factsSubtitle": "Vive la légende de l'Équipe 18.",

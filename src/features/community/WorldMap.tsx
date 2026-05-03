@@ -28,6 +28,17 @@ interface Pin {
 // already vendored, so a fresh `npm install` is enough — no manual cp.
 const GEOGRAPHY_URL = '/world-110m.json';
 
+// Marker style is referentially stable across renders so React's prop
+// equality short-circuits the work for every Marker that didn't change.
+const MARKER_STYLE = {
+  default: {
+    transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',
+    cursor: 'pointer',
+  },
+  hover: { cursor: 'pointer' },
+  pressed: { cursor: 'pointer' },
+} as const;
+
 function pinsFor(people: Profile[], mode: Props['mode']): Pin[] {
   const out: Pin[] = [];
   for (const p of people) {
@@ -169,14 +180,7 @@ export function WorldMap({ people, mode, onToggle }: Props): JSX.Element {
                     setHovered({ userId: pin.user.user_id, x: e.clientX, y: e.clientY })
                   }
                   onMouseLeave={() => setHovered(null)}
-                  style={{
-                    default: {
-                      transition: 'transform 700ms cubic-bezier(0.22, 1, 0.36, 1)',
-                      cursor: 'pointer',
-                    },
-                    hover: { cursor: 'pointer' },
-                    pressed: { cursor: 'pointer' },
-                  }}
+                  style={MARKER_STYLE}
                 >
                   {/* Invisible 18px hit-target so the small dot is easy to hover. */}
                   <circle r={18} fill="transparent" />

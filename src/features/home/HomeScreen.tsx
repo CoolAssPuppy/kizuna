@@ -10,6 +10,7 @@ import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { loadPersonalInfo } from '@/features/registration/api';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { getSupabaseClient } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 
 import { CheckinAccessCard } from './CheckinAccessCard';
 import { HomeMemoriesSection } from './HomeMemoriesSection';
@@ -42,6 +43,32 @@ function diffToCountdown(target: Date): Countdown {
     minutes: total % 60,
     isLive: false,
   };
+}
+
+/**
+ * 1-based day of the event when in progress; null otherwise. Day 1 is
+ * the calendar day that contains startDate. Boundaries use the event
+ * timezone so a 9pm-local start still rolls to Day 2 the next morning,
+ * not at UTC midnight.
+ */
+function dayOfEvent(
+  startDate: string,
+  endDate: string,
+  timeZone: string,
+  now: Date = new Date(),
+): number | null {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+  if (now < start || now > end) return null;
+  const dayInTz = (d: Date): string =>
+    d.toLocaleDateString('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
+  const startKey = dayInTz(start);
+  const nowKey = dayInTz(now);
+  const startMidnight = new Date(`${startKey}T00:00:00Z`).getTime();
+  const nowMidnight = new Date(`${nowKey}T00:00:00Z`).getTime();
+  const dayIndex = Math.floor((nowMidnight - startMidnight) / (1000 * 60 * 60 * 24));
+  return dayIndex + 1;
 }
 
 function eventSlug(
@@ -164,31 +191,27 @@ function Hero({
   return (
     <section className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
       <div className="space-y-5 lg:col-span-8">
-        <div
-          className="flex flex-wrap items-center gap-2 text-[11px]"
-          style={{ color: 'var(--c-dim)' }}
-        >
+        <div className="flex flex-wrap items-center gap-2 text-[11px] text-c-dim">
           <span>// session active</span>
           <StatusDot active size={6} />
-          <span style={{ color: 'var(--c-accent)', letterSpacing: '0.04em' }}>
+          <span className="text-c-accent" style={{ letterSpacing: '0.04em' }}>
             {t('home.terminal.connected')}
           </span>
         </div>
         <h1
-          className="break-words font-extralight"
+          className="break-words font-extralight text-c-fg"
           style={{
-            color: 'var(--c-fg)',
             fontSize: 'clamp(36px, 8vw, 72px)',
             lineHeight: 1.05,
             letterSpacing: '-0.02em',
           }}
         >
-          <span style={{ color: 'var(--c-fg)' }}>&gt; {t('home.terminal.greeting')},</span>
+          <span className="text-c-fg">&gt; {t('home.terminal.greeting')},</span>
           <br />
           {preferredName ?? t('home.terminal.fallbackName')}
           <span className="terminal-cursor ml-1 align-baseline" />
         </h1>
-        <p className="max-w-xl text-sm" style={{ color: 'var(--c-muted)', lineHeight: 1.6 }}>
+        <p className="max-w-xl text-sm text-c-muted" style={{ lineHeight: 1.6 }}>
           {summary}
         </p>
       </div>
@@ -198,6 +221,7 @@ function Hero({
           <EventEtaPanel
             slug={slug}
             startDate={startDate}
+            endDate={endDate}
             timeZone={startTimezone}
             eventName={eventName}
           />
@@ -218,18 +242,32 @@ function Hero({
 interface EventEtaPanelProps {
   slug: string;
   startDate: string;
+  endDate: string | null;
   timeZone: string;
   eventName: string | null;
 }
 
-function EventEtaPanel({ slug, startDate, timeZone, eventName }: EventEtaPanelProps): JSX.Element {
-  const [countdown, setCountdown] = useState<Countdown>(() => diffToCountdown(new Date(startDate)));
+function EventEtaPanel({
+  slug,
+  startDate,
+  endDate,
+  timeZone,
+  eventName,
+}: EventEtaPanelProps): JSX.Element {
+  const { t } = useTranslation();
+  const [now, setNow] = useState<Date>(() => new Date());
 
   useMountEffect(() => {
-    const target = new Date(startDate);
-    const id = window.setInterval(() => setCountdown(diffToCountdown(target)), 60_000);
+    const id = window.setInterval(() => setNow(new Date()), 60_000);
     return () => window.clearInterval(id);
   });
+
+  const countdown = diffToCountdown(new Date(startDate));
+  const day = endDate ? dayOfEvent(startDate, endDate, timeZone, now) : null;
+  // Stable rotation through the tip pool so attendees know what to expect
+  // each morning. Uses tip count from i18n.
+  const tipCount = Number.parseInt(t('home.terminal.dayTips.count'), 10) || 0;
+  const tipKey = day !== null && tipCount > 0 ? `home.terminal.dayTips.t${((day - 1) % tipCount) + 1}` : null;
 
   const startLabel = new Date(startDate).toLocaleString('en-US', {
     timeZone,
@@ -243,24 +281,36 @@ function EventEtaPanel({ slug, startDate, timeZone, eventName }: EventEtaPanelPr
   });
 
   return (
-    <div
-      className="border p-6"
-      style={{ backgroundColor: 'var(--c-surface)', borderColor: 'var(--c-rule)' }}
-    >
+    <div className="border border-c-rule bg-c-surface p-6">
       <TerminalEyebrow
+        as="h2"
         label={`ETA · ${slug.toUpperCase()}`}
         trailing={
-          <span style={{ color: 'var(--c-accent)' }} aria-hidden>
+          <span className="text-c-accent" aria-hidden>
             ●
           </span>
         }
       />
-      {countdown.isLive ? (
+      {day !== null ? (
+        <div className="mt-4 space-y-3">
+          <p
+            className="text-3xl font-extralight text-c-accent"
+            style={{ letterSpacing: '-0.04em' }}
+          >
+            {t('home.terminal.dayHeading', { day })}
+          </p>
+          {tipKey ? (
+            <p className="text-sm text-c-muted" style={{ lineHeight: 1.5 }}>
+              {t(tipKey)}
+            </p>
+          ) : null}
+        </div>
+      ) : countdown.isLive ? (
         <div
-          className="mt-4 text-3xl font-extralight"
-          style={{ color: 'var(--c-accent)', letterSpacing: '-0.04em' }}
+          className="mt-4 text-3xl font-extralight text-c-accent"
+          style={{ letterSpacing: '-0.04em' }}
         >
-          {eventName ?? 'Now live'}
+          {eventName ?? t('home.terminal.nowLive')}
         </div>
       ) : (
         <div className="mt-4 flex items-baseline justify-between gap-2">
@@ -269,10 +319,10 @@ function EventEtaPanel({ slug, startDate, timeZone, eventName }: EventEtaPanelPr
           <EtaCell value={countdown.minutes} unit="m" />
         </div>
       )}
-      <div className="my-4 h-px" style={{ backgroundColor: 'var(--c-rule)' }} />
+      <div className="my-4 h-px bg-c-rule" />
       <dl className="space-y-1 text-[11px]">
-        <EtaRow label="event.start" value={startLabel} highlight />
-        <EtaRow label="event.timezone" value={timeZone} />
+        <EtaRow label={t('home.terminal.startLabel')} value={startLabel} highlight />
+        <EtaRow label={t('home.terminal.timezoneLabel')} value={timeZone} />
       </dl>
     </div>
   );
@@ -290,9 +340,8 @@ function EtaCell({
   return (
     <div className="flex items-baseline gap-1.5">
       <span
-        className="font-extralight"
+        className={cn('font-extralight', emphasize ? 'text-c-accent' : 'text-c-fg')}
         style={{
-          color: emphasize ? 'var(--c-accent)' : 'var(--c-fg)',
           fontSize: emphasize ? 56 : 32,
           letterSpacing: emphasize ? '-0.04em' : undefined,
           lineHeight: 1,
@@ -300,9 +349,7 @@ function EtaCell({
       >
         {value}
       </span>
-      <span className="text-xs" style={{ color: 'var(--c-dim)' }}>
-        {unit}
-      </span>
+      <span className="text-xs text-c-dim">{unit}</span>
     </div>
   );
 }
@@ -318,11 +365,8 @@ function EtaRow({
 }): JSX.Element {
   return (
     <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
-      <dt style={{ color: 'var(--c-muted)' }}>{label}</dt>
-      <dd
-        className="break-words text-right"
-        style={{ color: highlight ? 'var(--c-accent)' : 'var(--c-fg)' }}
-      >
+      <dt className="text-c-muted">{label}</dt>
+      <dd className={cn('break-words text-right', highlight ? 'text-c-accent' : 'text-c-fg')}>
         {value}
       </dd>
     </div>
@@ -340,10 +384,8 @@ function Queue({ feed, editorial, count }: QueueProps): JSX.Element {
   if (count === 0) {
     return (
       <div>
-        <TerminalEyebrow label={t('home.terminal.queueLabel', { count: 0 })} ruled />
-        <p className="py-12 text-center text-sm" style={{ color: 'var(--c-muted)' }}>
-          {t('home.feedEmpty')}
-        </p>
+        <TerminalEyebrow as="h2" label={t('home.terminal.queueLabel', { count: 0 })} ruled />
+        <p className="py-12 text-center text-sm text-c-muted">{t('home.feedEmpty')}</p>
       </div>
     );
   }
@@ -352,11 +394,12 @@ function Queue({ feed, editorial, count }: QueueProps): JSX.Element {
   return (
     <div>
       <TerminalEyebrow
+        as="h2"
         label={t('home.terminal.queueLabel', { count })}
         trailing={t('home.terminal.queueSort')}
         ruled
       />
-      <ol className="divide-y" style={{ borderColor: 'var(--c-rule)' }}>
+      <ol className="divide-y border-c-rule">
         {editorial.map((item) => {
           index += 1;
           return <EditorialQueueRow key={item.id} item={item} index={index} />;
@@ -381,30 +424,25 @@ function FeedQueueRow({ item, index }: { item: FeedItem; index: number }): JSX.E
   const metaLabel = item.kind === 'document' ? 'due' : item.kind === 'task' ? 'progress' : 'posted';
 
   const body = (
-    <div
-      className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5"
-      style={{ borderColor: 'var(--c-rule)' }}
-    >
-      <span className="text-[11px]" style={{ color: 'var(--c-dim)' }}>
-        [{String(index).padStart(2, '0')}]
-      </span>
+    <div className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 border-c-rule py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5">
+      <span className="text-[11px] text-c-dim">[{String(index).padStart(2, '0')}]</span>
       <span
-        className="text-[11px] font-bold uppercase"
-        style={{ color: 'var(--c-accent)', letterSpacing: '0.12em' }}
+        className="text-[11px] font-bold uppercase text-c-accent"
+        style={{ letterSpacing: '0.12em' }}
       >
         {KIND_LABELS[item.kind]}
       </span>
       <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
-        <span className="break-words text-base font-medium" style={{ color: 'var(--c-fg)' }}>
+        <span className="break-words text-base font-medium text-c-fg">
           {snakeFile(item.title)}
         </span>
-        <span className="break-words text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>
+        <span className="break-words text-xs text-c-muted" style={{ lineHeight: 1.5 }}>
           {item.detail}
         </span>
       </div>
       <div className="col-span-2 flex flex-row items-baseline gap-2 text-[11px] sm:col-span-1 sm:w-32 sm:shrink-0 sm:flex-col sm:items-end sm:gap-1">
-        <span style={{ color: 'var(--c-dim)' }}>{metaLabel}</span>
-        <span style={{ color: 'var(--c-fg)' }}>{dateLabel}</span>
+        <span className="text-c-dim">{metaLabel}</span>
+        <span className="text-c-fg">{dateLabel}</span>
       </div>
     </div>
   );
@@ -433,36 +471,23 @@ function EditorialQueueRow({
   index: number;
 }): JSX.Element {
   const body = (
-    <div
-      className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5"
-      style={{ borderColor: 'var(--c-rule)' }}
-    >
-      <span className="text-[11px]" style={{ color: 'var(--c-dim)' }}>
-        [{String(index).padStart(2, '0')}]
-      </span>
+    <div className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 border-c-rule py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5">
+      <span className="text-[11px] text-c-dim">[{String(index).padStart(2, '0')}]</span>
       <span
-        className="text-[11px] font-bold uppercase"
-        style={{ color: 'var(--c-accent)', letterSpacing: '0.12em' }}
+        className="text-[11px] font-bold uppercase text-c-accent"
+        style={{ letterSpacing: '0.12em' }}
       >
         feature
       </span>
       <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
-        <span className="break-words text-base font-medium" style={{ color: 'var(--c-fg)' }}>
-          {item.title}
-        </span>
+        <span className="break-words text-base font-medium text-c-fg">{item.title}</span>
         {item.subtitle ? (
-          <span
-            className="break-words text-xs"
-            style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}
-          >
+          <span className="break-words text-xs text-c-muted" style={{ lineHeight: 1.5 }}>
             {item.subtitle}
           </span>
         ) : null}
         {item.body ? (
-          <span
-            className="break-words text-xs"
-            style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}
-          >
+          <span className="break-words text-xs text-c-muted" style={{ lineHeight: 1.5 }}>
             {item.body}
           </span>
         ) : null}
@@ -487,34 +512,44 @@ function EditorialQueueRow({
 function EventStatsPanel({ stats }: { stats: EventStats | undefined }): JSX.Element {
   const { t } = useTranslation();
   const rows = [
-    { label: 'attendees.employees', value: stats?.employeeCount ?? 0, highlight: false },
-    { label: 'attendees.guests', value: stats?.guestCount ?? 0, highlight: false },
     {
-      label: 'registrations.in_progress',
+      label: t('home.terminal.stats.employees'),
+      value: stats?.employeeCount ?? 0,
+      highlight: false,
+    },
+    {
+      label: t('home.terminal.stats.guests'),
+      value: stats?.guestCount ?? 0,
+      highlight: false,
+    },
+    {
+      label: t('home.terminal.stats.registrationsStarted'),
       value: stats?.registrationsStarted ?? 0,
       highlight: false,
     },
     {
-      label: 'registrations.complete',
+      label: t('home.terminal.stats.registrationsComplete'),
       value: stats?.registrationsComplete ?? 0,
       highlight: true,
     },
-    { label: 'documents.signed', value: stats?.documentsAcknowledged ?? 0, highlight: true },
+    {
+      label: t('home.terminal.stats.documentsSigned'),
+      value: stats?.documentsAcknowledged ?? 0,
+      highlight: true,
+    },
   ];
   return (
-    <div
-      className="border p-5"
-      style={{ backgroundColor: 'var(--c-surface)', borderColor: 'var(--c-rule)' }}
-    >
-      <TerminalEyebrow label="event.stats" trailing={t('home.terminal.live')} />
+    <div className="border border-c-rule bg-c-surface p-5">
+      <TerminalEyebrow
+        as="h2"
+        label={t('home.terminal.statsLabel')}
+        trailing={t('home.terminal.live')}
+      />
       <dl className="mt-3 space-y-0">
         {rows.map((row) => (
           <div key={row.label} className="flex justify-between py-1.5 text-xs">
-            <dt style={{ color: 'var(--c-muted)' }}>{row.label}</dt>
-            <dd
-              className="text-[13px]"
-              style={{ color: row.highlight ? 'var(--c-accent)' : 'var(--c-fg)' }}
-            >
+            <dt className="text-c-muted">{row.label}</dt>
+            <dd className={cn('text-[13px]', row.highlight ? 'text-c-accent' : 'text-c-fg')}>
               {row.value}
             </dd>
           </div>
@@ -527,24 +562,11 @@ function EventStatsPanel({ stats }: { stats: EventStats | undefined }): JSX.Elem
 function SidebarEditorialCard({ item }: { item: EditorialFeedItem }): JSX.Element {
   const { t } = useTranslation();
   return (
-    <article
-      className="border p-5"
-      style={{ backgroundColor: 'var(--c-surface)', borderColor: 'var(--c-rule)' }}
-    >
+    <article className="border border-c-rule bg-c-surface p-5">
       <TerminalEyebrow label={t('home.terminal.feedItemLabel')} />
-      <h3 className="mt-3 text-sm font-medium" style={{ color: 'var(--c-fg)' }}>
-        {item.title}
-      </h3>
-      {item.subtitle ? (
-        <p className="mt-1 text-xs" style={{ color: 'var(--c-muted)' }}>
-          {item.subtitle}
-        </p>
-      ) : null}
-      {item.body ? (
-        <p className="mt-2 text-xs leading-relaxed" style={{ color: 'var(--c-muted)' }}>
-          {item.body}
-        </p>
-      ) : null}
+      <h2 className="mt-3 text-sm font-medium text-c-fg">{item.title}</h2>
+      {item.subtitle ? <p className="mt-1 text-xs text-c-muted">{item.subtitle}</p> : null}
+      {item.body ? <p className="mt-2 text-xs leading-relaxed text-c-muted">{item.body}</p> : null}
     </article>
   );
 }

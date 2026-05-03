@@ -156,7 +156,7 @@ function EventCard({ event, viewing, isOverriding, isAdmin, onView }: EventCardP
             </span>
           ) : null}
           {viewing && isOverriding ? (
-            <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white shadow">
+            <span className="rounded-full bg-c-warn px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-c-bg shadow">
               {t('events.viewing')}
             </span>
           ) : null}

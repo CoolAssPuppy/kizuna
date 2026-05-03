@@ -73,8 +73,8 @@ function EventCountdownInner({
 
   const baseClasses =
     size === 'sm'
-      ? 'grid grid-cols-3 gap-1.5 rounded-lg border bg-card/60 px-3 py-2 text-center backdrop-blur'
-      : 'grid grid-cols-3 gap-2 rounded-xl border bg-card/60 px-4 py-3 text-center backdrop-blur';
+      ? 'grid grid-cols-3 gap-1.5 rounded-lg border bg-card px-3 py-2 text-center'
+      : 'grid grid-cols-3 gap-2 rounded-xl border bg-card px-4 py-3 text-center';
   return (
     <dl
       className={fullWidth ? `${baseClasses} w-full` : baseClasses}

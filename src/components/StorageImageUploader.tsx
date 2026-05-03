@@ -72,7 +72,13 @@ export function StorageImageUploader({
 
       {previewUrl ? (
         <figure className="relative overflow-hidden rounded-md border bg-muted">
-          <img src={previewUrl} alt="" className="aspect-[3/2] w-full object-cover" />
+          <img
+            src={previewUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="aspect-[3/2] w-full object-cover"
+          />
           <Button
             type="button"
             size="icon"

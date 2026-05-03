@@ -363,5 +363,13 @@ export function ChannelScreen(): JSX.Element {
 function ChannelImage({ path }: { path: string }): JSX.Element | null {
   const src = useStorageImage(COMMUNITY_MEDIA_BUCKET, path);
   if (!src) return null;
-  return <img src={src} alt="" className="mb-2 max-h-72 w-full rounded-lg object-cover" />;
+  return (
+    <img
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      className="mb-2 max-h-72 w-full rounded-lg object-cover"
+    />
+  );
 }

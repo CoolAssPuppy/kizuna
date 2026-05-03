@@ -25,7 +25,7 @@ export function RequireAuth({
 
   if (status === 'loading') {
     return (
-      <main className="flex min-h-screen items-center justify-center" aria-busy="true">
+      <main className="flex min-h-dvh items-center justify-center" aria-busy="true">
         <p className="text-muted-foreground">{t('auth.checkingSession')}</p>
       </main>
     );

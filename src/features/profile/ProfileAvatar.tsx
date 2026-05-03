@@ -106,7 +106,13 @@ export function ProfileAvatar({ size = 80 }: ProfileAvatarProps): JSX.Element {
         style={{ height: size, width: size }}
       >
         {avatarUrl ? (
-          <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
+          <img
+            src={avatarUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span className="text-lg font-semibold">{initialsFor(user?.email)}</span>
         )}

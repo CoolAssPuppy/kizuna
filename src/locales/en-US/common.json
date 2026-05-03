@@ -314,8 +314,32 @@
       "welcome": "Welcome to {{event}}.",
       "queueLabel": "QUEUE · {{count}} ITEMS",
       "queueSort": "sorted by:deadline ↓",
+      "statsLabel": "EVENT.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
       "live": "live",
-      "feedItemLabel": "News"
+      "nowLive": "Now live",
+      "feedItemLabel": "News",
+      "dayHeading": "Welcome to Day {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Try to sit next to someone new every day.",
+        "t2": "Ask one stranger about their hometown, and remember the answer.",
+        "t3": "Take the elevator without your phone, even if it feels awkward.",
+        "t4": "Volunteer for the activity that scares you a little.",
+        "t5": "Trade a small story for someone else's small story.",
+        "t6": "Skip the inbox tonight. Be present at the after-party.",
+        "t7": "Give a teammate a public shoutout before bed.",
+        "t8": "Eat one meal with a different team than yours.",
+        "t9": "Write down one name you didn't know on day one."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "eventAccess": {
       "label": "Event Access Code:"

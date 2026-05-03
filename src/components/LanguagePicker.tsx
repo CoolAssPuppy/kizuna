@@ -62,7 +62,7 @@ export function LanguagePicker(): JSX.Element {
             : 'pointer-events-none translate-y-2 opacity-0',
         )}
       >
-        <div className="flex flex-col-reverse gap-1 rounded-full border bg-background/95 p-1 shadow-lg ring-1 ring-border backdrop-blur">
+        <div className="flex flex-col-reverse gap-1 rounded-full border bg-background p-1 shadow-lg ring-1 ring-border">
           {SUPPORTED_LOCALES.map((locale) => {
             const active = current === locale;
             return (

@@ -102,7 +102,31 @@
       "welcome": "Tervetuloa: {{event}}.",
       "queueLabel": "JONO · {{count}} KOHDETTA",
       "queueSort": "järjestys:määräaika ↓",
-      "live": "live"
+      "statsLabel": "TAPAHTUMA.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "live",
+      "nowLive": "Käynnissä",
+      "dayHeading": "Tervetuloa päivään {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Istu joka päivä jonkun uuden viereen.",
+        "t2": "Kysy tuntemattomalta hänen kotikaupungistaan ja muista vastaus.",
+        "t3": "Mene hissiin ilman puhelinta, vaikka se tuntuisi oudolta.",
+        "t4": "Ilmoittaudu siihen ohjelmaan, joka vähän pelottaa.",
+        "t5": "Vaihda pieni tarina jonkun toisen pieneen tarinaan.",
+        "t6": "Unohda sähköposti illaksi. Ole läsnä jatkoilla.",
+        "t7": "Anna tiimitoverille julkinen kiitos ennen nukkumaanmenoa.",
+        "t8": "Syö yksi ateria muiden kuin oman tiimisi kanssa.",
+        "t9": "Kirjoita ylös yksi nimi, jota et tuntenut ensimmäisenä päivänä."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Faktoja Tapahtumastamme",
     "factsSubtitle": "Eläköön Tiimi 18 -legenda.",

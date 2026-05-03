@@ -8,7 +8,7 @@ export function NotFound(): JSX.Element {
 
   return (
     <main
-      className="relative flex min-h-screen items-center justify-center p-6 text-white"
+      className="relative flex min-h-dvh items-center justify-center p-6 text-white"
       style={{
         backgroundImage:
           'linear-gradient(rgba(10, 15, 30, 0.55), rgba(10, 15, 30, 0.85)), url(/backgrounds/404.jpg)',
@@ -19,7 +19,7 @@ export function NotFound(): JSX.Element {
       <section className="max-w-md space-y-6 text-center">
         <span
           aria-hidden
-          className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-base font-bold backdrop-blur-sm"
+          className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-base font-bold"
         >
           404
         </span>

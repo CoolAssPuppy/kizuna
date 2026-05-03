@@ -58,7 +58,7 @@ export function AcceptInvitationScreen(): JSX.Element {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-dvh items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6 rounded-xl border bg-background/95 p-8 shadow-2xl backdrop-blur">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">{t('guests.invitationTitle')}</h1>

@@ -30,7 +30,7 @@ export function CheckinAccessCard({ eventId, defaultOpen = false }: Props): JSX.
   return (
     <section
       aria-label={t('home.eventAccess.label')}
-      className="rounded-xl border bg-card/60 p-4 text-card-foreground shadow-sm backdrop-blur"
+      className="rounded-xl border bg-card p-4 text-card-foreground shadow-sm"
     >
       <button
         type="button"

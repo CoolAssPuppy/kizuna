@@ -110,7 +110,13 @@ export function DropzoneContent({ className }: { className?: string }): JSX.Elem
           >
             {file.type.startsWith('image/') && file.preview ? (
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted">
-                <img src={file.preview} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={file.preview}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               </div>
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-sm border bg-muted">

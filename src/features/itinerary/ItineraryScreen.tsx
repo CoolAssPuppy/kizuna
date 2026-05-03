@@ -27,7 +27,7 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center" aria-busy="true">
+      <main className="flex min-h-dvh items-center justify-center" aria-busy="true">
         <p className="text-muted-foreground">{t('itinerary.loading')}</p>
       </main>
     );
@@ -35,7 +35,7 @@ export function ItineraryScreen({ event }: Props): JSX.Element {
 
   if (error) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6">
+      <main className="flex min-h-dvh items-center justify-center p-6">
         <p role="alert" className="text-destructive">
           {error.message}
         </p>

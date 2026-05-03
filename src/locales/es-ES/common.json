@@ -102,7 +102,31 @@
       "welcome": "Bienvenido a {{event}}.",
       "queueLabel": "COLA · {{count}} ELEMENTOS",
       "queueSort": "orden:plazo ↓",
-      "live": "en vivo"
+      "statsLabel": "EVENTO.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "en vivo",
+      "nowLive": "En vivo",
+      "dayHeading": "¡Bienvenido al día {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Siéntate cada día junto a alguien que aún no conoces.",
+        "t2": "Pregunta a alguien por su ciudad natal y recuerda la respuesta.",
+        "t3": "Sube en el ascensor sin el teléfono, aunque sea incómodo.",
+        "t4": "Apúntate a la actividad que te da un poco de miedo.",
+        "t5": "Cambia una pequeña historia por la de otra persona.",
+        "t6": "Olvida el correo esta noche. Disfruta la fiesta del cierre.",
+        "t7": "Antes de dormir, da un reconocimiento público a un compañero.",
+        "t8": "Come una vez con un equipo distinto al tuyo.",
+        "t9": "Anota un nombre que el primer día no conocías."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Datos Sobre Nuestro Evento",
     "factsSubtitle": "Larga vida a la leyenda del Equipo 18.",

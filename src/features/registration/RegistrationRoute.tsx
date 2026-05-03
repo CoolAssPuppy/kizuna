@@ -47,7 +47,7 @@ function RegistrationInner({ event }: { event: EventRow }): JSX.Element {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center" aria-busy="true">
+      <main className="flex min-h-dvh items-center justify-center" aria-busy="true">
         <p className="text-muted-foreground">{t('app.loadingEvent')}</p>
       </main>
     );
@@ -55,7 +55,7 @@ function RegistrationInner({ event }: { event: EventRow }): JSX.Element {
 
   if (error || !bundle) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6">
+      <main className="flex min-h-dvh items-center justify-center p-6">
         <p role="alert" className="text-destructive">
           {error?.message ?? t('registration.errorSaving')}
         </p>

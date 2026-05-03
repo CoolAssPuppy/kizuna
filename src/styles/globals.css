@@ -67,6 +67,15 @@
     --c-cursor: #16a34a;
     --c-map-land: #cdd2c6;
     --c-map-stroke: #ffffff;
+
+    --c-chart-1: hsl(142 71% 45%);
+    --c-chart-2: hsl(217 91% 55%);
+    --c-chart-3: hsl(35 91% 50%);
+    --c-chart-4: hsl(326 78% 55%);
+    --c-chart-5: hsl(262 80% 60%);
+    --c-chart-6: hsl(173 60% 40%);
+    --c-chart-7: hsl(20 85% 55%);
+    --c-chart-8: hsl(200 80% 45%);
   }
 
   /* === Supa: CRT black × phosphor green === */
@@ -114,6 +123,15 @@
     --c-cursor: #3fe489;
     --c-map-land: #2b3329;
     --c-map-stroke: #0b0f0a;
+
+    --c-chart-1: hsl(145 73% 60%);
+    --c-chart-2: hsl(180 70% 60%);
+    --c-chart-3: hsl(50 90% 65%);
+    --c-chart-4: hsl(330 70% 70%);
+    --c-chart-5: hsl(270 70% 75%);
+    --c-chart-6: hsl(100 60% 65%);
+    --c-chart-7: hsl(20 85% 65%);
+    --c-chart-8: hsl(200 80% 70%);
   }
 
   /* === Hermione: cocoa × gold (dark academia) === */
@@ -161,6 +179,15 @@
     --c-cursor: #e8b53a;
     --c-map-land: #4d2e22;
     --c-map-stroke: #1f0f0a;
+
+    --c-chart-1: hsl(44 80% 60%);
+    --c-chart-2: hsl(15 70% 60%);
+    --c-chart-3: hsl(35 70% 65%);
+    --c-chart-4: hsl(80 50% 60%);
+    --c-chart-5: hsl(200 55% 65%);
+    --c-chart-6: hsl(330 60% 70%);
+    --c-chart-7: hsl(270 50% 70%);
+    --c-chart-8: hsl(150 50% 60%);
   }
 
   /* === Kirk: cream × command gold + science blue === */
@@ -208,6 +235,15 @@
     --c-cursor: #e8b83a;
     --c-map-land: #d9cfa8;
     --c-map-stroke: #faf6e8;
+
+    --c-chart-1: hsl(207 53% 45%);
+    --c-chart-2: hsl(45 80% 50%);
+    --c-chart-3: hsl(1 70% 50%);
+    --c-chart-4: hsl(120 45% 38%);
+    --c-chart-5: hsl(280 55% 50%);
+    --c-chart-6: hsl(35 80% 45%);
+    --c-chart-7: hsl(180 55% 38%);
+    --c-chart-8: hsl(326 65% 50%);
   }
 
   /* === Barbie: rose × hot pink === */
@@ -255,6 +291,15 @@
     --c-cursor: #e5378c;
     --c-map-land: #f9b7cb;
     --c-map-stroke: #fff1f5;
+
+    --c-chart-1: hsl(332 78% 50%);
+    --c-chart-2: hsl(280 70% 55%);
+    --c-chart-3: hsl(45 90% 50%);
+    --c-chart-4: hsl(180 60% 45%);
+    --c-chart-5: hsl(120 45% 45%);
+    --c-chart-6: hsl(20 85% 55%);
+    --c-chart-7: hsl(200 80% 55%);
+    --c-chart-8: hsl(310 60% 45%);
   }
 }
 

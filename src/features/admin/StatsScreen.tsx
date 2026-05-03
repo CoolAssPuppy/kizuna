@@ -18,17 +18,18 @@ import { getSupabaseClient } from '@/lib/supabase';
 
 import { fetchAdminStats, type CategoryCount } from './api/stats';
 
-// Supabase-leaning palette — primary green plus accents that read on
-// both light and dark backgrounds. Loops over slices.
+// Theme-driven 8-color palette. Each variant in globals.css defines its
+// own --c-chart-1..8, so charts re-skin automatically when the user
+// switches themes (light, supa, hermione, kirk, barbie).
 const PALETTE = [
-  'hsl(153 60% 53%)',
-  'hsl(217 91% 60%)',
-  'hsl(35 91% 56%)',
-  'hsl(326 78% 60%)',
-  'hsl(262 80% 64%)',
-  'hsl(173 60% 45%)',
-  'hsl(20 85% 60%)',
-  'hsl(200 80% 50%)',
+  'var(--c-chart-1)',
+  'var(--c-chart-2)',
+  'var(--c-chart-3)',
+  'var(--c-chart-4)',
+  'var(--c-chart-5)',
+  'var(--c-chart-6)',
+  'var(--c-chart-7)',
+  'var(--c-chart-8)',
 ];
 
 export function StatsScreen(): JSX.Element {

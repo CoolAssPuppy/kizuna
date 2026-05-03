@@ -102,7 +102,31 @@
       "welcome": "Bem-vindo a {{event}}.",
       "queueLabel": "FILA · {{count}} ITENS",
       "queueSort": "ordem:prazo ↓",
-      "live": "em direto"
+      "statsLabel": "EVENTO.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "em direto",
+      "nowLive": "Em direto",
+      "dayHeading": "Bem-vindo ao dia {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Senta-te ao lado de alguém novo todos os dias.",
+        "t2": "Pergunta a um desconhecido pela sua terra natal e lembra-te da resposta.",
+        "t3": "Apanha o elevador sem o telemóvel, mesmo que pareça estranho.",
+        "t4": "Inscreve-te na atividade que te mete um bocado de medo.",
+        "t5": "Troca uma pequena história pela de outra pessoa.",
+        "t6": "Esquece a caixa de entrada esta noite. Aproveita o after-party.",
+        "t7": "Antes de dormir, dá um reconhecimento público a um colega.",
+        "t8": "Faz uma refeição com uma equipa diferente da tua.",
+        "t9": "Aponta um nome que não conhecias no primeiro dia."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Factos Sobre o Nosso Evento",
     "factsSubtitle": "Glória à lenda da Equipa 18.",

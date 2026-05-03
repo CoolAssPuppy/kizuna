@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+type EyebrowHeading = 'span' | 'h2' | 'h3';
+
 interface TerminalEyebrowProps {
   /** Snake-case section label, e.g. "event.stats" or "queue · 3 items". */
   label: string;
@@ -7,6 +9,12 @@ interface TerminalEyebrowProps {
   trailing?: ReactNode;
   /** Render with top + bottom rule (used for full-width section headers). */
   ruled?: boolean;
+  /**
+   * Element used for the label text. Default `span` keeps the eyebrow as
+   * a decorative caption. Pass `h2` (or `h3`) when the eyebrow is the
+   * primary heading for its section so the document outline stays valid.
+   */
+  as?: EyebrowHeading;
 }
 
 /**
@@ -19,6 +27,7 @@ export function TerminalEyebrow({
   label,
   trailing,
   ruled = false,
+  as: Heading = 'span',
 }: TerminalEyebrowProps): JSX.Element {
   return (
     <div
@@ -33,12 +42,12 @@ export function TerminalEyebrow({
           : undefined
       }
     >
-      <span
+      <Heading
         className="text-[11px] font-bold uppercase"
-        style={{ color: 'var(--c-muted)', letterSpacing: '0.18em' }}
+        style={{ color: 'var(--c-muted)', letterSpacing: '0.18em', margin: 0 }}
       >
         {label}
-      </span>
+      </Heading>
       {trailing ? (
         <span className="text-[11px]" style={{ color: 'var(--c-muted)' }}>
           {trailing}

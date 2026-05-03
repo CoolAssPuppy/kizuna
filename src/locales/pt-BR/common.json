@@ -102,7 +102,31 @@
       "welcome": "Bem-vindo a {{event}}.",
       "queueLabel": "FILA · {{count}} ITENS",
       "queueSort": "ordem:prazo ↓",
-      "live": "ao vivo"
+      "statsLabel": "EVENTO.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "ao vivo",
+      "nowLive": "Ao vivo agora",
+      "dayHeading": "Bem-vindo ao dia {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Sente-se perto de alguém novo todos os dias.",
+        "t2": "Pergunte a um desconhecido sobre a cidade natal dele e guarde a resposta.",
+        "t3": "Pegue o elevador sem o celular, mesmo que pareça estranho.",
+        "t4": "Inscreva-se na atividade que mete um pouco de medo.",
+        "t5": "Troque uma pequena história pela de outra pessoa.",
+        "t6": "Deixe a caixa de entrada esta noite. Aproveite a after-party.",
+        "t7": "Antes de dormir, dê um reconhecimento público a um colega.",
+        "t8": "Faça uma refeição com um time diferente do seu.",
+        "t9": "Anote um nome que você não conhecia no primeiro dia."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Fatos Sobre Nosso Evento",
     "factsSubtitle": "Salve a lenda do Time 18.",

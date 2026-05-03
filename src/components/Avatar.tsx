@@ -44,6 +44,8 @@ export function Avatar({ url, fallback, size = 32 }: Props): JSX.Element {
         alt=""
         width={size}
         height={size}
+        loading="lazy"
+        decoding="async"
         className="rounded-full object-cover"
         style={{ width: dim, height: dim }}
       />

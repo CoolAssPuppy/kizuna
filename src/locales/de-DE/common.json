@@ -102,7 +102,31 @@
       "welcome": "Willkommen bei {{event}}.",
       "queueLabel": "WARTESCHLANGE · {{count}} EINTRÄGE",
       "queueSort": "sortiert nach:Frist ↓",
-      "live": "live"
+      "statsLabel": "EVENT.STATS",
+      "startLabel": "event.start",
+      "timezoneLabel": "event.timezone",
+      "live": "live",
+      "nowLive": "Jetzt live",
+      "dayHeading": "Willkommen zu Tag {{day}}!",
+      "dayTips": {
+        "count": "9",
+        "t1": "Setz dich jeden Tag neben jemand Neuen.",
+        "t2": "Frag eine fremde Person nach ihrer Heimatstadt und merk dir die Antwort.",
+        "t3": "Nimm den Aufzug ohne dein Telefon, auch wenn es sich seltsam anfühlt.",
+        "t4": "Melde dich für die Aktivität, die dir leicht Angst macht.",
+        "t5": "Erzähl eine kleine Geschichte und hör eine zurück.",
+        "t6": "Lass den Posteingang heute Abend in Ruhe. Sei auf der Aftershow präsent.",
+        "t7": "Lobe vor dem Schlafen ein Teammitglied öffentlich.",
+        "t8": "Iss eine Mahlzeit mit einem anderen Team als deinem.",
+        "t9": "Notier den Namen einer Person, die du am ersten Tag noch nicht kanntest."
+      },
+      "stats": {
+        "employees": "attendees.employees",
+        "guests": "attendees.guests",
+        "registrationsStarted": "registrations.in_progress",
+        "registrationsComplete": "registrations.complete",
+        "documentsSigned": "documents.signed"
+      }
     },
     "factsTitle": "Fakten zu unserer Veranstaltung",
     "factsSubtitle": "Es lebe die Legende von Team 18.",
