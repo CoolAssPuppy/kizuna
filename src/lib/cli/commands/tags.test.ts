@@ -93,10 +93,10 @@ describe('tags delete', () => {
       tables: { session_tags: [] },
     });
     const cmd = getCommand(['tags', 'delete'])!;
-    const out = (await cmd.handler(
-      { id: 't-1' },
-      createCtx({ supabase, role: 'admin' }),
-    )) as { id: string; deleted: boolean };
+    const out = (await cmd.handler({ id: 't-1' }, createCtx({ supabase, role: 'admin' }))) as {
+      id: string;
+      deleted: boolean;
+    };
     expect(out).toEqual({ id: 't-1', deleted: true });
   });
 });

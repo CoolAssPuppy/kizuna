@@ -26,12 +26,11 @@ select is(
   'create_api_key returned exactly one row'
 );
 
--- Explicit text casts are required because pgTAP overloads `like` and
--- Postgres cannot resolve the call from the literal arguments alone.
-select like(
-  (select token from issued)::text,
-  'kzn_read_%'::text,
-  'returned token uses the kzn_<scope>_ prefix'::text
+-- pgTAP doesn't ship a `like` test; use `is` against the LIKE operator.
+select is(
+  (select token like 'kzn_read_%' from issued),
+  true,
+  'returned token uses the kzn_<scope>_ prefix'
 );
 
 select is(

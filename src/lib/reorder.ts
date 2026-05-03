@@ -10,8 +10,6 @@ export async function reorderRowsByPosition(
   orderedIds: ReadonlyArray<string>,
 ): Promise<void> {
   await Promise.all(
-    orderedIds.map((id, position) =>
-      client.from(table).update({ position }).eq('id', id),
-    ),
+    orderedIds.map((id, position) => client.from(table).update({ position }).eq('id', id)),
   );
 }
