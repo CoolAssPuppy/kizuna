@@ -36,7 +36,7 @@ export function AppLayout({ children }: Props): JSX.Element {
   if (isAuth) {
     return (
       <div
-        className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+        className="relative min-h-dvh bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(/auth.jpg)' }}
       >
         <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" aria-hidden />
@@ -46,11 +46,11 @@ export function AppLayout({ children }: Props): JSX.Element {
   }
 
   if (bare) {
-    return <div className="min-h-screen bg-background">{children}</div>;
+    return <div className="min-h-dvh bg-background">{children}</div>;
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-dvh flex-col bg-background">
       <GlobalRealtime />
       <OfflineBanner />
       <CommandPalette />

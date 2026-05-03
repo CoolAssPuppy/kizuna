@@ -271,3 +271,11 @@
 **Why:** The QueryClient ships with `staleTime: 30_000` and `refetchOnWindowFocus: false`. Without invalidation, after a save: (1) the row in the DB updates, (2) the toast confirms success, (3) the user navigates away, (4) returns within 30s, (5) the cached row is served unchanged, (6) `useHydratedFormState` re-mounts and hydrates from stale data. The user sees their pre-save values and concludes "it didn't save." The PersonalInfo / Dietary / Accessibility / Emergency / Passport / Swag / Transport sections all hit this in prod on 2026-05-02; CommunityProfileSection escaped because it already invalidated inline.
 
 **How to apply:** When calling `useSectionSubmit({ ... })`, pass `invalidateQueryKeys: [['<same-key-as-useQuery>']]`. The hook awaits `Promise.all(keys.map(invalidateQueries))` before showing the toast so the next mount refetches.
+
+## 2026-05-03 - One mobile menu, responsive page padding
+
+**Rule:** On mobile (<lg) the avatar dropdown is the only menu — primary nav links live inside it alongside profile/admin/sign-out. No separate hamburger. The page wrapper is `mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10` (NOT `px-8 py-10`). The full-height shell uses `min-h-dvh`, not `min-h-screen`.
+
+**Why:** Two menus appeared in the header at small breakpoints (a hamburger MobileNav AND the avatar dropdown), which is a textbook mobile-UX smell — users don't know where the nav lives. There was also a dead breakpoint at md (768-1023px) where the hamburger was hidden but the inline nav hadn't appeared yet. Compounding that, `px-8 py-10` left only ~310px of usable width on a 375px phone, so every screen looked like a mini desktop site rather than a mobile app. `min-h-screen` (100vh) plus iOS Safari's URL bar produced a ~70px dead band below the footer.
+
+**How to apply:** Mount nav links inside `HeaderUserMenu` wrapped in a `lg:hidden` block. Delete any standalone mobile hamburger. Every new signed-in screen uses the responsive padding pattern; if a screen needs a unique mobile padding (e.g. asymmetric `pt-` on a hero), keep the `px-4 sm:px-8` half of the rule. Replace any `min-h-screen` on top-level shells with `min-h-dvh`. Header gets `pt-[env(safe-area-inset-top)]` and footer `pb-[env(safe-area-inset-bottom)]` so notched devices don't clip chrome.

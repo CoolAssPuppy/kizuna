@@ -17,7 +17,7 @@ export function RegistrationLayout({ bundle, stepIndex, children }: Props): JSX.
   const { t } = useTranslation();
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <div className="mx-auto max-w-2xl">
         <header className="mb-8 space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

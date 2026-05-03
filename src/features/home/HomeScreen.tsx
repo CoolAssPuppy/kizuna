@@ -88,7 +88,7 @@ export function HomeScreen(): JSX.Element {
   });
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-10 sm:px-8">
+    <main className="mx-auto w-full max-w-7xl px-4 pb-12 pt-6 sm:px-8 sm:pt-10">
       <Hero
         preferredName={preferredName}
         summary={summary}

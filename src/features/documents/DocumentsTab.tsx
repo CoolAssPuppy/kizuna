@@ -38,7 +38,7 @@ export function DocumentsTab({ eventId }: DocumentsTabProps): JSX.Element {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-10 px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl space-y-10 px-4 py-6 sm:px-8 sm:py-10">
       <header>
         <h1 className="text-3xl font-semibold tracking-tight">{t('documents.tabTitle')}</h1>
       </header>

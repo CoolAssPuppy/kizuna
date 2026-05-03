@@ -36,14 +36,14 @@ export function AllEventsScreen(): JSX.Element {
 
   if (isLoading) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
         <p className="text-sm text-muted-foreground">{t('app.loading')}</p>
       </main>
     );
   }
   if (error) {
     return (
-      <main className="mx-auto w-full max-w-7xl px-8 py-10">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
         <p role="alert" className="text-sm text-destructive">
           {error.message}
         </p>
@@ -66,7 +66,7 @@ export function AllEventsScreen(): JSX.Element {
   }
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-6 px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight">{t('events.title')}</h1>

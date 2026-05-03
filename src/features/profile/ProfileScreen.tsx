@@ -180,7 +180,7 @@ function ProfileScreenInner(): JSX.Element {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl space-y-8 px-8 py-10">
+    <main className="mx-auto w-full max-w-7xl space-y-8 px-4 py-6 sm:px-8 sm:py-10">
       <header className="flex flex-row items-center gap-6">
         <ProfileAvatar />
         <div className="space-y-2">
