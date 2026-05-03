@@ -1,4 +1,4 @@
-import { AlertTriangle, ClipboardPaste, FlaskConical, Mail, Upload } from 'lucide-react';
+import { AlertTriangle, ClipboardPaste, FlaskConical, Mail, Plane, Upload } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,10 +17,13 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 
 import {
+  importPerkBookingViaEdge,
+  listPerkBookingsViaEdge,
   parseItineraryViaEdge,
   saveParsedAccommodations,
   saveParsedFlights,
   saveParsedTransfers,
+  type PerkBookingSummary,
 } from './importApi';
 
 interface Props {
@@ -33,15 +36,16 @@ interface Props {
   onImported: () => void;
 }
 
-type SourceTab = 'paste' | 'upload' | 'email';
+type SourceTab = 'paste' | 'upload' | 'email' | 'perk';
 
 const TAB_ICON: Record<SourceTab, typeof ClipboardPaste> = {
   paste: ClipboardPaste,
   upload: Upload,
   email: Mail,
+  perk: Plane,
 };
 
-const TABS: ReadonlyArray<SourceTab> = ['paste', 'upload', 'email'];
+const TABS: ReadonlyArray<SourceTab> = ['paste', 'upload', 'email', 'perk'];
 
 // Two flights only — round-trip to YYC for the dev flow. No hotel,
 // rental, or shuttle so the smoke-test stays narrow.
@@ -81,6 +85,47 @@ export function ImportItineraryDialog({
   // Inline error message rendered directly in the dialog. Toasts alone
   // were too easy to miss when the user is focused on the textarea.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Perk picker state. We deliberately keep the listed bookings even
+  // after a successful import so the user can come back and import a
+  // sibling trip without re-listing.
+  const [perkBookings, setPerkBookings] = useState<ReadonlyArray<PerkBookingSummary> | null>(null);
+  const [perkImportingId, setPerkImportingId] = useState<string | null>(null);
+
+  async function handlePerkList(): Promise<void> {
+    if (!user) return;
+    setBusy(true);
+    setErrorMessage(null);
+    try {
+      const result = await listPerkBookingsViaEdge();
+      setPerkBookings(result.bookings);
+      if (!result.found) {
+        setErrorMessage(t('itinerary.import.perk.nothingFound'));
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`${t('itinerary.import.perk.error')} — ${message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handlePerkImport(bookingId: string): Promise<void> {
+    setPerkImportingId(bookingId);
+    setErrorMessage(null);
+    try {
+      const result = await importPerkBookingViaEdge(bookingId);
+      const total = result.inserted + result.updated;
+      show(t('itinerary.import.perk.success', { count: total }));
+      onImported();
+      onOpenChange(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setErrorMessage(`${t('itinerary.import.perk.error')} — ${message}`);
+    } finally {
+      setPerkImportingId(null);
+    }
+  }
 
   async function handleParse(): Promise<void> {
     if (!pasted.trim() || !user) return;
@@ -125,7 +170,7 @@ export function ImportItineraryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="gap-0 p-0">
+      <DialogContent className="gap-0 p-0 sm:max-w-3xl">
         <DialogHeader className="border-b px-6 py-5">
           <DialogTitle>{t('itinerary.import.title')}</DialogTitle>
           <DialogDescription>{t('itinerary.import.subtitle')}</DialogDescription>
@@ -175,6 +220,15 @@ export function ImportItineraryDialog({
                 </div>
               ) : null}
             </div>
+          ) : tab === 'perk' ? (
+            <PerkPanel
+              bookings={perkBookings}
+              busy={busy}
+              importingId={perkImportingId}
+              errorMessage={errorMessage}
+              onSync={() => void handlePerkList()}
+              onImport={(id) => void handlePerkImport(id)}
+            />
           ) : (
             <ComingSoon kind={tab} />
           )}
@@ -204,12 +258,14 @@ export function ImportItineraryDialog({
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
               {t('actions.cancel')}
             </Button>
-            <Button
-              onClick={() => void handleParse()}
-              disabled={busy || tab !== 'paste' || pasted.trim().length === 0}
-            >
-              {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
-            </Button>
+            {tab !== 'perk' ? (
+              <Button
+                onClick={() => void handleParse()}
+                disabled={busy || tab !== 'paste' || pasted.trim().length === 0}
+              >
+                {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
+              </Button>
+            ) : null}
           </div>
         </DialogFooter>
       </DialogContent>
@@ -223,6 +279,114 @@ function ComingSoon({ kind }: { kind: 'upload' | 'email' }): JSX.Element {
     <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
       <p className="font-medium">{t(`itinerary.import.${kind}ComingSoonTitle`)}</p>
       <p>{t(`itinerary.import.${kind}ComingSoonHint`)}</p>
+    </div>
+  );
+}
+
+interface PerkPanelProps {
+  bookings: ReadonlyArray<PerkBookingSummary> | null;
+  busy: boolean;
+  importingId: string | null;
+  errorMessage: string | null;
+  onSync: () => void;
+  onImport: (bookingId: string) => void;
+}
+
+/**
+ * Two-step Perk picker:
+ *  1. Pre-sync — explainer + "Sync now" button.
+ *  2. Post-sync — list of bookings, each with its own Import button.
+ *
+ * Re-listing is always one click away ("Refresh"), and Import is
+ * idempotent so a second click on the same booking just re-syncs the
+ * latest flight times instead of creating duplicates.
+ */
+function PerkPanel({
+  bookings,
+  busy,
+  importingId,
+  errorMessage,
+  onSync,
+  onImport,
+}: PerkPanelProps): JSX.Element {
+  const { t, i18n } = useTranslation();
+  const dateRange = (start: string, end: string): string => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const sameDay = startDate.toDateString() === endDate.toDateString();
+    const fmt = new Intl.DateTimeFormat(i18n.language, { month: 'short', day: 'numeric' });
+    if (sameDay) return fmt.format(startDate);
+    return `${fmt.format(startDate)} – ${fmt.format(endDate)}, ${endDate.getFullYear()}`;
+  };
+
+  return (
+    <div className="space-y-3">
+      {bookings === null ? (
+        <div className="flex flex-col items-start gap-3 rounded-lg border bg-muted/20 px-4 py-5 text-sm">
+          <div>
+            <p className="font-medium text-foreground">{t('itinerary.import.perk.title')}</p>
+            <p className="mt-1 text-muted-foreground">{t('itinerary.import.perk.hint')}</p>
+          </div>
+          <Button onClick={onSync} disabled={busy}>
+            {busy ? t('itinerary.import.perk.syncing') : t('itinerary.import.perk.sync')}
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {bookings.length === 0
+                ? t('itinerary.import.perk.nothingFound')
+                : t('itinerary.import.perk.listHint', { count: bookings.length })}
+            </p>
+            <Button variant="ghost" size="sm" onClick={onSync} disabled={busy}>
+              {busy ? t('itinerary.import.perk.syncing') : t('itinerary.import.perk.refresh')}
+            </Button>
+          </div>
+          <ul className="space-y-2">
+            {bookings.map((b) => {
+              const importing = importingId === b.bookingId;
+              return (
+                <li
+                  key={b.bookingId}
+                  className="flex items-start justify-between gap-3 rounded-lg border bg-card px-4 py-3"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {b.tripName ?? `${b.origin} → ${b.destination}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {b.origin} → {b.destination} · {dateRange(b.earliestDeparture, b.latestArrival)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('itinerary.import.perk.legs', { count: b.segmentCount })}
+                      {b.airlines.length > 0 ? ` · ${b.airlines.join(', ')}` : ''}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => onImport(b.bookingId)}
+                    disabled={busy || importingId !== null}
+                  >
+                    {importing
+                      ? t('itinerary.import.perk.importing')
+                      : t('itinerary.import.perk.import')}
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+      {errorMessage ? (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
+          <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+          <p className="break-words">{errorMessage}</p>
+        </div>
+      ) : null}
     </div>
   );
 }

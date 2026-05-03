@@ -666,7 +666,11 @@
       "phoneNumber": "Phone Number",
       "whatsapp": "WhatsApp",
       "baseCity": "Current City",
-      "baseCityHint": "Where you are travelling from."
+      "fromHibob": "From HiBob",
+      "title": "Title",
+      "team": "Team",
+      "startDate": "Start Date",
+      "pronouns": "Pronouns"
     },
     "dietary": {
       "restrictions": "Dietary restrictions",
@@ -1364,7 +1368,8 @@
       "tabs": {
         "paste": "Paste text",
         "upload": "Upload file",
-        "email": "Forward email"
+        "email": "Forward email",
+        "perk": "Sync with Perk"
       },
       "pastePlaceholder": "Paste your flight, hotel, or transfer confirmation here…",
       "pasteHint": "Works best with the full text of the confirmation email.",
@@ -1380,8 +1385,26 @@
       "uploadReady": "Ready: {{name}} ({{count}} chars)",
       "uploadError": "Could not read that file. Use Paste text or try another export.",
       "uploadInvalidType": "Please choose a PDF.",
+      "uploadComingSoonTitle": "PDF upload is coming soon",
+      "uploadComingSoonHint": "Drop a booking PDF and we'll extract the flights, hotel, and transfers in your browser.",
       "emailComingSoonTitle": "Email forwarding is coming soon",
-      "emailComingSoonHint": "Forward to itinerary@kizuna.dev once we have it wired."
+      "emailComingSoonHint": "Forward to itinerary@kizuna.dev once we have it wired.",
+      "perk": {
+        "title": "Pull your TravelPerk bookings",
+        "hint": "We'll list every active booking on your work email. Pick the one you want to add to your itinerary — re-importing later is safe and updates existing flights in place.",
+        "sync": "Sync now",
+        "syncing": "Looking up your bookings",
+        "refresh": "Refresh",
+        "listHint": "Found {{count}} booking. Pick one to import.",
+        "listHint_other": "Found {{count}} bookings. Pick one to import.",
+        "legs": "{{count}} flight",
+        "legs_other": "{{count}} flights",
+        "import": "Import",
+        "importing": "Importing",
+        "success": "Synced {{count}} flight(s) from TravelPerk.",
+        "nothingFound": "TravelPerk has no active bookings for your email yet.",
+        "error": "We could not reach TravelPerk just now. Try again in a moment."
+      }
     },
     "checkin": {
       "openLabel": "Open check-in QR code",

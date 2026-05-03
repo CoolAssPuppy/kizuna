@@ -402,23 +402,20 @@ fill in the registration sections for their dependents.
 
 ---
 
-# Phase 2 — Integrations, gallery, UI revamp
+# Phase 2 — Integrations
 
-> Generated 2026-05-02. Six integrations + a photo gallery + a UI revamp, sequenced so each milestone ships behind a feature flag and no two land at once.
+> Generated 2026-05-02. Six integrations, sequenced so each milestone ships behind a feature flag and no two land at once. Photo gallery, UI revamp, and agentic CLI tracks are now done and have been removed from this plan.
 
 ## Sequencing
 
-| #   | Track                   | Why this slot                                                                                                                                                                       |
-| --- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Stripe (live mode)**  | Already 70% built. Closing the bundled-checkout loop unblocks real registration.                                                                                                    |
-| 2   | **Resend (live mode)**  | Stripe success → invite email. Resend is the dependency under the dependency.                                                                                                       |
-| 3   | **HiBob bulk + cron**   | Replaces the seeded fixture roster with real employees.                                                                                                                             |
-| 4   | **Okta SSO**            | Once HiBob seeds `auth.users`, SSO has bodies to attach to.                                                                                                                         |
-| 5   | **Slack notifications** | Cheap, high-signal. Slot it whenever an evening is free.                                                                                                                            |
-| 6   | **Perk sync**           | Hardest API access. Start the procurement clock now; ship integration when keys arrive.                                                                                             |
-| 7   | **Photo gallery**       | Pure feature work, no dependency on the integrations above.                                                                                                                         |
-| 8   | **UI revamp**           | Pick a Paper variant, port tokens, sweep `src/components/ui/`.                                                                                                                      |
-| 9   | **Agentic CLI surface** | The lead-magnet feature. Cmd-K is a nav gimmick; the CLI is the agent showcase. Detailed plan in `tasks/cli-spec.md`. Read-only flows first, then PAT + HTTP + MCP, then mutations. |
+| #   | Track                   | Why this slot                                                                                            |
+| --- | ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| 1   | **Stripe (live mode)**  | Already 70% built. Closing the bundled-checkout loop unblocks real registration.                         |
+| 2   | **Resend (live mode)**  | Stripe success → invite email. Resend is the dependency under the dependency.                            |
+| 3   | **HiBob bulk + cron**   | Replaces the seeded fixture roster with real employees.                                                  |
+| 4   | **Okta SSO**            | Once HiBob seeds `auth.users`, SSO has bodies to attach to.                                              |
+| 5   | **Slack notifications** | Cheap, high-signal. Slot it whenever an evening is free.                                                 |
+| 6   | **Perk sync**           | Self-serve API keys (developers.perk.com). Slot after the procurement-blocked tracks above are unstuck.  |
 
 Each track below has: **current state · API research · phased plan · gotchas · MVP checklist.**
 
@@ -760,196 +757,6 @@ supabase sso add --type saml \
 
 ---
 
-## P2-7 · Photo gallery + tagging
-
-### Current state
-
-| Asset                                                  | Status                               |
-| ------------------------------------------------------ | ------------------------------------ |
-| `community_media` Storage bucket                       | Exists with admin/self RLS policies. |
-| No `media_items` table, no UI, no tagging. Greenfield. |
-
-### Plan
-
-- **P2-7.1 · Schema** (½d):
-
-```sql
-create table public.media_items (
-  id uuid primary key default gen_random_uuid(),
-  uploaded_by uuid not null references public.users(id) on delete set null,
-  event_id uuid references public.events(id) on delete cascade,
-  storage_path text not null,
-  mime_type text not null,
-  width int, height int,
-  taken_at timestamptz,
-  uploaded_at timestamptz not null default now(),
-  caption text,
-  privacy media_privacy not null default 'event_only'
-);
-
-create table public.media_tags (
-  media_id uuid not null references public.media_items(id) on delete cascade,
-  user_id uuid references public.users(id) on delete cascade,
-  label text,
-  added_by uuid not null references public.users(id) on delete set null,
-  added_at timestamptz not null default now(),
-  primary key (media_id, coalesce(user_id, '00000000-0000-0000-0000-000000000000'::uuid), label),
-  check (user_id is not null or label is not null)
-);
-```
-
-RLS: `event_only` visible to attendees; `public` to all signed-in; `private` to owner + admins. Tagged-as-me always visible regardless of privacy.
-
-- **P2-7.2 · Upload pipeline** (1d): reuse `useSupabaseUpload`. Client-side EXIF strip (lat/long leak). Edge function with `sharp` generates thumb (320), medium (1024), full. Post-upload: Slack ping.
-- **P2-7.3 · Gallery view** (1.5d): `/community/gallery` masonry grid (CSS columns), virtualized via `react-virtuoso`. Lightbox: prev/next, caption, tags, "Tag people" admin action. Filter chips by date / tagged-user / event.
-- **P2-7.4 · Tagging UX** (1d): face click in lightbox → person picker (typeahead vs `public.users`). Bulk-tag by `session_id`. Tags trigger Slack DM.
-- **P2-7.5 · AI auto-tag** (deferred): OpenAI Vision or AWS Rekognition vs. employee_profiles avatars. Confidence > 0.9 auto-tag, else queue for review. **Never auto-tag minors** — skip media tagged with any `additional_guests` reference.
-
-### Gotchas
-
-- **Minors.** Default `privacy = 'private'` for any media tagged with an `additional_guests` reference.
-- **Storage costs.** 60 × 100 photos × 4MB = 24GB. Generate derivatives, serve thumbs from CDN, full only on demand.
-- **EXIF.** Strip GPS before storing. Some users will share photos taken at home.
-
-### MVP checklist
-
-- [ ] `media_items` + `media_tags` tables + RLS
-- [ ] Upload pipeline with EXIF strip + derivatives
-- [ ] `/community/gallery` masonry view
-- [ ] Lightbox with tagging
-- [ ] Tag-to-Slack-DM notification
-
----
-
-## P2-8 · UI revamp
-
-### Current state
-
-| Asset                                                                                                                        | Status                                                                                              |
-| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `src/components/ui/`                                                                                                         | 9 files: button, checkbox, dialog, dropzone, input, label, progress, textarea, toast. Pure shadcn.  |
-| `src/styles/globals.css`                                                                                                     | 6 themes wired: light, dark, barbie, supa, hermione, kirk. Token system in place via CSS variables. |
-| Verdict: theme infrastructure is solid. The "very shadcn" feel is from default radius / shadow / typography, not the tokens. |
-
-### Three Paper variants
-
-Live in the `Kizuna` Paper file, on the canvas next to the existing Home Desktop.
-
-- **Variant A — Editorial.** Print-magazine register. Fraunces display + Inter body, single cadmium accent (`#7E1D14`), generous whitespace, asymmetric headline + countdown. Best for "curated content" use cases.
-- **Variant B — Alpine field guide.** Caudex display + Inter body, evergreen × ochre lichen on warm bone (`#F4EFE6`), woodcut-style icons, hand-drawn separators. References the Banff venue without being twee.
-- **Variant C — Phosphor terminal.** All JetBrains Mono, pure black ground, phosphor green accent. Plays the "Supabase is a developer brand" card straight. Tabular data fits naturally; itinerary timeline reads like CLI history.
-
-### Plan (after the user picks a winner)
-
-- **P2-8.1 · Pick a direction** (½d): review Paper variants. Probably an A/C blend ("editorial in shape, phosphor in moments where data is dense"). Lock mood word, palette, type scale into a Notion brand-voice doc.
-- **P2-8.2 · Token migration** (1d): update `globals.css` `:root` with new HSL channel triples. Add chosen serif (Fraunces) + mono (JetBrains Mono) to `index.html` Google Fonts. `tailwind.config.ts` gets `fontFamily.display` and `fontFamily.mono`.
-- **P2-8.3 · Component sweep** (2d): one PR per shadcn primitive. Replace radius / shadow / focus ring with new tokens. Default size scale (sm/md/lg) stays — only visual treatment changes.
-- **P2-8.4 · Hero treatments** (1d): HomeScreen + ItineraryHero get the variant's hero. LoggedOutHome (day/night background) keeps its current treatment.
-- **P2-8.5 · Visual regression baseline** (½d): Playwright screenshot tests for `/`, `/itinerary`, `/registration`, `/admin/agenda`, `/admin/scan`. Lock baselines after migration.
-
-### Gotchas
-
-- Existing themes (`barbie`, `supa`, `hermione`, `kirk`) need to be retired or re-derived from the new token base. Probably retire all but `light` / `dark` / `supa`.
-- shadcn Toast and Dialog have animation defaults that look default-shadcn. Override `data-[state=open]:animate-in` keyframes too.
-
-### MVP checklist
-
-- [ ] Paper variant picked, brand-voice doc locked
-- [ ] Token migration in `globals.css`
-- [ ] All 9 shadcn primitives swept
-- [ ] HomeScreen + ItineraryHero hero treatments shipped
-- [ ] Playwright visual baseline
-
----
-
-## P2-9 · Agentic CLI surface
-
-> Detailed implementation spec lives in `tasks/cli-spec.md`. Read that file first.
-
-### Thesis
-
-Two unrelated features sharing a footer:
-
-- **Cmd-K palette** is a navigation gimmick. Routes only. One small PR, never grows.
-- **CLI** is the actual product. An agent surface for an offsite app that proves the bet that every SaaS will need one. The in-app footer is the human-typeable demo of that surface; the same registry powers an HTTP edge function, an `npx` package, and a standalone MCP server.
-
-For the open-source-clone story this is the headline screenshot. Permissioning rides on RLS; agents inherit their user's row-level access with no service-role escape hatch. That is the Supabase angle.
-
-### Architecture
-
-```
-            ┌──────────────────────────────────────┐
-            │   src/lib/cli/registry.ts            │
-            │   typed command registry             │
-            │   zod schemas for input + output     │
-            │   dispatcher hits Postgres via RLS   │
-            └──────────────────────────────────────┘
-                      │            │              │
-        ┌─────────────┘            │              └─────────────┐
-        ▼                          ▼                            ▼
-  Footer CLI            supabase/functions/cli/        packages/kizuna-mcp/
-  (in-app demo)         (REST + PAT + npx wrap)        (separate npm package)
-```
-
-### Milestones
-
-#### M1 — Cmd-K palette gimmick (½ day)
-
-- [ ] Install `cmdk`, add `src/components/CommandPalette.tsx`
-- [ ] Auto-derive route manifest from `src/app/router.tsx` so palette stays in sync
-- [ ] Cmd-K opens palette, fuzzy nav, escape closes
-- [ ] Palette is purely cosmetic — never dispatches commands. Never grows.
-
-#### M2 — Registry + footer CLI, read-only (1 week)
-
-- [ ] `src/lib/cli/registry.ts` — typed `Command<TInput, TOutput>` registry, zod schemas, scopes, examples
-- [ ] `src/lib/cli/parser.ts` — verb-noun tokenizer with `@user`, `:id`, `--flag` support
-- [ ] `src/lib/cli/dispatcher.ts` — parse → validate → authorize → handle → format (JSON or MD)
-- [ ] Replace `CommandPaletteBar.tsx` with a working footer terminal: input, history, output panel, copy, format toggle
-- [ ] Implement v1 read commands: `help`, `schema`, `me`, `me itinerary`, `me sessions`, `me documents`, `me roommates`, `me transport`, `me notifications`, `attendees`, `sessions`, `events`, `event`, `agenda`, `photos`, `channels`
-- [ ] Vitest coverage for parser + dispatcher + every command
-- [ ] pgTAP coverage for any new SQL functions
-- [ ] Playwright spec: open footer, run `me itinerary --format=md`, copy output
-
-#### M3 — HTTP edge function + PAT auth + npx package (1 week)
-
-- [ ] `api_keys` table + RLS + pgTAP (see spec for schema)
-- [ ] `/profile/api-keys` page, slotted at the bottom of profile nav under Transport, called "API Keys"
-- [ ] PAT create / list / revoke flow with one-time-show secret modal
-- [ ] `supabase/functions/cli/index.ts` — POST endpoint that accepts PAT or session JWT
-- [ ] OAuth code-flow for agent auth (`/cli/oauth-authorize` + `/cli/oauth-callback`) with Kizuna-chromed callback page
-- [ ] `packages/kizuna-cli/` — `npx kizuna ...` thin wrapper around HTTP
-- [ ] Edge function tests for unauthorized, forbidden, validation, success
-- [ ] Playwright: PAT issue → revoke flow
-
-#### M4 — MCP server (1 week)
-
-- [ ] `packages/kizuna-mcp/` — separate npm package, standalone MCP server
-- [ ] Auto-converts each command's zod schema to MCP tool definition
-- [ ] `KIZUNA_URL` + `KIZUNA_TOKEN` env config; OAuth bootstrap flow if no token
-- [ ] Configuration recipes: Claude Desktop, Cursor, Claude Code
-- [ ] Smoke test: `kizuna://schema` resource returns the catalog
-- [ ] 60-second screencast deliverable: "Hey Claude, who at the offsite likes snowboarding?"
-
-#### M5 — Mutations + admin commands (1 week)
-
-- [ ] Mutation pattern locked: handlers call existing Postgres functions; never duplicate business logic
-- [ ] `me favorite-session`, `me rsvp`, `me sign-document`, `me set-hobby`, `me update-dietary`
-- [ ] `admin nudge`, `admin assign-room`, `admin conflicts approve|reject`, `admin reports <kind>`
-- [ ] All admin commands gated by `app_role` claim, surfaced in `schema` only when authorized
-- [ ] Audit-log every mutation to a new `cli_audit_log` table
-
-### Definition of done for each milestone
-
-The standard project gates plus:
-
-- [ ] Footer CLI works on every authenticated route
-- [ ] `npm run gen:types` re-run, no drift
-- [ ] `tasks/cli-spec.md` updated if architecture diverged
-- [ ] One screencast per milestone, posted in the project Notion
-
----
-
 ## Cross-cutting
 
 - **Doppler secret rotation.** Every integration adds 2-4 secrets. Roll the renames (`HIBOB_SERVICE_USER_ID`, etc.) in a single Doppler PR before integration work.
@@ -959,8 +766,6 @@ The standard project gates plus:
 
 ## Open questions for tomorrow
 
-1. Confirm `PERK_API_KEY` = TravelPerk vs. an internal Supabase tool.
+1. Confirm `PERK_API_KEY` = TravelPerk (now Perk). Verified 2026-05-03 — `developers.travelperk.com` 301s to `developers.perk.com`, base URL `https://api.travelperk.com`, `Authorization: apikey <KEY>` + `Api-Version: 1`. Self-serve under Company settings → Developers.
 2. Confirm Okta IdP is already provisioned for the company (not new procurement).
 3. Confirm Resend domain — `kizuna.supabase.com` vs. a dedicated subdomain.
-4. Photo gallery: AI auto-tag in or out for Phase 2?
-5. UI direction: which Paper variant lands the killing blow — A, B, C, or hybrid?

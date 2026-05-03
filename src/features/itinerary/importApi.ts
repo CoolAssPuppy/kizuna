@@ -37,6 +37,72 @@ async function describeFunctionError(error: unknown): Promise<Error> {
   return new Error(String(error));
 }
 
+export interface PerkBookingSummary {
+  bookingId: string;
+  tripName: string | null;
+  segmentCount: number;
+  origin: string;
+  destination: string;
+  earliestDeparture: string;
+  latestArrival: string;
+  airlines: ReadonlyArray<string>;
+}
+
+export interface PerkListResult {
+  found: boolean;
+  bookings: ReadonlyArray<PerkBookingSummary>;
+}
+
+export interface PerkImportResult {
+  bookingId: string;
+  inserted: number;
+  updated: number;
+}
+
+/**
+ * List every active booking the caller has in TravelPerk. Backed by
+ * the `sync-perk` edge function in list mode (empty body). Re-runnable;
+ * the user can re-list any time bookings change.
+ */
+export async function listPerkBookingsViaEdge(): Promise<PerkListResult> {
+  const client = getSupabaseClient();
+  const response = await client.functions.invoke<{
+    found?: boolean;
+    bookings?: ReadonlyArray<PerkBookingSummary>;
+  }>('sync-perk', { body: {} });
+  if (response.error) {
+    if (isNotDeployed(response.error)) return { found: false, bookings: [] };
+    throw await describeFunctionError(response.error);
+  }
+  return {
+    found: Boolean(response.data?.found),
+    bookings: response.data?.bookings ?? [],
+  };
+}
+
+/**
+ * Import one specific booking into the user's flights table. Idempotent
+ * per `(user_id, perk_booking_ref, flight_number, direction)` — calling
+ * this for the same booking twice updates the existing rows rather than
+ * creating duplicates, so the user can re-sync after a flight change.
+ */
+export async function importPerkBookingViaEdge(bookingId: string): Promise<PerkImportResult> {
+  const client = getSupabaseClient();
+  const response = await client.functions.invoke<PerkImportResult>('sync-perk', {
+    body: { bookingId },
+  });
+  if (response.error) {
+    throw await describeFunctionError(response.error);
+  }
+  return (
+    response.data ?? {
+      bookingId,
+      inserted: 0,
+      updated: 0,
+    }
+  );
+}
+
 /**
  * Send raw itinerary text to the parse-itinerary edge function. The edge
  * function holds OPENAI_API_KEY and calls the chat completions API; the

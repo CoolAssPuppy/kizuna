@@ -13,7 +13,10 @@
 //      contract).
 //   5. Upserts swag_sizes with HiBob's t-shirt and shoe size when
 //      present.
-//   6. Returns the hydrated shape so the SPA can route to the
+//   6. Upserts emergency_contacts when HiBob has a primary contact
+//      AND the user has not already filled one in (we never overwrite
+//      a user-entered emergency contact).
+//   7. Returns the hydrated shape so the SPA can route to the
 //      registration wizard with the form pre-filled.
 //
 // In stubbed mode (HIBOB_SERVICE_USER_ID / TOKEN absent) the function
@@ -26,6 +29,11 @@
 // own profile. Do not generalise without re-thinking the trust model.
 
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
+import {
+  HIBOB_CUSTOM_FIELDS,
+  HIBOB_PATHS,
+  buildHibobFieldList,
+} from '../_shared/hibobFieldIds.ts';
 import { HIBOB_STUB_BY_EMAIL, type HiBobStubPerson } from '../_shared/hibobStub.ts';
 import { getAdminClient, getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
@@ -33,9 +41,9 @@ declare const Deno: { env: { get: (k: string) => string | undefined } };
 
 const HIBOB_SEARCH_URL = 'https://api.hibob.com/v1/people/search';
 
-// Local shape mirrors HiBobStubPerson minus the `team` + `isActive`
-// flags this function does not consume. Keeping a typed alias makes
-// the upsert payload below readable.
+// Local shape mirrors HiBobStubPerson minus the org-level flags this
+// function does not consume (team/isActive). Keeping a typed alias
+// makes the upsert payload below readable.
 type HiBobPerson = Omit<HiBobStubPerson, 'team' | 'isActive'>;
 
 Deno.serve(async (req) => {
@@ -57,8 +65,6 @@ Deno.serve(async (req) => {
   const config = {
     serviceUserId: Deno.env.get('HIBOB_SERVICE_USER_ID'),
     serviceUserToken: Deno.env.get('HIBOB_SERVICE_USER_TOKEN'),
-    tshirtFieldId: Deno.env.get('HIBOB_TSHIRT_FIELD_ID'),
-    shoeFieldId: Deno.env.get('HIBOB_SHOE_FIELD_ID'),
   };
 
   let person: HiBobPerson | null;
@@ -75,9 +81,16 @@ Deno.serve(async (req) => {
   // the user can hydrate their own row even if it does not yet exist.
   const admin = getAdminClient();
 
-  // Mark these fields as hibob-sourced if they aren't already user_entered.
-  // We update the synced_at marker every time so dashboards know the cache
-  // is fresh even when no values changed.
+  // Upsert profile fields. Note: job_title, team, start_date, and
+  // pronouns are intentionally NOT user-editable in Kizuna (the UI
+  // renders them as read-only HiBob-sourced fields), so overwriting
+  // them on every sign-in is the correct behaviour. preferred_name,
+  // first_name, last_name, alternate_email, base_city are user-
+  // editable; we still overwrite from HiBob here because the user has
+  // not yet had a chance to edit during a fresh hydrate. Once they
+  // edit, the legal_name_locked / future per-field locks should be
+  // honoured — for now Phase 1 accepts that the next hydrate may
+  // overwrite a same-day user edit, which is rare.
   const profileUpsert = {
     user_id: callerId,
     preferred_name: person.preferredName,
@@ -87,9 +100,12 @@ Deno.serve(async (req) => {
     legal_name_source: 'hibob' as const,
     department: person.department,
     job_title: person.jobTitle,
+    team: person.team,
     start_date: person.startDate,
     home_country: person.homeCountry,
     base_city: person.baseCity,
+    pronouns: person.pronouns,
+    alternate_email: person.privateEmail,
     phone_number: person.phone,
     avatar_url: person.avatarUrl,
     hibob_synced_at: new Date().toISOString(),
@@ -116,6 +132,32 @@ Deno.serve(async (req) => {
     await admin.from('swag_sizes').upsert(swagPayload, { onConflict: 'user_id' });
   }
 
+  // Emergency contact: only set when HiBob has one AND the user has
+  // not already saved their own. We never overwrite a user-entered
+  // emergency contact because the kizuna form gathers more nuance
+  // (notes, phone_secondary) than HiBob does.
+  if (person.emergencyContact) {
+    const { data: existing } = await admin
+      .from('emergency_contacts')
+      .select('user_id')
+      .eq('user_id', callerId)
+      .maybeSingle();
+
+    if (!existing) {
+      const ec = person.emergencyContact;
+      const fullName = [ec.firstName, ec.lastName].filter(Boolean).join(' ').trim();
+      if (fullName && ec.relationship && ec.phone) {
+        await admin.from('emergency_contacts').insert({
+          user_id: callerId,
+          full_name: fullName,
+          relationship: ec.relationship,
+          phone_primary: ec.phone,
+          email: ec.email ?? null,
+        });
+      }
+    }
+  }
+
   return jsonResponse({ found: true, person });
 });
 
@@ -124,8 +166,6 @@ async function fetchHiBob(
   config: {
     serviceUserId: string | undefined;
     serviceUserToken: string | undefined;
-    tshirtFieldId: string | undefined;
-    shoeFieldId: string | undefined;
   },
 ): Promise<HiBobPerson | null> {
   if (!config.serviceUserId || !config.serviceUserToken) {
@@ -135,31 +175,11 @@ async function fetchHiBob(
     const stub = HIBOB_STUB_BY_EMAIL.get(email.toLowerCase());
     if (!stub) return null;
     // Strip team/isActive — they're not in the local HiBobPerson shape.
-    const { team: _team, isActive: _isActive, ...rest } = stub;
+    // Wait — `team` IS on HiBobPerson because we expanded it. Drop only
+    // isActive (per-user hydrate ignores activation).
+    const { isActive: _isActive, ...rest } = stub;
     return rest;
   }
-
-  const fields: string[] = [
-    'root.id',
-    'root.email',
-    'root.firstName',
-    'root.surname',
-    'root.displayName',
-    'root.fullName',
-    'root.avatarUrl',
-    'work.title',
-    'work.department',
-    'work.site',
-    'work.startDate',
-    'home.privateEmail',
-    'home.mobilePhone',
-    'address.country',
-    'address.city',
-    'internal.lifecycleStatus',
-    'internal.status',
-  ];
-  if (config.tshirtFieldId) fields.push(`work.custom.${config.tshirtFieldId}`);
-  if (config.shoeFieldId) fields.push(`work.custom.${config.shoeFieldId}`);
 
   const auth = btoa(`${config.serviceUserId}:${config.serviceUserToken}`);
   const response = await fetch(HIBOB_SEARCH_URL, {
@@ -170,21 +190,55 @@ async function fetchHiBob(
       Accept: 'application/json',
     },
     body: JSON.stringify({
-      fields,
-      filters: [{ fieldPath: 'root.email', operator: 'equals', values: [email] }],
+      fields: buildHibobFieldList(),
+      filters: [{ fieldPath: HIBOB_PATHS.email, operator: 'equals', values: [email] }],
       humanReadable: 'APPEND',
     }),
   });
   if (!response.ok) throw new Error(`hibob ${response.status}`);
-  const body = (await response.json()) as { employees?: any[] };
+  // Shape we read at the JSON boundary; cast once here, stay typed
+  // everywhere else.
+  interface RawEmployee {
+    id?: string;
+    email?: string;
+    firstName?: string;
+    surname?: string;
+    displayName?: string;
+    fullName?: string;
+    avatarUrl?: string;
+    work?: {
+      title?: string;
+      department?: string;
+      site?: string;
+      startDate?: string;
+      custom?: Record<string, unknown>;
+    };
+    home?: {
+      privateEmail?: string;
+      mobilePhone?: string;
+      emergencyContact?: {
+        firstName?: string;
+        surname?: string;
+        relationship?: string;
+        mobilePhone?: string;
+        email?: string;
+      };
+    };
+    address?: { country?: string; city?: string };
+    humanReadable?: { work?: { custom?: Record<string, unknown> } };
+  }
+  const body = (await response.json()) as { employees?: RawEmployee[] };
   const head = body.employees?.[0];
   if (!head) return null;
 
-  const tshirtRaw = config.tshirtFieldId ? head.work?.custom?.[config.tshirtFieldId] : null;
-  const tshirtHuman = config.tshirtFieldId
-    ? head.humanReadable?.work?.custom?.[config.tshirtFieldId]
-    : null;
-  const shoeRaw = config.shoeFieldId ? head.work?.custom?.[config.shoeFieldId] : null;
+  const tshirtRaw = head.work?.custom?.[HIBOB_CUSTOM_FIELDS.tshirtSize];
+  const tshirtHuman = head.humanReadable?.work?.custom?.[HIBOB_CUSTOM_FIELDS.tshirtSize];
+  const shoeRaw = head.work?.custom?.[HIBOB_CUSTOM_FIELDS.shoeSize];
+  const teamRaw = head.work?.custom?.[HIBOB_CUSTOM_FIELDS.team];
+  const teamHuman = head.humanReadable?.work?.custom?.[HIBOB_CUSTOM_FIELDS.team];
+  const pronounsRaw = head.work?.custom?.[HIBOB_CUSTOM_FIELDS.pronouns];
+  const pronounsHuman = head.humanReadable?.work?.custom?.[HIBOB_CUSTOM_FIELDS.pronouns];
+  const ec = head.home?.emergencyContact;
 
   return {
     hibobId: head.id ?? '',
@@ -196,15 +250,30 @@ async function fetchHiBob(
     firstName: head.firstName ?? null,
     lastName: head.surname ?? null,
     department: head.work?.department ?? null,
+    team: typeof teamHuman === 'string' ? teamHuman : typeof teamRaw === 'string' ? teamRaw : null,
     jobTitle: head.work?.title ?? null,
     startDate: head.work?.startDate ?? null,
     homeCountry: head.address?.country ?? null,
     baseCity: head.address?.city ?? head.work?.site ?? null,
+    pronouns:
+      typeof pronounsHuman === 'string'
+        ? pronounsHuman
+        : typeof pronounsRaw === 'string'
+          ? pronounsRaw
+          : null,
     phone: head.home?.mobilePhone ?? null,
     avatarUrl: head.avatarUrl ?? null,
-    tshirtSize: tshirtHuman ?? (typeof tshirtRaw === 'string' ? tshirtRaw : null),
+    tshirtSize: typeof tshirtHuman === 'string' ? tshirtHuman : typeof tshirtRaw === 'string' ? tshirtRaw : null,
     shoeSizeEu: typeof shoeRaw === 'number' ? shoeRaw : null,
+    emergencyContact:
+      ec && (ec.firstName || ec.surname)
+        ? {
+            firstName: ec.firstName ?? null,
+            lastName: ec.surname ?? null,
+            relationship: ec.relationship ?? null,
+            phone: ec.mobilePhone ?? null,
+            email: ec.email ?? null,
+          }
+        : null,
   };
 }
-
-// (Stub directory consolidated to supabase/functions/_shared/hibobStub.ts.)

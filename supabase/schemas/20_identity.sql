@@ -71,6 +71,7 @@ create table public.employee_profiles (
   start_date date,
   home_country text check (home_country is null or length(home_country) = 2),
   base_city text,
+  pronouns text,
   slack_handle text,
   avatar_url text,
   years_attended int not null default 0 check (years_attended >= 0),

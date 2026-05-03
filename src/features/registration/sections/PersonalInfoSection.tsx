@@ -110,38 +110,42 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-[1fr_5rem_1fr]">
-        <div className="space-y-2">
-          <Label htmlFor="personal-first">{t('registration.personalInfo.firstName')}</Label>
-          <Input
-            id="personal-first"
-            required
-            value={values.firstName}
-            onChange={(e) => setValues((v) => ({ ...v, firstName: e.target.value }))}
-          />
+      <div className="space-y-2">
+        <div className="grid gap-4 sm:grid-cols-[1fr_5rem_1fr]">
+          <div className="space-y-2">
+            <Label htmlFor="personal-first">{t('registration.personalInfo.firstName')}</Label>
+            <Input
+              id="personal-first"
+              required
+              value={values.firstName}
+              onChange={(e) => setValues((v) => ({ ...v, firstName: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personal-middle">
+              {t('registration.personalInfo.middleInitial')}
+            </Label>
+            <Input
+              id="personal-middle"
+              maxLength={3}
+              value={values.middleInitial}
+              onChange={(e) => setValues((v) => ({ ...v, middleInitial: e.target.value }))}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="personal-last">{t('registration.personalInfo.lastName')}</Label>
+            <Input
+              id="personal-last"
+              required
+              value={values.lastName}
+              onChange={(e) => setValues((v) => ({ ...v, lastName: e.target.value }))}
+            />
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="personal-middle">{t('registration.personalInfo.middleInitial')}</Label>
-          <Input
-            id="personal-middle"
-            maxLength={3}
-            value={values.middleInitial}
-            onChange={(e) => setValues((v) => ({ ...v, middleInitial: e.target.value }))}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="personal-last">{t('registration.personalInfo.lastName')}</Label>
-          <Input
-            id="personal-last"
-            required
-            value={values.lastName}
-            onChange={(e) => setValues((v) => ({ ...v, lastName: e.target.value }))}
-          />
-        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('registration.personalInfo.legalNameHint')}
+        </p>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {t('registration.personalInfo.legalNameHint')}
-      </p>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-2">
@@ -184,10 +188,59 @@ export function PersonalInfoSection({ mode }: SectionProps): JSX.Element {
           value={values.baseCity}
           onChange={(e) => setValues((v) => ({ ...v, baseCity: e.target.value }))}
         />
-        <p className="text-xs text-muted-foreground">
-          {t('registration.personalInfo.baseCityHint')}
-        </p>
       </div>
+
+      <HibobReadOnlyFields row={row} />
     </SectionChrome>
+  );
+}
+
+/**
+ * Read-only block for HiBob-sourced fields. These are intentionally
+ * not editable in Kizuna — every sign-in re-hydrates them from HiBob,
+ * so any user edit would be silently overwritten on the next sync.
+ * If a value is wrong, it gets fixed in HiBob, not here.
+ *
+ * Renders nothing when the row has no HiBob data — first-time users
+ * pre-sync see an empty section, not four blank dashes.
+ */
+function HibobReadOnlyFields({
+  row,
+}: {
+  row: { job_title?: string | null; team?: string | null; start_date?: string | null; pronouns?: string | null; hibob_synced_at?: string | null } | null | undefined;
+}): JSX.Element | null {
+  const { t, i18n } = useTranslation();
+  if (!row) return null;
+  const hasAny = Boolean(row.job_title || row.team || row.start_date || row.pronouns);
+  if (!hasAny) return null;
+
+  const startDateLabel = row.start_date
+    ? new Date(row.start_date).toLocaleDateString(i18n.language, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  return (
+    <div className="space-y-3 rounded-md border bg-muted/30 p-4">
+      <h3 className="text-sm font-semibold">{t('registration.personalInfo.fromHibob')}</h3>
+      <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+        <ReadOnlyRow label={t('registration.personalInfo.title')} value={row.job_title} />
+        <ReadOnlyRow label={t('registration.personalInfo.team')} value={row.team} />
+        <ReadOnlyRow label={t('registration.personalInfo.startDate')} value={startDateLabel} />
+        <ReadOnlyRow label={t('registration.personalInfo.pronouns')} value={row.pronouns} />
+      </dl>
+    </div>
+  );
+}
+
+function ReadOnlyRow({ label, value }: { label: string; value: string | null | undefined }): JSX.Element | null {
+  if (!value) return null;
+  return (
+    <div>
+      <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className="mt-0.5 font-medium text-foreground">{value}</dd>
+    </div>
   );
 }

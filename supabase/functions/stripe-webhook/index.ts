@@ -1,8 +1,21 @@
 // Edge function: stripe-webhook
 //
-// Receives payment_intent.succeeded / payment_intent.payment_failed events.
-// Updates guest_profiles.payment_status accordingly. We use service-role
-// here because Stripe is anonymous to us — no JWT to scope by.
+// Two distinct flows route through this webhook:
+//
+//   * `checkout.session.completed` (PRIMARY): the bundled sponsor
+//     checkout opens a Stripe Checkout Session and stamps
+//     metadata.sponsor_user_id. The session — not the underlying
+//     PaymentIntent — is what carries the metadata, so we must listen
+//     on this event for the fan-out (invitations pending → sent +
+//     invite emails) to fire.
+//
+//   * `payment_intent.{succeeded,payment_failed}` (LEGACY): the
+//     single-guest checkout (`create-stripe-checkout`) charges the
+//     guest's own seat and stamps metadata.guest_user_id on the intent.
+//     This still fires for that flow.
+//
+// Updates use the admin client because Stripe is anonymous to us —
+// no JWT to scope by.
 //
 // Signature verification: when STRIPE_WEBHOOK_SECRET is configured we
 // verify the Stripe-Signature header. Without it we accept the webhook
@@ -68,14 +81,15 @@ Deno.serve(async (req) => {
   // Stripe webhook payloads are documented but the SDK shape only
   // applies when we use `stripe.webhooks.constructEvent`. We sign-
   // verify above and parse JSON ourselves; this is the narrow set of
-  // fields we read.
-  interface StripeIntent {
+  // fields we read across the supported event types.
+  interface StripeObject {
     id?: string;
+    payment_status?: string;
     metadata?: { guest_user_id?: string; sponsor_user_id?: string };
   }
   interface StripeEvent {
     type?: string;
-    data?: { object?: StripeIntent };
+    data?: { object?: StripeObject };
   }
   let event: StripeEvent;
   try {
@@ -85,31 +99,66 @@ Deno.serve(async (req) => {
   }
 
   const admin = getAdminClient();
+  const obj = event.data?.object;
+  const guestUserId = obj?.metadata?.guest_user_id;
+  const sponsorUserId = obj?.metadata?.sponsor_user_id;
 
-  const intent = event.data?.object;
-  const guestUserId = intent?.metadata?.guest_user_id;
-  const sponsorUserId = intent?.metadata?.sponsor_user_id;
-
-  // Two distinct flows route through this webhook:
-  //   - guest_user_id: an accepted guest paying their own seat (legacy)
-  //   - sponsor_user_id: an employee paying for every invitation +
-  //     dependent in one bundled checkout. The fan-out helper flips
-  //     status='pending' → 'sent' and sends invite emails.
-  if (event.type === 'payment_intent.succeeded') {
-    if (sponsorUserId) {
-      await dispatchSponsorPaymentSucceeded(sponsorUserId);
+  switch (event.type) {
+    // Bundled sponsor checkout — primary success signal. The Session
+    // (not the PaymentIntent) carries metadata.sponsor_user_id.
+    case 'checkout.session.completed':
+    case 'checkout.session.async_payment_succeeded': {
+      // Async payment methods (e.g. Klarna, ACH) flip
+      // payment_status='paid' on the async_payment_succeeded event;
+      // checkout.session.completed for card payments is already paid.
+      // Be defensive and only fan out when payment_status indicates
+      // success — Stripe also fires session.completed for unpaid
+      // sessions (e.g. setup mode), which we never want to act on.
+      if (obj?.payment_status === 'paid' && sponsorUserId) {
+        await dispatchSponsorPaymentSucceeded(sponsorUserId);
+      }
+      // The single-guest legacy flow still uses Checkout Session too;
+      // mirror the same metadata read here.
+      if (obj?.payment_status === 'paid' && guestUserId) {
+        await admin
+          .from('guest_profiles')
+          .update({ payment_status: 'paid', stripe_payment_id: obj.id ?? null })
+          .eq('user_id', guestUserId);
+      }
+      break;
     }
-    if (guestUserId) {
-      await admin
-        .from('guest_profiles')
-        .update({ payment_status: 'paid', stripe_payment_id: intent?.id ?? null })
-        .eq('user_id', guestUserId);
+    case 'checkout.session.async_payment_failed': {
+      if (guestUserId) {
+        await admin
+          .from('guest_profiles')
+          .update({ payment_status: 'failed' })
+          .eq('user_id', guestUserId);
+      }
+      break;
     }
-  } else if (event.type === 'payment_intent.payment_failed' && guestUserId) {
-    await admin
-      .from('guest_profiles')
-      .update({ payment_status: 'failed' })
-      .eq('user_id', guestUserId);
+    // Legacy events kept for forward compatibility — older single-
+    // guest charge flows that posted PaymentIntent metadata still work.
+    case 'payment_intent.succeeded': {
+      if (sponsorUserId) {
+        await dispatchSponsorPaymentSucceeded(sponsorUserId);
+      }
+      if (guestUserId) {
+        await admin
+          .from('guest_profiles')
+          .update({ payment_status: 'paid', stripe_payment_id: obj?.id ?? null })
+          .eq('user_id', guestUserId);
+      }
+      break;
+    }
+    case 'payment_intent.payment_failed': {
+      if (guestUserId) {
+        await admin
+          .from('guest_profiles')
+          .update({ payment_status: 'failed' })
+          .eq('user_id', guestUserId);
+      }
+      break;
+    }
   }
 
   return jsonResponse({ received: true });

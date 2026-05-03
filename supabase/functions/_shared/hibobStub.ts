@@ -10,6 +10,14 @@
 // Keep this file aligned with supabase/fixtures/01_sample_employees.sql
 // — every email here should also exist as a seeded employee.
 
+export interface HiBobEmergencyContact {
+  firstName: string | null;
+  lastName: string | null;
+  relationship: string | null;
+  phone: string | null;
+  email: string | null;
+}
+
 export interface HiBobStubPerson {
   hibobId: string;
   workEmail: string;
@@ -24,11 +32,13 @@ export interface HiBobStubPerson {
   startDate: string | null;
   homeCountry: string | null;
   baseCity: string | null;
+  pronouns: string | null;
   phone: string | null;
   avatarUrl: string | null;
   tshirtSize: string | null;
   shoeSizeEu: number | null;
   isActive: boolean;
+  emergencyContact: HiBobEmergencyContact | null;
 }
 
 export const HIBOB_STUB: ReadonlyArray<HiBobStubPerson> = [
@@ -46,11 +56,19 @@ export const HIBOB_STUB: ReadonlyArray<HiBobStubPerson> = [
     startDate: '2023-06-01',
     homeCountry: 'GB',
     baseCity: 'London',
+    pronouns: 'he/him',
     phone: '+44 20 7946 0123',
     avatarUrl: null,
     tshirtSize: 'L',
     shoeSizeEu: 44,
     isActive: true,
+    emergencyContact: {
+      firstName: 'Min',
+      lastName: 'Park',
+      relationship: 'Spouse',
+      phone: '+44 20 7946 0124',
+      email: 'min.park@example.com',
+    },
   },
   {
     hibobId: 'hibob_maya',
@@ -66,11 +84,19 @@ export const HIBOB_STUB: ReadonlyArray<HiBobStubPerson> = [
     startDate: '2024-09-15',
     homeCountry: 'US',
     baseCity: 'New York',
+    pronouns: 'she/her',
     phone: null,
     avatarUrl: null,
     tshirtSize: 'M',
     shoeSizeEu: 39,
     isActive: true,
+    emergencyContact: {
+      firstName: 'Jordan',
+      lastName: 'Mason',
+      relationship: 'Sibling',
+      phone: '+1 212 555 0188',
+      email: null,
+    },
   },
   {
     hibobId: 'hibob_lu',
@@ -86,11 +112,19 @@ export const HIBOB_STUB: ReadonlyArray<HiBobStubPerson> = [
     startDate: '2022-03-01',
     homeCountry: 'CA',
     baseCity: 'Toronto',
+    pronouns: 'they/them',
     phone: '+1 416 555 0123',
     avatarUrl: null,
     tshirtSize: 'S',
     shoeSizeEu: 38,
     isActive: true,
+    emergencyContact: {
+      firstName: 'Wei',
+      lastName: 'Liu',
+      relationship: 'Parent',
+      phone: '+1 416 555 0199',
+      email: 'wei.liu@example.com',
+    },
   },
 ];
 

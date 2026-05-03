@@ -746,6 +746,7 @@ export type Database = {
           middle_initial: string | null
           phone_number: string | null
           preferred_name: string | null
+          pronouns: string | null
           slack_handle: string | null
           start_date: string | null
           team: string | null
@@ -771,6 +772,7 @@ export type Database = {
           middle_initial?: string | null
           phone_number?: string | null
           preferred_name?: string | null
+          pronouns?: string | null
           slack_handle?: string | null
           start_date?: string | null
           team?: string | null
@@ -796,6 +798,7 @@ export type Database = {
           middle_initial?: string | null
           phone_number?: string | null
           preferred_name?: string | null
+          pronouns?: string | null
           slack_handle?: string | null
           start_date?: string | null
           team?: string | null
