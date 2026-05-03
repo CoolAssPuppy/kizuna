@@ -1,11 +1,11 @@
-import { Check, Clipboard, Code2, FileText } from 'lucide-react';
+import { Check, Clipboard } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 import { Button } from '@/components/ui/button';
-import type { CommandFormat, CommandResult } from '@/lib/cli';
+import type { CommandResult } from '@/lib/cli';
 
 interface CommandOutputProps {
   command: string;
@@ -13,11 +13,17 @@ interface CommandOutputProps {
   result: CommandResult;
 }
 
+/**
+ * Renders the result of a CLI command for the web terminal. The web
+ * surface is intentionally UI-first: every command's per-command
+ * `toMarkdown` formatter is rendered as React components so the user
+ * sees prose, not raw JSON or markdown source. Use the CLI binary or
+ * the HTTP API for machine-readable output.
+ */
 export function CommandOutput({ command, durationMs, result }: CommandOutputProps): JSX.Element {
   const { t } = useTranslation();
-  const [format, setFormat] = useState<CommandFormat>(result.ok ? result.format : 'json');
   const [copied, setCopied] = useState(false);
-  const body = renderBody(result, format);
+  const body = renderBody(result);
 
   const onCopy = async (): Promise<void> => {
     await navigator.clipboard?.writeText(body.copyText);
@@ -28,34 +34,10 @@ export function CommandOutput({ command, durationMs, result }: CommandOutputProp
   return (
     <article className="border bg-background" style={{ borderColor: 'var(--c-rule)' }}>
       <header className="flex flex-wrap items-center gap-2 border-b px-3 py-2 text-xs">
-        <code className="font-mono" style={{ color: 'var(--c-accent)' }}>
+        <code className="break-all font-mono" style={{ color: 'var(--c-accent)' }}>
           $ {command}
         </code>
         <span className="ml-auto text-muted-foreground">{durationMs}ms</span>
-        {result.ok ? (
-          <div className="flex rounded-md border" style={{ borderColor: 'var(--c-rule)' }}>
-            <Button
-              type="button"
-              variant={format === 'json' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setFormat('json')}
-              aria-label={t('terminal.format.json')}
-              className="h-7 rounded-none px-2"
-            >
-              <Code2 aria-hidden className="h-3.5 w-3.5" />
-            </Button>
-            <Button
-              type="button"
-              variant={format === 'md' ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setFormat('md')}
-              aria-label={t('terminal.format.md')}
-              className="h-7 rounded-none px-2"
-            >
-              <FileText aria-hidden className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        ) : null}
         <Button
           type="button"
           variant="ghost"
@@ -76,72 +58,48 @@ export function CommandOutput({ command, durationMs, result }: CommandOutputProp
   );
 }
 
-function renderBody(
-  result: CommandResult,
-  format: CommandFormat,
-): { node: JSX.Element; copyText: string } {
+interface RenderedBody {
+  node: JSX.Element;
+  copyText: string;
+}
+
+function renderBody(result: CommandResult): RenderedBody {
   if (!result.ok) {
     const text = `${result.error.code}: ${result.error.message}`;
     return {
       copyText: text,
-      node: <p className="text-destructive">{text}</p>,
+      node: <p className="break-words text-destructive">{text}</p>,
     };
   }
 
-  if (format === 'md') {
-    const markdown =
-      result.markdown ?? ['```json', JSON.stringify(result.data, null, 2), '```'].join('\n');
-    return {
-      copyText: markdown,
-      node: (
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
-        </div>
-      ),
-    };
-  }
-
-  const json = JSON.stringify(result.data, null, 2);
+  // The dispatcher is invoked with `format: 'md'`, so `markdown` is
+  // populated for every successful result. The fallback exists only
+  // for defensive symmetry with the type — the web terminal will
+  // never hit it in practice.
+  const markdown = result.markdown ?? toFallbackMarkdown(result.data);
   return {
-    copyText: json,
-    node: <JsonView value={result.data} />,
+    copyText: markdown,
+    node: (
+      <div className="prose prose-sm dark:prose-invert prose-p:my-2 prose-li:my-1 prose-pre:my-2 prose-headings:mb-2 prose-headings:mt-3 max-w-none break-words">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{markdown}</ReactMarkdown>
+      </div>
+    ),
   };
 }
 
-function JsonView({ value }: { value: unknown }): JSX.Element {
-  if (value === null || typeof value !== 'object') {
-    return <span className="font-mono text-xs">{JSON.stringify(value)}</span>;
-  }
+function toFallbackMarkdown(data: unknown): string {
+  if (data === null || data === undefined) return '_No data._';
+  if (typeof data === 'string') return data;
+  if (typeof data === 'number' || typeof data === 'boolean') return String(data);
+  return Object.entries(data as Record<string, unknown>)
+    .map(([key, value]) => `- **${key}:** ${stringifyValue(value)}`)
+    .join('\n');
+}
 
-  if (Array.isArray(value)) {
-    const items = value as unknown[];
-    return (
-      <details open className="font-mono text-xs">
-        <summary>[{items.length}]</summary>
-        <div className="ml-4 space-y-1">
-          {items.map((item, index) => (
-            <div key={index}>
-              <span className="text-muted-foreground">{index}: </span>
-              <JsonView value={item} />
-            </div>
-          ))}
-        </div>
-      </details>
-    );
-  }
-
-  return (
-    <details open className="font-mono text-xs">
-      <summary>{'{'}</summary>
-      <div className="ml-4 space-y-1">
-        {Object.entries(value as Record<string, unknown>).map(([key, child]) => (
-          <div key={key}>
-            <span className="text-muted-foreground">{key}: </span>
-            <JsonView value={child} />
-          </div>
-        ))}
-      </div>
-      <span>{'}'}</span>
-    </details>
-  );
+function stringifyValue(value: unknown): string {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (Array.isArray(value)) return value.length === 0 ? '—' : `${value.length} items`;
+  return Object.keys(value).join(', ') || '—';
 }

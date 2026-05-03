@@ -279,3 +279,27 @@
 **Why:** Two menus appeared in the header at small breakpoints (a hamburger MobileNav AND the avatar dropdown), which is a textbook mobile-UX smell — users don't know where the nav lives. There was also a dead breakpoint at md (768-1023px) where the hamburger was hidden but the inline nav hadn't appeared yet. Compounding that, `px-8 py-10` left only ~310px of usable width on a 375px phone, so every screen looked like a mini desktop site rather than a mobile app. `min-h-screen` (100vh) plus iOS Safari's URL bar produced a ~70px dead band below the footer.
 
 **How to apply:** Mount nav links inside `HeaderUserMenu` wrapped in a `lg:hidden` block. Delete any standalone mobile hamburger. Every new signed-in screen uses the responsive padding pattern; if a screen needs a unique mobile padding (e.g. asymmetric `pt-` on a hero), keep the `px-4 sm:px-8` half of the rule. Replace any `min-h-screen` on top-level shells with `min-h-dvh`. Header gets `pt-[env(safe-area-inset-top)]` and footer `pb-[env(safe-area-inset-bottom)]` so notched devices don't clip chrome.
+
+## 2026-05-03 - Responsive grids must collapse on mobile
+
+**Rule:** Never ship a fixed-width grid template (`grid-cols-[3rem_8rem_1fr_8rem]`) that's only valid above the `sm:` breakpoint. Wrap every fixed-width grid in a mobile-first variant that stacks: e.g. `grid-cols-[2rem_1fr] sm:grid-cols-[3rem_8rem_1fr_8rem]` paired with `col-span-2 sm:col-span-1` on cells that should reflow into a vertical column on phones. Long string content (titles, paste text, dynamic labels) needs `min-w-0` on its flex/grid cell plus `break-words` on the text node — otherwise a 30-character German label or long URL forces horizontal overflow.
+
+**Why:** The HomeScreen queue rows used `grid grid-cols-[3rem_8rem_1fr_8rem] gap-5` which sums to ~19rem of fixed columns plus a 1fr column. On a 375px viewport that wins over the parent's `max-w-7xl` and pushes the page into horizontal scroll, breaking the "every page respects mobile" promise. The Hero h1 + queue + sidebar all assumed desktop widths.
+
+**How to apply:** Default to `grid-cols-1` (or `flex-col`) on mobile, opt into multi-column at `sm:`/`lg:`. For dialog footers with mixed-width buttons, use `flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between` so each button can take its own row on phones; tagging `w-full sm:w-auto` on each button keeps them visually balanced. Avoid decorative transforms like `-rotate-1` on buttons — they look unintentional in a row of plain buttons.
+
+## 2026-05-03 - Web terminal renders prose, not JSON or markdown source
+
+**Rule:** The `FooterTerminal` calls `dispatch({ raw, format: 'md' }, ...)` and `CommandOutput` always renders the resulting markdown via `react-markdown`. There is no JSON / Markdown toggle, no JSON tree view. Each command's `toMarkdown` formatter is the source of truth for what users see in the browser.
+
+**Why:** A web user is not the audience for a JSON tree or for raw markdown source with backticks and asterisks. They expect a web-app feature: rendered headings, lists, links, formatted prose. The CLI binary and the HTTP API still deliver JSON for machines.
+
+**How to apply:** New commands must implement `toMarkdown`. Style the output with the `prose prose-sm dark:prose-invert` set already on `CommandOutput`. The copy button copies the markdown source so users can paste a clean snapshot into Slack or a doc.
+
+## 2026-05-03 - Top-level pgTAP scripts use SELECT, not PERFORM
+
+**Rule:** From the top level of a `.sql` test (no enclosing `do $$ ... $$;` block), call `void`-returning functions with `select fn(args);` — never `perform fn(args);`. `perform` is a PL/pgSQL keyword and parses as a syntax error in plain SQL. Similarly, when calling pgTAP `like(have, want, description)`, cast each text argument explicitly (`::text`) so Postgres can resolve the overload — passing bare string literals fails with `function like(text, unknown, unknown) does not exist`.
+
+**Why:** CI broke on `api_keys__lifecycle.sql` and `cli_audit_log__rls.sql` for exactly these two reasons. The errors look unrelated (one is a parser error, the other a function-resolution error) but both stem from "I'm in a SQL script, not a PL/pgSQL block."
+
+**How to apply:** When you need to discard the void return of a function in a test, use `select fn(args);`. When you need PL/pgSQL constructs (loops, variables, exceptions), wrap them in `do $$ begin ... end; $$;`. For pgTAP assertions with text arguments, cast all three to `::text`.

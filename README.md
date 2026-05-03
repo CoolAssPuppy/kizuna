@@ -304,7 +304,7 @@ The `[auth.hook.custom_access_token]` hook in `supabase/config.toml` injects an 
 
 ## Storage layout
 
-Four buckets, all private — clients use `createSignedUrl` for display. Identity content (`avatars`) is keyed on `user_id`; everything else is keyed on `event_id` via the leading path segment, *not* per-event buckets. The four-bucket / path-prefix split keeps RLS in one place and lets the same employee carry their avatar across many events.
+Four buckets, all private — clients use `createSignedUrl` for display. Identity content (`avatars`) is keyed on `user_id`; everything else is keyed on `event_id` via the leading path segment, _not_ per-event buckets. The four-bucket / path-prefix split keeps RLS in one place and lets the same employee carry their avatar across many events.
 
 ```
 avatars/                                 # identity-scoped, cross-event
@@ -538,10 +538,7 @@ Wire it into Claude Desktop by editing `~/Library/Application Support/Claude/cla
   "mcpServers": {
     "kizuna-local": {
       "command": "npx",
-      "args": [
-        "tsx",
-        "/absolute/path/to/kizuna/packages/kizuna-mcp/src/bin/kizuna-mcp.ts"
-      ],
+      "args": ["tsx", "/absolute/path/to/kizuna/packages/kizuna-mcp/src/bin/kizuna-mcp.ts"],
       "env": {
         "KIZUNA_URL": "http://127.0.0.1:54321",
         "KIZUNA_TOKEN": "kzn_read_xxxxxx"

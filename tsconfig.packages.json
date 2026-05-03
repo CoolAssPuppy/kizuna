@@ -25,11 +25,6 @@
 
     "types": ["node"]
   },
-  "include": [
-    "packages/kizuna-cli/src",
-    "packages/kizuna-mcp/src",
-    "src/lib/cli",
-    "src/types"
-  ],
+  "include": ["packages/kizuna-cli/src", "packages/kizuna-mcp/src", "src/lib/cli", "src/types"],
   "exclude": ["node_modules", "**/dist"]
 }

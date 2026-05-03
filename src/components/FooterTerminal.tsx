@@ -51,8 +51,13 @@ export function FooterTerminal(): JSX.Element {
     setBusy(true);
     const started = performance.now();
     const controller = new AbortController();
+    // The web terminal is a UI surface, not an API client — every
+    // command is rendered via the per-command `toMarkdown` formatter so
+    // users see prose, not raw JSON. The format override here forces
+    // the dispatcher to populate `result.markdown` regardless of the
+    // typed `--format` flag.
     const result = await dispatch(
-      { raw },
+      { raw, format: 'md' },
       {
         supabase: getSupabaseClient(),
         user: { id: user.id, email: user.email, role: user.role },

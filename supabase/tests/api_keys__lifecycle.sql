@@ -26,10 +26,12 @@ select is(
   'create_api_key returned exactly one row'
 );
 
+-- Explicit text casts are required because pgTAP overloads `like` and
+-- Postgres cannot resolve the call from the literal arguments alone.
 select like(
-  (select token from issued),
-  'kzn_read_%',
-  'returned token uses the kzn_<scope>_ prefix'
+  (select token from issued)::text,
+  'kzn_read_%'::text,
+  'returned token uses the kzn_<scope>_ prefix'::text
 );
 
 select is(
@@ -55,8 +57,9 @@ select is(
   'verify_api_key stamps last_used_at'
 );
 
--- Revoke flips revoked_at and verify now returns zero rows.
-perform public.revoke_api_key((select id from issued));
+-- Revoke flips revoked_at and verify now returns zero rows. `perform`
+-- is PL/pgSQL-only, so call via `select` at the top level instead.
+select public.revoke_api_key((select id from issued));
 select is(
   (
     select count(*)::int

@@ -81,10 +81,10 @@ export function ItineraryItemCard({ item, index, state = 'future', onClick }: Pr
     <>
       {leading}
 
-      <div className="flex-1 space-y-1">
+      <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <p className="text-sm font-semibold leading-snug">{item.title}</p>
-          <span className="text-xs font-medium tabular-nums text-muted-foreground">
+          <p className="break-words text-sm font-semibold leading-snug">{item.title}</p>
+          <span className="whitespace-nowrap text-xs font-medium tabular-nums text-muted-foreground">
             {startLabel}
             {endLabel ? ` – ${endLabel}` : ''}
           </span>
@@ -94,7 +94,9 @@ export function ItineraryItemCard({ item, index, state = 'future', onClick }: Pr
           {t(`itinerary.itemTypes.${item.item_type}`)}
         </p>
 
-        {item.subtitle ? <p className="text-sm text-muted-foreground">{item.subtitle}</p> : null}
+        {item.subtitle ? (
+          <p className="break-words text-sm text-muted-foreground">{item.subtitle}</p>
+        ) : null}
 
         <div className="flex flex-wrap gap-2 pt-1">
           {item.includes_guest ? (

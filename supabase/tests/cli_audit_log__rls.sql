@@ -30,7 +30,9 @@ insert into public.users (id, email, role, hibob_id, auth_provider) values
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-000000003301","role":"authenticated","app_role":"employee","aud":"authenticated"}';
 
-perform public.write_cli_audit_log(
+-- `perform` is PL/pgSQL-only; from the top level we use `select` and
+-- discard the void return.
+select public.write_cli_audit_log(
   '00000000-0000-0000-0000-000000003301',
   null,
   'req-1',
