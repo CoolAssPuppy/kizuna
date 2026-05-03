@@ -23,8 +23,8 @@ done
 echo "installing pgtap into tap schema"
 "${PSQL_BASE[@]}" -c "create schema if not exists tap;"
 "${PSQL_BASE[@]}" -c "create extension if not exists pgtap with schema tap;"
-"${PSQL_BASE[@]}" -c "grant usage on schema tap to authenticated, anon;"
-"${PSQL_BASE[@]}" -c "grant execute on all functions in schema tap to authenticated, anon;"
+"${PSQL_BASE[@]}" -c "grant usage on schema tap to authenticated, anon, service_role;"
+"${PSQL_BASE[@]}" -c "grant execute on all functions in schema tap to authenticated, anon, service_role;"
 
 echo "configuring kizuna.passport_key for local dev"
 # set_passport reads kizuna.passport_key via current_setting(). Production

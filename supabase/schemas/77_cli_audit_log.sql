@@ -55,3 +55,9 @@ begin
   );
 end
 $$;
+
+-- write_cli_audit_log is invoked from the cli edge function with the
+-- service-role key. Letting anon or authenticated reach it via PostgREST
+-- would let them forge audit rows on behalf of any user_id/api_key_id
+-- pair. service_role keeps blanket EXECUTE via 99_grants.sql.
+revoke all on function public.write_cli_audit_log(uuid, uuid, text, text, public.api_key_scope, text, text, int) from public, anon, authenticated;

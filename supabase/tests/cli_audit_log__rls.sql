@@ -24,11 +24,12 @@ insert into public.users (id, email, role, hibob_id, auth_provider) values
   ('00000000-0000-0000-0000-000000003300', 'audit-admin@example.com', 'admin',    'h_audit_admin', 'sso'),
   ('00000000-0000-0000-0000-000000003301', 'audit-user@example.com',  'employee', 'h_audit_user',  'sso');
 
--- write_cli_audit_log is callable as service role. From a regular
--- authenticated session we go through it directly because it's
--- SECURITY DEFINER.
-set local role authenticated;
-set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-000000003301","role":"authenticated","app_role":"employee","aud":"authenticated"}';
+-- write_cli_audit_log is service-role only — only the cli edge function
+-- (running with the service-role key) may append rows. Append one row
+-- under service_role, then probe reads under each app role.
+set local role service_role;
+set local search_path to public, tap, extensions;
+set local request.jwt.claims to '{"role":"service_role"}';
 
 -- `perform` is PL/pgSQL-only; from the top level we use `select` and
 -- discard the void return.
@@ -44,6 +45,9 @@ select public.write_cli_audit_log(
 );
 
 -- Attendee cannot read the audit log.
+set local role authenticated;
+set local search_path to public, tap, extensions;
+set local request.jwt.claims to '{"sub":"00000000-0000-0000-0000-000000003301","role":"authenticated","app_role":"employee","aud":"authenticated"}';
 select is(
   (select count(*)::int from public.cli_audit_log),
   0,

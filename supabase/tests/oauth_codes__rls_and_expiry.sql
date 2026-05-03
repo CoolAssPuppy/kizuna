@@ -34,6 +34,10 @@ insert into minted
     'state-1',
     'http://127.0.0.1:50000/callback'
   );
+-- Temp tables created under one role aren't visible to another role
+-- without an explicit grant. The exchange step runs under service_role
+-- (see below) and reads `minted`, so open it up.
+grant all on minted to service_role;
 
 -- Direct SELECT is denied — the policy is `for all using (false)`.
 select is(
@@ -41,6 +45,13 @@ select is(
   0,
   'authenticated clients cannot read oauth_codes directly'
 );
+
+-- exchange_oauth_code is service-role only — invoked from the
+-- cli-oauth-exchange edge function with the service-role key. Switch
+-- roles for the consume + replay probes.
+set local role service_role;
+set local search_path to public, tap, extensions;
+set local request.jwt.claims to '{"role":"service_role"}';
 
 -- exchange_oauth_code returns a fresh PAT and marks the code consumed.
 create temp table exchanged (id uuid, token text) on commit drop;

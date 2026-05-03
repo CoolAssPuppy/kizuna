@@ -40,6 +40,11 @@ begin
 end
 $$;
 
+-- Trigger-only function. The trigger fires with table-owner privileges, so no
+-- application role needs EXECUTE. Revoking from public/anon/authenticated
+-- closes the PostgREST RPC surface (Supabase advisor lints 0028/0029).
+revoke all on function public.cascade_auth_user_delete() from public, anon, authenticated;
+
 create trigger cascade_auth_user_delete_ad
   after delete on auth.users
   for each row execute function public.cascade_auth_user_delete();
@@ -84,6 +89,9 @@ begin
   return new;
 end
 $$;
+
+-- Trigger-only function. See cascade_auth_user_delete above.
+revoke all on function public.ensure_public_user_for_auth() from public, anon, authenticated;
 
 create trigger ensure_public_user_for_auth_ai
   after insert on auth.users
@@ -801,6 +809,9 @@ begin
 end
 $$;
 
+-- Trigger-only function. See cascade_auth_user_delete above.
+revoke all on function public.ensure_additional_guest_user() from public, anon, authenticated;
+
 create trigger ensure_additional_guest_user_bi
   before insert on public.additional_guests
   for each row execute function public.ensure_additional_guest_user();
@@ -1063,6 +1074,9 @@ begin
 end
 $$;
 
+-- Trigger-only function. See cascade_auth_user_delete above.
+revoke all on function public.sync_event_photo_hashtags() from public, anon, authenticated;
+
 drop trigger if exists event_photos_sync_hashtags on public.event_photos;
 create trigger event_photos_sync_hashtags
   after insert or update of caption on public.event_photos
@@ -1223,6 +1237,9 @@ begin
   return NEW;
 end
 $$;
+
+-- Trigger-only function. See cascade_auth_user_delete above.
+revoke all on function public.maybe_complete_documents_task() from public, anon, authenticated;
 
 drop trigger if exists document_acks_complete_task on public.document_acknowledgements;
 create trigger document_acks_complete_task

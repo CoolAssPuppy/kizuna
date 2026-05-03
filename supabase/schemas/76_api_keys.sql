@@ -226,3 +226,45 @@ $$;
 create trigger api_keys_guard_update
 before update on public.api_keys
 for each row execute function public.guard_api_key_update();
+
+
+-- =====================================================================
+-- Function-level GRANTs for the RPCs above.
+-- Pattern (matches the rest of the schema):
+--   - User-facing SECURITY DEFINER RPCs the SPA invokes:
+--       revoke all from public, anon; grant execute to authenticated.
+--   - Service-role-only RPCs (called from edge functions with the
+--     SUPABASE_SERVICE_ROLE_KEY): revoke all from public, anon,
+--     authenticated. service_role keeps blanket EXECUTE via
+--     99_grants.sql.
+--   - Trigger-only functions: revoke all from public, anon,
+--     authenticated. Triggers fire with table-owner privileges, so no
+--     application role needs EXECUTE.
+-- Closes Supabase advisor lints 0028/0029 for the api_keys/oauth flow.
+-- =====================================================================
+
+revoke all on function public.create_api_key(text, public.api_key_scope, timestamptz) from public, anon;
+grant execute on function public.create_api_key(text, public.api_key_scope, timestamptz) to authenticated;
+
+revoke all on function public.revoke_api_key(uuid) from public, anon;
+grant execute on function public.revoke_api_key(uuid) to authenticated;
+
+revoke all on function public.mint_oauth_code(public.api_key_scope, text, text) from public, anon;
+grant execute on function public.mint_oauth_code(public.api_key_scope, text, text) to authenticated;
+
+-- exchange_oauth_code is invoked exclusively from the cli-oauth-exchange
+-- edge function with the service-role key. The OAuth code itself is the
+-- bearer credential (gated by code+state+expires_at inside the body),
+-- so the function must NOT be reachable from anon or authenticated
+-- callers — that would let signed-in users brute-force codes and skip
+-- the redirect-uri loop.
+revoke all on function public.exchange_oauth_code(text, text) from public, anon, authenticated;
+
+-- verify_api_key is the gateway-side token check used by the cli edge
+-- function. It bumps last_used_at as a side effect, which is why it has
+-- to be SECURITY DEFINER. Only the service role should ever call it.
+revoke all on function public.verify_api_key(text, inet) from public, anon, authenticated;
+
+-- Trigger-only function. See the trigger-function block in
+-- 80_functions_and_triggers.sql for the rationale.
+revoke all on function public.guard_api_key_update() from public, anon, authenticated;
