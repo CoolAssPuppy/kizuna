@@ -180,13 +180,13 @@ export function ImportItineraryDialog({
           )}
         </div>
 
-        <DialogFooter className="border-t px-6 py-4 sm:justify-between">
+        <DialogFooter className="flex flex-col gap-3 border-t px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
           {/* "Add Test Itinerary" filler. Temporarily un-gated for
               prod demos — re-add `import.meta.env.DEV` before launch. */}
           <Button
             type="button"
             variant="outline"
-            className="-rotate-1 border-2 border-dashed border-purple-500 font-bold uppercase tracking-wide text-purple-700 hover:text-purple-900"
+            className="w-full justify-center border-2 border-dashed border-purple-500 font-bold uppercase tracking-wide text-purple-700 hover:text-purple-900 sm:w-auto"
             style={{
               backgroundImage:
                 'repeating-linear-gradient(45deg, rgba(168,85,247,0.18) 0 8px, transparent 8px 16px)',
@@ -200,7 +200,7 @@ export function ImportItineraryDialog({
             <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
             {t('itinerary.import.testItinerary')}
           </Button>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-row justify-end gap-2 sm:w-auto">
             <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
               {t('actions.cancel')}
             </Button>

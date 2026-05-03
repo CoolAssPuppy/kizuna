@@ -95,7 +95,9 @@ export function HomeScreen(): JSX.Element {
         eventSlug={slug}
         eventName={event?.name ?? null}
         startDate={event?.start_date ?? null}
+        endDate={event?.end_date ?? null}
         startTimezone={event?.time_zone ?? 'UTC'}
+        eventId={event?.id ?? null}
       />
 
       <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -108,7 +110,14 @@ export function HomeScreen(): JSX.Element {
           <EventStatsPanel stats={stats} />
           {event ? <JetLagFighter eventTimeZone={event.time_zone} /> : null}
           <TeammateIcebreaker />
-          {event ? <CheckinAccessCard eventId={event.id} /> : null}
+          {event ? (
+            <div className="hidden lg:block">
+              <CheckinAccessCard
+                eventId={event.id}
+                defaultOpen={isEventInProgress(event.start_date, event.end_date)}
+              />
+            </div>
+          ) : null}
           {editorial.sidebar.map((item) => (
             <SidebarEditorialCard key={item.id} item={item} />
           ))}
@@ -118,13 +127,27 @@ export function HomeScreen(): JSX.Element {
   );
 }
 
+function isEventInProgress(
+  startDate: string | null | undefined,
+  endDate: string | null | undefined,
+): boolean {
+  if (!startDate || !endDate) return false;
+  const now = Date.now();
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end)) return false;
+  return now >= start && now <= end;
+}
+
 interface HeroProps {
   preferredName: string | null;
   summary: string;
   eventSlug: string;
   eventName: string | null;
   startDate: string | null;
+  endDate: string | null;
   startTimezone: string;
+  eventId: string | null;
 }
 
 function Hero({
@@ -133,13 +156,18 @@ function Hero({
   eventSlug: slug,
   eventName,
   startDate,
+  endDate,
   startTimezone,
+  eventId,
 }: HeroProps): JSX.Element {
   const { t } = useTranslation();
   return (
     <section className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-12">
       <div className="space-y-5 lg:col-span-8">
-        <div className="flex items-center gap-2 text-[11px]" style={{ color: 'var(--c-dim)' }}>
+        <div
+          className="flex flex-wrap items-center gap-2 text-[11px]"
+          style={{ color: 'var(--c-dim)' }}
+        >
           <span>// session active</span>
           <StatusDot active size={6} />
           <span style={{ color: 'var(--c-accent)', letterSpacing: '0.04em' }}>
@@ -147,10 +175,10 @@ function Hero({
           </span>
         </div>
         <h1
-          className="font-extralight"
+          className="break-words font-extralight"
           style={{
             color: 'var(--c-fg)',
-            fontSize: 'clamp(40px, 8vw, 72px)',
+            fontSize: 'clamp(36px, 8vw, 72px)',
             lineHeight: 1.05,
             letterSpacing: '-0.02em',
           }}
@@ -165,7 +193,7 @@ function Hero({
         </p>
       </div>
 
-      <div className="lg:col-span-4">
+      <div className="space-y-4 lg:col-span-4">
         {startDate ? (
           <EventEtaPanel
             slug={slug}
@@ -173,6 +201,14 @@ function Hero({
             timeZone={startTimezone}
             eventName={eventName}
           />
+        ) : null}
+        {eventId ? (
+          <div className="lg:hidden">
+            <CheckinAccessCard
+              eventId={eventId}
+              defaultOpen={isEventInProgress(startDate, endDate)}
+            />
+          </div>
         ) : null}
       </div>
     </section>
@@ -281,9 +317,14 @@ function EtaRow({
   highlight?: boolean;
 }): JSX.Element {
   return (
-    <div className="flex justify-between gap-3">
+    <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
       <dt style={{ color: 'var(--c-muted)' }}>{label}</dt>
-      <dd style={{ color: highlight ? 'var(--c-accent)' : 'var(--c-fg)' }}>{value}</dd>
+      <dd
+        className="break-words text-right"
+        style={{ color: highlight ? 'var(--c-accent)' : 'var(--c-fg)' }}
+      >
+        {value}
+      </dd>
     </div>
   );
 }
@@ -337,18 +378,11 @@ function FeedQueueRow({ item, index }: { item: FeedItem; index: number }): JSX.E
     month: '2-digit',
     day: '2-digit',
   });
-  const meta = (
-    <div className="flex w-32 shrink-0 flex-col items-end gap-1 text-[11px]">
-      <span style={{ color: 'var(--c-dim)' }}>
-        {item.kind === 'document' ? 'due' : item.kind === 'task' ? 'progress' : 'posted'}
-      </span>
-      <span style={{ color: 'var(--c-fg)' }}>{dateLabel}</span>
-    </div>
-  );
+  const metaLabel = item.kind === 'document' ? 'due' : item.kind === 'task' ? 'progress' : 'posted';
 
   const body = (
     <div
-      className="grid grid-cols-[3rem_8rem_1fr_8rem] items-start gap-5 py-5"
+      className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5"
       style={{ borderColor: 'var(--c-rule)' }}
     >
       <span className="text-[11px]" style={{ color: 'var(--c-dim)' }}>
@@ -360,15 +394,18 @@ function FeedQueueRow({ item, index }: { item: FeedItem; index: number }): JSX.E
       >
         {KIND_LABELS[item.kind]}
       </span>
-      <div className="flex flex-col gap-1.5">
-        <span className="text-base font-medium" style={{ color: 'var(--c-fg)' }}>
+      <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
+        <span className="break-words text-base font-medium" style={{ color: 'var(--c-fg)' }}>
           {snakeFile(item.title)}
         </span>
-        <span className="text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>
+        <span className="break-words text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>
           {item.detail}
         </span>
       </div>
-      {meta}
+      <div className="col-span-2 flex flex-row items-baseline gap-2 text-[11px] sm:col-span-1 sm:w-32 sm:shrink-0 sm:flex-col sm:items-end sm:gap-1">
+        <span style={{ color: 'var(--c-dim)' }}>{metaLabel}</span>
+        <span style={{ color: 'var(--c-fg)' }}>{dateLabel}</span>
+      </div>
     </div>
   );
 
@@ -397,7 +434,7 @@ function EditorialQueueRow({
 }): JSX.Element {
   const body = (
     <div
-      className="grid grid-cols-[3rem_8rem_1fr_8rem] items-start gap-5 py-5"
+      className="grid grid-cols-[2rem_1fr] items-start gap-x-3 gap-y-2 py-5 sm:grid-cols-[3rem_8rem_1fr_8rem] sm:gap-5"
       style={{ borderColor: 'var(--c-rule)' }}
     >
       <span className="text-[11px]" style={{ color: 'var(--c-dim)' }}>
@@ -409,22 +446,28 @@ function EditorialQueueRow({
       >
         feature
       </span>
-      <div className="flex flex-col gap-1.5">
-        <span className="text-base font-medium" style={{ color: 'var(--c-fg)' }}>
+      <div className="col-span-2 flex min-w-0 flex-col gap-1.5 sm:col-span-1">
+        <span className="break-words text-base font-medium" style={{ color: 'var(--c-fg)' }}>
           {item.title}
         </span>
         {item.subtitle ? (
-          <span className="text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>
+          <span
+            className="break-words text-xs"
+            style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}
+          >
             {item.subtitle}
           </span>
         ) : null}
         {item.body ? (
-          <span className="text-xs" style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}>
+          <span
+            className="break-words text-xs"
+            style={{ color: 'var(--c-muted)', lineHeight: 1.5 }}
+          >
             {item.body}
           </span>
         ) : null}
       </div>
-      <div />
+      <div className="hidden sm:block" />
     </div>
   );
 
