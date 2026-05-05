@@ -23,26 +23,13 @@ import {
   updateOwnProposal,
 } from './api';
 import { dayKey, groupSessionsByDay } from './grouping';
-import { loadSponsorGuestAttendance, setGuestAttendance } from './guestAttendance';
+import { attendanceKey, loadSponsorGuestAttendance, setGuestAttendance } from './guestAttendance';
+import { isGuestOptInSession } from './sessionRules';
 import { TagPills } from './TagPill';
 import { useAgenda } from './useAgenda';
 import { useProposals } from './useProposals';
 
 type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
-type SessionType = Database['public']['Enums']['session_type'];
-
-// Sessions where it makes sense to ask "are your kids coming?" — meals,
-// off-property activities, social events. Workshops/keynotes/transport
-// don't expose the picker because guests don't typically attend those.
-const GUEST_OPT_IN_TYPES: ReadonlySet<SessionType> = new Set<SessionType>([
-  'activity',
-  'social',
-  'dinner',
-]);
-
-function isGuestOptInSession(session: Pick<AgendaSession, 'audience' | 'type'>): boolean {
-  return session.audience === 'all' && GUEST_OPT_IN_TYPES.has(session.type);
-}
 
 type EventRow = Database['public']['Tables']['events']['Row'];
 
@@ -94,9 +81,27 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   const toggleAttendance = useMutation({
     mutationFn: (vars: { sessionId: string; additionalGuestId: string; attending: boolean }) =>
       setGuestAttendance(getSupabaseClient(), vars),
-    onSuccess: () =>
+    onMutate: async (vars) => {
+      const key = ['session-guest-attendance', userId] as const;
+      await queryClient.cancelQueries({ queryKey: key });
+      const prev = queryClient.getQueryData<Set<string>>(key);
+      queryClient.setQueryData<Set<string>>(key, (old) => {
+        const next = new Set(old ?? []);
+        const composed = attendanceKey(vars.sessionId, vars.additionalGuestId);
+        if (vars.attending) next.add(composed);
+        else next.delete(composed);
+        return next;
+      });
+      return { prev };
+    },
+    onError: (err: Error, _vars, ctx) => {
+      show(err.message, 'error');
+      if (ctx?.prev) {
+        queryClient.setQueryData(['session-guest-attendance', userId], ctx.prev);
+      }
+    },
+    onSettled: () =>
       queryClient.invalidateQueries({ queryKey: ['session-guest-attendance', userId] }),
-    onError: (err: Error) => show(err.message, 'error'),
   });
 
   if (isLoading) {
@@ -266,25 +271,35 @@ export function AgendaScreen({ event }: Props): JSX.Element {
                 {day.heading}
               </h2>
               <ul className="space-y-3">
-                {day.sessions.map((session) => (
-                  <SessionCard
-                    key={session.id}
-                    session={session}
-                    timeZone={event.time_zone}
-                    isPast={session.ends_at ? new Date(session.ends_at).getTime() < now : false}
-                    onToggleFavorite={() => toggleFavorite(session)}
-                    favoriteLabel={t(session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite')}
-                    guests={hasGuests && isGuestOptInSession(session) ? myGuests : []}
-                    attendance={attendance}
-                    onGuestToggle={(additionalGuestId, attending) =>
-                      toggleAttendance.mutate({
-                        sessionId: session.id,
-                        additionalGuestId,
-                        attending,
-                      })
-                    }
-                  />
-                ))}
+                {day.sessions.map((session) => {
+                  const showPicker = hasGuests && isGuestOptInSession(session);
+                  return (
+                    <SessionCard
+                      key={session.id}
+                      session={session}
+                      timeZone={event.time_zone}
+                      isPast={session.ends_at ? new Date(session.ends_at).getTime() < now : false}
+                      onToggleFavorite={() => toggleFavorite(session)}
+                      favoriteLabel={t(
+                        session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite',
+                      )}
+                      guestPicker={
+                        showPicker
+                          ? {
+                              guests: myGuests,
+                              attendance,
+                              onToggle: (additionalGuestId, attending) =>
+                                toggleAttendance.mutate({
+                                  sessionId: session.id,
+                                  additionalGuestId,
+                                  attending,
+                                }),
+                            }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
               </ul>
             </section>
           ))}
@@ -336,10 +351,14 @@ interface SessionCardProps {
   isPast: boolean;
   onToggleFavorite: () => void;
   favoriteLabel: string;
-  /** Empty when this session does not expose the guest picker. */
-  guests: ReadonlyArray<AdditionalGuestRow>;
-  attendance: ReadonlySet<string>;
-  onGuestToggle: (additionalGuestId: string, attending: boolean) => void;
+  /** Omitted when this session does not expose the guest picker. */
+  guestPicker?:
+    | {
+        guests: ReadonlyArray<AdditionalGuestRow>;
+        attendance: ReadonlySet<string>;
+        onToggle: (additionalGuestId: string, attending: boolean) => void;
+      }
+    | undefined;
 }
 
 function SessionCard({
@@ -348,9 +367,7 @@ function SessionCard({
   isPast,
   onToggleFavorite,
   favoriteLabel,
-  guests,
-  attendance,
-  onGuestToggle,
+  guestPicker,
 }: SessionCardProps): JSX.Element {
   const { t } = useTranslation();
   // Mandatory sessions are always-on for everyone — render them as
@@ -358,7 +375,6 @@ function SessionCard({
   const showAsStarred = session.is_favorite || session.is_mandatory;
   const Icon = showAsStarred ? Star : StarOff;
   const buttonLabel = session.is_mandatory ? t('agenda.mandatoryLabel') : favoriteLabel;
-  const showGuestPicker = guests.length > 0;
   return (
     <li
       className={cn(
@@ -408,22 +424,22 @@ function SessionCard({
         </div>
       </div>
 
-      {showGuestPicker ? (
+      {guestPicker ? (
         <fieldset className="mt-3 space-y-2 rounded-md bg-muted/40 p-3">
           <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('agenda.guests.prompt')}
           </legend>
           <div className="flex flex-wrap gap-3 pt-1">
-            {guests.map((guest) => {
+            {guestPicker.guests.map((guest) => {
               const id = `guest-attend-${session.id}-${guest.id}`;
-              const checked = attendance.has(`${session.id}:${guest.id}`);
+              const checked = guestPicker.attendance.has(attendanceKey(session.id, guest.id));
               const guestName = `${guest.first_name} ${guest.last_name}`.trim();
               return (
                 <label key={guest.id} htmlFor={id} className="flex items-center gap-2 text-sm">
                   <Checkbox
                     id={id}
                     checked={checked}
-                    onCheckedChange={(next) => onGuestToggle(guest.id, next === true)}
+                    onCheckedChange={(next) => guestPicker.onToggle(guest.id, next === true)}
                   />
                   {guestName}
                 </label>

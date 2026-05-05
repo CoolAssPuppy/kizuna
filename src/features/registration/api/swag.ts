@@ -166,12 +166,7 @@ export async function createSwagItem(
   return data;
 }
 
-/**
- * Bulk-stamps sort_order to match the order of the supplied ids.
- * Issued in parallel — one network turn — same shape as
- * `reorderRowsByPosition` in `src/lib/reorder.ts` but writes
- * `sort_order` instead of `position`.
- */
+/** Bulk-stamps sort_order to match the order of the supplied ids. */
 export async function reorderSwagItems(
   client: AppSupabaseClient,
   orderedIds: ReadonlyArray<string>,

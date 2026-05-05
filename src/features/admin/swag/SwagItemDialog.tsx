@@ -62,12 +62,9 @@ export function SwagItemDialog({ eventId, item, onClose }: Props): JSX.Element {
   const queryClient = useQueryClient();
   const { show } = useToast();
   const isEdit = item !== null;
-  // Mint the row's uuid up front for new items so the
-  // StorageImageUploader can write to the final
-  // `<event>/swag/<id>/` folder before the row exists. The insert
-  // reuses this id so the persisted image_path resolves cleanly
-  // afterwards. crypto.randomUUID() matches what Postgres' default
-  // uses, so the row id is shaped the same way either way.
+  // Mint the row's uuid up front for new items so the uploader writes
+  // to the final folder before the row exists. The insert reuses this
+  // id so the persisted image_path resolves cleanly afterwards.
   const [itemId] = useState<string>(() => item?.id ?? crypto.randomUUID());
   const [form, setForm] = useState<FormState>(() => fromRow(item));
   const [draftSize, setDraftSize] = useState('');
@@ -134,8 +131,6 @@ export function SwagItemDialog({ eventId, item, onClose }: Props): JSX.Element {
     setForm((prev) => ({ ...prev, sizes: prev.sizes.filter((s) => s !== size) }));
   }
 
-  // Storage folder anchor — the same uuid the row will get on save so
-  // the persisted image_path matches the bytes uploaded earlier.
   const folder = `${eventId}/swag/${itemId}`;
 
   return (

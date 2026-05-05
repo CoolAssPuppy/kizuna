@@ -34,11 +34,9 @@ const TASK_LABEL_KEYS: Record<string, string> = {
   documents: 'profile.checklist.tasks.documents',
 };
 
-// Canonical render order — derived from the wizard so the checklist,
-// the profile nav, and the wizard agree on a single sequence. The DB
-// query orders alphabetically by task_key, which would produce a
-// confusing checklist where "accessibility" showed up first. 'documents'
-// lives outside the wizard but inside the checklist, so append it.
+// Derived from WIZARD_STEPS so wizard, profile nav, and checklist
+// agree on a single sequence. 'documents' lives outside the wizard
+// but inside the checklist, so append it.
 const TASK_ORDER: ReadonlyArray<string> = [
   ...WIZARD_STEPS.map((step) => step.taskKey),
   'documents',

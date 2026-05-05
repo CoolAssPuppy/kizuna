@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { type AdminProposedSession, fetchAdminProposals } from '@/features/agenda/api';
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
 import { loadExpectedAttendance } from '@/features/agenda/guestAttendance';
+import { isGuestOptInSession } from '@/features/agenda/sessionRules';
 import { TagPills } from '@/features/agenda/TagPill';
 import { type SessionTag, fetchTagsForSessions, setSessionTags } from '@/features/agenda/tagsApi';
 
@@ -481,7 +482,7 @@ function SessionListItem({
             {t(`admin.agenda.audiences.${session.audience}`)}
             {session.location ? ` · ${session.location}` : ''}
           </p>
-          {session.audience === 'all' ? (
+          {isGuestOptInSession(session) ? (
             <p className="text-[11px] text-muted-foreground">
               {t('admin.agenda.expectedAttendance', {
                 employees: expectedEmployees,

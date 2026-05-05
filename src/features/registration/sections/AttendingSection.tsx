@@ -52,9 +52,7 @@ export function AttendingSection({ mode }: SectionProps): JSX.Element {
   const { show } = useToast();
   const navigate = useNavigate();
 
-  // Wizard mode hands us the bundle directly; profile mode has to fetch it.
-  // Skipping the query when we already have the bundle avoids an extra round
-  // trip and a flicker between EMPTY and the hydrated state.
+  // Wizard mode hands us the bundle; profile mode fetches its own.
   const profileQuery = useRegistration({
     eventId: mode.kind === 'profile' ? (event?.id ?? null) : null,
   });

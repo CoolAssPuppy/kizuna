@@ -38,9 +38,10 @@ interface QueryBundle {
 }
 
 function buildFormState({ items, ownSelections }: QueryBundle): FormState {
+  const byItemId = new Map(ownSelections.map((s) => [s.swag_item_id, s]));
   const out: FormState = {};
   for (const item of items) {
-    const sel = ownSelections.find((s) => s.swag_item_id === item.id);
+    const sel = byItemId.get(item.id);
     out[item.id] = { size: sel?.size ?? null, optedOut: sel?.opted_out ?? false };
   }
   return out;

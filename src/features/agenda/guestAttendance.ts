@@ -4,11 +4,15 @@ import type { Database } from '@/types/database.types';
 export type SessionGuestAttendanceRow =
   Database['public']['Tables']['session_guest_attendance']['Row'];
 
+/** Compose the key used by the attendance Set so the loader and the lookup site agree. */
+export function attendanceKey(sessionId: string, additionalGuestId: string): string {
+  return `${sessionId}:${additionalGuestId}`;
+}
+
 /**
- * Returns a Set keyed `sessionId:additionalGuestId` so the agenda card
- * can do O(1) lookups for "is this guest attending this session". The
- * caller (sponsor) reads only their own rows via RLS, so a single query
- * plus the join is enough.
+ * Returns a Set keyed via `attendanceKey()` so the agenda card can do
+ * O(1) lookups for "is this guest attending this session". The caller
+ * (sponsor) reads only their own rows via RLS.
  */
 export async function loadSponsorGuestAttendance(
   client: AppSupabaseClient,
@@ -21,7 +25,7 @@ export async function loadSponsorGuestAttendance(
   if (error) throw error;
   const set = new Set<string>();
   for (const row of data ?? []) {
-    set.add(`${row.session_id}:${row.additional_guest_id}`);
+    set.add(attendanceKey(row.session_id, row.additional_guest_id));
   }
   return set;
 }

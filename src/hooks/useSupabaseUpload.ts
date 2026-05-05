@@ -173,11 +173,7 @@ export function useSupabaseUpload(options: UseSupabaseUploadOptions) {
     }
   }, [files, maxFiles]);
 
-  // Auto-upload mode: kick the upload as soon as files are clean,
-  // valid, and not already uploaded. Without this, dropzone callers
-  // that rely on form-Save patterns (e.g. SwagItemDialog) silently
-  // discard the file because the user never clicks the explicit
-  // "Upload" button rendered by DropzoneContent.
+  // Auto-upload kicks off as soon as a clean, valid file is staged.
   // eslint-disable-next-line no-restricted-syntax
   useEffect(() => {
     if (!autoUpload) return;
