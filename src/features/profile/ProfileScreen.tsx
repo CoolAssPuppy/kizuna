@@ -65,6 +65,12 @@ interface ProfileSection {
   subject: 'self' | 'shared';
 }
 
+// Order matches the registration wizard + checklist (attending →
+// personal → passport → emergency → dietary → accessibility → swag →
+// transport). Sections that have no wizard equivalent (community,
+// guests, dependents, API keys) trail at the end. Keep these three
+// surfaces in sync — otherwise users see different orderings depending
+// on where they land.
 const SECTIONS: ReadonlyArray<ProfileSection> = [
   {
     id: 'attendance',
@@ -81,10 +87,17 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     subject: 'self',
   },
   {
-    id: 'community',
-    icon: Sparkles,
-    labelKey: 'profile.nav.community',
-    render: () => <CommunityProfileSection mode={PROFILE_MODE} />,
+    id: 'passport',
+    icon: IdCard,
+    labelKey: 'profile.nav.passport',
+    render: () => <PassportSection mode={PROFILE_MODE} />,
+    subject: 'shared',
+  },
+  {
+    id: 'emergency',
+    icon: HeartPulse,
+    labelKey: 'profile.nav.emergency',
+    render: () => <EmergencyContactSection mode={PROFILE_MODE} />,
     subject: 'shared',
   },
   {
@@ -102,17 +115,24 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     subject: 'shared',
   },
   {
-    id: 'emergency',
-    icon: HeartPulse,
-    labelKey: 'profile.nav.emergency',
-    render: () => <EmergencyContactSection mode={PROFILE_MODE} />,
+    id: 'swag',
+    icon: Shirt,
+    labelKey: 'profile.nav.swag',
+    render: () => <SwagSection mode={PROFILE_MODE} />,
+    subject: 'self',
+  },
+  {
+    id: 'transport',
+    icon: Plane,
+    labelKey: 'profile.nav.transport',
+    render: () => <TransportSection mode={PROFILE_MODE} />,
     subject: 'shared',
   },
   {
-    id: 'passport',
-    icon: IdCard,
-    labelKey: 'profile.nav.passport',
-    render: () => <PassportSection mode={PROFILE_MODE} />,
+    id: 'community',
+    icon: Sparkles,
+    labelKey: 'profile.nav.community',
+    render: () => <CommunityProfileSection mode={PROFILE_MODE} />,
     subject: 'shared',
   },
   {
@@ -128,20 +148,6 @@ const SECTIONS: ReadonlyArray<ProfileSection> = [
     labelKey: 'profile.nav.dependents',
     render: () => <DependentsSection mode={PROFILE_MODE} />,
     subject: 'self',
-  },
-  {
-    id: 'swag',
-    icon: Shirt,
-    labelKey: 'profile.nav.swag',
-    render: () => <SwagSection mode={PROFILE_MODE} />,
-    subject: 'self',
-  },
-  {
-    id: 'transport',
-    icon: Plane,
-    labelKey: 'profile.nav.transport',
-    render: () => <TransportSection mode={PROFILE_MODE} />,
-    subject: 'shared',
   },
   {
     id: 'api-keys',

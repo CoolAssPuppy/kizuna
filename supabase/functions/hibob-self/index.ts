@@ -11,13 +11,15 @@
 //      already overridden carry _source = 'user_entered' / _locked = true
 //      and are skipped (the existing reconcile logic handles that
 //      contract).
-//   5. Upserts swag_sizes with HiBob's t-shirt and shoe size when
-//      present.
-//   6. Upserts emergency_contacts when HiBob has a primary contact
+//   5. Upserts emergency_contacts when HiBob has a primary contact
 //      AND the user has not already filled one in (we never overwrite
 //      a user-entered emergency contact).
-//   7. Returns the hydrated shape so the SPA can route to the
+//   6. Returns the hydrated shape so the SPA can route to the
 //      registration wizard with the form pre-filled.
+//
+// Swag is event-scoped now (per-item catalogue under swag_items /
+// swag_selections), so the old "default tshirt/shoe size from HiBob"
+// path is gone. Attendees pick sizes per-item in the wizard instead.
 //
 // In stubbed mode (HIBOB_SERVICE_USER_ID / TOKEN absent) the function
 // returns deterministic data from a small hard-coded map. This lets us
@@ -124,13 +126,6 @@ Deno.serve(async (req) => {
   // hibob_id lives on public.users; sync it across so reconciliation
   // future runs can match employees back to the HiBob row.
   await admin.from('users').update({ hibob_id: person.hibobId }).eq('id', callerId);
-
-  if (person.tshirtSize !== null || person.shoeSizeEu !== null) {
-    const swagPayload: Record<string, unknown> = { user_id: callerId };
-    if (person.tshirtSize !== null) swagPayload.tshirt_size = person.tshirtSize;
-    if (person.shoeSizeEu !== null) swagPayload.shoe_size_eu = person.shoeSizeEu;
-    await admin.from('swag_sizes').upsert(swagPayload, { onConflict: 'user_id' });
-  }
 
   // Emergency contact: only set when HiBob has one AND the user has
   // not already saved their own. We never overwrite a user-entered

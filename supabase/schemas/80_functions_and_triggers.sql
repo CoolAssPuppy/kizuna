@@ -117,7 +117,8 @@ declare
     'flights',
     'accommodations',
     'transport_requests',
-    'swag_sizes'
+    'swag_items',
+    'swag_selections'
   ];
 begin
   foreach t in array touch_tables loop
@@ -931,9 +932,11 @@ create trigger guard_guest_profile_completion_biu
 -- cascades on each of those tables already point at events(id) ON
 -- DELETE CASCADE, so dropping the events row is sufficient.
 --
--- User-scoped data (additional_guests, guest_profiles, swag_sizes,
+-- User-scoped data (additional_guests, guest_profiles,
 -- attendee_profiles, emergency_contacts, dietary, passport, etc.)
 -- intentionally survives — those describe the person, not the event.
+-- Swag is event-scoped (swag_items + swag_selections) and goes when
+-- the event goes via the existing event_id FKs.
 -- Use the dedicated user-deletion path if you need to remove someone.
 --
 -- Returns true on success. Raises on missing event so the SPA can
@@ -1292,6 +1295,209 @@ $$;
 
 revoke all on function public.set_attending(boolean, boolean) from public;
 grant execute on function public.set_attending(boolean, boolean) to authenticated;
+
+
+-- =====================================================================
+-- Swag: bulk-save attendee selections + admin lock
+-- =====================================================================
+-- One RPC for the whole "save my swag" form. Body is a jsonb array of
+-- selections shaped like:
+--   [{"swag_item_id":"...","size":"M","opted_out":false,"additional_guest_id":null}, ...]
+-- Items not in the array are left alone, so the SPA can save partial
+-- forms without wiping existing answers. Locking is enforced here so
+-- every write path goes through the same gate.
+create or replace function public.set_swag_selections(
+  p_event_id uuid,
+  p_selections jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+  v_locked timestamptz;
+  v_row jsonb;
+  v_item_id uuid;
+  v_size text;
+  v_opted_out boolean;
+  v_guest_id uuid;
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+  if p_event_id is null then
+    raise exception 'event id required';
+  end if;
+
+  select swag_locked_at into v_locked from public.events where id = p_event_id;
+  if v_locked is not null then
+    raise exception 'swag selections are locked for this event' using errcode = '42501';
+  end if;
+
+  if p_selections is null or jsonb_typeof(p_selections) <> 'array' then
+    raise exception 'p_selections must be a JSON array';
+  end if;
+
+  for v_row in select * from jsonb_array_elements(p_selections)
+  loop
+    v_item_id := nullif(v_row->>'swag_item_id', '')::uuid;
+    v_size := nullif(v_row->>'size', '');
+    v_opted_out := coalesce((v_row->>'opted_out')::boolean, false);
+    v_guest_id := nullif(v_row->>'additional_guest_id', '')::uuid;
+
+    if v_item_id is null then continue; end if;
+
+    -- Confirm the item belongs to the event the caller is targeting,
+    -- so a malicious payload can't smuggle in items from another event.
+    if not exists (
+      select 1 from public.swag_items
+      where id = v_item_id and event_id = p_event_id
+    ) then
+      raise exception 'swag item % does not belong to event %', v_item_id, p_event_id;
+    end if;
+
+    -- Confirm the caller can write for this owner: themselves, or a
+    -- sponsor saving for one of their additional_guests.
+    if v_guest_id is not null then
+      if not exists (
+        select 1 from public.additional_guests g
+        where g.id = v_guest_id and g.sponsor_id = v_caller
+      ) then
+        raise exception 'cannot save swag for guest %', v_guest_id using errcode = '42501';
+      end if;
+    end if;
+
+    -- swag_selections has two unique constraints — one on
+    -- (swag_item_id, user_id) and one on (swag_item_id, additional_guest_id).
+    -- ON CONFLICT can only target one at a time, so branch on which
+    -- owner column is set and use the matching constraint.
+    if v_guest_id is null then
+      insert into public.swag_selections
+        (swag_item_id, user_id, size, opted_out)
+      values (
+        v_item_id, v_caller,
+        case when v_opted_out then null else v_size end,
+        v_opted_out
+      )
+      on conflict (swag_item_id, user_id) do update
+        set size = excluded.size,
+            opted_out = excluded.opted_out,
+            updated_at = now();
+    else
+      insert into public.swag_selections
+        (swag_item_id, additional_guest_id, size, opted_out)
+      values (
+        v_item_id, v_guest_id,
+        case when v_opted_out then null else v_size end,
+        v_opted_out
+      )
+      on conflict (swag_item_id, additional_guest_id) do update
+        set size = excluded.size,
+            opted_out = excluded.opted_out,
+            updated_at = now();
+    end if;
+  end loop;
+
+  -- Tick the swag registration task complete once the caller has
+  -- saved at least one selection for every non-hidden item.
+  perform public.maybe_complete_swag_task(v_caller, p_event_id);
+end
+$$;
+
+revoke all on function public.set_swag_selections(uuid, jsonb) from public;
+grant execute on function public.set_swag_selections(uuid, jsonb) to authenticated;
+
+
+-- Helper used by set_swag_selections; centralises the "did the caller
+-- answer every visible item?" math so a future trigger or admin tool
+-- can reuse it without duplicating the join.
+create or replace function public.maybe_complete_swag_task(
+  p_user_id uuid,
+  p_event_id uuid
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_required int;
+  v_answered int;
+  v_registration_id uuid;
+begin
+  select id into v_registration_id
+    from public.registrations
+   where user_id = p_user_id and event_id = p_event_id
+   limit 1;
+  if v_registration_id is null then return; end if;
+
+  select count(*) into v_required
+    from public.swag_items
+   where event_id = p_event_id and not is_hidden;
+
+  if v_required = 0 then
+    update public.registration_tasks
+       set status = 'complete', completed_at = coalesce(completed_at, now())
+     where registration_id = v_registration_id
+       and task_key = 'swag'
+       and status <> 'complete';
+    return;
+  end if;
+
+  select count(*) into v_answered
+    from public.swag_selections s
+    join public.swag_items i on i.id = s.swag_item_id
+   where i.event_id = p_event_id and not i.is_hidden
+     and s.user_id = p_user_id;
+
+  if v_answered >= v_required then
+    update public.registration_tasks
+       set status = 'complete', completed_at = coalesce(completed_at, now())
+     where registration_id = v_registration_id
+       and task_key = 'swag'
+       and status <> 'complete';
+  end if;
+end
+$$;
+
+revoke all on function public.maybe_complete_swag_task(uuid, uuid) from public, anon, authenticated;
+
+
+-- Admin toggle. When p_locked is true, stamps swag_locked_at +
+-- swag_locked_by so the ops team has audit info on who froze the
+-- catalogue. When p_locked is false, clears both columns so attendees
+-- can edit their picks again.
+create or replace function public.set_swag_lock(
+  p_event_id uuid,
+  p_locked boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'admin only' using errcode = '42501';
+  end if;
+  if p_locked then
+    update public.events
+       set swag_locked_at = coalesce(swag_locked_at, now()),
+           swag_locked_by = coalesce(swag_locked_by, auth.uid())
+     where id = p_event_id;
+  else
+    update public.events
+       set swag_locked_at = null,
+           swag_locked_by = null
+     where id = p_event_id;
+  end if;
+end
+$$;
+
+revoke all on function public.set_swag_lock(uuid, boolean) from public;
+grant execute on function public.set_swag_lock(uuid, boolean) to authenticated;
 
 
 -- =====================================================================

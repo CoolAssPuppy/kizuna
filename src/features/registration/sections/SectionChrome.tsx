@@ -56,7 +56,7 @@ export function SectionChrome({
 
   return (
     <CardShell title={title} {...(description ? { description } : {})}>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {children}
         <div className="flex justify-end">
           <Button onClick={onSubmit} disabled={busy || disabled}>

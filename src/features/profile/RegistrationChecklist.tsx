@@ -32,6 +32,31 @@ const TASK_LABEL_KEYS: Record<string, string> = {
   documents: 'profile.checklist.tasks.documents',
 };
 
+// Canonical render order — kept identical to the wizard's WIZARD_STEPS
+// + 'documents' (which lives outside the wizard but inside the
+// checklist). The DB query orders alphabetically by task_key, which
+// produced a confusing checklist where "accessibility" showed up first.
+// Sort client-side instead so wizard, profile nav, and checklist all
+// agree on the same sequence.
+const TASK_ORDER: ReadonlyArray<string> = [
+  'attending',
+  'personal_info',
+  'passport',
+  'emergency_contact',
+  'dietary',
+  'accessibility',
+  'swag',
+  'transport',
+  'documents',
+];
+
+function taskOrderIndex(taskKey: string): number {
+  const idx = TASK_ORDER.indexOf(taskKey);
+  // Unknown task keys (a future task added before the constant is
+  // updated) fall to the bottom rather than vanishing.
+  return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
+}
+
 export function RegistrationChecklist(): JSX.Element | null {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -45,7 +70,9 @@ export function RegistrationChecklist(): JSX.Element | null {
   });
 
   if (!query.data) return null;
-  const { tasks } = query.data;
+  const tasks = [...query.data.tasks].sort(
+    (a, b) => taskOrderIndex(a.task_key) - taskOrderIndex(b.task_key),
+  );
 
   const total = tasks.length;
   if (total === 0) return null;

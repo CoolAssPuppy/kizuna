@@ -16,6 +16,7 @@ import { ReportsScreen } from './ReportsScreen';
 import { RoomAssignmentToolScreen } from './RoomAssignmentToolScreen';
 import { ScanQrScreen } from './ScanQrScreen';
 import { StatsScreen } from './StatsScreen';
+import { SwagAdminScreen } from './swag/SwagAdminScreen';
 
 export function AdminRoute(): JSX.Element {
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ export function AdminRoute(): JSX.Element {
         />
         <Route path="feed" element={<FeedScreen />} />
         <Route path="documents" element={<DocumentsScreen />} />
+        <Route path="swag" element={<SwagAdminScreen />} />
         <Route path="stats" element={<StatsScreen />} />
         <Route path="nudges" element={<NudgesScreen />} />
         <Route path="reports" element={<ReportsScreen />} />

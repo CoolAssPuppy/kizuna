@@ -43,7 +43,7 @@ export function StepShell({
         {subtitle ? <p className="text-sm text-muted-foreground">{subtitle}</p> : null}
       </header>
 
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-6">{children}</div>
 
       <Button type="submit" disabled={busy || submitDisabled} size="lg" className="w-full">
         {busy ? t('registration.saving') : t('registration.saveAndContinue')}

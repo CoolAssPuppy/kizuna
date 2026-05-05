@@ -942,6 +942,8 @@ export type Database = {
           reg_opens_at: string | null
           start_date: string
           subtitle: string | null
+          swag_locked_at: string | null
+          swag_locked_by: string | null
           time_zone: string
           type: Database["public"]["Enums"]["event_type"]
         }
@@ -959,6 +961,8 @@ export type Database = {
           reg_opens_at?: string | null
           start_date: string
           subtitle?: string | null
+          swag_locked_at?: string | null
+          swag_locked_by?: string | null
           time_zone?: string
           type: Database["public"]["Enums"]["event_type"]
         }
@@ -976,10 +980,20 @@ export type Database = {
           reg_opens_at?: string | null
           start_date?: string
           subtitle?: string | null
+          swag_locked_at?: string | null
+          swag_locked_by?: string | null
           time_zone?: string
           type?: Database["public"]["Enums"]["event_type"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "events_swag_locked_by_fkey"
+            columns: ["swag_locked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feed_items: {
         Row: {
@@ -2052,43 +2066,106 @@ export type Database = {
           },
         ]
       }
-      swag_sizes: {
+      swag_items: {
+        Row: {
+          allows_opt_out: boolean
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          image_path: string | null
+          is_hidden: boolean
+          name: string
+          size_image_path: string | null
+          sizes: string[]
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          allows_opt_out?: boolean
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          image_path?: string | null
+          is_hidden?: boolean
+          name: string
+          size_image_path?: string | null
+          sizes?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          allows_opt_out?: boolean
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          image_path?: string | null
+          is_hidden?: boolean
+          name?: string
+          size_image_path?: string | null
+          sizes?: string[]
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swag_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      swag_selections: {
         Row: {
           additional_guest_id: string | null
           id: string
-          shoe_size_eu: number | null
-          tshirt_size: string | null
+          opted_out: boolean
+          size: string | null
+          swag_item_id: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
           additional_guest_id?: string | null
           id?: string
-          shoe_size_eu?: number | null
-          tshirt_size?: string | null
+          opted_out?: boolean
+          size?: string | null
+          swag_item_id: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           additional_guest_id?: string | null
           id?: string
-          shoe_size_eu?: number | null
-          tshirt_size?: string | null
+          opted_out?: boolean
+          size?: string | null
+          swag_item_id?: string
           updated_at?: string
           user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "swag_sizes_additional_guest_id_fkey"
+            foreignKeyName: "swag_selections_additional_guest_id_fkey"
             columns: ["additional_guest_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "additional_guests"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "swag_sizes_user_id_fkey"
+            foreignKeyName: "swag_selections_swag_item_id_fkey"
+            columns: ["swag_item_id"]
+            isOneToOne: false
+            referencedRelation: "swag_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swag_selections_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2362,6 +2439,10 @@ export type Database = {
         Args: { p_notification_id: string }
         Returns: undefined
       }
+      maybe_complete_swag_task: {
+        Args: { p_event_id: string; p_user_id: string }
+        Returns: undefined
+      }
       mint_oauth_code: {
         Args: {
           p_redirect: string
@@ -2383,6 +2464,14 @@ export type Database = {
           p_passport_number: string
           p_user_id: string
         }
+        Returns: undefined
+      }
+      set_swag_lock: {
+        Args: { p_event_id: string; p_locked: boolean }
+        Returns: undefined
+      }
+      set_swag_selections: {
+        Args: { p_event_id: string; p_selections: Json }
         Returns: undefined
       }
       set_user_leadership: {

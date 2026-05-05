@@ -634,10 +634,54 @@ create policy transport_vehicles_admin_all on public.transport_vehicles
   with check (public.is_admin());
 
 
--- swag_sizes is polymorphic: a row is owned either by the user_id (the
--- attendee themselves) or by the sponsor of the additional_guest_id.
--- Admins can read/write everything.
-create policy swag_sizes_self_or_sponsor on public.swag_sizes
+-- Swag catalogue: anyone with read access to the event sees the
+-- non-hidden items; admins see everything and own the writes. The
+-- attendee picker (SwagSection) filters out hidden items in app code,
+-- but the policy lets admins use the same query in admin mode without
+-- a parallel pathway.
+create policy swag_items_read_visible on public.swag_items
+  for select using (
+    public.is_admin()
+    or (
+      not is_hidden
+      and exists (
+        select 1 from public.events e
+        where e.id = swag_items.event_id
+          and (
+            e.invite_all_employees
+            or exists (
+              select 1 from public.registrations r
+              where r.event_id = e.id and r.user_id = auth.uid()
+            )
+          )
+      )
+    )
+  );
+
+create policy swag_items_admin_write on public.swag_items
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+-- Per-attendee swag selections. Polymorphic owner mirrors swag_sizes:
+-- a row is owned either by user_id (the attendee themselves) or via
+-- the sponsor of the additional_guest_id. Admins read everything for
+-- exports; writes go through set_swag_selections() so the lock check
+-- stays centralised.
+create policy swag_selections_owner_read on public.swag_selections
+  for select using (
+    public.is_admin()
+    or (user_id is not null and public.is_self_or_admin(user_id))
+    or (
+      additional_guest_id is not null
+      and exists (
+        select 1 from public.additional_guests g
+        where g.id = additional_guest_id
+          and g.sponsor_id = auth.uid()
+      )
+    )
+  );
+
+create policy swag_selections_owner_write on public.swag_selections
   for all using (
     public.is_admin()
     or (user_id is not null and public.is_self_or_admin(user_id))

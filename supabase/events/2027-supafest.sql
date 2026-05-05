@@ -115,8 +115,29 @@ Sample code of conduct content. Real content will replace this in production.',
      'The agenda has 14 breakout slots this year. Star the ones you want to attend in the agenda tab.',
      null);
 
-  -- Swag catalogue is gone — every attendee just gives us a t-shirt
-  -- size and (optionally) a shoe size, captured per-user via swag_sizes.
+  -- Sample swag catalogue with deliberately silly product names so the
+  -- demo has personality. Admins can edit/add/remove via /admin/swag.
+  -- image_path / size_image_path stay null here; scripts/seed-test-storage.ts
+  -- uploads the public/test-images/* files into the bucket and stamps
+  -- the resulting paths on these rows.
+  insert into public.swag_items (event_id, name, description, sizes, allows_opt_out, sort_order)
+  values
+    (v_event_id, 'Captain Picard''s Red Uniform',
+     'Officially a "T-Shirt." Not officially flagship-bridge issue. Wear it on the off-property excursions and the locals will assume you''re in command.',
+     array['XS','S','M','L','XL','XXL','3XL'], true, 0),
+    (v_event_id, 'Worf''s Bat''leth',
+     'Officially a "Letter Opener." Brushed steel, single curved blade, completely unbalanced for actual combat. Honour demands you open every postcard with one decisive stroke.',
+     array['One size'], true, 1),
+    (v_event_id, 'Insulated Banff Jacket',
+     'Goose-down winter jacket. Required for the off-property excursions; everyone gets one whether they ask or not.',
+     array['XS','S','M','L','XL','XXL'], false, 2),
+    (v_event_id, 'Engineering Tote Bag',
+     'Heavy canvas tote with reinforced handles. Big enough to fit the Bat''leth, the laptop, and the regret from buying every souvenir at the Banff hot springs gift shop.',
+     array['One size'], true, 3),
+    (v_event_id, 'Subspace Coffee Mug',
+     'Ceramic, 14oz, dishwasher safe but not actually capable of subspace transmission. Tested.',
+     array['One size'], true, 4)
+  on conflict do nothing;
 
   -- Starter registrations + per-task rows for the dev employees so the
   -- wizard has data to resume from. Other users register on first visit.

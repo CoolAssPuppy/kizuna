@@ -834,18 +834,14 @@
       "noGuests": "No dependents to add? Continue."
     },
     "swag": {
-      "intro": "Tell us your t-shirt and shoe sizes so we can order the right gear ahead of time.",
-      "yourSizes": "Your sizes",
-      "guestsHeading": "Sizes for additional guests",
-      "tshirtSize": "T-shirt size",
-      "shoeSize": "Shoe size",
-      "shoeSizeHint": "Pick the system you know — we store everything as EU.",
-      "shoeSystem": {
-        "us": "US",
-        "eu": "EU"
-      },
-      "age_one": "{{age}} year old",
-      "age_other": "{{age}} years old"
+      "intro": "Pick a size for each item, or opt out if you'd rather not receive one.",
+      "empty": "The events team hasn't published any swag items for this event yet.",
+      "pickSize": "Choose a size",
+      "optOut": "I don't need this item",
+      "sizingChart": "View sizing chart",
+      "sizingChartAlt": "Sizing chart",
+      "lockedTitle": "Swag selection is locked.",
+      "lockedBody": "The events team has frozen swag selections for this event. Reach out if you need a change."
     },
     "transport": {
       "intro": "Tell us which legs you'd like an airport transfer for. We use this to build the shuttle manifest.",
@@ -874,6 +870,7 @@
       "scanQr": "Scan QR Code",
       "feed": "Feed",
       "documents": "Documents",
+      "swag": "Swag",
       "stats": "Stats",
       "nudges": "Communication",
       "communication": "Communication",
@@ -1219,7 +1216,8 @@
       "rooming": "Rooming list",
       "transport": "Transport manifest",
       "dietary": "Dietary summary",
-      "swag": "Swag order",
+      "swag": "Swag (per person)",
+      "swag_totals": "Swag (total order)",
       "payments": "Payments"
     },
     "pagination": {
@@ -1574,5 +1572,51 @@
     },
     "previewMarkdown": "Preview",
     "writeMarkdown": "Write"
+  },
+  "adminSwag": {
+    "title": "Swag",
+    "subtitle": "Curate the per-event swag catalogue. Hidden items stay invisible to attendees until you publish them.",
+    "newItem": "Add swag item",
+    "editTitle": "Edit swag item",
+    "lock": "Lock swag selection",
+    "unlock": "Unlock swag selection",
+    "lockHint": "When locked, employees can no longer edit their swag selections.",
+    "locked": "Swag selection is locked.",
+    "unlocked": "Swag selection is unlocked.",
+    "lockedAt": "Locked {{date}}",
+    "created": "Swag item created.",
+    "updated": "Swag item saved.",
+    "deleted": "Swag item deleted.",
+    "deleteConfirm": "Delete \"{{name}}\"? Existing attendee selections for this item will be removed.",
+    "deleteAria": "Delete {{name}}",
+    "edit": "Edit {{name}}",
+    "empty": "No swag items yet. Add the first one to publish it to attendees.",
+    "noSizes": "No sizes added yet.",
+    "addSize": "Add",
+    "addSizePlaceholder": "Custom size",
+    "removeSize": "Remove {{size}}",
+    "sizesHint": "Pick a template to populate the list, then add or remove individual sizes.",
+    "fields": {
+      "name": "Name",
+      "description": "Description",
+      "image": "Cover image",
+      "sizeImage": "Sizing chart",
+      "sizes": "Sizes",
+      "hidden": "Hidden",
+      "hiddenHint": "Visible to admins only. Use for previews before launch.",
+      "optOut": "Allow opt-out",
+      "optOutHint": "Lets attendees decline this item entirely.",
+      "sortOrder": "Sort order"
+    },
+    "templates": {
+      "apparel": "Apparel sizes",
+      "shoesUs": "US shoe sizes",
+      "shoesEu": "EU shoe sizes"
+    },
+    "badges": {
+      "hidden": "Hidden",
+      "visible": "Live",
+      "optOut": "Opt-out allowed"
+    }
   }
 }

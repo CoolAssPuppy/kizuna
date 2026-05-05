@@ -1,130 +1,149 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Lock } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useActiveEvent } from '@/features/events/useActiveEvent';
+import { useStorageImage } from '@/lib/useStorageImage';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
-import type { Database } from '@/types/database.types';
 
-import { loadAdditionalGuests } from '../api/additionalGuests';
 import {
-  loadAdditionalGuestSwagSizes,
-  loadSelfSwagSize,
-  saveAdditionalGuestSwagSize,
-  saveSelfSwagSize,
+  loadMySwagSelections,
+  loadVisibleSwagItems,
+  saveSwagSelections,
+  type SwagItemRow,
+  type SwagSelectionInput,
+  type SwagSelectionRow,
 } from '../api/swag';
-import { EU_SHOE_SIZES, US_SHOE_SIZES, euToUs, type ShoeSizeSystem, toEu } from '../shoeSize';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from '@/hooks/useHydratedFormState';
-import { useSectionSubmit } from './useSectionSubmit';
 
-type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
-
-const TSHIRT_SIZES: ReadonlyArray<string> = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
-const KIDS_TSHIRT_SIZES: ReadonlyArray<string> = [
-  '2T',
-  '3T',
-  '4T',
-  '5',
-  '6',
-  '7',
-  '8',
-  '10',
-  '12',
-  '14',
-];
-
-interface SizingState {
-  tshirtSize: string;
-  shoeSize: string; // entered value as string (may be float)
-  shoeSystem: ShoeSizeSystem;
+interface ItemFormState {
+  size: string | null;
+  optedOut: boolean;
 }
 
-interface SwagFormState {
-  self: SizingState;
-  guests: AdditionalGuestRow[];
-  guestState: Record<string, SizingState>;
+const EMPTY_FORM: Record<string, ItemFormState> = {};
+
+/**
+ * Builds the per-item form state. Each item starts unanswered (no size,
+ * no opt-out) so the Save button stays disabled until the user makes
+ * a real choice — keeps us from auto-submitting hollow rows.
+ */
+function buildFormState(
+  items: ReadonlyArray<SwagItemRow>,
+  selections: ReadonlyArray<SwagSelectionRow>,
+): Record<string, ItemFormState> {
+  const out: Record<string, ItemFormState> = {};
+  for (const item of items) {
+    const sel = selections.find((s) => s.swag_item_id === item.id);
+    out[item.id] = {
+      size: sel?.size ?? null,
+      optedOut: sel?.opted_out ?? false,
+    };
+  }
+  return out;
 }
 
-const EMPTY_SIZING: SizingState = { tshirtSize: '', shoeSize: '', shoeSystem: 'us' };
-const EMPTY: SwagFormState = { self: EMPTY_SIZING, guests: [], guestState: {} };
-
-function fromEu(eu: number | null, system: ShoeSizeSystem): string {
-  if (eu === null || eu === undefined) return '';
-  if (system === 'eu') return String(eu);
-  const us = euToUs(eu);
-  return us === null ? '' : String(us);
+function isAnswered(state: ItemFormState | undefined): boolean {
+  if (!state) return false;
+  return state.optedOut || (state.size !== null && state.size.length > 0);
 }
 
 export function SwagSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: loaded, isSuccess: hydrated } = useQuery({
-    queryKey: ['swag-sizes', user?.id ?? null],
-    enabled: !!user,
-    queryFn: async () => {
-      const client = getSupabaseClient();
-      const [own, list, guestSizes] = await Promise.all([
-        loadSelfSwagSize(client, user!.id),
-        loadAdditionalGuests(client, user!.id),
-        loadAdditionalGuestSwagSizes(client, user!.id),
-      ]);
-      return { own, list, guestSizes };
-    },
-  });
-  const [form, setForm] = useHydratedFormState(hydrated, loaded, EMPTY, (data): SwagFormState => {
-    if (!data) return EMPTY;
-    const guestState: Record<string, SizingState> = {};
-    for (const guest of data.list) {
-      const sized = data.guestSizes.find((g) => g.additional_guest_id === guest.id);
-      guestState[guest.id] = {
-        tshirtSize: sized?.tshirt_size ?? '',
-        shoeSize: fromEu(sized?.shoe_size_eu ?? null, 'us'),
-        shoeSystem: 'us',
-      };
-    }
-    return {
-      self: {
-        tshirtSize: data.own?.tshirt_size ?? '',
-        shoeSize: fromEu(data.own?.shoe_size_eu ?? null, 'us'),
-        shoeSystem: 'us',
-      },
-      guests: data.list,
-      guestState,
-    };
-  });
-  const { self, guests, guestState } = form;
-  function setSelf(next: SizingState): void {
-    setForm((prev) => ({ ...prev, self: next }));
-  }
-  function setGuestSizing(id: string, next: SizingState): void {
-    setForm((prev) => ({ ...prev, guestState: { ...prev.guestState, [id]: next } }));
-  }
-  const { busy, errorKey, submit } = useSectionSubmit({
-    mode,
-    taskKey: 'swag',
-    toastSuccessKey: 'profile.toast.swagSaved',
-    invalidateQueryKeys: [['swag-sizes', user?.id ?? null]],
+  const { data: event } = useActiveEvent();
+  const queryClient = useQueryClient();
+  const { show } = useToast();
+  const eventId = event?.id ?? null;
+
+  const [form, setForm] = useState<Record<string, ItemFormState>>(EMPTY_FORM);
+  const [hydrated, setHydrated] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+
+  const itemsQuery = useQuery({
+    queryKey: ['swag-items', eventId],
+    enabled: eventId !== null,
+    queryFn: () => loadVisibleSwagItems(getSupabaseClient(), eventId!),
   });
 
-  function handleSubmit(): void {
-    if (!user) return;
-    void submit(async () => {
-      const client = getSupabaseClient();
-      await saveSelfSwagSize(client, user.id, {
-        tshirtSize: self.tshirtSize || null,
-        shoeSizeEu: parseShoe(self.shoeSize, self.shoeSystem),
+  const selectionsQuery = useQuery({
+    queryKey: ['swag-selections', user?.id ?? null, eventId],
+    enabled: !!user && eventId !== null,
+    queryFn: () => loadMySwagSelections(getSupabaseClient(), user!.id, user!.id),
+  });
+
+  const items = itemsQuery.data ?? [];
+  const ownSelections = selectionsQuery.data?.own ?? [];
+  const queriesReady = itemsQuery.isSuccess && selectionsQuery.isSuccess;
+
+  // Hydrate the form once both queries resolve. Doing it conditionally
+  // during render keeps the dependency array out of useEffect — same
+  // pattern useHydratedFormState uses for the simpler one-row sections.
+  if (!hydrated && queriesReady) {
+    setHydrated(true);
+    setForm(buildFormState(items, ownSelections));
+  }
+
+  const isLocked = event?.swag_locked_at != null;
+
+  function setItem(itemId: string, next: Partial<ItemFormState>): void {
+    setForm((prev) => ({
+      ...prev,
+      [itemId]: {
+        size: prev[itemId]?.size ?? null,
+        optedOut: prev[itemId]?.optedOut ?? false,
+        ...next,
+      },
+    }));
+  }
+
+  // Save is enabled when every visible item has either a size picked
+  // or the opt-out box checked. Items with allows_opt_out=false require
+  // a size — opt-out is hidden in that case so the user can't satisfy
+  // the gate without choosing.
+  const allAnswered = items.every((item) => {
+    const state = form[item.id];
+    if (item.allows_opt_out) return isAnswered(state);
+    return state?.size !== null && state?.size !== undefined && state.size.length > 0;
+  });
+  const submitDisabled = !allAnswered || isLocked;
+
+  async function handleSubmit(): Promise<void> {
+    if (!eventId || submitDisabled) return;
+    setBusy(true);
+    setErrorKey(null);
+    try {
+      const payload: SwagSelectionInput[] = items.map((item) => {
+        const state = form[item.id] ?? { size: null, optedOut: false };
+        return {
+          swagItemId: item.id,
+          size: state.optedOut ? null : state.size,
+          optedOut: state.optedOut,
+        };
       });
-      for (const guest of guests) {
-        const s = guestState[guest.id] ?? EMPTY_SIZING;
-        await saveAdditionalGuestSwagSize(client, guest.id, {
-          tshirtSize: s.tshirtSize || null,
-          shoeSizeEu: parseShoe(s.shoeSize, s.shoeSystem),
-        });
-      }
-    });
+      await saveSwagSelections(getSupabaseClient(), eventId, payload);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['swag-selections'] }),
+        queryClient.invalidateQueries({ queryKey: ['profile', 'checklist'] }),
+        queryClient.invalidateQueries({ queryKey: ['registration'] }),
+      ]);
+      show(t('profile.toast.swagSaved'));
+      if (mode.kind === 'wizard') mode.onComplete();
+    } catch (err) {
+      console.error('[kizuna] saveSwagSelections failed', err);
+      show(t('profile.toast.error'), 'error');
+      setErrorKey('registration.errorSaving');
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -135,132 +154,133 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
       busy={busy}
       hydrated={hydrated}
       errorKey={errorKey}
-      onSubmit={handleSubmit}
+      onSubmit={() => void handleSubmit()}
+      submitDisabled={submitDisabled}
     >
-      <SizingFieldset
-        title={t('registration.swag.yourSizes')}
-        value={self}
-        onChange={setSelf}
-        tshirtSizes={TSHIRT_SIZES}
-      />
-
-      {guests.length > 0 ? (
-        <div className="space-y-3">
-          <h3 className="text-sm font-medium">{t('registration.swag.guestsHeading')}</h3>
-          {guests.map((guest) => (
-            <SizingFieldset
-              key={guest.id}
-              title={`${guest.first_name} ${guest.last_name} (${t(`registration.guests.brackets.${guest.age_bracket}`)})`}
-              value={guestState[guest.id] ?? EMPTY_SIZING}
-              onChange={(next) => setGuestSizing(guest.id, next)}
-              // Under-12 fits the youth t-shirt size grid; teens and
-              // adults fit the standard adult grid. Bracket-based switch
-              // replaces the previous numeric `age < 14` heuristic.
-              tshirtSizes={guest.age_bracket === 'under_12' ? KIDS_TSHIRT_SIZES : TSHIRT_SIZES}
-            />
-          ))}
+      {isLocked ? (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-amber-900"
+        >
+          <Lock aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="space-y-0.5 text-sm">
+            <p className="font-medium">{t('registration.swag.lockedTitle')}</p>
+            <p>{t('registration.swag.lockedBody')}</p>
+          </div>
         </div>
       ) : null}
+
+      {hydrated && items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('registration.swag.empty')}</p>
+      ) : null}
+
+      <div className="space-y-8">
+        {items.map((item) => (
+          <SwagItemCard
+            key={item.id}
+            item={item}
+            state={form[item.id]}
+            onSizeChange={(size) => setItem(item.id, { size, optedOut: false })}
+            onOptOutChange={(optedOut) =>
+              setItem(item.id, { optedOut, size: optedOut ? null : (form[item.id]?.size ?? null) })
+            }
+            disabled={isLocked}
+          />
+        ))}
+      </div>
     </SectionChrome>
   );
 }
 
-interface SizingFieldsetProps {
-  title: string;
-  value: SizingState;
-  onChange: (next: SizingState) => void;
-  tshirtSizes: ReadonlyArray<string>;
+interface SwagItemCardProps {
+  item: SwagItemRow;
+  state: ItemFormState | undefined;
+  onSizeChange: (size: string) => void;
+  onOptOutChange: (optedOut: boolean) => void;
+  disabled: boolean;
 }
 
-function SizingFieldset({ title, value, onChange, tshirtSizes }: SizingFieldsetProps): JSX.Element {
+function SwagItemCard({
+  item,
+  state,
+  onSizeChange,
+  onOptOutChange,
+  disabled,
+}: SwagItemCardProps): JSX.Element {
   const { t } = useTranslation();
-  const shoeOptions = value.shoeSystem === 'eu' ? EU_SHOE_SIZES : US_SHOE_SIZES;
+  const cover = useStorageImage('event-content', item.image_path ?? '');
+  const sizing = useStorageImage('event-content', item.size_image_path ?? '');
   return (
-    <fieldset className="space-y-4 rounded-md border p-4">
-      <legend className="px-1 text-sm font-medium">{title}</legend>
-
-      <div className="space-y-2">
-        <Label>{t('registration.swag.tshirtSize')}</Label>
-        <div className="flex flex-wrap gap-2">
-          {tshirtSizes.map((size) => (
-            <SizeChip
-              key={size}
-              label={size}
-              selected={value.tshirtSize === size}
-              onClick={() => onChange({ ...value, tshirtSize: size })}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <Label>{t('registration.swag.shoeSize')}</Label>
-          <div role="tablist" className="flex rounded-md border bg-muted/30 p-0.5">
-            {(['us', 'eu'] as const).map((system) => (
-              <button
-                key={system}
-                type="button"
-                role="tab"
-                aria-selected={value.shoeSystem === system}
-                onClick={() => onChange({ ...value, shoeSystem: system, shoeSize: '' })}
-                className={cn(
-                  'rounded-sm px-2 py-0.5 text-xs font-medium uppercase tracking-wider',
-                  value.shoeSystem === system
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground',
-                )}
-              >
-                {t(`registration.swag.shoeSystem.${system}`)}
-              </button>
-            ))}
+    <article className="rounded-md border bg-card p-5">
+      <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+        {cover ? (
+          <img
+            src={cover}
+            alt=""
+            loading="lazy"
+            className="h-40 w-full shrink-0 rounded-md object-cover sm:w-48"
+          />
+        ) : null}
+        <div className="min-w-0 flex-1 space-y-4">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold">{item.name}</h3>
+            {item.description ? (
+              <p className="text-sm text-muted-foreground">{item.description}</p>
+            ) : null}
           </div>
+
+          <div className="space-y-2">
+            <Label>{t('registration.swag.pickSize')}</Label>
+            <div className="flex flex-wrap gap-2">
+              {item.sizes.map((size) => {
+                const selected = state?.size === size && !state?.optedOut;
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    disabled={disabled || state?.optedOut}
+                    onClick={() => onSizeChange(size)}
+                    className={cn(
+                      'rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-50',
+                      selected
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'bg-background hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {sizing ? (
+            <details>
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground">
+                {t('registration.swag.sizingChart')}
+              </summary>
+              <img
+                src={sizing}
+                alt={t('registration.swag.sizingChartAlt')}
+                loading="lazy"
+                className="mt-2 max-h-96 rounded-md border"
+              />
+            </details>
+          ) : null}
+
+          {item.allows_opt_out ? (
+            <label htmlFor={`swag-opt-out-${item.id}`} className="flex items-center gap-2 text-sm">
+              <Checkbox
+                id={`swag-opt-out-${item.id}`}
+                checked={state?.optedOut ?? false}
+                disabled={disabled}
+                onCheckedChange={(checked) => onOptOutChange(checked === true)}
+              />
+              {t('registration.swag.optOut')}
+            </label>
+          ) : null}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {shoeOptions.map((size) => (
-            <SizeChip
-              key={size}
-              label={String(size)}
-              selected={value.shoeSize === String(size)}
-              onClick={() => onChange({ ...value, shoeSize: String(size) })}
-            />
-          ))}
-        </div>
-        <p className="text-xs text-muted-foreground">{t('registration.swag.shoeSizeHint')}</p>
       </div>
-    </fieldset>
+    </article>
   );
-}
-
-function SizeChip({
-  label,
-  selected,
-  onClick,
-}: {
-  label: string;
-  selected: boolean;
-  onClick: () => void;
-}): JSX.Element {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'rounded-md border px-3 py-1.5 text-sm transition-colors',
-        selected
-          ? 'border-primary bg-primary text-primary-foreground'
-          : 'bg-background hover:bg-accent hover:text-accent-foreground',
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
-function parseShoe(raw: string, system: ShoeSizeSystem): number | null {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  const value = Number.parseFloat(trimmed);
-  if (!Number.isFinite(value)) return null;
-  return toEu(value, system);
 }

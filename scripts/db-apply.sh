@@ -60,3 +60,8 @@ if compgen -G "supabase/fixtures/*.sql" > /dev/null; then
     "${PSQL_BASE[@]}" -f "$f"
   done
 fi
+
+if [[ -f scripts/seed-test-storage.ts ]] && command -v npx >/dev/null 2>&1; then
+  echo "uploading placeholder swag images into event-content bucket"
+  npx tsx scripts/seed-test-storage.ts || echo "warning: seed-test-storage failed; continuing"
+fi

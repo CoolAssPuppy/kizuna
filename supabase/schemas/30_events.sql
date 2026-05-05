@@ -25,7 +25,9 @@ create table public.events (
   is_active boolean not null default false,
   hero_image_path text,
   logo_path text,
-  invite_all_employees boolean not null default false
+  invite_all_employees boolean not null default false,
+  swag_locked_at timestamptz,
+  swag_locked_by uuid references public.users(id) on delete set null
 );
 
 comment on column public.events.hero_image_path is
@@ -34,6 +36,8 @@ comment on column public.events.logo_path is
   'Storage object path inside the event-content bucket — e.g. <event_id>/about/logo.png. Resolved to a signed URL at read time.';
 comment on column public.events.invite_all_employees is
   'When true, every active employee is implicitly invited (RLS extends visibility to role=employee). When false, only users with a registrations row see the event.';
+comment on column public.events.swag_locked_at is
+  'Non-null = swag selections are frozen for this event. Set by lock_swag(); intentionally one-way (no unlock RPC) so the ops team can hand-off to the swag vendor with confidence.';
 
 comment on column public.events.time_zone is
   'IANA timezone for the event venue (e.g. America/Edmonton for Banff). Used as the default render timezone for sessions and accommodations.';

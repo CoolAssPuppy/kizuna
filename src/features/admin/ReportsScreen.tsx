@@ -17,6 +17,7 @@ import {
   fetchRegistrationProgress,
   fetchRoomingList,
   fetchSwagOrder,
+  fetchSwagOrderTotals,
   fetchTransportManifest,
 } from './reports';
 import { ReportTable } from './ReportTable';
@@ -54,8 +55,13 @@ const REPORTS: ReadonlyArray<ReportConfig> = [
   },
   {
     key: 'swag',
-    filename: 'swag-order.csv',
+    filename: 'swag-per-person.csv',
     fetch: (c) => fetchSwagOrder(c),
+  },
+  {
+    key: 'swag_totals',
+    filename: 'swag-total-order.csv',
+    fetch: (c) => fetchSwagOrderTotals(c),
   },
   {
     key: 'payments',
