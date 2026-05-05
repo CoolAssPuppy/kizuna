@@ -51,6 +51,8 @@ export function StorageImageUploader({
     maxFiles: 1,
     maxFileSize: maxBytes,
     allowedMimeTypes: ALLOWED_TYPES,
+    upsert: true,
+    autoUpload: true,
     onUploadComplete: (paths) => {
       const next = paths[0];
       if (next) onChange(next);

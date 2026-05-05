@@ -1,13 +1,12 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Lock } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { useStorageImage } from '@/lib/useStorageImage';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -22,51 +21,36 @@ import {
 } from '../api/swag';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
+import { useSectionSubmit } from './useSectionSubmit';
 
 interface ItemFormState {
   size: string | null;
   optedOut: boolean;
 }
 
-const EMPTY_FORM: Record<string, ItemFormState> = {};
+type FormState = Record<string, ItemFormState>;
 
-/**
- * Builds the per-item form state. Each item starts unanswered (no size,
- * no opt-out) so the Save button stays disabled until the user makes
- * a real choice — keeps us from auto-submitting hollow rows.
- */
-function buildFormState(
-  items: ReadonlyArray<SwagItemRow>,
-  selections: ReadonlyArray<SwagSelectionRow>,
-): Record<string, ItemFormState> {
-  const out: Record<string, ItemFormState> = {};
-  for (const item of items) {
-    const sel = selections.find((s) => s.swag_item_id === item.id);
-    out[item.id] = {
-      size: sel?.size ?? null,
-      optedOut: sel?.opted_out ?? false,
-    };
-  }
-  return out;
+const EMPTY_FORM: FormState = {};
+
+interface QueryBundle {
+  items: ReadonlyArray<SwagItemRow>;
+  ownSelections: ReadonlyArray<SwagSelectionRow>;
 }
 
-function isAnswered(state: ItemFormState | undefined): boolean {
-  if (!state) return false;
-  return state.optedOut || (state.size !== null && state.size.length > 0);
+function buildFormState({ items, ownSelections }: QueryBundle): FormState {
+  const out: FormState = {};
+  for (const item of items) {
+    const sel = ownSelections.find((s) => s.swag_item_id === item.id);
+    out[item.id] = { size: sel?.size ?? null, optedOut: sel?.opted_out ?? false };
+  }
+  return out;
 }
 
 export function SwagSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { data: event } = useActiveEvent();
-  const queryClient = useQueryClient();
-  const { show } = useToast();
   const eventId = event?.id ?? null;
-
-  const [form, setForm] = useState<Record<string, ItemFormState>>(EMPTY_FORM);
-  const [hydrated, setHydrated] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
 
   const itemsQuery = useQuery({
     queryKey: ['swag-items', eventId],
@@ -77,20 +61,18 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
   const selectionsQuery = useQuery({
     queryKey: ['swag-selections', user?.id ?? null, eventId],
     enabled: !!user && eventId !== null,
-    queryFn: () => loadMySwagSelections(getSupabaseClient(), user!.id, user!.id),
+    queryFn: () => loadMySwagSelections(getSupabaseClient(), user!.id),
   });
 
   const items = itemsQuery.data ?? [];
   const ownSelections = selectionsQuery.data?.own ?? [];
-  const queriesReady = itemsQuery.isSuccess && selectionsQuery.isSuccess;
-
-  // Hydrate the form once both queries resolve. Doing it conditionally
-  // during render keeps the dependency array out of useEffect — same
-  // pattern useHydratedFormState uses for the simpler one-row sections.
-  if (!hydrated && queriesReady) {
-    setHydrated(true);
-    setForm(buildFormState(items, ownSelections));
-  }
+  const hydrated = itemsQuery.isSuccess && selectionsQuery.isSuccess;
+  const [form, setForm] = useHydratedFormState<QueryBundle, FormState>(
+    hydrated,
+    { items, ownSelections },
+    EMPTY_FORM,
+    buildFormState,
+  );
 
   const isLocked = event?.swag_locked_at != null;
 
@@ -105,22 +87,30 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
     }));
   }
 
-  // Save is enabled when every visible item has either a size picked
-  // or the opt-out box checked. Items with allows_opt_out=false require
-  // a size — opt-out is hidden in that case so the user can't satisfy
-  // the gate without choosing.
+  // Save is enabled when every visible item has either a size picked or
+  // the opt-out box checked. Items with allows_opt_out=false require a
+  // size — opt-out is hidden in that case so the user can't satisfy the
+  // gate without choosing.
   const allAnswered = items.every((item) => {
     const state = form[item.id];
-    if (item.allows_opt_out) return isAnswered(state);
-    return state?.size !== null && state?.size !== undefined && state.size.length > 0;
+    if (item.allows_opt_out) return state?.optedOut === true || Boolean(state?.size);
+    return Boolean(state?.size);
   });
-  const submitDisabled = !allAnswered || isLocked;
 
-  async function handleSubmit(): Promise<void> {
-    if (!eventId || submitDisabled) return;
-    setBusy(true);
-    setErrorKey(null);
-    try {
+  // The swag task auto-ticks via maybe_complete_swag_task inside the
+  // RPC, so we pass taskKey: null and let useSectionSubmit handle the
+  // toast + wizard advance. Profile-mode mark_my_registration_task_complete
+  // would conflict with the gate's "every item answered" semantic.
+  const { busy, errorKey, submit } = useSectionSubmit({
+    mode,
+    taskKey: null,
+    toastSuccessKey: 'profile.toast.swagSaved',
+    invalidateQueryKeys: [['swag-selections'], ['registration']],
+  });
+
+  function handleSubmit(): void {
+    if (!eventId || isLocked) return;
+    void submit(async () => {
       const payload: SwagSelectionInput[] = items.map((item) => {
         const state = form[item.id] ?? { size: null, optedOut: false };
         return {
@@ -130,20 +120,7 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
         };
       });
       await saveSwagSelections(getSupabaseClient(), eventId, payload);
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['swag-selections'] }),
-        queryClient.invalidateQueries({ queryKey: ['profile', 'checklist'] }),
-        queryClient.invalidateQueries({ queryKey: ['registration'] }),
-      ]);
-      show(t('profile.toast.swagSaved'));
-      if (mode.kind === 'wizard') mode.onComplete();
-    } catch (err) {
-      console.error('[kizuna] saveSwagSelections failed', err);
-      show(t('profile.toast.error'), 'error');
-      setErrorKey('registration.errorSaving');
-    } finally {
-      setBusy(false);
-    }
+    });
   }
 
   return (
@@ -154,8 +131,8 @@ export function SwagSection({ mode }: SectionProps): JSX.Element {
       busy={busy}
       hydrated={hydrated}
       errorKey={errorKey}
-      onSubmit={() => void handleSubmit()}
-      submitDisabled={submitDisabled}
+      onSubmit={handleSubmit}
+      submitDisabled={!allAnswered || isLocked}
     >
       {isLocked ? (
         <div

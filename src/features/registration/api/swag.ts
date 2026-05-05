@@ -57,21 +57,20 @@ export interface OwnedSwagSelections {
 
 /**
  * Loads every selection visible to the caller — their own plus any rows
- * for their additional_guests. RLS already scopes the read; we run two
- * targeted queries instead of one wide one so each side is easy to
- * surface in the UI.
+ * for their additional_guests. The caller is both the user (own rows)
+ * and the sponsor (guest rows) — kept as one parameter so call sites
+ * can't accidentally pass mismatched ids.
  */
 export async function loadMySwagSelections(
   client: AppSupabaseClient,
   userId: string,
-  sponsorId: string,
 ): Promise<OwnedSwagSelections> {
   const [own, guests] = await Promise.all([
     client.from('swag_selections').select('*').eq('user_id', userId),
     client
       .from('swag_selections')
       .select('*, additional_guests!inner(sponsor_id)')
-      .eq('additional_guests.sponsor_id', sponsorId),
+      .eq('additional_guests.sponsor_id', userId),
   ]);
   if (own.error) throw own.error;
   if (guests.error) throw guests.error;
@@ -169,15 +168,18 @@ export async function createSwagItem(
 
 /**
  * Bulk-stamps sort_order to match the order of the supplied ids.
- * Issued in parallel — one round trip — same shape as
- * lib/reorder.reorderRowsByPosition.
+ * Issued in parallel — one network turn — same shape as
+ * `reorderRowsByPosition` in `src/lib/reorder.ts` but writes
+ * `sort_order` instead of `position`.
  */
 export async function reorderSwagItems(
   client: AppSupabaseClient,
   orderedIds: ReadonlyArray<string>,
 ): Promise<void> {
   await Promise.all(
-    orderedIds.map((id, idx) => client.from('swag_items').update({ sort_order: idx }).eq('id', id)),
+    orderedIds.map((id, sort_order) =>
+      client.from('swag_items').update({ sort_order }).eq('id', id),
+    ),
   );
 }
 

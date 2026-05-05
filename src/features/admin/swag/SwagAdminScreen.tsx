@@ -13,6 +13,7 @@ import {
   setSwagLock,
   type SwagItemRow,
 } from '@/features/registration/api/swag';
+import { useDragReorder, type DragRowProps } from '@/hooks/useDragReorder';
 import { useStorageImage } from '@/lib/useStorageImage';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -58,26 +59,17 @@ export function SwagAdminScreen(): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
-  const [dragId, setDragId] = useState<string | null>(null);
-
-  function handleDrop(targetId: string): void {
-    if (!items || dragId === null || dragId === targetId) return;
-    const source = items.findIndex((row) => row.id === dragId);
-    const target = items.findIndex((row) => row.id === targetId);
-    if (source === -1 || target === -1) return;
-    const next = [...items];
-    const [moved] = next.splice(source, 1);
-    if (!moved) return;
-    next.splice(target, 0, moved);
-    reorder.mutate(next.map((row) => row.id));
-    setDragId(null);
-  }
+  const isLocked = event?.swag_locked_at != null;
+  const { dragId, rowProps } = useDragReorder(
+    items ?? [],
+    (orderedIds) => reorder.mutate(orderedIds),
+    isLocked,
+  );
 
   if (!event) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.loading')}</p>;
   }
 
-  const isLocked = event.swag_locked_at != null;
   const dialogOpen = creating || editingId !== null;
   const editing = editingId ? items?.find((i) => i.id === editingId) : null;
 
@@ -113,10 +105,7 @@ export function SwagAdminScreen(): JSX.Element {
               key={item.id}
               item={item}
               dragging={dragId === item.id}
-              onDragStart={() => setDragId(item.id)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => handleDrop(item.id)}
-              onDragEnd={() => setDragId(null)}
+              rowProps={rowProps(item.id)}
               onEdit={() => setEditingId(item.id)}
               onDelete={() => {
                 if (window.confirm(t('adminSwag.deleteConfirm', { name: item.name }))) {
@@ -163,10 +152,7 @@ export function SwagAdminScreen(): JSX.Element {
 interface SwagAdminRowProps {
   item: SwagItemRow;
   dragging: boolean;
-  onDragStart: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDrop: () => void;
-  onDragEnd: () => void;
+  rowProps: DragRowProps;
   onEdit: () => void;
   onDelete: () => void;
   disabled: boolean;
@@ -175,10 +161,7 @@ interface SwagAdminRowProps {
 function SwagAdminRow({
   item,
   dragging,
-  onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnd,
+  rowProps,
   onEdit,
   onDelete,
   disabled,
@@ -187,11 +170,7 @@ function SwagAdminRow({
   const cover = useStorageImage('event-content', item.image_path ?? '');
   return (
     <li
-      draggable={!disabled}
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-      onDrop={onDrop}
-      onDragEnd={onDragEnd}
+      {...rowProps}
       className={cn(
         'flex items-start gap-6 rounded-lg border bg-card p-5 transition-shadow hover:shadow-sm',
         dragging ? 'opacity-60' : null,

@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { Check, ChevronRight, ListChecks } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { ensureRegistration } from '@/features/registration/api/registration';
+import { WIZARD_STEPS } from '@/features/registration/wizardSteps';
 import { getSupabaseClient } from '@/lib/supabase';
 
 const TASK_TO_PROFILE_SECTION: Record<string, string> = {
@@ -32,27 +34,19 @@ const TASK_LABEL_KEYS: Record<string, string> = {
   documents: 'profile.checklist.tasks.documents',
 };
 
-// Canonical render order — kept identical to the wizard's WIZARD_STEPS
-// + 'documents' (which lives outside the wizard but inside the
-// checklist). The DB query orders alphabetically by task_key, which
-// produced a confusing checklist where "accessibility" showed up first.
-// Sort client-side instead so wizard, profile nav, and checklist all
-// agree on the same sequence.
+// Canonical render order — derived from the wizard so the checklist,
+// the profile nav, and the wizard agree on a single sequence. The DB
+// query orders alphabetically by task_key, which would produce a
+// confusing checklist where "accessibility" showed up first. 'documents'
+// lives outside the wizard but inside the checklist, so append it.
 const TASK_ORDER: ReadonlyArray<string> = [
-  'attending',
-  'personal_info',
-  'passport',
-  'emergency_contact',
-  'dietary',
-  'accessibility',
-  'swag',
-  'transport',
+  ...WIZARD_STEPS.map((step) => step.taskKey),
   'documents',
 ];
 
 function taskOrderIndex(taskKey: string): number {
   const idx = TASK_ORDER.indexOf(taskKey);
-  // Unknown task keys (a future task added before the constant is
+  // Unknown task keys (a future task added before WIZARD_STEPS is
   // updated) fall to the bottom rather than vanishing.
   return idx === -1 ? Number.MAX_SAFE_INTEGER : idx;
 }
@@ -69,10 +63,16 @@ export function RegistrationChecklist(): JSX.Element | null {
     enabled: !!user && !!event,
   });
 
-  if (!query.data) return null;
-  const tasks = [...query.data.tasks].sort(
-    (a, b) => taskOrderIndex(a.task_key) - taskOrderIndex(b.task_key),
+  const sortedTasks = useMemo(
+    () =>
+      [...(query.data?.tasks ?? [])].sort(
+        (a, b) => taskOrderIndex(a.task_key) - taskOrderIndex(b.task_key),
+      ),
+    [query.data?.tasks],
   );
+
+  if (!query.data) return null;
+  const tasks = sortedTasks;
 
   const total = tasks.length;
   if (total === 0) return null;

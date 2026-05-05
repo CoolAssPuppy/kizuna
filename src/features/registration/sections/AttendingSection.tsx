@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { saveAttending } from '../api/attending';
@@ -13,7 +14,6 @@ import type { RegistrationBundle } from '../types';
 import { useRegistration } from '../useRegistration';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
-import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 
 type YesNo = 'yes' | 'no' | null;
 
@@ -66,8 +66,6 @@ export function AttendingSection({ mode }: SectionProps): JSX.Element {
     EMPTY,
     deriveFormState,
   );
-  const [busy, setBusy] = useState(false);
-  const [errorKey, setErrorKey] = useState<string | null>(null);
 
   function setAttending(next: YesNo): void {
     // Clear the dependent answer when the gate flips so the user has to
@@ -82,6 +80,13 @@ export function AttendingSection({ mode }: SectionProps): JSX.Element {
   // First-time is moot when the user is opting out.
   const submitDisabled = attending === null || (attending === 'yes' && firstTime === null);
 
+  const [busy, setBusy] = useState(false);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+
+  // Bespoke submit because the opt-out path navigates to '/' instead of
+  // advancing to the next wizard step. useSectionSubmit's wizard branch
+  // calls mode.onComplete() unconditionally, which would race the
+  // navigate. Other sections use useSectionSubmit; this one can't.
   async function handleSubmit(): Promise<void> {
     if (submitDisabled || !user) return;
     setBusy(true);
@@ -91,9 +96,6 @@ export function AttendingSection({ mode }: SectionProps): JSX.Element {
         attending: attending === 'yes',
         firstTime: firstTime === 'yes',
       });
-      // Refresh anything keyed off registration state — useRegistration's
-      // ['registration', eventId, userId] tuple, and the profile sidebar's
-      // own ['profile', 'checklist'] query. Prefix matching handles both.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['registration'] }),
         queryClient.invalidateQueries({ queryKey: ['profile', 'checklist'] }),
@@ -101,14 +103,10 @@ export function AttendingSection({ mode }: SectionProps): JSX.Element {
       show(t('profile.toast.attendingSaved'));
 
       if (attending === 'no') {
-        // Opt-out short-circuits the wizard. Profile mode just stays put.
         if (mode.kind === 'wizard') navigate('/', { replace: true });
         return;
       }
-
-      if (mode.kind === 'wizard') {
-        mode.onComplete();
-      }
+      if (mode.kind === 'wizard') mode.onComplete();
     } catch (err) {
       console.error('[kizuna] saveAttending failed', err);
       show(t('profile.toast.error'), 'error');

@@ -15,7 +15,7 @@ import { createSwagItem, updateSwagItem, type SwagItemRow } from '@/features/reg
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
-import { SIZE_TEMPLATES } from './sizeTemplates';
+import { SIZE_TEMPLATES, type SizeTemplate } from './sizeTemplates';
 
 interface FormState {
   name: string;
@@ -62,13 +62,13 @@ export function SwagItemDialog({ eventId, item, onClose }: Props): JSX.Element {
   const queryClient = useQueryClient();
   const { show } = useToast();
   const isEdit = item !== null;
-  // For new items, mint the uuid up front so the StorageImageUploader
-  // can write to the final `<event>/swag/<id>/` folder before the row
-  // exists. The insert reuses this id so the persisted image_path
-  // resolves cleanly afterwards. crypto.randomUUID() is the same
-  // generator Postgres uses for default uuid columns.
-  const [pendingId] = useState<string>(() => (item ? item.id : crypto.randomUUID()));
-  const itemId = item?.id ?? pendingId;
+  // Mint the row's uuid up front for new items so the
+  // StorageImageUploader can write to the final
+  // `<event>/swag/<id>/` folder before the row exists. The insert
+  // reuses this id so the persisted image_path resolves cleanly
+  // afterwards. crypto.randomUUID() matches what Postgres' default
+  // uses, so the row id is shaped the same way either way.
+  const [itemId] = useState<string>(() => item?.id ?? crypto.randomUUID());
   const [form, setForm] = useState<FormState>(() => fromRow(item));
   const [draftSize, setDraftSize] = useState('');
 
@@ -95,7 +95,7 @@ export function SwagItemDialog({ eventId, item, onClose }: Props): JSX.Element {
           sizes: payload.sizes,
         });
       } else {
-        await createSwagItem(client, { id: pendingId, eventId, ...payload });
+        await createSwagItem(client, { id: itemId, eventId, ...payload });
       }
     },
     onSuccess: async () => {
@@ -109,7 +109,7 @@ export function SwagItemDialog({ eventId, item, onClose }: Props): JSX.Element {
 
   const submitDisabled = save.isPending || form.name.trim().length === 0;
 
-  function applyTemplate(templateId: string): void {
+  function applyTemplate(templateId: SizeTemplate['id']): void {
     const template = SIZE_TEMPLATES.find((tpl) => tpl.id === templateId);
     if (!template) return;
     setForm((prev) => {

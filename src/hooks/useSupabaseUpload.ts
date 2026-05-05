@@ -39,6 +39,14 @@ export interface UseSupabaseUploadOptions {
    * persist the path on the form (e.g. `feed_items.image_path`).
    */
   onUploadComplete?: (objectPaths: string[]) => void;
+  /**
+   * When true, files start uploading as soon as the user drops them
+   * instead of waiting for an explicit "Upload" button click. Use it
+   * for surfaces where the form's primary action is "Save" — users
+   * (reasonably) expect the dropped image to already be saved by the
+   * time they hit Save.
+   */
+  autoUpload?: boolean;
 }
 
 export type UseSupabaseUploadReturn = ReturnType<typeof useSupabaseUpload>;
@@ -53,6 +61,7 @@ export function useSupabaseUpload(options: UseSupabaseUploadOptions) {
     cacheControl = 3600,
     upsert = false,
     onUploadComplete,
+    autoUpload = false,
   } = options;
 
   const [files, setFiles] = useState<FileWithPreview[]>([]);
@@ -163,6 +172,22 @@ export function useSupabaseUpload(options: UseSupabaseUploadOptions) {
       if (changed) setFiles(nextFiles);
     }
   }, [files, maxFiles]);
+
+  // Auto-upload mode: kick the upload as soon as files are clean,
+  // valid, and not already uploaded. Without this, dropzone callers
+  // that rely on form-Save patterns (e.g. SwagItemDialog) silently
+  // discard the file because the user never clicks the explicit
+  // "Upload" button rendered by DropzoneContent.
+  // eslint-disable-next-line no-restricted-syntax
+  useEffect(() => {
+    if (!autoUpload) return;
+    if (loading) return;
+    if (files.length === 0) return;
+    if (files.some((file) => file.errors.length > 0)) return;
+    const allUploaded = files.every((file) => successes.includes(file.name));
+    if (allUploaded) return;
+    void onUpload();
+  }, [autoUpload, files, loading, successes, onUpload]);
 
   return {
     files,
