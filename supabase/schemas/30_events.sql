@@ -181,6 +181,26 @@ create table public.session_registrations (
 create index session_registrations_user_id_idx on public.session_registrations(user_id);
 
 
+-- Per-additional_guest opt-in for sessions with audience='all'. Sponsors
+-- decide which of their dependents will join "Everyone" sessions on
+-- their agenda view. Presence = attending; deletion = not attending.
+-- Admin reports aggregate this so the kitchen / activity vendor knows
+-- the real headcount per session.
+create table public.session_guest_attendance (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references public.sessions(id) on delete cascade,
+  additional_guest_id uuid not null references public.additional_guests(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (session_id, additional_guest_id)
+);
+
+comment on table public.session_guest_attendance is
+  'Per-guest opt-in for audience=''all'' sessions. The agenda screen renders a checkbox per dependent; the admin agenda view sums these into "current expected attendance" totals.';
+
+create index session_guest_attendance_session_id_idx on public.session_guest_attendance(session_id);
+create index session_guest_attendance_guest_id_idx on public.session_guest_attendance(additional_guest_id);
+
+
 create table public.dinner_seating (
   id uuid primary key default gen_random_uuid(),
   session_id uuid not null references public.sessions(id) on delete cascade,

@@ -19,6 +19,7 @@ import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { useDragReorder } from '@/hooks/useDragReorder';
 import { eventFeedFolder } from '@/lib/storagePaths';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -211,20 +212,7 @@ function FeedBucket({
   onReorder,
 }: FeedBucketProps): JSX.Element {
   const { t } = useTranslation();
-  const [dragId, setDragId] = useState<string | null>(null);
-
-  function handleDrop(targetId: string): void {
-    if (!dragId || dragId === targetId) return;
-    const fromIdx = items.findIndex((i) => i.id === dragId);
-    const toIdx = items.findIndex((i) => i.id === targetId);
-    if (fromIdx === -1 || toIdx === -1) return;
-    const next = items.slice();
-    const [moved] = next.splice(fromIdx, 1);
-    if (!moved) return;
-    next.splice(toIdx, 0, moved);
-    onReorder(next.map((i) => i.id));
-    setDragId(null);
-  }
+  const { dragId, rowProps } = useDragReorder(items, onReorder);
 
   return (
     <div className="space-y-3">
@@ -240,10 +228,7 @@ function FeedBucket({
           {items.map((item) => (
             <li
               key={item.id}
-              draggable
-              onDragStart={() => setDragId(item.id)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={() => handleDrop(item.id)}
+              {...rowProps(item.id)}
               className={cn(
                 'group flex items-start gap-3 rounded-lg border bg-card p-3 transition-shadow',
                 dragId === item.id ? 'opacity-60' : 'hover:shadow-sm',

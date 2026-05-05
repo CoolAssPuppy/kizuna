@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 
 import { type AdminProposedSession, fetchAdminProposals } from '@/features/agenda/api';
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
+import { loadExpectedAttendance } from '@/features/agenda/guestAttendance';
 import { TagPills } from '@/features/agenda/TagPill';
 import { type SessionTag, fetchTagsForSessions, setSessionTags } from '@/features/agenda/tagsApi';
 
@@ -98,6 +99,19 @@ export function AgendaAdminScreen(): JSX.Element {
         getSupabaseClient(),
         (sessions ?? []).map((s) => s.id),
       ),
+  });
+
+  // Used by SessionListItem to render "Current expected attendance" for
+  // audience='all' sessions. Pulls a single registration count + a per-
+  // session guest-opt-in count so the row math is just `employees +
+  // guestsBySession.get(id)`.
+  const { data: expectedAttendance } = useQuery({
+    queryKey: ['admin', 'agenda', 'expected-attendance', eventId],
+    enabled: eventId !== null,
+    queryFn: () =>
+      eventId
+        ? loadExpectedAttendance(getSupabaseClient(), eventId)
+        : Promise.resolve({ employeeCount: 0, guestsBySession: new Map<string, number>() }),
   });
 
   const activeSessions = useMemo(
@@ -360,6 +374,8 @@ export function AgendaAdminScreen(): JSX.Element {
                 session={s}
                 tags={tagsBySession.get(s.id) ?? []}
                 isPast={s.ends_at ? new Date(s.ends_at).getTime() < Date.now() : false}
+                expectedEmployees={expectedAttendance?.employeeCount ?? 0}
+                expectedGuests={expectedAttendance?.guestsBySession.get(s.id) ?? 0}
                 onEdit={() =>
                   setEditing(
                     rowToDraft(
@@ -427,6 +443,8 @@ interface SessionListItemProps {
   session: SessionRow;
   tags: ReadonlyArray<SessionTag>;
   isPast: boolean;
+  expectedEmployees: number;
+  expectedGuests: number;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -435,6 +453,8 @@ function SessionListItem({
   session,
   tags,
   isPast,
+  expectedEmployees,
+  expectedGuests,
   onEdit,
   onDelete,
 }: SessionListItemProps): JSX.Element {
@@ -461,6 +481,14 @@ function SessionListItem({
             {t(`admin.agenda.audiences.${session.audience}`)}
             {session.location ? ` · ${session.location}` : ''}
           </p>
+          {session.audience === 'all' ? (
+            <p className="text-[11px] text-muted-foreground">
+              {t('admin.agenda.expectedAttendance', {
+                employees: expectedEmployees,
+                guests: expectedGuests,
+              })}
+            </p>
+          ) : null}
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           {session.starts_at ? (

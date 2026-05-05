@@ -431,6 +431,28 @@ create policy session_registrations_self_all on public.session_registrations
   with check (public.is_self_or_admin(user_id));
 
 
+-- Per-guest session attendance: the sponsor of the additional_guest
+-- owns the row. Admins read everything for the "current expected
+-- attendance" aggregation on the admin agenda view.
+create policy session_guest_attendance_sponsor_or_admin on public.session_guest_attendance
+  for all using (
+    public.is_admin()
+    or exists (
+      select 1 from public.additional_guests g
+      where g.id = additional_guest_id
+        and g.sponsor_id = auth.uid()
+    )
+  )
+  with check (
+    public.is_admin()
+    or exists (
+      select 1 from public.additional_guests g
+      where g.id = additional_guest_id
+        and g.sponsor_id = auth.uid()
+    )
+  );
+
+
 -- Session favorites: each user manages their own row, admins read all
 -- so admin reports can show "most starred sessions".
 create policy session_favorites_self_all on public.session_favorites

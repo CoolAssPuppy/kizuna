@@ -1,12 +1,15 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Pencil, Plus, Star, StarOff, ThumbsUp, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { SessionDialog } from '@/features/admin/SessionDialog';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from '@/features/admin/sessionDraft';
 import { useAuth } from '@/features/auth/AuthContext';
+import { listAdditionalGuests } from '@/features/guests/api';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
@@ -20,9 +23,26 @@ import {
   updateOwnProposal,
 } from './api';
 import { dayKey, groupSessionsByDay } from './grouping';
+import { loadSponsorGuestAttendance, setGuestAttendance } from './guestAttendance';
 import { TagPills } from './TagPill';
 import { useAgenda } from './useAgenda';
 import { useProposals } from './useProposals';
+
+type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
+type SessionType = Database['public']['Enums']['session_type'];
+
+// Sessions where it makes sense to ask "are your kids coming?" — meals,
+// off-property activities, social events. Workshops/keynotes/transport
+// don't expose the picker because guests don't typically attend those.
+const GUEST_OPT_IN_TYPES: ReadonlySet<SessionType> = new Set<SessionType>([
+  'activity',
+  'social',
+  'dinner',
+]);
+
+function isGuestOptInSession(session: Pick<AgendaSession, 'audience' | 'type'>): boolean {
+  return session.audience === 'all' && GUEST_OPT_IN_TYPES.has(session.type);
+}
 
 type EventRow = Database['public']['Tables']['events']['Row'];
 
@@ -51,6 +71,33 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   const [submitting, setSubmitting] = useState(false);
   const { data, isLoading, error, toggleFavorite } = useAgenda(event.id);
   const { proposals, vote, isVoting, refetch } = useProposals(event.id);
+  const queryClient = useQueryClient();
+
+  // Sponsors with additional_guests can opt those guests in/out of
+  // audience='all' meal/social/activity sessions. Both queries stay
+  // disabled (and effectively silent) when the user has no guests.
+  const guestsQuery = useQuery({
+    queryKey: ['additional-guests', userId ?? null],
+    enabled: !!userId,
+    queryFn: () => listAdditionalGuests(getSupabaseClient(), userId!),
+  });
+  const myGuests: ReadonlyArray<AdditionalGuestRow> = guestsQuery.data ?? [];
+  const hasGuests = myGuests.length > 0;
+
+  const attendanceQuery = useQuery({
+    queryKey: ['session-guest-attendance', userId ?? null],
+    enabled: !!userId && hasGuests,
+    queryFn: () => loadSponsorGuestAttendance(getSupabaseClient(), userId!),
+  });
+  const attendance = attendanceQuery.data ?? new Set<string>();
+
+  const toggleAttendance = useMutation({
+    mutationFn: (vars: { sessionId: string; additionalGuestId: string; attending: boolean }) =>
+      setGuestAttendance(getSupabaseClient(), vars),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['session-guest-attendance', userId] }),
+    onError: (err: Error) => show(err.message, 'error'),
+  });
 
   if (isLoading) {
     return (
@@ -227,6 +274,15 @@ export function AgendaScreen({ event }: Props): JSX.Element {
                     isPast={session.ends_at ? new Date(session.ends_at).getTime() < now : false}
                     onToggleFavorite={() => toggleFavorite(session)}
                     favoriteLabel={t(session.is_favorite ? 'agenda.unfavorite' : 'agenda.favorite')}
+                    guests={hasGuests && isGuestOptInSession(session) ? myGuests : []}
+                    attendance={attendance}
+                    onGuestToggle={(additionalGuestId, attending) =>
+                      toggleAttendance.mutate({
+                        sessionId: session.id,
+                        additionalGuestId,
+                        attending,
+                      })
+                    }
                   />
                 ))}
               </ul>
@@ -280,6 +336,10 @@ interface SessionCardProps {
   isPast: boolean;
   onToggleFavorite: () => void;
   favoriteLabel: string;
+  /** Empty when this session does not expose the guest picker. */
+  guests: ReadonlyArray<AdditionalGuestRow>;
+  attendance: ReadonlySet<string>;
+  onGuestToggle: (additionalGuestId: string, attending: boolean) => void;
 }
 
 function SessionCard({
@@ -288,6 +348,9 @@ function SessionCard({
   isPast,
   onToggleFavorite,
   favoriteLabel,
+  guests,
+  attendance,
+  onGuestToggle,
 }: SessionCardProps): JSX.Element {
   const { t } = useTranslation();
   // Mandatory sessions are always-on for everyone — render them as
@@ -295,6 +358,7 @@ function SessionCard({
   const showAsStarred = session.is_favorite || session.is_mandatory;
   const Icon = showAsStarred ? Star : StarOff;
   const buttonLabel = session.is_mandatory ? t('agenda.mandatoryLabel') : favoriteLabel;
+  const showGuestPicker = guests.length > 0;
   return (
     <li
       className={cn(
@@ -343,6 +407,31 @@ function SessionCard({
           </button>
         </div>
       </div>
+
+      {showGuestPicker ? (
+        <fieldset className="mt-3 space-y-2 rounded-md bg-muted/40 p-3">
+          <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {t('agenda.guests.prompt')}
+          </legend>
+          <div className="flex flex-wrap gap-3 pt-1">
+            {guests.map((guest) => {
+              const id = `guest-attend-${session.id}-${guest.id}`;
+              const checked = attendance.has(`${session.id}:${guest.id}`);
+              const guestName = `${guest.first_name} ${guest.last_name}`.trim();
+              return (
+                <label key={guest.id} htmlFor={id} className="flex items-center gap-2 text-sm">
+                  <Checkbox
+                    id={id}
+                    checked={checked}
+                    onCheckedChange={(next) => onGuestToggle(guest.id, next === true)}
+                  />
+                  {guestName}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+      ) : null}
     </li>
   );
 }

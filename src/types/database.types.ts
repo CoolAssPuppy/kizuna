@@ -1851,6 +1851,42 @@ export type Database = {
           },
         ]
       }
+      session_guest_attendance: {
+        Row: {
+          additional_guest_id: string
+          created_at: string
+          id: string
+          session_id: string
+        }
+        Insert: {
+          additional_guest_id: string
+          created_at?: string
+          id?: string
+          session_id: string
+        }
+        Update: {
+          additional_guest_id?: string
+          created_at?: string
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_guest_attendance_additional_guest_id_fkey"
+            columns: ["additional_guest_id"]
+            isOneToOne: false
+            referencedRelation: "additional_guests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_guest_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       session_proposal_votes: {
         Row: {
           id: string

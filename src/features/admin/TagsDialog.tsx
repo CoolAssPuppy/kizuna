@@ -21,6 +21,7 @@ import {
   reorderTags,
   updateTag,
 } from '@/features/agenda/tagsApi';
+import { useDragReorder } from '@/hooks/useDragReorder';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
@@ -39,7 +40,6 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(DEFAULT_NEW_COLOR);
-  const [dragId, setDragId] = useState<string | null>(null);
 
   const { data: tags = [] } = useQuery({
     queryKey: ['agenda', 'tags', eventId],
@@ -90,18 +90,7 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
     onError: (err: Error) => show(err.message, 'error'),
   });
 
-  function handleDrop(targetId: string): void {
-    if (!dragId || dragId === targetId) return;
-    const fromIdx = tags.findIndex((tag) => tag.id === dragId);
-    const toIdx = tags.findIndex((tag) => tag.id === targetId);
-    if (fromIdx === -1 || toIdx === -1) return;
-    const next = tags.slice();
-    const [moved] = next.splice(fromIdx, 1);
-    if (!moved) return;
-    next.splice(toIdx, 0, moved);
-    reorder.mutate(next.map((tag) => tag.id));
-    setDragId(null);
-  }
+  const { dragId, rowProps } = useDragReorder(tags, (orderedIds) => reorder.mutate(orderedIds));
 
   return (
     <Dialog
@@ -120,11 +109,7 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
             {tags.map((tag) => (
               <li
                 key={tag.id}
-                draggable
-                onDragStart={() => setDragId(tag.id)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(tag.id)}
-                onDragEnd={() => setDragId(null)}
+                {...rowProps(tag.id)}
                 className={cn(
                   'flex items-center gap-2 rounded-md border bg-card px-2 py-1.5 transition-shadow',
                   dragId === tag.id ? 'opacity-60' : 'hover:shadow-sm',

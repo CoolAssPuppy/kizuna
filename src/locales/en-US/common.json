@@ -1045,6 +1045,7 @@
       "saved": "Session saved.",
       "deleted": "Session removed.",
       "deleteConfirm": "Remove this session from the agenda?",
+      "expectedAttendance": "Expected: {{employees}} employees + {{guests}} guests",
       "fields": {
         "title": "Title",
         "subtitle": "Subtitle",
@@ -1265,6 +1266,9 @@
     "favorite": "Add to favorites",
     "unfavorite": "Remove from favorites",
     "mandatoryLabel": "Mandatory session — always in your agenda",
+    "guests": {
+      "prompt": "Which guests will be attending?"
+    },
     "filters": {
       "all": "All ({{count}})",
       "favorites": "My picks ({{count}})",
