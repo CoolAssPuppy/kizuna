@@ -3,7 +3,17 @@ set search_path to public, tap, extensions;
 begin;
 select plan(3);
 
-set local kizuna.passport_key = 'test-key-not-for-prod';
+-- Seed the Vault secret the passport functions look up by name.
+-- Insert-if-missing keeps re-running test suites idempotent across
+-- a long-lived dev DB; the rollback at the end still wipes it for
+-- this transaction.
+do $$
+begin
+  if not exists (select 1 from vault.secrets where name = 'kizuna_passport_key') then
+    perform vault.create_secret('test-key-not-for-prod', 'kizuna_passport_key', 'pgtap');
+  end if;
+end
+$$;
 
 insert into auth.users (id, email, aud, role)
 values ('00000000-0000-0000-0000-00000000a1ce', 'pgtap.alice@example.com', 'authenticated', 'authenticated');

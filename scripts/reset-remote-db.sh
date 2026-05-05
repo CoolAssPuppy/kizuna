@@ -13,6 +13,12 @@
 # Prerequisites in the chosen Doppler config:
 #   * VITE_SUPABASE_URL          — https://<ref>.supabase.co
 #   * SB_DB_PASSWORD             — Postgres password (Settings -> Database)
+#   * SB_PASSPORT_KEY            — pgp_sym_encrypt key seeded into
+#                                  vault.secrets as 'kizuna_passport_key'.
+#                                  Generate once: `openssl rand -hex 32`.
+#                                  Rotating it strands previously-encrypted
+#                                  passport numbers, so set once per env
+#                                  and treat it as immutable.
 #   * (optional) SB_DB_REGION    — defaults to us-east-1
 #
 # Doppler reserves the SUPABASE_ prefix for its Supabase sync, so we
@@ -41,12 +47,20 @@ DOPPLER=(doppler --project kizuna --config "$CONFIG")
 
 SUPABASE_URL=$("${DOPPLER[@]}" secrets get VITE_SUPABASE_URL --plain)
 DB_PASSWORD=$("${DOPPLER[@]}" secrets get SB_DB_PASSWORD --plain 2>/dev/null || true)
+PASSPORT_KEY=$("${DOPPLER[@]}" secrets get SB_PASSPORT_KEY --plain 2>/dev/null || true)
 DB_REGION=$("${DOPPLER[@]}" secrets get SB_DB_REGION --plain 2>/dev/null || echo "us-east-1")
 
 if [[ -z "$DB_PASSWORD" ]]; then
   echo "SB_DB_PASSWORD missing in doppler $CONFIG. Add it first:" >&2
   echo "  doppler secrets set --project kizuna --config $CONFIG SB_DB_PASSWORD '<your-postgres-password>'" >&2
   echo "Find the password in Supabase dashboard > Settings > Database." >&2
+  exit 78
+fi
+
+if [[ -z "$PASSPORT_KEY" ]]; then
+  echo "SB_PASSPORT_KEY missing in doppler $CONFIG. Generate one and add it:" >&2
+  echo "  doppler secrets set --project kizuna --config $CONFIG SB_PASSPORT_KEY \"\$(openssl rand -hex 32)\"" >&2
+  echo "set_passport / get_passport_number read this from vault.secrets." >&2
   exit 78
 fi
 
@@ -111,6 +125,25 @@ if compgen -G "supabase/fixtures/*.sql" > /dev/null; then
     "${PSQL[@]}" -f "$f" >/dev/null
   done
 fi
+
+echo "Bootstrapping kizuna_passport_key in vault.secrets"
+# set_passport / get_passport_number read the key from Vault by name.
+# Idempotent: insert only if absent so reruns don't strand prior ciphertext.
+# psql substitutes :'passport_key' to a properly-quoted literal client-side,
+# so the value is bound into the statement instead of being interpolated by
+# the shell.
+"${PSQL[@]}" -v "passport_key=$PASSPORT_KEY" <<'SQL'
+select case
+  when exists (select 1 from vault.secrets where name = 'kizuna_passport_key')
+    then 'kizuna_passport_key already set; leaving existing value in place'
+  else 'kizuna_passport_key created: ' ||
+       vault.create_secret(
+         :'passport_key',
+         'kizuna_passport_key',
+         'pgp_sym_encrypt key for passport_details.passport_number_encrypted'
+       )::text
+end as vault_status;
+SQL
 
 echo
 echo "Done. Sample data is live on $CONFIG."

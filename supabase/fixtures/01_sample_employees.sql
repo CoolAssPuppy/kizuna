@@ -288,7 +288,6 @@ declare
   v_user record;
   v_reg_id uuid;
   v_task registration_task_key;
-  v_completed int;
 begin
   select id into v_event_id from public.events where is_active = true and type = 'supafest' limit 1;
   if v_event_id is null then
@@ -309,21 +308,18 @@ begin
 
     if v_reg_id is null then continue; end if;
 
-    -- Sprinkle a realistic mix of task progress: ~40% done, ~40% mid,
-    -- ~20% just started.
-    v_completed := (abs(hashtext(v_user.id::text)) % 7);
-
+    -- Always seed all 8 task keys as pending. The per-task completion
+    -- status is reconciled at the bottom of this file from the actual
+    -- data we seed (passport, dietary, etc.), so the user-facing
+    -- registration checklist matches what is really on file. Any earlier
+    -- random sprinkle drifted from underlying data and confused users
+    -- who signed in as a fixture employee.
     for v_task in
-      select unnest(array['personal_info','passport','emergency_contact','dietary','swag','transport','documents']::registration_task_key[])
+      select unnest(array['personal_info','passport','emergency_contact','dietary','accessibility','swag','transport','documents']::registration_task_key[])
     loop
-      insert into public.registration_tasks (registration_id, task_key, applies_to, status, completed_at)
-      values (
-        v_reg_id, v_task, 'all',
-        case when v_completed > 0 then 'complete'::registration_task_status else 'pending' end,
-        case when v_completed > 0 then now() else null end
-      )
+      insert into public.registration_tasks (registration_id, task_key, applies_to, status)
+      values (v_reg_id, v_task, 'all', 'pending')
       on conflict (registration_id, task_key) do nothing;
-      v_completed := v_completed - 1;
     end loop;
   end loop;
 end
@@ -426,6 +422,34 @@ values
   ('a0000000-0000-0000-0000-000000000010', 'Ben',  'Skywalker', 'under_12', 0, 'paid'),
   ('a0000000-0000-0000-0000-000000000010', 'Leia', 'Skywalker', 'teen',     0, 'paid')
 on conflict do nothing;
+
+
+-- =====================================================================
+-- Reconcile registration_tasks against the data actually seeded above
+-- =====================================================================
+-- The checklist must match reality: a fixture user who signs in should
+-- see "complete" only for tasks whose underlying row exists. This pass
+-- runs after every fixture insert so the join sees the final state.
+-- personal_info uses employee_profiles.first_name as the "filled in"
+-- signal — every fixture employee has it after the backfill above.
+update public.registration_tasks rt
+set status = 'complete', completed_at = now()
+from public.registrations r
+where rt.registration_id = r.id
+  and rt.status <> 'complete'
+  and (
+    (rt.task_key = 'personal_info'
+       and exists (select 1 from public.employee_profiles ep
+                   where ep.user_id = r.user_id and ep.first_name is not null))
+    or (rt.task_key = 'passport'
+       and exists (select 1 from public.passport_details pd where pd.user_id = r.user_id))
+    or (rt.task_key = 'emergency_contact'
+       and exists (select 1 from public.emergency_contacts ec where ec.user_id = r.user_id))
+    or (rt.task_key = 'dietary'
+       and exists (select 1 from public.dietary_preferences dp where dp.user_id = r.user_id))
+    or (rt.task_key = 'accessibility'
+       and exists (select 1 from public.accessibility_preferences ap where ap.user_id = r.user_id))
+  );
 
 commit;
 

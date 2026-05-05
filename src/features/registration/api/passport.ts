@@ -16,8 +16,9 @@ export interface PassportInput {
  * encrypted at rest with pgcrypto. The plaintext never lands in a
  * client-readable column.
  *
- * Note: `kizuna.passport_key` is set via Postgres GUC in production. The
- * local dev DB needs `ALTER DATABASE postgres SET kizuna.passport_key='…'`.
+ * Encryption key lives in Supabase Vault as `kizuna_passport_key`. Local
+ * dev populates it via scripts/db-apply.sh; staging/prod via
+ * scripts/reset-remote-db.sh (reads SB_PASSPORT_KEY from Doppler).
  */
 export async function savePassport(
   client: AppSupabaseClient,

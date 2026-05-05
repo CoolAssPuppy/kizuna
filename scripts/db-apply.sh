@@ -26,15 +26,23 @@ echo "installing pgtap into tap schema"
 "${PSQL_BASE[@]}" -c "grant usage on schema tap to authenticated, anon, service_role;"
 "${PSQL_BASE[@]}" -c "grant execute on all functions in schema tap to authenticated, anon, service_role;"
 
-echo "configuring kizuna.passport_key for local dev"
-# set_passport reads kizuna.passport_key via current_setting(). Production
-# wires this through Vault; locally we set it as a per-role GUC so every
-# postgres-as-authenticated connection sees it. Custom GUCs require
-# supabase_admin to ALTER ROLE the postgres user.
-env PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
-  -c "alter role postgres set kizuna.passport_key = 'dev-only-not-for-prod-passport-key';" \
-  -c "alter role authenticator set kizuna.passport_key = 'dev-only-not-for-prod-passport-key';" \
-  -c "alter role authenticated set kizuna.passport_key = 'dev-only-not-for-prod-passport-key';"
+echo "configuring kizuna_passport_key in vault.secrets for local dev"
+# set_passport / get_passport_number read the encryption key from Supabase
+# Vault by name. Idempotent: insert only if the named secret is absent so
+# repeated db-apply runs don't error or rotate the dev key.
+"${PSQL_BASE[@]}" -c "
+do \$\$
+begin
+  if not exists (select 1 from vault.secrets where name = 'kizuna_passport_key') then
+    perform vault.create_secret(
+      'dev-only-not-for-prod-passport-key',
+      'kizuna_passport_key',
+      'pgp_sym_encrypt key for passport_details.passport_number_encrypted (local dev)'
+    );
+  end if;
+end
+\$\$;
+"
 
 echo "applying seed"
 "${PSQL_BASE[@]}" -f supabase/seed.sql

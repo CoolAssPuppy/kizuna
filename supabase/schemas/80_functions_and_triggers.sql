@@ -473,8 +473,13 @@ create trigger sync_itinerary_for_accommodation_occupant_aiud
 -- Passport encryption helpers
 --
 -- The passport_number_encrypted column holds pgp_sym_encrypt output. The key
--- is read from the kizuna.passport_key custom GUC so it is never present in
--- application code or logs. Set in supabase config or via vault.
+-- lives in Supabase Vault under the name 'kizuna_passport_key' so it is
+-- encrypted at rest, replicated, and never present in application code,
+-- logs, or pg_authid. Bootstrap the secret once per environment with:
+--   select vault.create_secret('<key>', 'kizuna_passport_key',
+--          'pgp_sym_encrypt key for passport_details.passport_number_encrypted');
+-- scripts/db-apply.sh handles this for local dev; reset-remote-db.sh does
+-- the same for staging/prod (reading the value from Doppler).
 
 create or replace function public.set_passport(
   p_user_id uuid,
@@ -486,14 +491,15 @@ create or replace function public.set_passport(
 returns void
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = public, extensions, vault
 as $$
 declare
   v_key text;
 begin
-  v_key := current_setting('kizuna.passport_key', true);
+  select decrypted_secret into v_key
+  from vault.decrypted_secrets where name = 'kizuna_passport_key' limit 1;
   if v_key is null or length(v_key) = 0 then
-    raise exception 'kizuna.passport_key not configured';
+    raise exception 'kizuna_passport_key missing from vault.secrets';
   end if;
 
   insert into public.passport_details (
@@ -520,7 +526,7 @@ create or replace function public.get_passport_number(p_user_id uuid)
 returns text
 language plpgsql
 security definer
-set search_path = public, extensions
+set search_path = public, extensions, vault
 as $$
 declare
   v_key text;
@@ -532,9 +538,10 @@ begin
     raise exception 'unauthorized';
   end if;
 
-  v_key := current_setting('kizuna.passport_key', true);
+  select decrypted_secret into v_key
+  from vault.decrypted_secrets where name = 'kizuna_passport_key' limit 1;
   if v_key is null or length(v_key) = 0 then
-    raise exception 'kizuna.passport_key not configured';
+    raise exception 'kizuna_passport_key missing from vault.secrets';
   end if;
 
   select passport_number_encrypted into v_cipher
