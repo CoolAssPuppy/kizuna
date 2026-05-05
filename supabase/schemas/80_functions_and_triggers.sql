@@ -160,6 +160,10 @@ begin
   update public.registrations
   set completion_pct = v_pct,
       status = case
+        -- 'cancelled' is a manual user choice (set_attending false). Never
+        -- let the auto-completion trigger walk it back to 'started'/'complete'
+        -- when sibling tasks happen to be marked 'skipped' or 'complete'.
+        when status = 'cancelled' then status
         when v_pct = 100 then 'complete'::registration_status
         when v_pct > 0 then 'started'::registration_status
         else status
@@ -1182,6 +1186,112 @@ $$;
 
 revoke all on function public.mark_my_registration_task_complete(text) from public;
 grant execute on function public.mark_my_registration_task_complete(text) to authenticated;
+
+
+-- =====================================================================
+-- Wizard "attending" gate
+-- =====================================================================
+-- The first wizard step asks the caller two questions: are you attending,
+-- and is this your first time. This RPC persists both answers atomically
+-- against the caller's registration for the active event.
+--
+-- "Yes attending":
+--   * registrations.status flips to 'started' (or stays at any value other
+--     than 'cancelled') and is_first_time_attendee gets the caller's answer.
+--   * The 'attending' task ticks complete so the wizard advances.
+--
+-- "No attending":
+--   * registrations.status flips to 'cancelled'. is_first_time_attendee
+--     is reset to false because the answer is moot.
+--   * The 'attending' task is marked 'skipped'; sibling tasks are also
+--     marked 'skipped' so completion_pct shows 0/0 instead of 0/8 — a
+--     non-attendee is "done" with the registration in the only sense it
+--     can be done.
+create or replace function public.set_attending(
+  p_attending boolean,
+  p_first_time boolean
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_caller uuid := auth.uid();
+  v_event_id uuid;
+  v_registration_id uuid;
+begin
+  if v_caller is null then
+    raise exception 'unauthenticated' using errcode = '42501';
+  end if;
+
+  v_event_id := public.current_active_event_id();
+  if v_event_id is null then
+    raise exception 'no active event';
+  end if;
+
+  -- Make sure a registration exists. ensureRegistration in the SPA does
+  -- this on first wizard load, but a JWT-only client (CLI) must be able
+  -- to call this RPC without going through the SPA.
+  insert into public.registrations (user_id, event_id, status)
+  values (v_caller, v_event_id, 'started')
+  on conflict (user_id, event_id) do nothing;
+
+  select id into v_registration_id
+    from public.registrations
+   where user_id = v_caller and event_id = v_event_id
+   limit 1;
+
+  if p_attending then
+    update public.registrations
+       set status = case when status = 'cancelled' then 'started' else status end,
+           is_first_time_attendee = coalesce(p_first_time, false)
+     where id = v_registration_id;
+
+    -- Upsert so a CLI client (or any caller skipping ensureRegistration)
+    -- still gets the gate ticked. on conflict do update preserves the
+    -- earliest completed_at if already set.
+    insert into public.registration_tasks
+      (registration_id, task_key, applies_to, status, completed_at)
+    values
+      (v_registration_id, 'attending', 'all', 'complete', now())
+    on conflict (registration_id, task_key) do update
+      set status = 'complete',
+          completed_at = coalesce(public.registration_tasks.completed_at, excluded.completed_at);
+
+    -- Re-open sibling tasks if the caller is flipping back from a prior
+    -- "not attending" answer. Without this, a user who said no, then yes,
+    -- would see every task stuck at 'skipped'.
+    update public.registration_tasks
+       set status = 'pending', completed_at = null
+     where registration_id = v_registration_id
+       and task_key <> 'attending'
+       and status = 'skipped';
+  else
+    update public.registrations
+       set status = 'cancelled',
+           is_first_time_attendee = false
+     where id = v_registration_id;
+
+    insert into public.registration_tasks
+      (registration_id, task_key, applies_to, status, completed_at)
+    values
+      (v_registration_id, 'attending', 'all', 'complete', now())
+    on conflict (registration_id, task_key) do update
+      set status = 'complete',
+          completed_at = coalesce(public.registration_tasks.completed_at, excluded.completed_at);
+
+    update public.registration_tasks
+       set status = 'skipped', completed_at = null
+     where registration_id = v_registration_id
+       and task_key <> 'attending'
+       and status <> 'complete';
+  end if;
+end
+$$;
+
+revoke all on function public.set_attending(boolean, boolean) from public;
+grant execute on function public.set_attending(boolean, boolean) to authenticated;
 
 
 -- =====================================================================

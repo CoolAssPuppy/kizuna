@@ -6,6 +6,7 @@ import type { Database } from '@/types/database.types';
 
 import { RegistrationLayout } from './RegistrationLayout';
 import { AccessibilitySection } from './sections/AccessibilitySection';
+import { AttendingSection } from './sections/AttendingSection';
 import { DietarySection } from './sections/DietarySection';
 import { EmergencyContactSection } from './sections/EmergencyContactSection';
 import { PassportSection } from './sections/PassportSection';
@@ -18,6 +19,8 @@ import { findStepByPath, nextPendingStep, WIZARD_STEPS } from './wizardSteps';
 
 function StepRouter({ mode, stepPath }: { mode: SectionMode; stepPath: string }): JSX.Element {
   switch (stepPath) {
+    case 'attending':
+      return <AttendingSection mode={mode} />;
     case 'personal-info':
       return <PersonalInfoSection mode={mode} />;
     case 'passport':
@@ -61,6 +64,12 @@ function RegistrationInner({ event }: { event: EventRow }): JSX.Element {
         </p>
       </main>
     );
+  }
+
+  // A user who already opted out shouldn't see the wizard. They can flip
+  // the answer back on via the Profile > Attendance card.
+  if (bundle.registration.status === 'cancelled') {
+    return <Navigate to="/" replace />;
   }
 
   if (!stepPath) {

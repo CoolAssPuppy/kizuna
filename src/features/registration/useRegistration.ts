@@ -10,7 +10,13 @@ const registrationKey = (eventId: string, userId: string): readonly unknown[] =>
   ['registration', eventId, userId] as const;
 
 interface Args {
-  eventId: string;
+  /**
+   * Active event id. Pass `null` while the active event is still loading
+   * (or the screen has no event in scope) — the query stays disabled and
+   * `data` stays `undefined` until a real id arrives. Avoids round trips
+   * with empty-string event ids that would 400 on the FK insert.
+   */
+  eventId: string | null;
 }
 
 export function useRegistration({ eventId }: Args): {
@@ -22,13 +28,14 @@ export function useRegistration({ eventId }: Args): {
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const queryClient = useQueryClient();
+  const enabled = userId !== null && eventId !== null;
 
   const query = useQuery({
-    queryKey: registrationKey(eventId, userId ?? 'anon'),
-    enabled: userId !== null,
+    queryKey: registrationKey(eventId ?? 'no-event', userId ?? 'anon'),
+    enabled,
     queryFn: () => {
-      if (userId === null) {
-        return Promise.reject(new Error('Cannot load registration without an authenticated user'));
+      if (userId === null || eventId === null) {
+        return Promise.reject(new Error('Cannot load registration without user + event'));
       }
       return ensureRegistration(getSupabaseClient(), { userId, eventId });
     },
@@ -40,7 +47,7 @@ export function useRegistration({ eventId }: Args): {
     error: query.error ?? null,
     invalidate: () => {
       void queryClient.invalidateQueries({
-        queryKey: registrationKey(eventId, userId ?? 'anon'),
+        queryKey: registrationKey(eventId ?? 'no-event', userId ?? 'anon'),
       });
     },
   };

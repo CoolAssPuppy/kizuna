@@ -308,14 +308,14 @@ begin
 
     if v_reg_id is null then continue; end if;
 
-    -- Always seed all 8 task keys as pending. The per-task completion
+    -- Always seed all 9 task keys as pending. The per-task completion
     -- status is reconciled at the bottom of this file from the actual
     -- data we seed (passport, dietary, etc.), so the user-facing
     -- registration checklist matches what is really on file. Any earlier
     -- random sprinkle drifted from underlying data and confused users
     -- who signed in as a fixture employee.
     for v_task in
-      select unnest(array['personal_info','passport','emergency_contact','dietary','accessibility','swag','transport','documents']::registration_task_key[])
+      select unnest(array['attending','personal_info','passport','emergency_contact','dietary','accessibility','swag','transport','documents']::registration_task_key[])
     loop
       insert into public.registration_tasks (registration_id, task_key, applies_to, status)
       values (v_reg_id, v_task, 'all', 'pending')
@@ -438,7 +438,10 @@ from public.registrations r
 where rt.registration_id = r.id
   and rt.status <> 'complete'
   and (
-    (rt.task_key = 'personal_info'
+    -- Fixture users are seeded as status='started', which is the signal
+    -- that they answered "yes attending" — tick the gate task to match.
+    (rt.task_key = 'attending' and r.status <> 'invited' and r.status <> 'cancelled')
+    or (rt.task_key = 'personal_info'
        and exists (select 1 from public.employee_profiles ep
                    where ep.user_id = r.user_id and ep.first_name is not null))
     or (rt.task_key = 'passport'

@@ -10,6 +10,7 @@
 
 export * from './accessibility';
 export * from './additionalGuests';
+export * from './attending';
 export * from './dietary';
 export * from './emergencyContact';
 export * from './passport';

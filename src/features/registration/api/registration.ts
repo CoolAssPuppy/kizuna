@@ -8,6 +8,7 @@ interface ScopedArgs {
 }
 
 const DEFAULT_TASK_KEYS: RegistrationTaskKey[] = [
+  'attending',
   'personal_info',
   'passport',
   'emergency_contact',

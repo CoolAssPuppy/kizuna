@@ -24,8 +24,13 @@ describe('nextPendingStep', () => {
     expect(nextPendingStep([])).toEqual(WIZARD_STEPS[0]);
   });
 
+  it('routes a brand-new user to the attending gate first', () => {
+    expect(nextPendingStep([])?.taskKey).toBe('attending');
+  });
+
   it('returns the first step that is still pending', () => {
     const tasks: RegistrationTaskRow[] = [
+      fakeTask({ task_key: 'attending', status: 'complete' }),
       fakeTask({ task_key: 'personal_info', status: 'complete' }),
       fakeTask({ task_key: 'passport', status: 'complete' }),
       fakeTask({ task_key: 'emergency_contact', status: 'pending' }),
@@ -36,6 +41,7 @@ describe('nextPendingStep', () => {
 
   it('treats waived as done when finding the next pending step', () => {
     const tasks: RegistrationTaskRow[] = [
+      fakeTask({ task_key: 'attending', status: 'complete' }),
       fakeTask({ task_key: 'personal_info', status: 'waived' }),
       fakeTask({ task_key: 'passport', status: 'waived' }),
       fakeTask({ task_key: 'emergency_contact', status: 'pending' }),

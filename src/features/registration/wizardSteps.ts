@@ -17,6 +17,7 @@ export interface WizardStep {
 }
 
 export const WIZARD_STEPS: ReadonlyArray<WizardStep> = [
+  { taskKey: 'attending', i18nKey: 'registration.steps.attending', path: 'attending' },
   { taskKey: 'personal_info', i18nKey: 'registration.steps.personalInfo', path: 'personal-info' },
   { taskKey: 'passport', i18nKey: 'registration.steps.passport', path: 'passport' },
   {

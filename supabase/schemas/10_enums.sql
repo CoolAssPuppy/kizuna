@@ -25,6 +25,7 @@ create type sync_status as enum ('success', 'partial', 'failed');
 -- Registration
 create type registration_status as enum ('invited', 'started', 'complete', 'cancelled');
 create type registration_task_key as enum (
+  'attending',
   'personal_info',
   'passport',
   'emergency_contact',

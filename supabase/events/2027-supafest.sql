@@ -130,7 +130,7 @@ Sample code of conduct content. Real content will replace this in production.',
   select r.id, k.task_key, 'all'::task_audience
   from public.registrations r
   cross join unnest(
-    array['personal_info','passport','emergency_contact','dietary','accessibility','swag','transport','documents']::registration_task_key[]
+    array['attending','personal_info','passport','emergency_contact','dietary','accessibility','swag','transport','documents']::registration_task_key[]
   ) as k(task_key)
   where r.event_id = v_event_id
   on conflict do nothing;

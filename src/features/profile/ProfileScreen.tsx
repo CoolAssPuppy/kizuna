@@ -3,6 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Accessibility,
   Baby,
+  CalendarCheck,
   HeartPulse,
   IdCard,
   KeyRound,
@@ -22,6 +23,7 @@ import { CommunityProfileSection } from '@/features/community/CommunityProfileSe
 import { listAdditionalGuests } from '@/features/guests/api';
 import { ApiKeysSection } from '@/features/profile/api-keys/ApiKeysSection';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
+import { AttendingSection } from '@/features/registration/sections/AttendingSection';
 import { DependentsSection } from '@/features/registration/sections/DependentsSection';
 import { DietarySection } from '@/features/registration/sections/DietarySection';
 import { EmergencyContactSection } from '@/features/registration/sections/EmergencyContactSection';
@@ -41,6 +43,7 @@ import { useActiveSubject } from './useActiveSubject';
 const PROFILE_MODE = { kind: 'profile' } as const;
 
 type SectionId =
+  | 'attendance'
   | 'personal'
   | 'community'
   | 'dietary'
@@ -63,6 +66,13 @@ interface ProfileSection {
 }
 
 const SECTIONS: ReadonlyArray<ProfileSection> = [
+  {
+    id: 'attendance',
+    icon: CalendarCheck,
+    labelKey: 'profile.nav.attendance',
+    render: () => <AttendingSection mode={PROFILE_MODE} />,
+    subject: 'self',
+  },
   {
     id: 'personal',
     icon: User,

@@ -1745,6 +1745,7 @@ export type Database = {
           created_at: string
           event_id: string
           id: string
+          is_first_time_attendee: boolean
           qr_token: string | null
           status: Database["public"]["Enums"]["registration_status"]
           updated_at: string
@@ -1757,6 +1758,7 @@ export type Database = {
           created_at?: string
           event_id: string
           id?: string
+          is_first_time_attendee?: boolean
           qr_token?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
           updated_at?: string
@@ -1769,6 +1771,7 @@ export type Database = {
           created_at?: string
           event_id?: string
           id?: string
+          is_first_time_attendee?: boolean
           qr_token?: string | null
           status?: Database["public"]["Enums"]["registration_status"]
           updated_at?: string
@@ -2368,6 +2371,10 @@ export type Database = {
         Returns: string
       }
       revoke_api_key: { Args: { p_id: string }; Returns: undefined }
+      set_attending: {
+        Args: { p_attending: boolean; p_first_time: boolean }
+        Returns: undefined
+      }
       set_passport: {
         Args: {
           p_expiry_date: string
@@ -2477,6 +2484,7 @@ export type Database = {
         | "checkin_reminder"
       registration_status: "invited" | "started" | "complete" | "cancelled"
       registration_task_key:
+        | "attending"
         | "personal_info"
         | "passport"
         | "emergency_contact"
@@ -2691,6 +2699,7 @@ export const Constants = {
       ],
       registration_status: ["invited", "started", "complete", "cancelled"],
       registration_task_key: [
+        "attending",
         "personal_info",
         "passport",
         "emergency_contact",

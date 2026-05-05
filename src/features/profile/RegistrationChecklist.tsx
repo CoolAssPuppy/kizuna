@@ -9,6 +9,7 @@ import { ensureRegistration } from '@/features/registration/api/registration';
 import { getSupabaseClient } from '@/lib/supabase';
 
 const TASK_TO_PROFILE_SECTION: Record<string, string> = {
+  attending: 'attendance',
   personal_info: 'personal-info',
   passport: 'passport',
   emergency_contact: 'emergency-contact',
@@ -20,6 +21,7 @@ const TASK_TO_PROFILE_SECTION: Record<string, string> = {
 };
 
 const TASK_LABEL_KEYS: Record<string, string> = {
+  attending: 'profile.checklist.tasks.attending',
   personal_info: 'profile.checklist.tasks.personal_info',
   passport: 'profile.checklist.tasks.passport',
   emergency_contact: 'profile.checklist.tasks.emergency_contact',

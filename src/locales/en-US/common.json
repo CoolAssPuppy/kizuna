@@ -419,6 +419,7 @@
     "checklist": {
       "label": "Registration progress",
       "tasks": {
+        "attending": "Attendance",
         "personal_info": "Personal info",
         "passport": "Passport details",
         "emergency_contact": "Emergency contact",
@@ -431,6 +432,7 @@
     },
     "nav": {
       "label": "Profile sections",
+      "attendance": "Attendance",
       "personal": "Personal info",
       "community": "Community",
       "dietary": "Dietary",
@@ -510,6 +512,7 @@
       "yourself": "Yourself"
     },
     "toast": {
+      "attendingSaved": "Attendance saved.",
       "personalInfoSaved": "Personal info saved.",
       "emergencyContactSaved": "Emergency contact saved.",
       "dietarySaved": "Dietary preferences saved.",
@@ -635,7 +638,9 @@
     "agree": "I Agree",
     "close": "Close",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "yes": "Yes",
+    "no": "No"
   },
   "registration": {
     "title": "Registration",
@@ -645,6 +650,7 @@
     "saving": "Saving",
     "errorSaving": "We could not save your changes. Please try again.",
     "steps": {
+      "attending": "Attendance",
       "personalInfo": "Personal Info",
       "dietary": "Dietary",
       "accessibility": "Accessibility",
@@ -654,6 +660,13 @@
       "dependents": "Dependents",
       "swag": "Swag",
       "transport": "Transport"
+    },
+    "attending": {
+      "intro": "We need to know whether you'll be joining us for {{eventName}} so we can plan accordingly. You can change your mind from your Profile.",
+      "fallbackEventName": "this event",
+      "attendingPrompt": "Are you planning on attending {{eventName}}?",
+      "firstTimePrompt": "Is this your first time attending an event?",
+      "optOutNote": "Saving \"No\" closes the rest of the wizard. You can re-open it later from your Profile."
     },
     "personalInfo": {
       "preferredName": "Preferred Name",

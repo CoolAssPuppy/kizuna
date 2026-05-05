@@ -9,6 +9,7 @@ create table public.registrations (
   user_id uuid not null references public.users(id) on delete cascade,
   event_id uuid not null references public.events(id) on delete cascade,
   status registration_status not null default 'invited',
+  is_first_time_attendee boolean not null default false,
   completion_pct int not null default 0 check (completion_pct between 0 and 100),
   checked_in_at timestamptz,
   checked_in_by uuid references public.users(id) on delete set null,
@@ -22,6 +23,8 @@ comment on column public.registrations.completion_pct is
   'Maintained by trigger update_registration_completion(). Never write directly from app code.';
 comment on column public.registrations.qr_token is
   'Signed JWT rendered as QR code at check-in. Cached offline.';
+comment on column public.registrations.is_first_time_attendee is
+  'Self-attested in the wizard''s "attending" step. Phase 1 honours the user''s answer; later phases may reconcile against past registrations.';
 
 create index registrations_event_status_idx on public.registrations(event_id, status);
 create index registrations_user_id_idx on public.registrations(user_id);
