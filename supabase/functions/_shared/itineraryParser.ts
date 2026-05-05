@@ -195,8 +195,14 @@ Only return the JSON. Do not include any extra text, explanation, or formatting.
 export async function parseItineraryWithOpenAI(text: string): Promise<ParsedItinerary> {
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) {
-    console.warn('[parse-itinerary] OPENAI_API_KEY missing — returning empty itinerary');
-    return { ...EMPTY_PARSED_ITINERARY };
+    // Hard error rather than the previous "return empty itinerary" so a
+    // missing prod secret surfaces as a visible failure instead of
+    // masquerading as "we couldn't find anything to import." Local devs
+    // who need the stub fallback can set OPENAI_API_KEY=stub explicitly
+    // and read the surfaced 401/403 from OpenAI rather than this branch.
+    throw new Error(
+      'OPENAI_API_KEY is not set on the parse-itinerary edge function. Run `supabase secrets set OPENAI_API_KEY=...` against the project.',
+    );
   }
 
   const response = await fetch(OPENAI_URL, {
