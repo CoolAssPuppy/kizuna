@@ -10,6 +10,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 import { zonedDateTimeLocalToUtcIso } from '@/lib/timezone';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 
 import { type AdminProposedSession, fetchAdminProposals } from '@/features/agenda/api';
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
@@ -51,6 +52,18 @@ function uniqueDayBuckets(sessions: ReadonlyArray<SessionRow>, timeZone: string)
 
 const PROPOSED_FILTER = 'proposed';
 
+// Tables that feed the four agenda admin queries. Any change refetches
+// every dependent admin/agenda query (sessions, tags, proposals,
+// expected attendance) — TanStack matches partial keys as prefixes.
+const AGENDA_ADMIN_TABLES = [
+  'sessions',
+  'session_tags',
+  'session_tag_assignments',
+  'session_proposal_votes',
+  'session_guest_attendance',
+  'registrations',
+] as const;
+
 export function AgendaAdminScreen(): JSX.Element {
   const { t } = useTranslation();
   const { data: event } = useActiveEvent();
@@ -70,6 +83,10 @@ export function AgendaAdminScreen(): JSX.Element {
     imported: number;
     errors: { row: number; message: string }[];
   } | null>(null);
+
+  useRealtimeInvalidation(
+    AGENDA_ADMIN_TABLES.map((table) => ({ table, invalidates: ['admin', 'agenda'] })),
+  );
 
   const { data: sessions } = useQuery({
     queryKey: ['admin', 'agenda', eventId],

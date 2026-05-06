@@ -80,17 +80,32 @@ interface ReportData {
   isLoading: boolean;
 }
 
+// Every table read by any report fetcher in ./index. Subscribing all of
+// them to every report keeps the code small at the cost of a few
+// cross-report invalidations the user doesn't see (only the active tab
+// refetches, others stay stale until the user switches to them).
+const REPORT_TABLES = [
+  'registrations',
+  'users',
+  'employee_profiles',
+  'flights',
+  'transport_requests',
+  'accommodations',
+  'accommodation_occupants',
+  'swag_selections',
+  'dietary_preferences',
+  'guest_profiles',
+  'additional_guests',
+] as const;
+
 function useReportRows(config: ReportConfig, eventId: string | null): ReportData {
   const query = useQuery({
     queryKey: ['admin', config.key, eventId],
     queryFn: () => config.fetch(getSupabaseClient(), eventId),
   });
-  useRealtimeInvalidation([
-    { table: 'registrations', invalidates: ['admin', config.key] },
-    { table: 'users', invalidates: ['admin', config.key] },
-    { table: 'flights', invalidates: ['admin', config.key] },
-    { table: 'transport_requests', invalidates: ['admin', config.key] },
-  ]);
+  useRealtimeInvalidation(
+    REPORT_TABLES.map((table) => ({ table, invalidates: ['admin', config.key] })),
+  );
   return { rows: query.data ?? [], isLoading: query.isPending };
 }
 

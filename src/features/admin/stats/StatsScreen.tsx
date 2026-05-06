@@ -15,8 +15,19 @@ import {
 
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useRealtimeInvalidation } from '@/lib/useRealtimeInvalidation';
 
 import { fetchAdminStats, type CategoryCount } from '../api/stats';
+
+// Tables that feed fetchAdminStats. Any change refetches the dashboard.
+const STATS_TABLES = [
+  'registrations',
+  'users',
+  'employee_profiles',
+  'dietary_preferences',
+  'guest_profiles',
+  'accessibility_preferences',
+] as const;
 
 // Theme-driven 8-color palette. Each variant in globals.css defines its
 // own --c-chart-1..8, so charts re-skin automatically when the user
@@ -47,6 +58,10 @@ export function StatsScreen(): JSX.Element {
     queryFn: () =>
       eventId ? fetchAdminStats(getSupabaseClient(), eventId) : Promise.resolve(null),
   });
+
+  useRealtimeInvalidation(
+    STATS_TABLES.map((table) => ({ table, invalidates: ['admin', 'stats'] })),
+  );
 
   if (isLoading) {
     return <p className="py-8 text-sm text-muted-foreground">{t('admin.loading')}</p>;
