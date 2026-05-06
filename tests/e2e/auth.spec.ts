@@ -1,9 +1,12 @@
 import { expect, test } from '@playwright/test';
 
-test('unauthenticated visit to home redirects to sign-in', async ({ page }) => {
+test('unauthenticated visit to home shows the welcome hero with a sign-in link', async ({
+  page,
+}) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/sign-in/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Welcome back');
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kizuna');
+  await expect(page.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in');
 });
 
 test('sign-in screen exposes employee SSO and guest credentials tabs', async ({ page }) => {
