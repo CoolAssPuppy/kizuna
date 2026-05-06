@@ -14,7 +14,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-import { type PerkBookingSummary } from './importApi';
+import { type PerkBookingSummary } from './api';
 import { useItineraryImport } from './useItineraryImport';
 
 interface Props {

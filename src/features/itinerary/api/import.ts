@@ -8,7 +8,7 @@ import {
   type ParsedRentalCar,
 } from '@/lib/integrations/openai';
 
-import { timezoneForAirport } from './airportTimezones';
+import { timezoneForAirport } from '../airportTimezones';
 
 interface MaybeFunctionsHttpError {
   context?: { status?: number; body?: unknown };

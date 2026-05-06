@@ -12,7 +12,7 @@ import {
   saveParsedFlights,
   saveParsedTransfers,
   type PerkBookingSummary,
-} from './importApi';
+} from './api';
 
 /**
  * State machine for the itinerary import dialog. Owns the parse / save

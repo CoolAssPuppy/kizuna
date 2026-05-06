@@ -1,6 +1,6 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
 
-import type { ItineraryItemRow } from './types';
+import type { ItineraryItemRow } from '../types';
 
 interface FetchArgs {
   userId: string;
