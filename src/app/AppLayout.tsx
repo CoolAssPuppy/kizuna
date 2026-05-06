@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { AppFooter } from '@/components/AppFooter';
-import { CommandPalette } from '@/components/CommandPalette';
+import { CommandPalette } from '@/features/cli/CommandPalette';
 import { FooterTerminal } from '@/components/FooterTerminal';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { TerminalHeader } from '@/components/TerminalHeader';

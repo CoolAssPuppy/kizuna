@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { TerminalResults } from '@/components/TerminalResults';
 import { useMountEffect } from '@/hooks/useMountEffect';
-import { useTerminal, type TerminalHistoryEntry } from '@/hooks/useTerminal';
+import { useTerminal, type TerminalHistoryEntry } from '@/features/cli/useTerminal';
 
 /** Hidden below `lg` — phones use the full-screen `MobilePrompt` instead. */
 export function FooterTerminal(): JSX.Element {

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
-import { CommandOutput } from '@/components/CommandOutput';
-import type { TerminalHistoryEntry } from '@/hooks/useTerminal';
+import { CommandOutput } from '@/features/cli/CommandOutput';
+import type { TerminalHistoryEntry } from '@/features/cli/useTerminal';
 import { cn } from '@/lib/utils';
 
 interface Props {

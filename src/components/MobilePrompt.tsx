@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { TerminalResults } from '@/components/TerminalResults';
 import { useMountEffect } from '@/hooks/useMountEffect';
-import { useTerminal } from '@/hooks/useTerminal';
+import { useTerminal } from '@/features/cli/useTerminal';
 
 /** Mobile-only entry point to the web terminal. */
 export function MobilePrompt(): JSX.Element {
