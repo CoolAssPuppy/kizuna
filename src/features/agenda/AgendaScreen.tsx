@@ -1,36 +1,35 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Pencil, Plus, Star, StarOff, ThumbsUp, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { SessionDialog } from '@/features/admin/SessionDialog';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from '@/features/admin/sessionDraft';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { getSupabaseClient } from '@/lib/supabase';
-import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
 import {
-  type AgendaSession,
   type ProposalDraft,
   type ProposedSession,
   createProposal,
   deleteOwnProposal,
   updateOwnProposal,
 } from './api';
+import { FilterTab } from './components/FilterTab';
+import { ProposalsList } from './components/ProposalsList';
+import { SessionCard } from './components/SessionCard';
 import { dayKey, groupSessionsByDay } from './grouping';
 import { attendanceKey, loadSponsorGuestAttendance, setGuestAttendance } from './guestAttendance';
 import { isGuestOptInSession } from './sessionRules';
-import { TagPills } from './TagPill';
 import { useAgenda } from './useAgenda';
 import { useProposals } from './useProposals';
 
 type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
-
 type EventRow = Database['public']['Tables']['events']['Row'];
 
 interface Props {
@@ -39,18 +38,11 @@ interface Props {
 
 type FilterMode = 'all' | 'favorites' | 'proposed';
 
-function formatTime(iso: string, timeZone: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone,
-  }).format(new Date(iso));
-}
-
 export function AgendaScreen({ event }: Props): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
   const { user } = useAuth();
+  const confirm = useConfirm();
   const userId = user?.id ?? null;
   const [filter, setFilter] = useState<FilterMode>('all');
   const [dayFilter, setDayFilter] = useState<string>('all');
@@ -169,7 +161,12 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   }
 
   async function deleteProposal(proposal: ProposedSession): Promise<void> {
-    if (!confirm(t('agenda.proposals.deleteConfirm', { title: proposal.title }))) return;
+    const ok = await confirm({
+      titleKey: 'agenda.proposals.deleteConfirm',
+      titleValues: { title: proposal.title },
+      destructive: true,
+    });
+    if (!ok) return;
     try {
       await deleteOwnProposal(getSupabaseClient(), proposal.id);
       show(t('agenda.proposals.deleted'));
@@ -313,239 +310,5 @@ export function AgendaScreen({ event }: Props): JSX.Element {
         saving={submitting}
       />
     </main>
-  );
-}
-
-interface FilterTabProps {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}
-
-function FilterTab({ active, onClick, label }: FilterTabProps): JSX.Element {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={cn(
-        'rounded-sm px-3 py-1.5 text-sm font-medium transition-colors',
-        active ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted',
-      )}
-    >
-      {label}
-    </button>
-  );
-}
-
-interface SessionCardProps {
-  session: AgendaSession;
-  timeZone: string;
-  isPast: boolean;
-  onToggleFavorite: () => void;
-  favoriteLabel: string;
-  /** Omitted when this session does not expose the guest picker. */
-  guestPicker?:
-    | {
-        guests: ReadonlyArray<AdditionalGuestRow>;
-        attendance: ReadonlySet<string>;
-        onToggle: (additionalGuestId: string, attending: boolean) => void;
-      }
-    | undefined;
-}
-
-function SessionCard({
-  session,
-  timeZone,
-  isPast,
-  onToggleFavorite,
-  favoriteLabel,
-  guestPicker,
-}: SessionCardProps): JSX.Element {
-  const { t } = useTranslation();
-  // Mandatory sessions are always-on for everyone — render them as
-  // starred and disable the toggle so the UX matches the data model.
-  const showAsStarred = session.is_favorite || session.is_mandatory;
-  const Icon = showAsStarred ? Star : StarOff;
-  const buttonLabel = session.is_mandatory ? t('agenda.mandatoryLabel') : favoriteLabel;
-  return (
-    <li
-      className={cn(
-        'rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary/40',
-        isPast && 'opacity-50',
-      )}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex-1 space-y-1">
-          {session.starts_at && session.ends_at ? (
-            <p className="text-xs font-medium tabular-nums text-muted-foreground">
-              {formatTime(session.starts_at, timeZone)} — {formatTime(session.ends_at, timeZone)}
-              {session.location ? <span> · {session.location}</span> : null}
-            </p>
-          ) : null}
-          <h3 className="text-base font-semibold">{session.title}</h3>
-          {session.subtitle ? (
-            <p className="text-sm text-muted-foreground">{session.subtitle}</p>
-          ) : null}
-          {session.speaker_display_name || session.speaker_email ? (
-            <p className="text-xs text-muted-foreground">
-              {session.speaker_display_name ?? session.speaker_email}
-            </p>
-          ) : null}
-          {session.abstract ? (
-            <p className="pt-2 text-sm leading-relaxed text-foreground/80">{session.abstract}</p>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-2 pt-0.5">
-          <TagPills tags={session.tags} />
-          <button
-            type="button"
-            onClick={onToggleFavorite}
-            aria-label={buttonLabel}
-            title={buttonLabel}
-            disabled={session.is_mandatory}
-            className={cn(
-              'inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors',
-              showAsStarred
-                ? 'text-amber-500 hover:bg-amber-100/40'
-                : 'text-muted-foreground hover:bg-muted',
-              session.is_mandatory && 'cursor-not-allowed opacity-80 hover:bg-transparent',
-            )}
-          >
-            <Icon aria-hidden className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {guestPicker ? (
-        <fieldset className="mt-3 space-y-2 rounded-md bg-muted/40 p-3">
-          <legend className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {t('agenda.guests.prompt')}
-          </legend>
-          <div className="flex flex-wrap gap-3 pt-1">
-            {guestPicker.guests.map((guest) => {
-              const id = `guest-attend-${session.id}-${guest.id}`;
-              const checked = guestPicker.attendance.has(attendanceKey(session.id, guest.id));
-              const guestName = `${guest.first_name} ${guest.last_name}`.trim();
-              return (
-                <label key={guest.id} htmlFor={id} className="flex items-center gap-2 text-sm">
-                  <Checkbox
-                    id={id}
-                    checked={checked}
-                    onCheckedChange={(next) => guestPicker.onToggle(guest.id, next === true)}
-                  />
-                  {guestName}
-                </label>
-              );
-            })}
-          </div>
-        </fieldset>
-      ) : null}
-    </li>
-  );
-}
-
-interface ProposalsListProps {
-  proposals: ReadonlyArray<ProposedSession>;
-  currentUserId: string | null;
-  onVote: (proposal: ProposedSession) => void;
-  onEdit: (proposal: ProposedSession) => void;
-  onDelete: (proposal: ProposedSession) => void;
-  isVoting: boolean;
-}
-
-function ProposalsList({
-  proposals,
-  currentUserId,
-  onVote,
-  onEdit,
-  onDelete,
-  isVoting,
-}: ProposalsListProps): JSX.Element {
-  const { t } = useTranslation();
-  if (proposals.length === 0) {
-    return (
-      <p className="py-12 text-center text-sm text-muted-foreground">
-        {t('agenda.proposals.empty')}
-      </p>
-    );
-  }
-  return (
-    <ul className="space-y-3">
-      {proposals.map((proposal) => {
-        const isOwn = currentUserId !== null && proposal.proposed_by === currentUserId;
-        return (
-          <li
-            key={proposal.id}
-            className="rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary/40"
-          >
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="min-w-0 flex-1 space-y-1">
-                <h3 className="text-base font-semibold">{proposal.title}</h3>
-                {proposal.abstract ? (
-                  <p className="pt-1 text-sm leading-relaxed text-foreground/80">
-                    {proposal.abstract}
-                  </p>
-                ) : null}
-                <p className="pt-2 text-xs text-muted-foreground">
-                  {t('agenda.proposals.proposedBy', {
-                    name: proposal.proposer_display_name ?? t('agenda.proposals.unknownProposer'),
-                  })}
-                </p>
-                <TagPills tags={proposal.tags} className="pt-1" />
-              </div>
-              <div className="flex items-center gap-2">
-                {isOwn ? (
-                  <>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onEdit(proposal)}
-                      aria-label={t('agenda.proposals.editAction', { title: proposal.title })}
-                    >
-                      <Pencil aria-hidden className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onDelete(proposal)}
-                      aria-label={t('agenda.proposals.deleteAction', { title: proposal.title })}
-                    >
-                      <Trash2 aria-hidden className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </>
-                ) : null}
-                <Button
-                  type="button"
-                  variant={proposal.has_voted ? 'secondary' : 'outline'}
-                  size="sm"
-                  className="gap-2"
-                  disabled={proposal.has_voted || isVoting}
-                  onClick={() => onVote(proposal)}
-                  aria-label={
-                    proposal.has_voted
-                      ? t('agenda.proposals.alreadyVoted', { count: proposal.vote_count })
-                      : t('agenda.proposals.vote')
-                  }
-                >
-                  <ThumbsUp aria-hidden className="h-4 w-4" />
-                  {proposal.has_voted
-                    ? t('agenda.proposals.voteCount', { count: proposal.vote_count })
-                    : t('agenda.proposals.vote')}
-                  {!proposal.has_voted && proposal.vote_count > 0 ? (
-                    <span className="text-xs text-muted-foreground">({proposal.vote_count})</span>
-                  ) : null}
-                </Button>
-              </div>
-            </div>
-          </li>
-        );
-      })}
-    </ul>
   );
 }
