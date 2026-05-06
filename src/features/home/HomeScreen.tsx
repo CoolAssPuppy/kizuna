@@ -8,12 +8,12 @@ import { loadPersonalInfo } from '@/features/registration/api';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import { CheckinAccessCard } from './CheckinAccessCard';
-import { EventEtaPanel } from './components/EventEtaPanel';
-import { EventStatsPanel } from './components/EventStatsPanel';
-import { HomeQueue } from './components/HomeQueue';
-import { SidebarEditorialCard } from './components/SidebarEditorialCard';
-import { HomeMemoriesSection } from './HomeMemoriesSection';
+import { EventEtaPanel } from './EventEtaPanel';
+import { EventStatsPanel } from './EventStatsPanel';
+import { HomeQueue } from './HomeQueue';
 import { JetLagFighter } from './JetLagFighter';
+import { MemoriesPreview } from './MemoriesPreview';
+import { SidebarEditorialCard } from './SidebarEditorialCard';
 import { TeammateIcebreaker } from './TeammateIcebreaker';
 import { eventSlug, isEventInProgress } from './timeMath';
 import { useEditorialFeed } from './useEditorialFeed';
@@ -60,7 +60,7 @@ export function HomeScreen(): JSX.Element {
       <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-12">
         <section className="space-y-10 lg:col-span-8">
           <HomeQueue feed={feed} editorial={editorial.main} count={queueCount} />
-          {event ? <HomeMemoriesSection eventId={event.id} eventName={event.name} /> : null}
+          {event ? <MemoriesPreview eventId={event.id} eventName={event.name} /> : null}
         </section>
 
         <aside className="space-y-6 lg:col-span-4">

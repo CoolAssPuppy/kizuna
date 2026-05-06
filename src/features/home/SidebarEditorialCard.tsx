@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 
-import type { EditorialFeedItem } from '../useEditorialFeed';
+import type { EditorialFeedItem } from './useEditorialFeed';
 
 /** Single editorial card in the home-screen sidebar. */
 export function SidebarEditorialCard({ item }: { item: EditorialFeedItem }): JSX.Element {

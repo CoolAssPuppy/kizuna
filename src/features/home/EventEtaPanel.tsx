@@ -5,7 +5,7 @@ import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { cn } from '@/lib/utils';
 
-import { dayOfEvent, diffToCountdown } from '../timeMath';
+import { dayOfEvent, diffToCountdown } from './timeMath';
 
 interface EventEtaPanelProps {
   slug: string;

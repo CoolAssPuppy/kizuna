@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 
 import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 
-import { snakeFile } from '../timeMath';
-import type { EditorialFeedItem } from '../useEditorialFeed';
-import type { FeedItem } from '../useHomeFeed';
+import { snakeFile } from './timeMath';
+import type { EditorialFeedItem } from './useEditorialFeed';
+import type { FeedItem } from './useHomeFeed';
 
 const KIND_LABELS: Record<FeedItem['kind'], string> = {
   document: 'document',

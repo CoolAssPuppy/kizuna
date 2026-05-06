@@ -16,7 +16,7 @@ interface Props {
 const LIMIT = 10;
 const EXIT_MS = 360;
 
-export function HomeMemoriesSection({ eventId, eventName }: Props): JSX.Element | null {
+export function MemoriesPreview({ eventId, eventName }: Props): JSX.Element | null {
   const { t } = useTranslation();
   const photosQ = useRecentPhotos(eventId, LIMIT);
 

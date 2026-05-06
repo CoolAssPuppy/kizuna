@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { cn } from '@/lib/utils';
 
-import type { EventStats } from '../useEventStats';
+import type { EventStats } from './useEventStats';
 
 /**
  * Sidebar stats card on the home screen. Reads from useEventStats and
