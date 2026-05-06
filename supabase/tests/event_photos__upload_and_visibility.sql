@@ -22,7 +22,7 @@ insert into public.users (id, email, role, hibob_id, sponsor_id, auth_provider) 
   ('00000000-0000-0000-0000-000000000203', 'photo-admin@example.com', 'admin',    'h_pad',null, 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, time_zone, is_active, invite_all_employees) values
-  ('00000000-0000-0000-0000-0000000000aa', 'Photo Test 2027', 'supafest', '2027-08-01', '2027-08-05', 'UTC', false, false);
+  ('00000000-0000-0000-0000-0000000000aa', 'Photo Test 2027', 'company_offsite', '2027-08-01', '2027-08-05', 'UTC', false, false);
 
 -- Alice + Bob registered; Eve is not.
 insert into public.registrations (user_id, event_id, status) values

@@ -164,6 +164,30 @@
       "channels": {
         "summary": "List community channels.",
         "description": "Shows active community channels."
+      },
+      "invitationsList": {
+        "summary": "List invitations.",
+        "description": "Lists every invitation on the active event. Admin only."
+      },
+      "invitationsAdd": {
+        "summary": "Invite an attendee.",
+        "description": "Adds a single email + name to the active event. Admin only."
+      },
+      "invitationsRemove": {
+        "summary": "Remove an invitation.",
+        "description": "Deletes an invitation row. The invited person's existing registration (if any) is preserved."
+      },
+      "allowedDomainsList": {
+        "summary": "List allowed domains.",
+        "description": "Lists the email domains eligible for the active event when \"Open to all employees\" is on."
+      },
+      "allowedDomainsAdd": {
+        "summary": "Add an allowed domain.",
+        "description": "Appends a domain to the active event's allowed list. Use *.host.tld for subdomain wildcards."
+      },
+      "allowedDomainsRemove": {
+        "summary": "Remove an allowed domain.",
+        "description": "Removes a domain from the active event. Existing registrations under that domain are preserved."
       }
     }
   },
@@ -412,7 +436,8 @@
   "header": {
     "uploadAvatar": "Upload Your Avatar",
     "avatarMenu": "Open account menu",
-    "editProfile": "Edit Profile"
+    "editProfile": "Edit Profile",
+    "yourEvents": "Your events"
   },
   "profile": {
     "title": "Profile",
@@ -875,7 +900,8 @@
       "nudges": "Communication",
       "communication": "Communication",
       "reports": "Reports",
-      "conflicts": "Conflicts"
+      "conflicts": "Conflicts",
+      "invitations": "Invitations"
     },
     "scanQr": {
       "title": "Scan QR Code",
@@ -994,8 +1020,21 @@
         "title": "Visibility and status",
         "isActive": "Active event",
         "isActiveHint": "Only one supafest event can be active at a time. Active events drive the welcome screen.",
-        "inviteAll": "Invite all employees automatically",
-        "inviteAllHint": "When on, every active employee sees this event. Otherwise, invitations must be added one by one."
+        "openToAll": "Open to all employees",
+        "openToAllHint": "Anyone whose email matches one of the allowed domains is automatically invited.",
+        "inviteOnlyHint": "This event is invite-only. Add employees from the Invitations tab."
+      },
+      "types": {
+        "company_offsite": "Company offsite",
+        "sales_meeting": "Sales meeting",
+        "team_offsite": "Team offsite"
+      },
+      "allowedDomains": {
+        "label": "Allowed domains",
+        "placeholder": "supabase.io",
+        "hint": "Press Enter to add. Use exact hosts (supabase.io) or wildcards (*.supabase.io).",
+        "invalid": "Doesn't look like a domain. Try host.tld or *.host.tld.",
+        "remove": "Remove {{domain}}"
       }
     },
     "agenda": {
@@ -1255,7 +1294,55 @@
       "acceptExternal": "Use External Value",
       "noConflicts": "No open conflicts."
     },
-    "blocked": "You do not have permission to view this page."
+    "blocked": "You do not have permission to view this page.",
+    "invitations": {
+      "title": "Invitations",
+      "subtitle": "Curate the invite list for this event. CSV imports use the email,first_name,last_name header.",
+      "invite": "Invite attendee",
+      "empty": "No invitations yet. Click Invite attendee to add the first one.",
+      "deleted": "Invitation removed.",
+      "deleteConfirm": "Remove the invitation for {{email}}? Existing registrations are preserved.",
+      "deleteAria": "Remove invitation for {{email}}",
+      "openToAll": {
+        "title": "This event is open to all employees",
+        "body": "Anyone whose email is in: {{domains}}.",
+        "noDomains": "no domains set yet",
+        "editLink": "Manage allowed domains in About →"
+      },
+      "add": {
+        "title": "Invite attendees",
+        "subtitle": "Add one at a time, paste a list, or upload a CSV.",
+        "tabs": {
+          "one": "One",
+          "paste": "Paste",
+          "csv": "CSV"
+        },
+        "one": {
+          "email": "Email",
+          "firstName": "First name",
+          "lastName": "Last name"
+        },
+        "paste": {
+          "label": "Paste a list",
+          "placeholder": "taylor@supabase.io, Taylor, Reed\navery@supabase.io, Avery, Lin",
+          "hint": "One row per line: email, first name, last name. Tabs and commas both work."
+        },
+        "csv": {
+          "hint": "CSV with header row. Required columns: email, first_name, last_name.",
+          "choose": "Choose CSV file",
+          "preview": "{{ready}} ready, {{rejected}} rejected."
+        },
+        "summary": "{{added}} added, {{skipped}} duplicates skipped, {{rejected}} rejected.",
+        "adding": "Adding...",
+        "submit": "Add",
+        "errors": {
+          "unauthenticated": "Sign in to add invitations.",
+          "failed": "Could not add invitations.",
+          "pasteEmpty": "Paste at least one row with email, first name, and last name.",
+          "csv": "CSV could not be parsed: {{message}}"
+        }
+      }
+    }
   },
   "agenda": {
     "title": "Agenda",
@@ -1621,6 +1708,15 @@
       "hidden": "Hidden",
       "visible": "Live",
       "optOut": "Opt-out allowed"
+    }
+  },
+  "pickEvent": {
+    "title": "Pick your event",
+    "subtitle": "You're invited to more than one. Choose where to start; you can switch anytime from the avatar menu.",
+    "empty": {
+      "title": "You're not invited to any events yet",
+      "subtitle": "We don't see {{email}} on any guest list right now. Reach out to the organizer if you think this is a mistake.",
+      "signOutHint": "Back to home"
     }
   }
 }

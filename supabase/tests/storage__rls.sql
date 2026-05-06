@@ -30,10 +30,16 @@ insert into public.users (id, email, role, hibob_id, auth_provider, sponsor_id) 
   ('00000000-0000-0000-0000-00000000a003', 'storage.guest@example.com',  'guest',    null,                  'email_password', '00000000-0000-0000-0000-00000000a002'),
   ('00000000-0000-0000-0000-00000000a004', 'storage.outsider@example.com','employee','h_storage_outsider', 'sso',    null);
 
--- Two events: A is private (registration-gated), B is invite-all.
-insert into public.events (id, name, type, start_date, end_date, invite_all_employees) values
-  ('00000000-0000-0000-0000-0000000eee01', 'Storage Test A', 'meetup', '2027-06-01', '2027-06-03', false),
-  ('00000000-0000-0000-0000-0000000eee02', 'Storage Test B', 'meetup', '2027-07-01', '2027-07-03', true);
+-- Two events: A is private (registration-gated), B is invite-all (the
+-- @example.com domain matches every fixture user, so the storage RLS
+-- helper grants those active employees access without a registration).
+insert into public.events
+  (id, name, type, start_date, end_date, invite_all_employees, allowed_domains)
+values
+  ('00000000-0000-0000-0000-0000000eee01', 'Storage Test A', 'team_offsite',
+   '2027-06-01', '2027-06-03', false, '{}'),
+  ('00000000-0000-0000-0000-0000000eee02', 'Storage Test B', 'team_offsite',
+   '2027-07-01', '2027-07-03', true, ARRAY['example.com']);
 
 insert into public.registrations (user_id, event_id, status) values
   ('00000000-0000-0000-0000-00000000a002', '00000000-0000-0000-0000-0000000eee01', 'started'),

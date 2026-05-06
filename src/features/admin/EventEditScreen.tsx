@@ -21,6 +21,7 @@ import {
   updateEvent,
   type EventInsert,
 } from './api/events';
+import { DomainsInput } from './DomainsInput';
 
 interface EventEditScreenProps {
   /**
@@ -53,13 +54,14 @@ interface FormState {
   hero_image_path: string;
   logo_path: string;
   invite_all_employees: boolean;
+  allowed_domains: string[];
   is_active: boolean;
 }
 
 const EMPTY: FormState = {
   name: '',
   subtitle: '',
-  type: 'supafest',
+  type: 'company_offsite',
   location: '',
   time_zone: 'UTC',
   start_date: '',
@@ -69,6 +71,7 @@ const EMPTY: FormState = {
   hero_image_path: '',
   logo_path: '',
   invite_all_employees: false,
+  allowed_domains: [],
   is_active: false,
 };
 
@@ -123,6 +126,7 @@ export function EventEditScreen({
       hero_image_path: row.hero_image_path ?? '',
       logo_path: row.logo_path ?? '',
       invite_all_employees: row.invite_all_employees,
+      allowed_domains: row.allowed_domains ?? [],
       is_active: row.is_active,
     };
   });
@@ -142,6 +146,10 @@ export function EventEditScreen({
         hero_image_path: state.hero_image_path || null,
         logo_path: state.logo_path || null,
         invite_all_employees: state.invite_all_employees,
+        // Empty out the domain list when the box is off so a stale
+        // value can't accidentally re-grant access if the admin flips
+        // the toggle on later.
+        allowed_domains: state.invite_all_employees ? state.allowed_domains : [],
         is_active: state.is_active,
       };
       if (isNew) return createEvent(getSupabaseClient(), payload);
@@ -215,9 +223,9 @@ export function EventEditScreen({
               onChange={(e) => setForm({ ...form, type: e.target.value as EventTypeEnum })}
               className="h-10 w-full rounded-md border bg-background px-3 text-sm"
             >
-              <option value="supafest">Supafest</option>
-              <option value="select">Select</option>
-              <option value="meetup">Meetup</option>
+              <option value="company_offsite">{t('admin.events.types.company_offsite')}</option>
+              <option value="sales_meeting">{t('admin.events.types.sales_meeting')}</option>
+              <option value="team_offsite">{t('admin.events.types.team_offsite')}</option>
             </select>
           </Field>
           <Field label={t('admin.events.fields.location')}>
@@ -308,11 +316,26 @@ export function EventEditScreen({
           />
           <FlagRow
             id="event-invite-all"
-            label={t('admin.events.flags.inviteAll')}
-            hint={t('admin.events.flags.inviteAllHint')}
+            label={t('admin.events.flags.openToAll')}
+            hint={t('admin.events.flags.openToAllHint')}
             checked={form.invite_all_employees}
             onChange={(checked) => setForm({ ...form, invite_all_employees: checked })}
           />
+          {form.invite_all_employees ? (
+            <div className="space-y-2 rounded-md border border-dashed bg-background/50 p-3">
+              <label className="text-xs font-medium">
+                {t('admin.events.allowedDomains.label')}
+              </label>
+              <DomainsInput
+                value={form.allowed_domains}
+                onChange={(next) => setForm({ ...form, allowed_domains: next })}
+              />
+            </div>
+          ) : (
+            <p className="rounded-md border border-dashed bg-background/50 p-3 text-xs text-muted-foreground">
+              {t('admin.events.flags.inviteOnlyHint')}
+            </p>
+          )}
         </fieldset>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">

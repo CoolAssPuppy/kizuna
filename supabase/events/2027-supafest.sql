@@ -31,11 +31,16 @@ begin
   insert into public.events (
     id, name, subtitle, type, location, airport_iata, time_zone,
     start_date, end_date, reg_opens_at, reg_closes_at,
-    is_active, hero_image_path, logo_path, invite_all_employees
+    is_active, hero_image_path, logo_path,
+    invite_all_employees, allowed_domains
   ) values (
-    v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, 'YYC', v_event_tz,
+    v_event_id, v_event_name, v_event_subtitle, 'company_offsite', v_event_location, 'YYC', v_event_tz,
     v_start_date, v_end_date, v_reg_opens_at, v_reg_closes_at,
-    true, v_hero_image_path, v_logo_path, true
+    true, v_hero_image_path, v_logo_path,
+    -- The seeded fixture employees all live on @kizuna.dev. Anyone
+    -- with a kizuna.dev email is open-to-all eligible by default;
+    -- swap in your own production domains via Admin → About.
+    true, ARRAY['kizuna.dev']
   );
 
   -- Documents that every attendee must read and sign.

@@ -66,28 +66,14 @@ begin
   end if;
   v_event_id := v_first::uuid;
 
-  -- Admins read every event regardless of registration.
+  -- Single source of truth: defer to the eligibility helper. is_admin
+  -- is checked there too, but the early return preserves the perf win
+  -- on the storage SELECT hot path (admins skip the helper's plpgsql).
   if public.is_admin() then
     return true;
   end if;
 
-  -- A registration row gates per-attendee visibility. invite_all_employees
-  -- is honoured the same way RLS on `events` does it: an active employee
-  -- can read content for any event flagged as company-wide.
-  return exists (
-    select 1
-    from public.registrations r
-    where r.user_id = v_caller and r.event_id = v_event_id
-  )
-  or exists (
-    select 1
-    from public.events e
-    join public.users u on u.id = v_caller
-    where e.id = v_event_id
-      and e.invite_all_employees
-      and u.role = 'employee'
-      and u.is_active
-  );
+  return public.user_eligible_for_event(v_caller, v_event_id);
 end
 $$;
 

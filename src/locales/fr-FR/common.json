@@ -213,7 +213,8 @@
   "header": {
     "uploadAvatar": "Téléverser Votre Avatar",
     "avatarMenu": "Ouvrir le menu du compte",
-    "editProfile": "Modifier le Profil"
+    "editProfile": "Modifier le Profil",
+    "yourEvents": "Tes événements"
   },
   "profile": {
     "title": "Profil",
@@ -675,7 +676,8 @@
       "conflicts": "Conflits",
       "about": "__TODO_LOCALE__ About",
       "scanQr": "__TODO_LOCALE__ Scan QR Code",
-      "swag": "__TODO_LOCALE__ Swag"
+      "swag": "__TODO_LOCALE__ Swag",
+      "invitations": "Invitations"
     },
     "groundTransport": {
       "title": "Outil de Transport Terrestre",
@@ -782,10 +784,23 @@
         "title": "Visibilité et statut",
         "isActive": "Événement actif",
         "isActiveHint": "Un seul événement Supafest peut être actif à la fois. Les événements actifs alimentent l'écran de bienvenue.",
-        "inviteAll": "Inviter automatiquement tous les employés",
-        "inviteAllHint": "Lorsque l'option est activée, chaque employé actif voit cet événement. Sinon, les invitations doivent être ajoutées une par une."
+        "openToAll": "Ouvert à tous les employés",
+        "openToAllHint": "Toute personne dont l'email correspond à l'un des domaines autorisés est automatiquement invitée.",
+        "inviteOnlyHint": "Cet événement est sur invitation. Ajoute des personnes depuis l'onglet Invitations."
       },
-      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id.",
+      "types": {
+        "company_offsite": "Séminaire d'entreprise",
+        "sales_meeting": "Réunion commerciale",
+        "team_offsite": "Séminaire d'équipe"
+      },
+      "allowedDomains": {
+        "label": "Domaines autorisés",
+        "placeholder": "supabase.io",
+        "hint": "Entrée pour ajouter. Hôte exact (supabase.io) ou caractère générique (*.supabase.io).",
+        "invalid": "Pas un domaine valide. Essaie host.tld ou *.host.tld.",
+        "remove": "Retirer {{domain}}"
+      }
     },
     "agenda": {
       "title": "Agenda",
@@ -1058,6 +1073,54 @@
     "empty": {
       "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
       "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    },
+    "invitations": {
+      "title": "Invitations",
+      "subtitle": "Gère la liste d'invités. Le CSV requiert l'en-tête email,first_name,last_name.",
+      "invite": "Inviter une personne",
+      "empty": "Aucune invitation. Clique sur Inviter une personne pour commencer.",
+      "deleted": "Invitation supprimée.",
+      "deleteConfirm": "Retirer l'invitation de {{email}} ? Les inscriptions existantes sont conservées.",
+      "deleteAria": "Retirer l'invitation de {{email}}",
+      "openToAll": {
+        "title": "Cet événement est ouvert à tous",
+        "body": "Toute personne dont l'email est dans : {{domains}}.",
+        "noDomains": "aucun domaine défini",
+        "editLink": "Gérer les domaines dans À propos →"
+      },
+      "add": {
+        "title": "Inviter des personnes",
+        "subtitle": "Une à la fois, en collant une liste ou en téléversant un CSV.",
+        "tabs": {
+          "one": "Une",
+          "paste": "Coller",
+          "csv": "CSV"
+        },
+        "one": {
+          "email": "Email",
+          "firstName": "Prénom",
+          "lastName": "Nom"
+        },
+        "paste": {
+          "label": "Coller une liste",
+          "placeholder": "taylor@supabase.io, Taylor, Reed\navery@supabase.io, Avery, Lin",
+          "hint": "Une ligne par personne : email, prénom, nom. Les tabulations et virgules fonctionnent."
+        },
+        "csv": {
+          "hint": "CSV avec en-tête. Colonnes obligatoires : email, first_name, last_name.",
+          "choose": "Choisir un CSV",
+          "preview": "{{ready}} prêtes, {{rejected}} rejetées."
+        },
+        "summary": "{{added}} ajoutées, {{skipped}} doublons ignorés, {{rejected}} rejetées.",
+        "adding": "Ajout...",
+        "submit": "Ajouter",
+        "errors": {
+          "unauthenticated": "Connecte-toi pour ajouter des invitations.",
+          "failed": "Impossible d'ajouter les invitations.",
+          "pasteEmpty": "Colle au moins une ligne avec email, prénom et nom.",
+          "csv": "CSV illisible : {{message}}"
+        }
+      }
     }
   },
   "agenda": {
@@ -1495,6 +1558,30 @@
       "channels": {
         "summary": "__TODO_LOCALE__ List community channels.",
         "description": "__TODO_LOCALE__ Shows active community channels."
+      },
+      "invitationsList": {
+        "summary": "Lister les invitations.",
+        "description": "Liste chaque invitation de l'événement actif. Admin uniquement."
+      },
+      "invitationsAdd": {
+        "summary": "Inviter une personne.",
+        "description": "Ajoute un email + nom à l'événement actif. Admin uniquement."
+      },
+      "invitationsRemove": {
+        "summary": "Retirer une invitation.",
+        "description": "Supprime une invitation. L'inscription existante de la personne est conservée."
+      },
+      "allowedDomainsList": {
+        "summary": "Lister les domaines autorisés.",
+        "description": "Liste les domaines éligibles pour l'événement actif quand « Ouvert à tous » est activé."
+      },
+      "allowedDomainsAdd": {
+        "summary": "Ajouter un domaine.",
+        "description": "Ajoute un domaine. Utilise *.host.tld pour les sous-domaines."
+      },
+      "allowedDomainsRemove": {
+        "summary": "Retirer un domaine.",
+        "description": "Supprime un domaine. Les inscriptions existantes sont préservées."
       }
     }
   },
@@ -1626,6 +1713,15 @@
       "hidden": "__TODO_LOCALE__ Hidden",
       "visible": "__TODO_LOCALE__ Live",
       "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
+  },
+  "pickEvent": {
+    "title": "Choisis ton événement",
+    "subtitle": "Tu es invitée à plusieurs. Choisis par où commencer ; tu peux changer depuis le menu de l'avatar à tout moment.",
+    "empty": {
+      "title": "Tu n'es invitée à aucun événement pour l'instant",
+      "subtitle": "On ne voit pas {{email}} sur une liste d'invités. Préviens l'organisateur si c'est une erreur.",
+      "signOutHint": "Retour à l'accueil"
     }
   }
 }

@@ -11,7 +11,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-000000000060', 'dup@example.com', 'employee', 'hibob_dup', 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, is_active)
-values ('00000000-0000-0000-0000-0000000000d1', 'Dup Event', 'supafest', current_date, current_date + 1, false);
+values ('00000000-0000-0000-0000-0000000000d1', 'Dup Event', 'company_offsite', current_date, current_date + 1, false);
 
 -- Insert a base itinerary item directly.
 insert into public.itinerary_items (

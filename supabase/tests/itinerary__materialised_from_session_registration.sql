@@ -9,7 +9,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-000000000030', 'attendee@example.com', 'employee', 'hibob_at', 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, is_active)
-values ('00000000-0000-0000-0000-0000000000e2', 'Itin Event', 'supafest', current_date, current_date + 1, false);
+values ('00000000-0000-0000-0000-0000000000e2', 'Itin Event', 'company_offsite', current_date, current_date + 1, false);
 
 insert into public.sessions (id, event_id, title, type, audience, starts_at, ends_at, location)
 values ('00000000-0000-0000-0000-000000000051',

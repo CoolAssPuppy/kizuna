@@ -89,3 +89,134 @@ registerCommand({
     return rowToEvent(row);
   },
 });
+
+// ---------------------------------------------------------------------
+// Allowed-domains management. Mirrors the chip-input on the admin About
+// tab: list, add, and remove domain entries on the active event. The
+// helpers below treat the column as a set, so adding a domain that's
+// already there is a no-op rather than an error.
+// ---------------------------------------------------------------------
+
+const Domain = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(
+    /^(\*\.)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/,
+    'domain must look like host.tld or *.host.tld',
+  );
+
+const AllowedDomainsListInput = z.object({ format: FormatFlag, args: Args }).strict();
+const AllowedDomainsListOutput = z.object({
+  event_id: z.string(),
+  invite_all_employees: z.boolean(),
+  allowed_domains: z.array(z.string()),
+});
+
+registerCommand({
+  path: ['events', 'allowed-domains', 'list'],
+  summaryKey: 'cli.commands.allowedDomainsList.summary',
+  descriptionKey: 'cli.commands.allowedDomainsList.description',
+  examples: ['events allowed-domains list'],
+  scope: 'admin',
+  input: AllowedDomainsListInput,
+  output: AllowedDomainsListOutput,
+  handler: async (_input, ctx) => {
+    const event = await getActiveEvent(ctx);
+    const { data, error } = await ctx.supabase
+      .from('events')
+      .select('id, invite_all_employees, allowed_domains')
+      .eq('id', event.id)
+      .single();
+    if (error) throw error;
+    return {
+      event_id: data.id,
+      invite_all_employees: data.invite_all_employees,
+      allowed_domains: data.allowed_domains ?? [],
+    };
+  },
+  toMarkdown: (output) =>
+    output.allowed_domains.length === 0
+      ? '_No allowed domains set._'
+      : output.allowed_domains.map((d) => `- ${d}`).join('\n'),
+});
+
+const AllowedDomainsMutateInput = z
+  .object({ format: FormatFlag, args: Args, domain: Domain })
+  .strict();
+
+const AllowedDomainsMutateOutput = z.object({
+  event_id: z.string(),
+  allowed_domains: z.array(z.string()),
+});
+
+registerCommand({
+  path: ['events', 'allowed-domains', 'add'],
+  summaryKey: 'cli.commands.allowedDomainsAdd.summary',
+  descriptionKey: 'cli.commands.allowedDomainsAdd.description',
+  examples: [
+    'events allowed-domains add --domain supabase.io',
+    'events allowed-domains add --domain "*.supabase.io"',
+  ],
+  scope: 'admin',
+  mutation: true,
+  input: AllowedDomainsMutateInput,
+  output: AllowedDomainsMutateOutput,
+  handler: async (input, ctx) => {
+    const event = await getActiveEvent(ctx);
+    const { data: row, error: readErr } = await ctx.supabase
+      .from('events')
+      .select('allowed_domains')
+      .eq('id', event.id)
+      .single();
+    if (readErr) throw readErr;
+    const current: string[] = row.allowed_domains ?? [];
+    const next = current.includes(input.domain) ? current : [...current, input.domain];
+    const { data, error } = await ctx.supabase
+      .from('events')
+      .update({ allowed_domains: next })
+      .eq('id', event.id)
+      .select('id, allowed_domains')
+      .single();
+    if (error) throw error;
+    return { event_id: data.id, allowed_domains: data.allowed_domains ?? [] };
+  },
+  toMarkdown: (output) =>
+    output.allowed_domains.length === 0
+      ? '_No domains set._'
+      : output.allowed_domains.map((d) => `- ${d}`).join('\n'),
+});
+
+registerCommand({
+  path: ['events', 'allowed-domains', 'remove'],
+  summaryKey: 'cli.commands.allowedDomainsRemove.summary',
+  descriptionKey: 'cli.commands.allowedDomainsRemove.description',
+  examples: ['events allowed-domains remove --domain supabase.io'],
+  scope: 'admin',
+  mutation: true,
+  input: AllowedDomainsMutateInput,
+  output: AllowedDomainsMutateOutput,
+  handler: async (input, ctx) => {
+    const event = await getActiveEvent(ctx);
+    const { data: row, error: readErr } = await ctx.supabase
+      .from('events')
+      .select('allowed_domains')
+      .eq('id', event.id)
+      .single();
+    if (readErr) throw readErr;
+    const current: string[] = row.allowed_domains ?? [];
+    const next = current.filter((d) => d !== input.domain);
+    const { data, error } = await ctx.supabase
+      .from('events')
+      .update({ allowed_domains: next })
+      .eq('id', event.id)
+      .select('id, allowed_domains')
+      .single();
+    if (error) throw error;
+    return { event_id: data.id, allowed_domains: data.allowed_domains ?? [] };
+  },
+  toMarkdown: (output) =>
+    output.allowed_domains.length === 0
+      ? '_No domains remain._'
+      : output.allowed_domains.map((d) => `- ${d}`).join('\n'),
+});

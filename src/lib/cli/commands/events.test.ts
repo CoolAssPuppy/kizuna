@@ -18,7 +18,7 @@ describe('events', () => {
             end_date: '2024-01-05',
             location: null,
             is_active: false,
-            type: 'supafest',
+            type: 'company_offsite',
           },
         ],
       },

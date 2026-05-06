@@ -213,7 +213,8 @@
   "header": {
     "uploadAvatar": "Carregar o Seu Avatar",
     "avatarMenu": "Abrir menu da conta",
-    "editProfile": "Editar Perfil"
+    "editProfile": "Editar Perfil",
+    "yourEvents": "Os teus eventos"
   },
   "profile": {
     "title": "Perfil",
@@ -675,7 +676,8 @@
       "conflicts": "Conflitos",
       "about": "__TODO_LOCALE__ About",
       "scanQr": "__TODO_LOCALE__ Scan QR Code",
-      "swag": "__TODO_LOCALE__ Swag"
+      "swag": "__TODO_LOCALE__ Swag",
+      "invitations": "Convites"
     },
     "groundTransport": {
       "title": "Ferramenta de Transporte Terrestre",
@@ -782,10 +784,23 @@
         "title": "Visibilidade e estado",
         "isActive": "Evento ativo",
         "isActiveHint": "Apenas um evento Supafest pode estar ativo de cada vez. Os eventos ativos alimentam o ecrã de boas-vindas.",
-        "inviteAll": "Convidar todos os colaboradores automaticamente",
-        "inviteAllHint": "Quando ativo, todos os colaboradores ativos veem este evento. Caso contrário, os convites têm de ser adicionados um a um."
+        "openToAll": "Aberto a toda a equipa",
+        "openToAllHint": "Quem tiver email num dos domínios permitidos é convidada automaticamente.",
+        "inviteOnlyHint": "Este evento é só por convite. Adiciona pessoas no separador Convites."
       },
-      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id.",
+      "types": {
+        "company_offsite": "Offsite da empresa",
+        "sales_meeting": "Reunião de vendas",
+        "team_offsite": "Offsite de equipa"
+      },
+      "allowedDomains": {
+        "label": "Domínios permitidos",
+        "placeholder": "supabase.io",
+        "hint": "Carrega Enter para adicionar. Hosts exactos (supabase.io) ou curingas (*.supabase.io).",
+        "invalid": "Não parece um domínio. Experimenta host.tld ou *.host.tld.",
+        "remove": "Remover {{domain}}"
+      }
     },
     "agenda": {
       "title": "Programa",
@@ -1058,6 +1073,54 @@
     "empty": {
       "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
       "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    },
+    "invitations": {
+      "title": "Convites",
+      "subtitle": "Gere a lista de convidados. O CSV usa o cabeçalho email,first_name,last_name.",
+      "invite": "Convidar pessoa",
+      "empty": "Ainda sem convites. Carrega em Convidar pessoa para começar.",
+      "deleted": "Convite removido.",
+      "deleteConfirm": "Remover o convite de {{email}}? Inscrições existentes são preservadas.",
+      "deleteAria": "Remover convite de {{email}}",
+      "openToAll": {
+        "title": "Este evento está aberto a todas",
+        "body": "Convidada quem tem email em: {{domains}}.",
+        "noDomains": "sem domínios definidos",
+        "editLink": "Gerir domínios em Sobre →"
+      },
+      "add": {
+        "title": "Convidar pessoas",
+        "subtitle": "Uma de cada vez, colando uma lista ou enviando um CSV.",
+        "tabs": {
+          "one": "Uma",
+          "paste": "Colar",
+          "csv": "CSV"
+        },
+        "one": {
+          "email": "Email",
+          "firstName": "Nome",
+          "lastName": "Apelido"
+        },
+        "paste": {
+          "label": "Cola uma lista",
+          "placeholder": "taylor@supabase.io, Taylor, Reed\navery@supabase.io, Avery, Lin",
+          "hint": "Uma linha por pessoa: email, nome, apelido. Tabs e vírgulas funcionam."
+        },
+        "csv": {
+          "hint": "CSV com cabeçalho. Colunas obrigatórias: email, first_name, last_name.",
+          "choose": "Escolher ficheiro CSV",
+          "preview": "{{ready}} prontas, {{rejected}} rejeitadas."
+        },
+        "summary": "{{added}} adicionadas, {{skipped}} duplicadas ignoradas, {{rejected}} rejeitadas.",
+        "adding": "A adicionar...",
+        "submit": "Adicionar",
+        "errors": {
+          "unauthenticated": "Inicia sessão para adicionar convites.",
+          "failed": "Não foi possível adicionar os convites.",
+          "pasteEmpty": "Cola pelo menos uma linha com email, nome e apelido.",
+          "csv": "CSV não pôde ser lido: {{message}}"
+        }
+      }
     }
   },
   "agenda": {
@@ -1495,6 +1558,30 @@
       "channels": {
         "summary": "__TODO_LOCALE__ List community channels.",
         "description": "__TODO_LOCALE__ Shows active community channels."
+      },
+      "invitationsList": {
+        "summary": "Listar convites.",
+        "description": "Mostra cada convite do evento activo. Só admin."
+      },
+      "invitationsAdd": {
+        "summary": "Convidar uma pessoa.",
+        "description": "Adiciona email + nome ao evento activo. Só admin."
+      },
+      "invitationsRemove": {
+        "summary": "Remover um convite.",
+        "description": "Elimina um convite. A inscrição existente da pessoa é preservada."
+      },
+      "allowedDomainsList": {
+        "summary": "Listar domínios permitidos.",
+        "description": "Mostra os domínios elegíveis quando \"Aberto a todos\" está activo."
+      },
+      "allowedDomainsAdd": {
+        "summary": "Adicionar um domínio.",
+        "description": "Adiciona um domínio. Usa *.host.tld para curingas de subdomínio."
+      },
+      "allowedDomainsRemove": {
+        "summary": "Remover um domínio.",
+        "description": "Remove um domínio. Inscrições existentes são preservadas."
       }
     }
   },
@@ -1626,6 +1713,15 @@
       "hidden": "__TODO_LOCALE__ Hidden",
       "visible": "__TODO_LOCALE__ Live",
       "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
+  },
+  "pickEvent": {
+    "title": "Escolhe o teu evento",
+    "subtitle": "Estás convidada para mais do que um. Escolhe por onde começar; podes mudar pelo menu do avatar a qualquer altura.",
+    "empty": {
+      "title": "Ainda não estás convidada para nenhum evento",
+      "subtitle": "{{email}} não aparece em nenhuma lista. Avisa quem organiza se achas que é um erro.",
+      "signOutHint": "Voltar à página inicial"
     }
   }
 }

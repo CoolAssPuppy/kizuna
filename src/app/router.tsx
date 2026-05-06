@@ -54,6 +54,9 @@ const SignDocumentScreen = lazy(() =>
 const AllEventsScreen = lazy(() =>
   import('@/features/events/AllEventsScreen').then((m) => ({ default: m.AllEventsScreen })),
 );
+const PickEventScreen = lazy(() =>
+  import('@/features/events/PickEventScreen').then((m) => ({ default: m.PickEventScreen })),
+);
 const ItineraryRoute = lazy(() =>
   import('@/features/itinerary/ItineraryRoute').then((m) => ({ default: m.ItineraryRoute })),
 );
@@ -238,6 +241,14 @@ export function AppRouter(): JSX.Element {
             element={
               <RequireAuth allow={['admin', 'super_admin']}>
                 <AllEventsScreen />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/pick-event"
+            element={
+              <RequireAuth>
+                <PickEventScreen />
               </RequireAuth>
             }
           />

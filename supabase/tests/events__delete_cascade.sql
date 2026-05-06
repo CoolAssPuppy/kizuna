@@ -17,7 +17,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider, is_leadershi
 
 -- Create a brand-new event so we don't disturb the seeded supafest.
 insert into public.events (id, name, type, location, time_zone, start_date, end_date)
-values ('00000000-0000-0000-0000-000000003100', 'Cascade Test', 'meetup',
+values ('00000000-0000-0000-0000-000000003100', 'Cascade Test', 'team_offsite',
         'Test City', 'UTC', '2027-06-01', '2027-06-03');
 
 insert into public.registrations (id, user_id, event_id)

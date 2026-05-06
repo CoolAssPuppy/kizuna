@@ -11,9 +11,9 @@ do $$
 declare
   v_event_id uuid;
 begin
-  if not exists (select 1 from public.events where is_active = true and type = 'supafest') then
+  if not exists (select 1 from public.events where is_active = true and type = 'company_offsite') then
     insert into public.events (id, name, type, start_date, end_date, starts_tz, ends_tz, location, is_active)
-    values (gen_random_uuid(), 'pgTAP Attending Test', 'supafest', current_date, current_date + 5,
+    values (gen_random_uuid(), 'pgTAP Attending Test', 'company_offsite', current_date, current_date + 5,
             'UTC', 'UTC', 'pgtap', true);
   end if;
 end
@@ -32,7 +32,7 @@ values ('00000000-0000-0000-0000-00000000a77e', 'pgtap.attending@example.com', '
 -- the moment 'attending' is the only thing on the table.
 insert into public.registrations (user_id, event_id, status)
 select '00000000-0000-0000-0000-00000000a77e', e.id, 'invited'
-from public.events e where e.is_active = true and e.type = 'supafest' limit 1
+from public.events e where e.is_active = true and e.type = 'company_offsite' limit 1
 on conflict (user_id, event_id) do nothing;
 
 insert into public.registration_tasks (registration_id, task_key, applies_to, status)

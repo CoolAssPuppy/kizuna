@@ -213,7 +213,8 @@
   "header": {
     "uploadAvatar": "Lataa Profiilikuvasi",
     "avatarMenu": "Avaa tilivalikko",
-    "editProfile": "Muokkaa Profiilia"
+    "editProfile": "Muokkaa Profiilia",
+    "yourEvents": "Tapahtumasi"
   },
   "profile": {
     "title": "Profiili",
@@ -675,7 +676,8 @@
       "conflicts": "Ristiriidat",
       "about": "__TODO_LOCALE__ About",
       "scanQr": "__TODO_LOCALE__ Scan QR Code",
-      "swag": "__TODO_LOCALE__ Swag"
+      "swag": "__TODO_LOCALE__ Swag",
+      "invitations": "Kutsut"
     },
     "groundTransport": {
       "title": "Maakuljetustyökalu",
@@ -782,10 +784,23 @@
         "title": "Näkyvyys ja tila",
         "isActive": "Aktiivinen tapahtuma",
         "isActiveHint": "Vain yksi supafest-tapahtuma voi olla kerralla aktiivinen. Aktiiviset tapahtumat ohjaavat tervetuloruutua.",
-        "inviteAll": "Kutsu kaikki työntekijät automaattisesti",
-        "inviteAllHint": "Kun käytössä, jokainen aktiivinen työntekijä näkee tämän tapahtuman. Muutoin kutsut on lisättävä yksi kerrallaan."
+        "openToAll": "Avoinna kaikille työntekijöille",
+        "openToAllHint": "Kuka tahansa, jonka sähköposti vastaa yhtä sallituista verkkotunnuksista, on automaattisesti kutsuttu.",
+        "inviteOnlyHint": "Tämä tapahtuma on vain kutsutuille. Lisää henkilöt Kutsut-välilehdellä."
       },
-      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id.",
+      "types": {
+        "company_offsite": "Yrityksen offsite",
+        "sales_meeting": "Myyntipalaveri",
+        "team_offsite": "Tiimin offsite"
+      },
+      "allowedDomains": {
+        "label": "Sallitut verkkotunnukset",
+        "placeholder": "supabase.io",
+        "hint": "Lisää painamalla Enter. Tarkat hostit (supabase.io) tai jokerit (*.supabase.io).",
+        "invalid": "Ei näytä verkkotunnukselta. Kokeile host.tld tai *.host.tld.",
+        "remove": "Poista {{domain}}"
+      }
     },
     "agenda": {
       "title": "Aikataulu",
@@ -1058,6 +1073,54 @@
     "empty": {
       "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
       "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    },
+    "invitations": {
+      "title": "Kutsut",
+      "subtitle": "Hallinnoi vieraslistaa. CSV käyttää otsikkoa email,first_name,last_name.",
+      "invite": "Kutsu henkilö",
+      "empty": "Ei vielä kutsuja. Aloita klikkaamalla Kutsu henkilö.",
+      "deleted": "Kutsu poistettu.",
+      "deleteConfirm": "Poistetaanko kutsu osoitteelle {{email}}? Aiemmat ilmoittautumiset säilyvät.",
+      "deleteAria": "Poista kutsu osoitteelle {{email}}",
+      "openToAll": {
+        "title": "Tämä tapahtuma on avoin kaikille",
+        "body": "Kutsuttuja ovat ne, joiden sähköposti on: {{domains}}.",
+        "noDomains": "ei vielä verkkotunnuksia",
+        "editLink": "Hallinnoi verkkotunnuksia Tietoja-välilehdellä →"
+      },
+      "add": {
+        "title": "Kutsu henkilöitä",
+        "subtitle": "Yksitellen, listaa liittämällä tai lataamalla CSV.",
+        "tabs": {
+          "one": "Yksi",
+          "paste": "Liitä",
+          "csv": "CSV"
+        },
+        "one": {
+          "email": "Sähköposti",
+          "firstName": "Etunimi",
+          "lastName": "Sukunimi"
+        },
+        "paste": {
+          "label": "Liitä lista",
+          "placeholder": "taylor@supabase.io, Taylor, Reed\navery@supabase.io, Avery, Lin",
+          "hint": "Yksi rivi per henkilö: sähköposti, etunimi, sukunimi. Tabit ja pilkut toimivat molemmat."
+        },
+        "csv": {
+          "hint": "CSV-tiedosto otsikkorivillä. Pakolliset sarakkeet: email, first_name, last_name.",
+          "choose": "Valitse CSV-tiedosto",
+          "preview": "{{ready}} valmiina, {{rejected}} hylättyä."
+        },
+        "summary": "{{added}} lisätty, {{skipped}} kaksoiskappaletta ohitettu, {{rejected}} hylätty.",
+        "adding": "Lisätään...",
+        "submit": "Lisää",
+        "errors": {
+          "unauthenticated": "Kirjaudu sisään lisätäksesi kutsuja.",
+          "failed": "Kutsuja ei voitu lisätä.",
+          "pasteEmpty": "Liitä vähintään yksi rivi sähköpostilla, etu- ja sukunimellä.",
+          "csv": "CSV-tiedostoa ei voitu lukea: {{message}}"
+        }
+      }
     }
   },
   "agenda": {
@@ -1495,6 +1558,30 @@
       "channels": {
         "summary": "__TODO_LOCALE__ List community channels.",
         "description": "__TODO_LOCALE__ Shows active community channels."
+      },
+      "invitationsList": {
+        "summary": "Listaa kutsut.",
+        "description": "Näyttää aktiivisen tapahtuman jokaisen kutsun. Vain admin."
+      },
+      "invitationsAdd": {
+        "summary": "Kutsu henkilö.",
+        "description": "Lisää sähköpostin + nimen aktiiviseen tapahtumaan. Vain admin."
+      },
+      "invitationsRemove": {
+        "summary": "Poista kutsu.",
+        "description": "Poistaa kutsun. Henkilön olemassa oleva ilmoittautuminen säilyy."
+      },
+      "allowedDomainsList": {
+        "summary": "Listaa sallitut verkkotunnukset.",
+        "description": "Näyttää aktiivisen tapahtuman sallitut verkkotunnukset, kun \"Avoin kaikille\" on käytössä."
+      },
+      "allowedDomainsAdd": {
+        "summary": "Lisää sallittu verkkotunnus.",
+        "description": "Lisää verkkotunnuksen listaan. Käytä *.host.tld aliverkkotunnusten jokereille."
+      },
+      "allowedDomainsRemove": {
+        "summary": "Poista sallittu verkkotunnus.",
+        "description": "Poistaa verkkotunnuksen. Olemassa olevat ilmoittautumiset säilyvät."
       }
     }
   },
@@ -1626,6 +1713,15 @@
       "hidden": "__TODO_LOCALE__ Hidden",
       "visible": "__TODO_LOCALE__ Live",
       "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
+  },
+  "pickEvent": {
+    "title": "Valitse tapahtumasi",
+    "subtitle": "Sinut on kutsuttu useampaan. Valitse mistä aloittaa; voit vaihtaa avatar-valikosta milloin vain.",
+    "empty": {
+      "title": "Sinua ei ole vielä kutsuttu mihinkään tapahtumaan",
+      "subtitle": "{{email}} ei ole millään vieraslistalla. Kerro järjestäjälle, jos uskot tämän olevan virhe.",
+      "signOutHint": "Takaisin kotisivulle"
     }
   }
 }

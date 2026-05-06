@@ -19,7 +19,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider) values
 
 -- Reuse the active supafest event seeded by 2027-supafest.sql.
 with e as (
-  select id from public.events where is_active and type = 'supafest' limit 1
+  select id from public.events where is_active and type = 'company_offsite' limit 1
 )
 insert into public.accommodations (
   id, event_id, hotel_name, room_type, capacity, check_in, check_out

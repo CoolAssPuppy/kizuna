@@ -32,7 +32,7 @@ export async function getActiveEvent(ctx: CommandContext): Promise<ActiveEventRo
     .from('events')
     .select('*')
     .eq('is_active', true)
-    .eq('type', 'supafest')
+    .eq('type', 'company_offsite')
     .order('start_date', { ascending: false })
     .limit(1)
     .maybeSingle();

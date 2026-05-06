@@ -165,5 +165,5 @@ export const ACTIVE_EVENT_ROW = {
   end_date: '2026-09-05',
   location: 'Banff',
   is_active: true,
-  type: 'supafest',
+  type: 'company_offsite',
 };

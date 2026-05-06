@@ -13,7 +13,7 @@ values ('00000000-0000-0000-0000-000000000020', 'flyer@example.com', 'employee',
 -- Event for the vehicle row's event_id FK. Not active so we don't trip the
 -- one-active-supafest unique index against any seeded event.
 insert into public.events (id, name, type, location, time_zone, start_date, end_date)
-values ('00000000-0000-0000-0000-0000000000e1', 'Test 2027', 'supafest', 'Calgary',
+values ('00000000-0000-0000-0000-0000000000e1', 'Test 2027', 'company_offsite', 'Calgary',
         'America/Edmonton', '2027-04-01', '2027-04-05');
 
 insert into public.transport_vehicles (id, event_id, vehicle_name, direction, pickup_at, pickup_tz, capacity_passengers, capacity_bags)

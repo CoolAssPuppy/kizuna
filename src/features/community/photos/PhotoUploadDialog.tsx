@@ -1,5 +1,5 @@
 import { ImagePlus, Loader2, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Avatar } from '@/components/Avatar';
@@ -13,14 +13,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/toast';
-import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 
 import { type AttendeeSearchResult } from './api';
 import { HighlightedCaption } from './HighlightedCaption';
-import { useAttendeeSearch, useUploadPhoto } from './hooks';
-import { processImage } from './imageProcess';
+import { useAttendeeSearch } from './hooks';
+import { PHOTO_UPLOAD_MAX_FILES, type DraftItem, usePhotoUpload } from './usePhotoUpload';
 
 interface Props {
   open: boolean;
@@ -28,19 +26,9 @@ interface Props {
   eventId: string;
 }
 
-interface DraftItem {
-  id: string;
-  file: File;
-  previewUrl: string;
-  caption: string;
-  tagged: AttendeeSearchResult[];
-}
-
-const MAX_FILES = 10;
-const MAX_BYTES = 25 * 1024 * 1024;
-const ALLOWED = /^image\/(jpeg|png|webp|heic|heif)$/;
-
 export function PhotoUploadDialog({ open, onClose, eventId }: Props): JSX.Element {
+  // Re-mount the inner dialog on open/close so the upload hook starts
+  // fresh each time (clears drafts, revokes preview URLs).
   return (
     <PhotoUploadDialogInner
       key={open ? 'open' : 'closed'}
@@ -53,55 +41,13 @@ export function PhotoUploadDialog({ open, onClose, eventId }: Props): JSX.Elemen
 
 function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element {
   const { t } = useTranslation();
-  const { show } = useToast();
-  const { user } = useAuth();
-  const [items, setItems] = useState<DraftItem[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [tagQuery, setTagQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const upload = useUploadPhoto();
-
-  const active = useMemo(() => items.find((i) => i.id === activeId) ?? null, [items, activeId]);
-  const attendeeQuery = useAttendeeSearch(active ? tagQuery : '');
-
-  // eslint-disable-next-line no-restricted-syntax
-  useEffect(() => {
-    // Object URLs created in handlePick must be revoked when the dialog
-    // unmounts or the corresponding draft is removed.
-    return () => {
-      for (const item of items) URL.revokeObjectURL(item.previewUrl);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [tagQuery, setTagQuery] = useState('');
+  const upload = usePhotoUpload(eventId);
+  const attendeeQuery = useAttendeeSearch(upload.active ? tagQuery : '');
 
   function handlePick(picked: FileList | null): void {
-    if (!picked || picked.length === 0) return;
-    const drafts: DraftItem[] = [];
-    let rejectedType = false;
-    let rejectedSize = false;
-    for (const file of Array.from(picked)) {
-      if (drafts.length + items.length >= MAX_FILES) break;
-      if (!ALLOWED.test(file.type)) {
-        rejectedType = true;
-        continue;
-      }
-      if (file.size > MAX_BYTES) {
-        rejectedSize = true;
-        continue;
-      }
-      drafts.push({
-        id: crypto.randomUUID(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-        caption: '',
-        tagged: [],
-      });
-    }
-    if (rejectedType) show(t('photos.upload.errors.type'), 'error');
-    if (rejectedSize) show(t('photos.upload.errors.size', { max: '25 MB' }), 'error');
-    if (drafts.length === 0) return;
-    setItems((prev) => [...prev, ...drafts]);
-    setActiveId((prev) => prev ?? drafts[0]?.id ?? null);
+    upload.pick(picked);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
@@ -110,70 +56,15 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
     handlePick(e.dataTransfer.files);
   }
 
-  function removeItem(id: string): void {
-    setItems((prev) => {
-      const target = prev.find((i) => i.id === id);
-      if (target) URL.revokeObjectURL(target.previewUrl);
-      const next = prev.filter((i) => i.id !== id);
-      return next;
-    });
-    setActiveId((prev) => (prev === id ? (items.find((i) => i.id !== id)?.id ?? null) : prev));
-  }
-
-  function updateItem(id: string, patch: Partial<DraftItem>): void {
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
-  }
-
-  function addTag(itemId: string, person: AttendeeSearchResult): void {
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-    if (item.tagged.some((p) => p.user_id === person.user_id)) return;
-    updateItem(itemId, { tagged: [...item.tagged, person] });
-    setTagQuery('');
-  }
-
-  function removeTag(itemId: string, userId: string): void {
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return;
-    updateItem(itemId, { tagged: item.tagged.filter((p) => p.user_id !== userId) });
-  }
-
   async function handleSubmit(): Promise<void> {
-    if (items.length === 0 || !user) return;
-    let succeeded = 0;
-    let failed = 0;
-    for (const item of items) {
-      try {
-        const processed = await processImage(item.file);
-        await upload.mutateAsync({
-          eventId,
-          uploaderId: user.id,
-          original: processed.original,
-          preview: processed.preview,
-          thumb: processed.thumb,
-          width: processed.width,
-          height: processed.height,
-          caption: item.caption,
-          taggedUserIds: item.tagged.map((t) => t.user_id),
-        });
-        succeeded += 1;
-      } catch (err) {
-        console.error('[kizuna] photo upload failed', err);
-        failed += 1;
-      }
-    }
-    if (succeeded > 0) {
-      show(t('photos.upload.successCount', { count: succeeded }));
-    }
-    if (failed > 0) {
-      show(t('photos.upload.errors.someFailed', { count: failed }), 'error');
-      return;
-    }
-    onClose();
+    const ok = await upload.submit();
+    if (ok) onClose();
   }
 
-  const filteredResults = active
-    ? (attendeeQuery.data ?? []).filter((r) => !active.tagged.some((p) => p.user_id === r.user_id))
+  const filteredResults = upload.active
+    ? (attendeeQuery.data ?? []).filter(
+        (r) => !upload.active!.tagged.some((p) => p.user_id === r.user_id),
+      )
     : [];
 
   return (
@@ -192,7 +83,7 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
             onChange={(e) => handlePick(e.target.files)}
           />
 
-          {items.length === 0 ? (
+          {upload.items.length === 0 ? (
             <label
               onDragOver={(e) => e.preventDefault()}
               onDrop={handleDrop}
@@ -214,14 +105,17 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
             <>
               <div className="flex items-center justify-between">
                 <p className="text-xs" style={{ color: 'var(--c-muted)' }}>
-                  {t('photos.upload.count', { current: items.length, max: MAX_FILES })}
+                  {t('photos.upload.count', {
+                    current: upload.items.length,
+                    max: PHOTO_UPLOAD_MAX_FILES,
+                  })}
                 </p>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={items.length >= MAX_FILES}
+                  disabled={upload.items.length >= PHOTO_UPLOAD_MAX_FILES}
                 >
                   {t('photos.upload.addMore')}
                 </Button>
@@ -230,17 +124,18 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
                 className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2"
                 style={{ scrollbarWidth: 'thin' }}
               >
-                {items.map((item) => (
+                {upload.items.map((item) => (
                   <li key={item.id}>
                     <button
                       type="button"
-                      onClick={() => setActiveId(item.id)}
+                      onClick={() => upload.setActiveId(item.id)}
                       className={cn(
                         'relative block h-20 w-20 overflow-hidden border',
-                        item.id === activeId ? 'ring-2 ring-offset-2' : '',
+                        item.id === upload.activeId ? 'ring-2 ring-offset-2' : '',
                       )}
                       style={{
-                        borderColor: item.id === activeId ? 'var(--c-accent)' : 'var(--c-rule)',
+                        borderColor:
+                          item.id === upload.activeId ? 'var(--c-accent)' : 'var(--c-rule)',
                         backgroundColor: 'var(--c-surface)',
                       }}
                       aria-label={t('photos.upload.editFile', { name: item.file.name })}
@@ -257,17 +152,20 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
                 ))}
               </ul>
 
-              {active ? (
+              {upload.active ? (
                 <ItemEditor
-                  key={active.id}
-                  item={active}
+                  key={upload.active.id}
+                  item={upload.active}
                   filteredResults={filteredResults}
                   tagQuery={tagQuery}
                   onTagQueryChange={setTagQuery}
-                  onCaptionChange={(caption) => updateItem(active.id, { caption })}
-                  onAddTag={(p) => addTag(active.id, p)}
-                  onRemoveTag={(uid) => removeTag(active.id, uid)}
-                  onRemove={() => removeItem(active.id)}
+                  onCaptionChange={(caption) => upload.updateCaption(upload.active!.id, caption)}
+                  onAddTag={(p) => {
+                    upload.addTag(upload.active!.id, p);
+                    setTagQuery('');
+                  }}
+                  onRemoveTag={(uid) => upload.removeTag(upload.active!.id, uid)}
+                  onRemove={() => upload.removeItem(upload.active!.id)}
                 />
               ) : null}
             </>
@@ -275,19 +173,19 @@ function PhotoUploadDialogInner({ open, onClose, eventId }: Props): JSX.Element 
         </div>
 
         <DialogFooter>
-          <Button type="button" variant="ghost" onClick={onClose} disabled={upload.isPending}>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={upload.isUploading}>
             {t('actions.cancel')}
           </Button>
           <Button
             type="button"
-            disabled={items.length === 0 || upload.isPending}
+            disabled={upload.items.length === 0 || upload.isUploading}
             onClick={() => void handleSubmit()}
           >
-            {upload.isPending ? (
+            {upload.isUploading ? (
               <Loader2 aria-hidden className="mr-2 h-4 w-4 animate-spin" />
             ) : null}
-            {items.length > 1
-              ? t('photos.upload.submitMany', { count: items.length })
+            {upload.items.length > 1
+              ? t('photos.upload.submitMany', { count: upload.items.length })
               : t('photos.upload.submit')}
           </Button>
         </DialogFooter>

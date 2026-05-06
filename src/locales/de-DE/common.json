@@ -213,7 +213,8 @@
   "header": {
     "uploadAvatar": "Avatar hochladen",
     "avatarMenu": "Kontomenü öffnen",
-    "editProfile": "Profil bearbeiten"
+    "editProfile": "Profil bearbeiten",
+    "yourEvents": "Deine Events"
   },
   "profile": {
     "title": "Profil",
@@ -675,7 +676,8 @@
       "conflicts": "Konflikte",
       "about": "__TODO_LOCALE__ About",
       "scanQr": "__TODO_LOCALE__ Scan QR Code",
-      "swag": "__TODO_LOCALE__ Swag"
+      "swag": "__TODO_LOCALE__ Swag",
+      "invitations": "Einladungen"
     },
     "groundTransport": {
       "title": "Tool für Bodentransport",
@@ -782,10 +784,23 @@
         "title": "Sichtbarkeit und Status",
         "isActive": "Aktive Veranstaltung",
         "isActiveHint": "Es kann jeweils nur eine Supafest-Veranstaltung aktiv sein. Aktive Veranstaltungen steuern die Willkommensseite.",
-        "inviteAll": "Alle Mitarbeiter automatisch einladen",
-        "inviteAllHint": "Wenn aktiviert, sieht jeder aktive Mitarbeiter diese Veranstaltung. Andernfalls müssen Einladungen einzeln hinzugefügt werden."
+        "openToAll": "Offen für alle Mitarbeitenden",
+        "openToAllHint": "Wer eine E-Mail in einer der zulässigen Domains hat, ist automatisch eingeladen.",
+        "inviteOnlyHint": "Dieses Event ist nur auf Einladung. Mitarbeitende fügst du im Reiter Einladungen hinzu."
       },
-      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id.",
+      "types": {
+        "company_offsite": "Firmen-Offsite",
+        "sales_meeting": "Vertriebs-Meeting",
+        "team_offsite": "Team-Offsite"
+      },
+      "allowedDomains": {
+        "label": "Zulässige Domains",
+        "placeholder": "supabase.io",
+        "hint": "Mit Enter hinzufügen. Exakte Hosts (supabase.io) oder Wildcards (*.supabase.io).",
+        "invalid": "Sieht nicht wie eine Domain aus. Versuche host.tld oder *.host.tld.",
+        "remove": "{{domain}} entfernen"
+      }
     },
     "agenda": {
       "title": "Agenda",
@@ -1058,6 +1073,54 @@
     "empty": {
       "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
       "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    },
+    "invitations": {
+      "title": "Einladungen",
+      "subtitle": "Pflege die Einladungsliste für dieses Event. CSV-Import nutzt den Header email,first_name,last_name.",
+      "invite": "Person einladen",
+      "empty": "Noch keine Einladungen. Klicke auf \"Person einladen\", um zu starten.",
+      "deleted": "Einladung entfernt.",
+      "deleteConfirm": "Einladung für {{email}} entfernen? Bereits gestartete Anmeldungen bleiben erhalten.",
+      "deleteAria": "Einladung für {{email}} entfernen",
+      "openToAll": {
+        "title": "Dieses Event ist für alle Mitarbeitenden offen",
+        "body": "Eingeladen ist, wer eine E-Mail aus: {{domains}}.",
+        "noDomains": "noch keine Domains gesetzt",
+        "editLink": "Domains im About-Tab verwalten →"
+      },
+      "add": {
+        "title": "Personen einladen",
+        "subtitle": "Eine nach der anderen, als Liste einfügen oder als CSV hochladen.",
+        "tabs": {
+          "one": "Einzeln",
+          "paste": "Einfügen",
+          "csv": "CSV"
+        },
+        "one": {
+          "email": "E-Mail",
+          "firstName": "Vorname",
+          "lastName": "Nachname"
+        },
+        "paste": {
+          "label": "Liste einfügen",
+          "placeholder": "taylor@supabase.io, Taylor, Reed\navery@supabase.io, Avery, Lin",
+          "hint": "Eine Zeile pro Person: E-Mail, Vorname, Nachname. Tabs und Kommas funktionieren beide."
+        },
+        "csv": {
+          "hint": "CSV mit Header-Zeile. Pflichtspalten: email, first_name, last_name.",
+          "choose": "CSV-Datei auswählen",
+          "preview": "{{ready}} bereit, {{rejected}} abgelehnt."
+        },
+        "summary": "{{added}} hinzugefügt, {{skipped}} Duplikate übersprungen, {{rejected}} abgelehnt.",
+        "adding": "Wird hinzugefügt...",
+        "submit": "Hinzufügen",
+        "errors": {
+          "unauthenticated": "Melde dich an, um Einladungen hinzuzufügen.",
+          "failed": "Einladungen konnten nicht hinzugefügt werden.",
+          "pasteEmpty": "Mindestens eine Zeile mit E-Mail, Vor- und Nachname einfügen.",
+          "csv": "CSV konnte nicht gelesen werden: {{message}}"
+        }
+      }
     }
   },
   "agenda": {
@@ -1495,6 +1558,30 @@
       "channels": {
         "summary": "__TODO_LOCALE__ List community channels.",
         "description": "__TODO_LOCALE__ Shows active community channels."
+      },
+      "invitationsList": {
+        "summary": "Einladungen auflisten.",
+        "description": "Listet alle Einladungen für das aktive Event. Admin-only."
+      },
+      "invitationsAdd": {
+        "summary": "Person einladen.",
+        "description": "Fügt E-Mail + Name dem aktiven Event hinzu. Admin-only."
+      },
+      "invitationsRemove": {
+        "summary": "Einladung entfernen.",
+        "description": "Löscht eine Einladung. Eine bereits begonnene Anmeldung der Person bleibt erhalten."
+      },
+      "allowedDomainsList": {
+        "summary": "Zulässige Domains anzeigen.",
+        "description": "Listet die für das aktive Event erlaubten E-Mail-Domains, wenn \"Offen für alle\" aktiv ist."
+      },
+      "allowedDomainsAdd": {
+        "summary": "Domain hinzufügen.",
+        "description": "Hängt eine Domain an die Liste an. Nutze *.host.tld für Subdomain-Wildcards."
+      },
+      "allowedDomainsRemove": {
+        "summary": "Domain entfernen.",
+        "description": "Entfernt eine Domain. Bereits registrierte Personen behalten den Zugang."
       }
     }
   },
@@ -1626,6 +1713,15 @@
       "hidden": "__TODO_LOCALE__ Hidden",
       "visible": "__TODO_LOCALE__ Live",
       "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
+  },
+  "pickEvent": {
+    "title": "Wähle dein Event",
+    "subtitle": "Du bist zu mehreren eingeladen. Wähle eines aus; du kannst über das Avatar-Menü jederzeit wechseln.",
+    "empty": {
+      "title": "Du bist noch zu keinem Event eingeladen",
+      "subtitle": "{{email}} steht aktuell auf keiner Gästeliste. Wende dich an die Organisator:innen, falls das ein Fehler ist.",
+      "signOutHint": "Zurück zur Startseite"
     }
   }
 }

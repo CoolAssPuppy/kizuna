@@ -11,6 +11,7 @@ import { DocumentsScreen } from './DocumentsScreen';
 import { EventEditScreen } from './EventEditScreen';
 import { FeedScreen } from './FeedScreen';
 import { GroundTransportToolScreen } from './GroundTransportToolScreen';
+import { InvitationsScreen } from './invitations/InvitationsScreen';
 import { NudgesScreen } from './NudgesScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { RoomAssignmentToolScreen } from './RoomAssignmentToolScreen';
@@ -37,6 +38,7 @@ export function AdminRoute(): JSX.Element {
       <Route element={<AdminLayout />}>
         <Route index element={<Navigate to="about" replace />} />
         <Route path="about" element={<AboutScreen />} />
+        <Route path="invitations" element={<InvitationsScreen />} />
         <Route path="events" element={<Navigate to="/all-events" replace />} />
         <Route path="events/new" element={<EventEditScreen />} />
         <Route path="events/:eventId" element={<EventEditScreen />} />

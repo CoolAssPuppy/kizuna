@@ -10,7 +10,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider)
 values ('00000000-0000-0000-0000-000000000010', 'eve@example.com', 'employee', 'hibob_eve', 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, is_active)
-values ('00000000-0000-0000-0000-0000000000e1', 'Test', 'supafest', current_date, current_date + 1, false);
+values ('00000000-0000-0000-0000-0000000000e1', 'Test', 'company_offsite', current_date, current_date + 1, false);
 
 insert into public.registrations (id, user_id, event_id, status)
 values ('00000000-0000-0000-0000-0000000000a1',

@@ -817,6 +817,48 @@ export type Database = {
           },
         ]
       }
+      event_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          event_id: string
+          first_name: string | null
+          invited_by: string | null
+          last_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          event_id: string
+          first_name?: string | null
+          invited_by?: string | null
+          last_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          event_id?: string
+          first_name?: string | null
+          invited_by?: string | null
+          last_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invitations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_photo_hashtags: {
         Row: {
           hashtag: string
@@ -930,6 +972,7 @@ export type Database = {
       events: {
         Row: {
           airport_iata: string | null
+          allowed_domains: string[]
           end_date: string
           hero_image_path: string | null
           id: string
@@ -949,6 +992,7 @@ export type Database = {
         }
         Insert: {
           airport_iata?: string | null
+          allowed_domains?: string[]
           end_date: string
           hero_image_path?: string | null
           id?: string
@@ -968,6 +1012,7 @@ export type Database = {
         }
         Update: {
           airport_iata?: string | null
+          allowed_domains?: string[]
           end_date?: string
           hero_image_path?: string | null
           id?: string
@@ -2441,6 +2486,14 @@ export type Database = {
       current_active_event_id: { Args: never; Returns: string }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       delete_event_cascade: { Args: { p_event_id: string }; Returns: boolean }
+      email_domain_matches: {
+        Args: { p_domain: string; p_email: string }
+        Returns: boolean
+      }
+      email_in_domains: {
+        Args: { p_domains: string[]; p_email: string }
+        Returns: boolean
+      }
       exchange_oauth_code: {
         Args: { p_code: string; p_state: string }
         Returns: {
@@ -2465,6 +2518,35 @@ export type Database = {
           email: string
           user_id: string
         }[]
+      }
+      list_my_eligible_events: {
+        Args: never
+        Returns: {
+          airport_iata: string | null
+          allowed_domains: string[]
+          end_date: string
+          hero_image_path: string | null
+          id: string
+          invite_all_employees: boolean
+          is_active: boolean
+          location: string | null
+          logo_path: string | null
+          name: string
+          reg_closes_at: string | null
+          reg_opens_at: string | null
+          start_date: string
+          subtitle: string | null
+          swag_locked_at: string | null
+          swag_locked_by: string | null
+          time_zone: string
+          type: Database["public"]["Enums"]["event_type"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_my_registration_task_complete: {
@@ -2530,6 +2612,10 @@ export type Database = {
         Args: { p_request_id: string; p_requests: string }
         Returns: undefined
       }
+      user_eligible_for_event: {
+        Args: { p_event_id: string; p_user_id: string }
+        Returns: boolean
+      }
       verify_api_key: {
         Args: { p_ip?: unknown; p_token: string }
         Returns: {
@@ -2566,7 +2652,7 @@ export type Database = {
       dietary_severity: "preference" | "intolerance" | "allergy"
       document_audience: "all" | "employee" | "guest"
       document_content_type: "markdown" | "pdf" | "notion"
-      event_type: "supafest" | "select" | "meetup"
+      event_type: "company_offsite" | "sales_meeting" | "team_offsite"
       external_source_type: "hibob" | "perk"
       feed_location: "main" | "sidebar"
       field_source_type: "hibob" | "perk" | "user_entered" | "admin_set"
@@ -2782,7 +2868,7 @@ export const Constants = {
       dietary_severity: ["preference", "intolerance", "allergy"],
       document_audience: ["all", "employee", "guest"],
       document_content_type: ["markdown", "pdf", "notion"],
-      event_type: ["supafest", "select", "meetup"],
+      event_type: ["company_offsite", "sales_meeting", "team_offsite"],
       external_source_type: ["hibob", "perk"],
       feed_location: ["main", "sidebar"],
       field_source_type: ["hibob", "perk", "user_entered", "admin_set"],

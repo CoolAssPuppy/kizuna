@@ -12,19 +12,10 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/components/ui/toast';
-import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 
-import {
-  importPerkBookingViaEdge,
-  listPerkBookingsViaEdge,
-  parseItineraryViaEdge,
-  saveParsedAccommodations,
-  saveParsedFlights,
-  saveParsedTransfers,
-  type PerkBookingSummary,
-} from './importApi';
+import { type PerkBookingSummary } from './importApi';
+import { useItineraryImport } from './useItineraryImport';
 
 interface Props {
   open: boolean;
@@ -77,95 +68,17 @@ export function ImportItineraryDialog({
   onImported,
 }: Props): JSX.Element {
   const { t } = useTranslation();
-  const { show } = useToast();
-  const { user } = useAuth();
   const [tab, setTab] = useState<SourceTab>('paste');
-  const [pasted, setPasted] = useState('');
-  const [busy, setBusy] = useState(false);
-  // Inline error message rendered directly in the dialog. Toasts alone
-  // were too easy to miss when the user is focused on the textarea.
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const importer = useItineraryImport({ eventTimezone, onImported });
 
-  // Perk picker state. We deliberately keep the listed bookings even
-  // after a successful import so the user can come back and import a
-  // sibling trip without re-listing.
-  const [perkBookings, setPerkBookings] = useState<ReadonlyArray<PerkBookingSummary> | null>(null);
-  const [perkImportingId, setPerkImportingId] = useState<string | null>(null);
-
-  async function handlePerkList(): Promise<void> {
-    if (!user) return;
-    setBusy(true);
-    setErrorMessage(null);
-    try {
-      const result = await listPerkBookingsViaEdge();
-      setPerkBookings(result.bookings);
-      if (!result.found) {
-        setErrorMessage(t('itinerary.import.perk.nothingFound'));
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setErrorMessage(`${t('itinerary.import.perk.error')} — ${message}`);
-    } finally {
-      setBusy(false);
-    }
+  async function handleParse(): Promise<void> {
+    const ok = await importer.importPasted();
+    if (ok) onOpenChange(false);
   }
 
   async function handlePerkImport(bookingId: string): Promise<void> {
-    setPerkImportingId(bookingId);
-    setErrorMessage(null);
-    try {
-      const result = await importPerkBookingViaEdge(bookingId);
-      const total = result.inserted + result.updated;
-      show(t('itinerary.import.perk.success', { count: total }));
-      onImported();
-      onOpenChange(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      setErrorMessage(`${t('itinerary.import.perk.error')} — ${message}`);
-    } finally {
-      setPerkImportingId(null);
-    }
-  }
-
-  async function handleParse(): Promise<void> {
-    if (!pasted.trim() || !user) return;
-    setBusy(true);
-    setErrorMessage(null);
-    try {
-      const result = await parseItineraryViaEdge(pasted.trim());
-      const [flightCount, hotelCount, transferCount] = await Promise.all([
-        saveParsedFlights(user.id, result.flights, eventTimezone),
-        saveParsedAccommodations(user.id, result.hotels),
-        saveParsedTransfers(user.id, result.car_services, result.rental_cars, eventTimezone),
-      ]);
-      const parsed =
-        result.flights.length +
-        result.hotels.length +
-        result.rental_cars.length +
-        result.car_services.length;
-      const persisted = flightCount + hotelCount + transferCount;
-      if (persisted === 0 && parsed === 0) {
-        // Surface "we found nothing in this text" inline so the user
-        // can decide whether to refine the paste or pick a different
-        // booking confirmation.
-        setErrorMessage(t('itinerary.import.nothingFound'));
-        return;
-      }
-      show(t('itinerary.import.success', { count: persisted }));
-      onImported();
-      onOpenChange(false);
-      setPasted('');
-      setErrorMessage(null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      // Render the underlying server message verbatim. The parse-itinerary
-      // edge function returns useful detail like "OPENAI_API_KEY missing"
-      // or "you must provide a model parameter"; hiding it behind a
-      // generic toast made debugging nearly impossible.
-      setErrorMessage(`${t('itinerary.import.error')} — ${message}`);
-    } finally {
-      setBusy(false);
-    }
+    const ok = await importer.importPerk(bookingId);
+    if (ok) onOpenChange(false);
   }
 
   return (
@@ -203,30 +116,30 @@ export function ImportItineraryDialog({
           {tab === 'paste' ? (
             <div className="space-y-3">
               <Textarea
-                value={pasted}
-                onChange={(event) => setPasted(event.target.value)}
+                value={importer.pasted}
+                onChange={(event) => importer.setPasted(event.target.value)}
                 rows={10}
                 placeholder={t('itinerary.import.pastePlaceholder')}
                 aria-label={t('itinerary.import.tabs.paste')}
               />
               <p className="text-xs text-muted-foreground">{t('itinerary.import.pasteHint')}</p>
-              {errorMessage ? (
+              {importer.errorMessage ? (
                 <div
                   role="alert"
                   className="flex items-start gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
                 >
                   <AlertTriangle aria-hidden className="mt-0.5 h-4 w-4 shrink-0" />
-                  <p className="break-words">{errorMessage}</p>
+                  <p className="break-words">{importer.errorMessage}</p>
                 </div>
               ) : null}
             </div>
           ) : tab === 'perk' ? (
             <PerkPanel
-              bookings={perkBookings}
-              busy={busy}
-              importingId={perkImportingId}
-              errorMessage={errorMessage}
-              onSync={() => void handlePerkList()}
+              bookings={importer.perkBookings}
+              busy={importer.busy}
+              importingId={importer.perkImportingId}
+              errorMessage={importer.errorMessage}
+              onSync={() => void importer.listPerk()}
               onImport={(id) => void handlePerkImport(id)}
             />
           ) : (
@@ -246,24 +159,24 @@ export function ImportItineraryDialog({
                 'repeating-linear-gradient(45deg, rgba(168,85,247,0.18) 0 8px, transparent 8px 16px)',
             }}
             onClick={() => {
-              setPasted(TEST_ITINERARY);
+              importer.setPasted(TEST_ITINERARY);
               setTab('paste');
-              setErrorMessage(null);
+              importer.clearError();
             }}
           >
             <FlaskConical aria-hidden className="mr-2 h-4 w-4" />
             {t('itinerary.import.testItinerary')}
           </Button>
           <div className="flex w-full flex-row justify-end gap-2 sm:w-auto">
-            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>
+            <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={importer.busy}>
               {t('actions.cancel')}
             </Button>
             {tab !== 'perk' ? (
               <Button
                 onClick={() => void handleParse()}
-                disabled={busy || tab !== 'paste' || pasted.trim().length === 0}
+                disabled={importer.busy || tab !== 'paste' || importer.pasted.trim().length === 0}
               >
-                {busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
+                {importer.busy ? t('itinerary.import.parsing') : t('itinerary.import.parse')}
               </Button>
             ) : null}
           </div>

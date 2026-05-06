@@ -39,7 +39,7 @@ select
   '2027-01-12T08:00:00Z',
   e.time_zone
 from public.events e
-where e.is_active and e.type = 'supafest'
+where e.is_active and e.type = 'company_offsite'
 limit 1;
 
 -- Guest with sync OFF: cannot see sponsor's row

@@ -8,7 +8,7 @@ select plan(4);
 
 -- Test event so the session has a place to live.
 insert into public.events (id, name, type, start_date, end_date, time_zone, location, is_active)
-values ('00000000-0000-0000-0000-00000000aa10', 'pgTAP Guest Attendance', 'supafest',
+values ('00000000-0000-0000-0000-00000000aa10', 'pgTAP Guest Attendance', 'company_offsite',
         current_date, current_date + 5, 'UTC', 'pgtap', false);
 
 insert into public.sessions (id, event_id, type, audience, status, title, starts_at, ends_at)

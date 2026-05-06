@@ -227,6 +227,143 @@ create trigger flag_transport_for_review_on_flight_change_au
 -- Mandatory sessions auto-add for every registered user; opt-in sessions
 -- only land for users with a session_registration row.
 
+-- ---------------------------------------------------------------------
+-- Eligibility helpers
+-- ---------------------------------------------------------------------
+-- A user is "eligible" for an event when any of these hold:
+--   1. they are admin / super_admin (always eligible)
+--   2. events.invite_all_employees=true AND their email host matches
+--      one of events.allowed_domains (exact 'host.tld' or wildcard
+--      '*.host.tld')
+--   3. there's a row in public.event_invitations matching
+--      (event_id, lower(email))
+--   4. the caller is a guest whose sponsor is eligible on the same
+--      event (so guest seats follow the inviting employee)
+--   5. the caller already has a registrations row on the event (keeps
+--      registered users alive even when a domain or invitation is
+--      later removed)
+--
+-- Storage RLS, the registrations read policy, and the itinerary chain
+-- all funnel through public.user_eligible_for_event so the rule lives
+-- in one place. SECURITY DEFINER so the helper's reads against events
+-- and event_invitations don't fight the calling policy.
+
+create or replace function public.email_domain_matches(p_email text, p_domain text)
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  -- Wildcard form '*.host.tld' matches any subdomain ('foo.host.tld',
+  -- 'a.b.host.tld') but NOT the bare host. Use both 'host.tld' and
+  -- '*.host.tld' to cover the root and subdomains together. The split
+  -- on '@' tolerates emails without an '@' (returns empty host) by
+  -- failing the equality check.
+  select case
+    when p_email is null or p_domain is null then false
+    when p_domain like '*.%' then
+      lower(split_part(p_email, '@', 2)) like '%.' || lower(substring(p_domain from 3))
+    else
+      lower(split_part(p_email, '@', 2)) = lower(p_domain)
+  end
+$$;
+
+comment on function public.email_domain_matches(text, text) is
+  'Returns true when p_email host matches p_domain. Supports exact (example.com) and subdomain wildcard (*.example.com) shapes.';
+
+create or replace function public.email_in_domains(p_email text, p_domains text[])
+returns boolean
+language sql
+immutable
+set search_path = public
+as $$
+  select coalesce(
+    bool_or(public.email_domain_matches(p_email, d)),
+    false
+  )
+  from unnest(coalesce(p_domains, '{}'::text[])) as d
+$$;
+
+comment on function public.email_in_domains(text, text[]) is
+  'Returns true when p_email matches any entry in p_domains via email_domain_matches.';
+
+create or replace function public.user_eligible_for_event(p_user_id uuid, p_event_id uuid)
+returns boolean
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_email text;
+  v_role text;
+  v_sponsor_id uuid;
+  v_event public.events%rowtype;
+begin
+  if p_user_id is null or p_event_id is null then
+    return false;
+  end if;
+
+  select * into v_event from public.events where id = p_event_id;
+  if not found then
+    return false;
+  end if;
+
+  select email, role, sponsor_id
+    into v_email, v_role, v_sponsor_id
+  from public.users where id = p_user_id;
+  if not found then
+    return false;
+  end if;
+
+  -- (1) admin / super_admin: blanket access
+  if v_role in ('admin', 'super_admin') then
+    return true;
+  end if;
+
+  -- (5) existing registration keeps eligibility regardless of later
+  -- domain/invitation removal
+  if exists (
+    select 1 from public.registrations
+    where user_id = p_user_id and event_id = p_event_id
+  ) then
+    return true;
+  end if;
+
+  -- (2) open-to-domains
+  if v_event.invite_all_employees
+     and public.email_in_domains(v_email, v_event.allowed_domains) then
+    return true;
+  end if;
+
+  -- (3) explicit per-row invitation. citext on event_invitations.email
+  -- means the comparison is case-insensitive without an explicit lower().
+  if exists (
+    select 1 from public.event_invitations
+    where event_id = p_event_id
+      and email = v_email
+  ) then
+    return true;
+  end if;
+
+  -- (4) guest follows their sponsor
+  if v_role = 'guest' and v_sponsor_id is not null then
+    return public.user_eligible_for_event(v_sponsor_id, p_event_id);
+  end if;
+
+  return false;
+end
+$$;
+
+comment on function public.user_eligible_for_event(uuid, uuid) is
+  'Single source of truth for "is this user eligible to register for / see content on this event". Walks five truth paths; admins are always true; existing registrations preserve access after a domain or invitation is removed.';
+
+revoke all on function public.user_eligible_for_event(uuid, uuid) from public;
+grant execute on function public.user_eligible_for_event(uuid, uuid) to authenticated, anon;
+grant execute on function public.email_domain_matches(text, text) to authenticated, anon;
+grant execute on function public.email_in_domains(text, text[]) to authenticated, anon;
+
+
 -- Picks the active event used to attribute flight and transport itinerary rows.
 -- Returns null if no event is active; callers short-circuit in that case.
 create or replace function public.current_active_event_id()
@@ -240,6 +377,59 @@ as $$
   order by start_date desc
   limit 1
 $$;
+
+
+-- Returns every event the caller is eligible for, ordered by start_date
+-- desc (most recent first). Used by the home-screen first-login picker
+-- and the profile dropdown event switcher. SECURITY DEFINER so the
+-- helper's reads against events / event_invitations / users don't fight
+-- the calling RLS surface — we then filter inside the function with
+-- public.user_eligible_for_event so the rule stays in one place.
+create or replace function public.list_my_eligible_events()
+returns setof public.events
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select e.*
+  from public.events e
+  where public.user_eligible_for_event(auth.uid(), e.id)
+  order by e.start_date desc, e.name asc
+$$;
+
+revoke all on function public.list_my_eligible_events() from public;
+grant execute on function public.list_my_eligible_events() to authenticated;
+
+
+-- Lower-cases events.allowed_domains entries on insert/update so casing
+-- variations ('Supabase.IO') resolve to the canonical 'supabase.io' the
+-- email matcher expects. Empty entries are dropped — they'd be a footgun
+-- (an empty string passes email_domain_matches for users with no @host
+-- portion in their email).
+create or replace function public.normalize_allowed_domains()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  if new.allowed_domains is null then
+    new.allowed_domains := '{}';
+  else
+    new.allowed_domains := (
+      select coalesce(array_agg(distinct trim(lower(d))), '{}')
+      from unnest(new.allowed_domains) as d
+      where coalesce(trim(d), '') <> ''
+    );
+  end if;
+  return new;
+end
+$$;
+
+drop trigger if exists events_normalize_allowed_domains on public.events;
+create trigger events_normalize_allowed_domains
+  before insert or update of allowed_domains on public.events
+  for each row execute function public.normalize_allowed_domains();
 
 
 create or replace function public.sync_itinerary_for_session_registration()

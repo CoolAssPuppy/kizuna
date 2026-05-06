@@ -28,7 +28,7 @@ begin
     start_date, end_date, reg_opens_at, reg_closes_at,
     is_active, hero_image_path, logo_path, invite_all_employees
   ) values (
-    v_event_id, v_event_name, v_event_subtitle, 'supafest', v_event_location, v_event_tz,
+    v_event_id, v_event_name, v_event_subtitle, 'company_offsite', v_event_location, v_event_tz,
     v_start_date, v_end_date, v_reg_opens_at, v_reg_closes_at,
     false, v_hero_image_path, v_logo_path, true
   );

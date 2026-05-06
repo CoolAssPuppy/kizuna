@@ -20,6 +20,7 @@ import './sessions.ts';
 import './sessions-propose.ts';
 import './tags.ts';
 import './events.ts';
+import './invitations.ts';
 import './agenda.ts';
 import './photos.ts';
 import './channels.ts';

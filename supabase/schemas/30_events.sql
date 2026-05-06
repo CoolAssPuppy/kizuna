@@ -25,7 +25,18 @@ create table public.events (
   is_active boolean not null default false,
   hero_image_path text,
   logo_path text,
+  -- Eligibility model. Two mutually-supportive paths:
+  --   1. invite_all_employees=true + allowed_domains: anyone whose email
+  --      lands in one of the listed domains is eligible. Use exact host
+  --      ('supabase.io') or subdomain wildcards ('*.supabase.io') —
+  --      see public.email_in_domains() for the matching rule.
+  --   2. invite_all_employees=false: eligibility is gated by per-row
+  --      entries in public.event_invitations(event_id, email, ...).
+  -- Admins are always eligible regardless of these settings; existing
+  -- registrations also keep someone eligible after a domain is removed
+  -- (so revoking eligibility doesn't silently break their access).
   invite_all_employees boolean not null default false,
+  allowed_domains text[] not null default '{}',
   swag_locked_at timestamptz,
   swag_locked_by uuid references public.users(id) on delete set null
 );
@@ -35,7 +46,9 @@ comment on column public.events.hero_image_path is
 comment on column public.events.logo_path is
   'Storage object path inside the event-content bucket — e.g. <event_id>/about/logo.png. Resolved to a signed URL at read time.';
 comment on column public.events.invite_all_employees is
-  'When true, every active employee is implicitly invited (RLS extends visibility to role=employee). When false, only users with a registrations row see the event.';
+  'When true, every user whose email matches one of allowed_domains is eligible. When false, eligibility is per-row in public.event_invitations.';
+comment on column public.events.allowed_domains is
+  'Email domains eligible for this event when invite_all_employees=true. Each entry is either an exact host ("supabase.io") or a subdomain wildcard ("*.supabase.io"). Lower-cased on insert; matched by public.email_in_domains().';
 comment on column public.events.swag_locked_at is
   'Non-null = swag selections are frozen for this event. Set by lock_swag(); intentionally one-way (no unlock RPC) so the ops team can hand-off to the swag vendor with confidence.';
 
@@ -48,7 +61,7 @@ comment on column public.events.is_active is
   'Controls app welcome screen routing. Only one supafest event should be active at a time.';
 
 create unique index events_one_active_supafest_idx
-  on public.events ((1)) where is_active and type = 'supafest';
+  on public.events ((1)) where is_active and type = 'company_offsite';
 create index events_type_active_idx on public.events(type) where is_active;
 
 
@@ -296,3 +309,31 @@ comment on column public.feed_items.occurs_at is
 
 create index feed_items_event_location_position_idx
   on public.feed_items(event_id, location, position);
+
+
+-- Per-event invitations. Used when events.invite_all_employees=false:
+-- the admin curates a list of emails (often pasted or CSV-imported) and
+-- only those addresses are eligible for the event. first_name/last_name
+-- are captured at invite time so the admin can pre-fill greetings and
+-- the welcome screen knows what to call the attendee before they land
+-- on the registration form. lower-casing is enforced via the citext
+-- type so casing doesn't keep someone out.
+create table public.event_invitations (
+  event_id uuid not null references public.events(id) on delete cascade,
+  email citext not null,
+  first_name text,
+  last_name text,
+  invited_by uuid references public.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  primary key (event_id, email)
+);
+
+comment on table public.event_invitations is
+  'Per-event eligibility list for invite-only events. Email is citext so casing variations resolve to the same row; primary key (event_id, email) prevents duplicates.';
+comment on column public.event_invitations.first_name is
+  'Captured at invite time so the welcome screen and admin tooling can address the attendee before they sign up.';
+comment on column public.event_invitations.invited_by is
+  'Admin user who added this invitation. Set null on user delete so the invitation persists if the inviting admin leaves.';
+
+create index event_invitations_event_id_idx on public.event_invitations(event_id);
+create index event_invitations_email_idx on public.event_invitations(email);

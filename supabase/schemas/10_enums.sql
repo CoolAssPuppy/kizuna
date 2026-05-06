@@ -70,8 +70,11 @@ create type flight_source_type as enum ('perk_sync', 'perk_csv', 'manual_obs');
 create type transport_direction as enum ('arrival', 'departure');
 create type ground_transport_need as enum ('none', 'arrival', 'departure', 'both');
 
--- Events and sessions
-create type event_type as enum ('supafest', 'select', 'meetup');
+-- Events and sessions. The event_type values describe the human-facing
+-- kind of event; behaviour is identical across them today. The SPA and
+-- CLI fall back to `company_offsite` when no per-browser event override
+-- is set (see useActiveEvent.ts and src/lib/cli/commands/_shared.ts).
+create type event_type as enum ('company_offsite', 'sales_meeting', 'team_offsite');
 create type session_type as enum ('keynote', 'breakout', 'workshop', 'dinner', 'activity', 'transport', 'social');
 create type session_audience as enum ('all', 'employees_only', 'guests_only', 'opt_in');
 create type session_registration_status as enum ('registered', 'waitlisted', 'attended', 'no_show');

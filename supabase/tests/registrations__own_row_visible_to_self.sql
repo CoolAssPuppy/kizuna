@@ -15,7 +15,7 @@ values
   ('00000000-0000-0000-0000-000000000002', 'bob@example.com', 'employee', 'hibob_bob', 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, is_active)
-values ('00000000-0000-0000-0000-00000000ee01', 'Test Event', 'supafest', current_date, current_date + 7, false);
+values ('00000000-0000-0000-0000-00000000ee01', 'Test Event', 'company_offsite', current_date, current_date + 7, false);
 
 insert into public.registrations (user_id, event_id, status)
 values

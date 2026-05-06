@@ -3,9 +3,14 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
+import { Check } from 'lucide-react';
+
 import { Avatar } from '@/components/Avatar';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
+import { setEventOverride, useEventOverride } from '@/features/events/eventOverride';
+import { useEligibleEvents } from '@/features/events/useEligibleEvents';
+import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { cn } from '@/lib/utils';
 import { getSupabaseClient } from '@/lib/supabase';
@@ -46,6 +51,14 @@ export function HeaderUserMenu(): JSX.Element {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { data: eligibleEvents } = useEligibleEvents();
+  const { data: activeEvent } = useActiveEvent();
+  const override = useEventOverride();
+  // Show the event switcher only when the user has more than one
+  // eligible event. With a single event the switcher is noise; with
+  // none the picker handles it instead.
+  const showEventSwitcher = eligibleEvents.length > 1;
+  const currentEventId = activeEvent?.id ?? override ?? null;
 
   const { data: avatarPath = null } = useQuery({
     queryKey: ['employee-profile-avatar-path', user?.id ?? null],
@@ -104,6 +117,40 @@ export function HeaderUserMenu(): JSX.Element {
             </nav>
             <div className="border-t" />
           </div>
+          {showEventSwitcher ? (
+            <>
+              <div className="border-t" />
+              <div className="px-3 pb-1 pt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                {t('header.yourEvents')}
+              </div>
+              <ul className="flex flex-col pb-1">
+                {eligibleEvents.map((event) => {
+                  const active = event.id === currentEventId;
+                  return (
+                    <li key={event.id}>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setEventOverride(event.id);
+                          close();
+                          navigate('/');
+                        }}
+                        className={cn(
+                          'flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent',
+                          active && 'bg-accent font-medium text-accent-foreground',
+                        )}
+                      >
+                        <span className="truncate">{event.name}</span>
+                        {active ? <Check aria-hidden className="h-3.5 w-3.5 shrink-0" /> : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="border-t" />
+            </>
+          ) : null}
           <MenuItem
             label={t('profile.title')}
             active={pathname === '/profile'}

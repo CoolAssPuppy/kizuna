@@ -29,7 +29,7 @@ insert into public.users (id, email, role, hibob_id, auth_provider) values
   ('00000000-0000-0000-0000-00000000aa03', 'pgtap.prop.admin@example.com', 'admin',       'h_prop_admin', 'sso');
 
 insert into public.events (id, name, type, start_date, end_date, is_active, time_zone)
-values ('00000000-0000-0000-0000-0000000000ef', 'Proposals Event', 'supafest',
+values ('00000000-0000-0000-0000-0000000000ef', 'Proposals Event', 'company_offsite',
         current_date, current_date + 3, false, 'America/Edmonton');
 
 -- ---------------------------------------------------------------------

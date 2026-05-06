@@ -8,6 +8,7 @@ import { OfflineBanner } from '@/components/OfflineBanner';
 import { TerminalHeader } from '@/components/TerminalHeader';
 import { useAuth } from '@/features/auth/AuthContext';
 
+import { EventRouterGate } from './EventRouterGate';
 import { GlobalRealtime } from './GlobalRealtime';
 
 interface Props {
@@ -51,6 +52,7 @@ export function AppLayout({ children }: Props): JSX.Element {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
+      <EventRouterGate />
       <GlobalRealtime />
       <OfflineBanner />
       <CommandPalette />

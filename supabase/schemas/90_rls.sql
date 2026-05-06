@@ -142,6 +142,12 @@ end
 $$;
 
 
+-- (Eligibility helpers — email_domain_matches, email_in_domains, and
+-- user_eligible_for_event — live in 80_functions_and_triggers.sql so
+-- functions in that file like list_my_eligible_events can reference
+-- them. They're documented near their definition there.)
+
+
 -- Enable RLS on every public table.
 do $$
 declare
@@ -295,29 +301,31 @@ create policy accessibility_preferences_self_all on public.accessibility_prefere
   with check (public.is_self_or_admin(user_id));
 
 
--- Events: every authenticated user can read; only admins write.
--- Users see events they have a registration row in, OR events flagged
--- invite_all_employees = true (provided they are an active employee).
--- Admins see every event regardless.
+-- Events: an authenticated user sees an event when they're eligible.
+-- The eligibility helper covers admin (always), domain-based access,
+-- per-row invitations, guest sponsor inheritance, and existing
+-- registrations. Falling back to a single helper means policy bodies
+-- across the codebase don't drift as the eligibility model evolves.
 create policy events_visible_read on public.events
-  for select using (
-    public.is_admin()
-    or exists (
-      select 1 from public.registrations r
-      where r.event_id = events.id and r.user_id = auth.uid()
-    )
-    or (
-      events.invite_all_employees
-      and exists (
-        select 1 from public.users u
-        where u.id = auth.uid() and u.role = 'employee' and u.is_active
-      )
-    )
-  );
+  for select using (public.user_eligible_for_event(auth.uid(), events.id));
 
 create policy events_admin_write on public.events
   for all using (public.is_admin())
   with check (public.is_admin());
+
+
+-- event_invitations: admin-only writes; admins read everything; the
+-- invited person can see their own row (so the future "you've been
+-- invited to X" surface can render without an admin round-trip).
+create policy event_invitations_admin_all on public.event_invitations
+  for all using (public.is_admin())
+  with check (public.is_admin());
+
+create policy event_invitations_self_read on public.event_invitations
+  for select using (
+    not public.is_admin()
+    and email = (select email::citext from public.users where id = auth.uid())
+  );
 
 
 -- Feed items: anyone authenticated can read items inside their display
@@ -666,17 +674,7 @@ create policy swag_items_read_visible on public.swag_items
     public.is_admin()
     or (
       not is_hidden
-      and exists (
-        select 1 from public.events e
-        where e.id = swag_items.event_id
-          and (
-            e.invite_all_employees
-            or exists (
-              select 1 from public.registrations r
-              where r.event_id = e.id and r.user_id = auth.uid()
-            )
-          )
-      )
+      and public.user_eligible_for_event(auth.uid(), swag_items.event_id)
     )
   );
 
@@ -885,21 +883,7 @@ stable
 security definer
 set search_path = public
 as $$
-  select
-    public.is_admin()
-    or exists (
-      select 1 from public.registrations r
-      where r.user_id = auth.uid() and r.event_id = p_event_id
-    )
-    or exists (
-      select 1
-      from public.events e
-      join public.users u on u.id = auth.uid()
-      where e.id = p_event_id
-        and e.invite_all_employees
-        and u.role = 'employee'
-        and u.is_active
-    )
+  select public.user_eligible_for_event(auth.uid(), p_event_id)
 $$;
 
 revoke all on function public.caller_can_read_event(uuid) from public;

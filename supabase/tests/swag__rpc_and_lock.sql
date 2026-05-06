@@ -12,12 +12,12 @@ select plan(8);
 -- Test event (separate from the seeded supafest event so its swag
 -- catalogue is empty until this test populates it).
 insert into public.events (id, name, type, start_date, end_date, time_zone, location, is_active)
-values ('00000000-0000-0000-0000-000000000e1d', 'pgTAP Swag Event', 'supafest',
+values ('00000000-0000-0000-0000-000000000e1d', 'pgTAP Swag Event', 'company_offsite',
         current_date, current_date + 5, 'UTC', 'pgtap', false);
 
 -- Outsider event for the cross-event guard test.
 insert into public.events (id, name, type, start_date, end_date, time_zone, location, is_active)
-values ('00000000-0000-0000-0000-000000000ee2', 'pgTAP Outsider Event', 'supafest',
+values ('00000000-0000-0000-0000-000000000ee2', 'pgTAP Outsider Event', 'company_offsite',
         current_date, current_date + 1, 'UTC', 'pgtap', false);
 
 insert into auth.users (id, email, aud, role)

@@ -289,7 +289,7 @@ declare
   v_reg_id uuid;
   v_task registration_task_key;
 begin
-  select id into v_event_id from public.events where is_active = true and type = 'supafest' limit 1;
+  select id into v_event_id from public.events where is_active = true and type = 'company_offsite' limit 1;
   if v_event_id is null then
     raise notice 'no active supafest event yet — sample registrations skipped';
     return;
