@@ -81,20 +81,36 @@ When adding any new Storage usage:
 ```
 kizuna/
 ├── src/                    # Vite React PWA
-│   ├── app/                # Routing, layouts, providers
-│   ├── components/         # Shared UI (shadcn primitives + composed)
-│   │   ├── ui/             # shadcn/ui generated components
-│   │   └── ...             # Domain components
-│   ├── features/           # Feature-sliced (registration, itinerary, admin, …)
-│   │   └── <feature>/
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       ├── api/        # Supabase client wrappers
-│   │       └── *.test.tsx
-│   ├── lib/                # Cross-cutting utilities (supabase client, i18n, dates)
-│   ├── locales/            # i18n resource files
-│   │   └── en-US/
+│   ├── app/                # Routing, providers, layout
+│   │   └── chrome/         # Header, footer, language picker, terminal header
+│   ├── components/         # Primitives shared across 3+ features
+│   │   ├── ui/             # shadcn/ui generated components (untouched)
+│   │   └── terminal/       # Branded terminal-aesthetic primitives
+│   ├── features/           # Feature-sliced modules
+│   │   ├── admin/          # One subfolder per admin tool
+│   │   │   ├── api/        # Supabase wrappers
+│   │   │   ├── agenda/, conflicts/, documents/, events/, feed/,
+│   │   │   ├── ground-transport/, invitations/, nudges/, reports/,
+│   │   │   ├── room-assignment/, scan/, stats/, swag/, tags/
+│   │   ├── agenda/         # Public agenda (sessions, proposals, tags)
+│   │   ├── auth/           # AuthProvider, RequireAuth, SignInScreen
+│   │   ├── cli/            # Command palette, terminal hook
+│   │   ├── community/      # Profiles, channels, photos, world map
+│   │   ├── documents/      # Consent gate, document signing
+│   │   ├── events/         # Active event hook, event countdown
+│   │   ├── guests/         # Invitation acceptance
+│   │   ├── home/           # Home dashboard, jet-lag fighter, editorial feed
+│   │   ├── itinerary/      # Personal schedule + offline + QR check-in
+│   │   ├── notifications/  # Bell, dropdown, read state
+│   │   ├── profile/        # Profile screen + API keys
+│   │   ├── registration/   # Wizard shell + sections
+│   │   ├── welcome/        # Logged-out hero
+│   │   └── errors/         # NotFound
+│   ├── hooks/              # Hooks shared by 3+ features
+│   ├── lib/                # Cross-cutting utilities (supabase client, i18n, CLI library)
+│   ├── locales/            # i18n resource files (en-US default)
 │   ├── styles/
+│   ├── test/               # Test setup and helpers
 │   └── types/              # Generated Supabase types live here
 ├── supabase/
 │   ├── schemas/            # Declarative schemas (table + policy + trigger SQL)
@@ -110,6 +126,17 @@ kizuna/
 │   └── lessons.md          # Rolling log of corrections and patterns
 └── CLAUDE.md               # This file
 ```
+
+### Where things live
+
+Each `features/<x>/` folder owns its UI, hooks, and Supabase calls. `src/components/` holds primitives shared by 3+ features (or by app shell + a feature). `src/components/ui/` holds shadcn primitives untouched. `src/app/` holds the router, providers, layout, and chrome (header, footer, language picker). `src/lib/` holds cross-cutting utilities (Supabase client, i18n, formatters, the CLI library). `src/hooks/` holds hooks shared by 3+ features. Tests sit next to the file under test.
+
+### Conventions
+
+- Folder names: kebab-case. Single words are fine (`agenda/`, `photos/`).
+- File names: PascalCase for components, camelCase for hooks and utilities.
+- Inner `components/` subfolders only when the feature has 10+ component files, or the subfolder has a real semantic name (`sections/`, `person/`, `photos/`).
+- `api.ts` for single-resource features; `api/<resource>.ts` once a feature touches three or more distinct tables.
 
 ## Development workflow
 

@@ -214,22 +214,45 @@ That runs `doppler secrets download` into `supabase/.env` (so `OPENAI_API_KEY` a
 ```
 src/
   app/             Routing, providers, error boundary, layout, theme
-  components/      Shared UI (header, footer, avatar, shadcn primitives)
-    ui/            shadcn-generated atoms
+    chrome/        App-shell pieces: header, footer, language picker, terminal header
+  components/      Primitives shared across 3+ features (or app shell + a feature)
+    ui/            shadcn-generated atoms (untouched)
+    terminal/      Branded terminal-aesthetic primitives (TerminalEyebrow, TerminalResults)
   features/        Feature-sliced modules
-    admin/         Reports, conflict resolution, agenda admin, nudges, stats, feed, documents
-    auth/          AuthProvider, RequireAuth, SignInScreen, dev shortcuts
-    community/     Profiles, channels, iMessage chat, world map, hobby + town matching
+    admin/         One subfolder per admin tool
+      api/         Supabase wrappers
+      agenda/      Agenda admin, session dialog, agenda CSV
+      conflicts/   Data-conflict resolution screen + panel
+      documents/   Document admin + dialog
+      events/      Event editor + domain allow-list
+      feed/        Editorial feed admin
+      ground-transport/  Transport tool (vehicles, passengers)
+      invitations/ Invite-attendee screen + dialog
+      nudges/      Nudge composer + history
+      reports/     Reports screen + per-report fetchers + CSV
+      room-assignment/   Room-block import + assignment UI
+      scan/        QR scanner screen + payload parser
+      stats/       Charts dashboard
+      swag/        Swag admin + size templates
+      tags/        Tag editor dialog
+    agenda/        Public agenda (sessions, proposals, tags)
+    auth/          AuthProvider, RequireAuth, SignInScreen, CLI OAuth
+    cli/           Command palette + command output + terminal hook
+    community/     Profiles, channels, iMessage chat, world map, photos
     documents/     Consent gate, documents tab, audit trail
     events/        useActiveEvent, EventCountdown, /all-events gallery
-    guests/        Invitation accept screen, edge function bindings
-    home/          Home dashboard, jet-lag fighter, editorial feed, greetings
+    guests/        Invitation accept screen, edge-function bindings
+    home/          Home dashboard, jet-lag fighter, editorial feed, memories preview
     itinerary/     Personal schedule + offline + QR check-in
+      api/         Items + import sub-modules
     notifications/ Bell + dropdown + read state
-    profile/       Left-nav profile editor that mounts every section
+    profile/       Profile screen + API keys
     registration/  Wizard shell + sections (personal info, dietary, ...)
     welcome/       Logged-out hero
+    errors/        NotFound
+  hooks/           Hooks shared by 3+ features
   lib/             Cross-cutting utilities
+    cli/           CLI dispatcher + command registry
     email/         Shared transactional email theme + templates
     integrations/  Resend, Stripe, OpenAI, HiBob, Slack, ... (graceful when unkeyed)
     edgeFunction.ts callEdgeFunction<T> wrapper with consistent error model
@@ -237,7 +260,7 @@ src/
     i18n.ts        i18next setup
     supabase.ts    Singleton client
     theme.ts       Theme tokens + persistence
-    useMountEffect.ts Explicit one-time external sync hook
+    timeOfDay.ts   Logged-out hero day/night background selector
   locales/         i18n resource files (en-US default)
   styles/          Tailwind + CSS variables for themes
   test/            Test setup and helpers
@@ -260,6 +283,12 @@ public/            Static assets, favicons, PWA manifest icons
 .github/workflows/ CI (typecheck, lint, format, test, build, e2e) — wired in M10+
 tasks/             Plan, lessons, refactor audit
 ```
+
+### Where things live
+
+Each `features/<x>/` folder owns its UI, hooks, and Supabase calls. `src/components/` holds primitives shared by 3+ features (or by app shell + a feature). `src/components/ui/` holds shadcn primitives untouched. `src/app/` holds the router, providers, layout, and chrome (header, footer, language picker). `src/lib/` holds cross-cutting utilities (Supabase client, i18n, formatters, the CLI library). `src/hooks/` holds hooks shared by 3+ features. Tests sit next to the file under test.
+
+Conventions: folder names are kebab-case (single words are fine); component files are PascalCase, hooks and utilities are camelCase; inner `components/` subfolders only when the feature has 10+ component files or the subfolder has a real semantic name (`sections/`, `person/`, `photos/`); `api.ts` for single-resource features and `api/<resource>.ts` once a feature touches three or more distinct tables.
 
 ## Routing map
 
