@@ -24,9 +24,9 @@ import {
   rankVehiclesForPassenger,
   windowTimeFmt,
   type VehicleStat,
-} from './groundTransport/grouping';
-import { NewVehicleDialog } from './groundTransport/NewVehicleDialog';
-import { VehicleSidebar } from './groundTransport/VehicleSidebar';
+} from './ground-transport/grouping';
+import { NewVehicleDialog } from './ground-transport/NewVehicleDialog';
+import { VehicleSidebar } from './ground-transport/VehicleSidebar';
 
 export function GroundTransportToolScreen(): JSX.Element {
   const { t } = useTranslation();

@@ -2,7 +2,7 @@ import type { AppSupabaseClient, Joined } from '@/lib/supabase';
 import { flatJoin } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
-import type { ParsedRoom } from '../roomAssignment/csv';
+import type { ParsedRoom } from '../room-assignment/csv';
 
 export type AccommodationRow = Pick<
   Database['public']['Tables']['accommodations']['Row'],

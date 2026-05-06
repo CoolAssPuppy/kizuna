@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import { useAuth } from '@/features/auth/AuthContext';
 
-import { backgroundFor, fallbackGradientFor, timeOfDay } from './timeOfDay';
+import { backgroundFor, fallbackGradientFor, timeOfDay } from '@/lib/timeOfDay';
 
 export function WelcomeScreen(): JSX.Element {
   const { t } = useTranslation();
