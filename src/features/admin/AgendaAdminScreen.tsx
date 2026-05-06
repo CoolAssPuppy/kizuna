@@ -1,36 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  Download,
-  FileDown,
-  Pencil,
-  Plus,
-  Search,
-  Tags,
-  ThumbsUp,
-  Trash2,
-  Upload,
-} from 'lucide-react';
+import { Download, FileDown, Plus, Tags, Upload } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
-import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { zonedDateTimeLocalToUtcIso } from '@/lib/timezone';
-import { cn } from '@/lib/utils';
 
 import { type AdminProposedSession, fetchAdminProposals } from '@/features/agenda/api';
 import { dayHeading, dayKey } from '@/features/agenda/grouping';
 import { loadExpectedAttendance } from '@/features/agenda/guestAttendance';
-import { isGuestOptInSession } from '@/features/agenda/sessionRules';
-import { TagPills } from '@/features/agenda/TagPill';
-import { type SessionTag, fetchTagsForSessions, setSessionTags } from '@/features/agenda/tagsApi';
+import { fetchTagsForSessions, setSessionTags, type SessionTag } from '@/features/agenda/tagsApi';
 
 import { agendaToCsv, blankAgendaCsv, importAgendaCsv, sessionsToCsvRows } from './agendaCsv';
+import { AdminProposalsList, type ProposalSort } from './agenda/AdminProposalsList';
+import { IconAction } from './agenda/IconAction';
+import { SessionListItem } from './agenda/SessionListItem';
 import {
   type SessionRow,
   createSession,
@@ -42,8 +31,6 @@ import { downloadCsv } from './csv';
 import { SessionDialog } from './SessionDialog';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from './sessionDraft';
 import { TagsDialog } from './TagsDialog';
-
-type ProposalSort = 'votes' | 'proposer';
 
 interface DayBucket {
   iso: string;
@@ -70,6 +57,7 @@ export function AgendaAdminScreen(): JSX.Element {
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
   const { show } = useToast();
+  const confirm = useConfirm();
   const { user } = useAuth();
   const userId = user?.id ?? null;
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -387,7 +375,16 @@ export function AgendaAdminScreen(): JSX.Element {
                   )
                 }
                 onDelete={() => {
-                  if (confirm(t('admin.agenda.deleteConfirm'))) remove.mutate(s.id);
+                  void (async () => {
+                    if (
+                      await confirm({
+                        titleKey: 'admin.agenda.deleteConfirm',
+                        destructive: true,
+                      })
+                    ) {
+                      remove.mutate(s.id);
+                    }
+                  })();
                 }}
               />
             ))}
@@ -414,202 +411,5 @@ export function AgendaAdminScreen(): JSX.Element {
         onClose={() => setTagsDialogOpen(false)}
       />
     </section>
-  );
-}
-
-interface IconActionProps {
-  icon: JSX.Element;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-}
-
-function IconAction({ icon, label, onClick, disabled }: IconActionProps): JSX.Element {
-  return (
-    <Button
-      type="button"
-      size="icon"
-      variant="outline"
-      onClick={onClick}
-      disabled={disabled}
-      title={label}
-      aria-label={label}
-    >
-      {icon}
-    </Button>
-  );
-}
-
-interface SessionListItemProps {
-  session: SessionRow;
-  tags: ReadonlyArray<SessionTag>;
-  isPast: boolean;
-  expectedEmployees: number;
-  expectedGuests: number;
-  onEdit: () => void;
-  onDelete: () => void;
-}
-
-function SessionListItem({
-  session,
-  tags,
-  isPast,
-  expectedEmployees,
-  expectedGuests,
-  onEdit,
-  onDelete,
-}: SessionListItemProps): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <li
-      className={cn(
-        'group flex items-start gap-3 px-4 py-3 text-sm hover:bg-muted/30',
-        isPast && 'opacity-50',
-      )}
-    >
-      <button
-        type="button"
-        onClick={onEdit}
-        className="flex flex-1 items-start gap-3 rounded text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-          <span className="font-medium">{session.title}</span>
-          {session.subtitle ? (
-            <p className="text-xs text-muted-foreground">{session.subtitle}</p>
-          ) : null}
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            {t(`admin.agenda.types.${session.type}`)} ·{' '}
-            {t(`admin.agenda.audiences.${session.audience}`)}
-            {session.location ? ` · ${session.location}` : ''}
-          </p>
-          {isGuestOptInSession(session) ? (
-            <p className="text-[11px] text-muted-foreground">
-              {t('admin.agenda.expectedAttendance', {
-                employees: expectedEmployees,
-                guests: expectedGuests,
-              })}
-            </p>
-          ) : null}
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          {session.starts_at ? (
-            <span className="text-xs tabular-nums text-muted-foreground">
-              {mediumDateTimeFormatter.format(new Date(session.starts_at))}
-            </span>
-          ) : null}
-          <TagPills tags={tags} className="justify-end" />
-        </div>
-      </button>
-      <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
-          onClick={onEdit}
-          aria-label={t('actions.edit')}
-        >
-          <Pencil aria-hidden className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8"
-          onClick={onDelete}
-          aria-label={t('actions.delete')}
-        >
-          <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />
-        </Button>
-      </div>
-    </li>
-  );
-}
-
-interface AdminProposalsListProps {
-  proposals: ReadonlyArray<AdminProposedSession>;
-  query: string;
-  onQueryChange: (next: string) => void;
-  sort: ProposalSort;
-  onSortChange: (next: ProposalSort) => void;
-  onEdit: (proposal: AdminProposedSession) => void;
-}
-
-function AdminProposalsList({
-  proposals,
-  query,
-  onQueryChange,
-  sort,
-  onSortChange,
-  onEdit,
-}: AdminProposalsListProps): JSX.Element {
-  const { t } = useTranslation();
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-[16rem] flex-1">
-          <Search
-            aria-hidden
-            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            placeholder={t('admin.agenda.proposalsSearchPlaceholder')}
-            aria-label={t('admin.agenda.proposalsSearchLabel')}
-            className="pl-9"
-          />
-        </div>
-        <select
-          value={sort}
-          onChange={(e) => onSortChange(e.target.value as ProposalSort)}
-          aria-label={t('admin.agenda.proposalsSortLabel')}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="votes">{t('admin.agenda.proposalsSort.votes')}</option>
-          <option value="proposer">{t('admin.agenda.proposalsSort.proposer')}</option>
-        </select>
-      </div>
-      {proposals.length === 0 ? (
-        <p className="rounded-md border bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
-          {t('admin.agenda.proposalsEmpty')}
-        </p>
-      ) : (
-        <ul className="divide-y rounded-md border">
-          {proposals.map((p) => (
-            <li key={p.id} className="space-y-2 px-4 py-3 text-sm hover:bg-muted/30">
-              <button
-                type="button"
-                onClick={() => onEdit(p)}
-                className="flex w-full flex-col items-start gap-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <div className="flex w-full flex-wrap items-baseline justify-between gap-2">
-                  <span className="font-medium">{p.title}</span>
-                  <span className="inline-flex items-center gap-1 text-xs tabular-nums text-muted-foreground">
-                    <ThumbsUp aria-hidden className="h-3.5 w-3.5" />
-                    {t('agenda.proposals.voteCount', { count: p.vote_count })}
-                  </span>
-                </div>
-                {p.abstract ? (
-                  <p className="text-xs leading-relaxed text-muted-foreground">{p.abstract}</p>
-                ) : null}
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  {t('agenda.proposals.proposedBy', {
-                    name: p.proposer_display_name ?? t('agenda.proposals.unknownProposer'),
-                  })}
-                </p>
-                <TagPills tags={p.tags} className="pt-1" />
-              </button>
-              {p.voters.length > 0 ? (
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    {t('admin.agenda.proposalsVoters')}:
-                  </span>{' '}
-                  {p.voters.map((v) => v.display_name).join(', ')}
-                </p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
   );
 }

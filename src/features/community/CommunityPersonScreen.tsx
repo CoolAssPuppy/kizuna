@@ -11,7 +11,7 @@ import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { COUNTRIES } from './countries';
+import { COUNTRIES } from '@/lib/countries';
 import { fetchUserMessages, loadCommunityPerson, loadCommunityProfile } from './api';
 import { useProfileActivityPhotos } from './photos/hooks';
 import { type PhotoRecord } from './photos/api';

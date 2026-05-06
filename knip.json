@@ -1,13 +1,26 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["src/app/router.tsx", "scripts/*.ts", "tests/e2e/**/*.spec.ts", "src/test/**/*.ts"],
-  "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["src/types/database.types.ts"],
+  "entry": [
+    "src/app/router.tsx",
+    "scripts/*.ts",
+    "scripts/*.mjs",
+    "tests/e2e/**/*.spec.ts",
+    "src/test/**/*.ts",
+    "src/lib/cli/index.ts",
+    "src/lib/cli/commands/*.ts",
+    "packages/kizuna-cli/src/bin/*.ts",
+    "packages/kizuna-mcp/src/bin/*.ts",
+    "packages/kizuna-mcp/src/server.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "packages/**/src/**/*.ts"],
+  "ignore": ["src/types/database.types.ts", "src/app/routeManifest.generated.ts"],
   "ignoreDependencies": [
     "@typescript-eslint/eslint-plugin",
     "@typescript-eslint/parser",
     "eslint-plugin-react",
     "lint-staged",
     "world-atlas"
-  ]
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreBinaries": ["supabase", "doppler"]
 }

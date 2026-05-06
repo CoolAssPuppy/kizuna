@@ -7,7 +7,7 @@ import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 're
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 
-import { COUNTRIES } from './countries';
+import { COUNTRIES } from '@/lib/countries';
 import type { Profile } from './matching';
 import { locate } from './worldCoordinates';
 

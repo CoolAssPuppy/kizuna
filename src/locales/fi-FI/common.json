@@ -82,7 +82,19 @@
     }
   },
   "terminal": {
-    "palettePlaceholder": "kirjoita / avataksesi komentopaletti"
+    "label": "Komentorivi",
+    "placeholder": "kirjoita komento tai `/` paletille · `?` ohjeelle",
+    "help": "Kirjoita `help` nähdäksesi komennot, tai `/` aktivoidaksesi palkin.",
+    "copy": "Kopioi tuloste",
+    "copied": "Tuloste kopioitu",
+    "title": "Kehote",
+    "openPrompt": "Avaa kehote",
+    "results": "Komennon tulokset",
+    "resultsLabel": "Tulokset",
+    "format": {
+      "json": "JSON",
+      "md": "Markdown"
+    }
   },
   "email": {
     "copy": "Kopioi sähköposti",
@@ -126,7 +138,8 @@
         "registrationsStarted": "registrations.in_progress",
         "registrationsComplete": "registrations.complete",
         "documentsSigned": "documents.signed"
-      }
+      },
+      "feedItemLabel": "__TODO_LOCALE__ News"
     },
     "factsTitle": "Faktoja Tapahtumastamme",
     "factsSubtitle": "Eläköön Tiimi 18 -legenda.",
@@ -163,7 +176,14 @@
       "subtitle": "Aito hauska fakta toiselta osallistujalta. Arvaa ensin, sitten paljasta.",
       "reveal": "Paljasta vastaus",
       "tryAnother": "Kokeile toista"
-    }
+    },
+    "eventAccess": {
+      "label": "__TODO_LOCALE__ Event Access Code:"
+    },
+    "memories": {
+      "cta": "__TODO_LOCALE__ Make your own {{event}} memories"
+    },
+    "feed": {}
   },
   "welcome": {
     "title": "Tervetuloa tapahtumaan {{eventName}}",
@@ -208,7 +228,9 @@
       "guests": "Vieraat",
       "dependents": "Huollettavat",
       "swag": "Tuotelahjat",
-      "transport": "Kuljetus"
+      "transport": "Kuljetus",
+      "attendance": "__TODO_LOCALE__ Attendance",
+      "apiKeys": "__TODO_LOCALE__ API Keys"
     },
     "cards": {
       "personalInfo": "Nimi, nimikylttinimi ja kaupunki, jota kutsut kodiksi.",
@@ -229,7 +251,79 @@
       "accessibilitySaved": "Esteettömyystoiveet tallennettu.",
       "swagSaved": "Tuotelahjavalinnat tallennettu.",
       "transportSaved": "Kuljetustoive tallennettu.",
-      "error": "Jokin meni pieleen. Yritä uudelleen."
+      "error": "Tallennus epäonnistui. Yritä uudelleen.",
+      "attendingSaved": "Vastaus tallennettu"
+    },
+    "checklist": {
+      "label": "__TODO_LOCALE__ Registration progress",
+      "tasks": {
+        "attending": "__TODO_LOCALE__ Attendance",
+        "personal_info": "__TODO_LOCALE__ Personal info",
+        "passport": "__TODO_LOCALE__ Passport details",
+        "emergency_contact": "__TODO_LOCALE__ Emergency contact",
+        "dietary": "__TODO_LOCALE__ Dietary preferences",
+        "accessibility": "__TODO_LOCALE__ Accessibility",
+        "swag": "__TODO_LOCALE__ Swag sizes",
+        "transport": "__TODO_LOCALE__ Transport",
+        "documents": "__TODO_LOCALE__ Documents"
+      }
+    },
+    "apiKeys": {
+      "title": "CLI-henkilökohtaiset käyttötunnukset",
+      "description": "Tunnukset todentavat Kizuna CLI:n ja MCP-palvelimet. Käsittele kuten salasanoja.",
+      "empty": "Ei aktiivisia tunnuksia.",
+      "createDescription": "__TODO_LOCALE__ Create a personal access token for scripts, local agents, or the Kizuna CLI.",
+      "name": "Nimi",
+      "nameHelp": "__TODO_LOCALE__ What is this key for? You can rename it later.",
+      "revoke": "Peruuta",
+      "revokeConfirm": "Peruutetaanko tunnus \"{{name}}\"? Sitä käyttävät asiakkaat epäonnistuvat heti.",
+      "revoked": "Peruutetut tunnukset",
+      "created": "Luotu {{date}}",
+      "lastUsed": "Viimeksi käytetty {{date}}",
+      "neverUsed": "__TODO_LOCALE__ Never used",
+      "expiry": {
+        "label": "__TODO_LOCALE__ Expiry",
+        "30d": "__TODO_LOCALE__ 30 days",
+        "90d": "__TODO_LOCALE__ 90 days",
+        "1y": "__TODO_LOCALE__ 1 year",
+        "never": "__TODO_LOCALE__ Never"
+      },
+      "revealOnce": {
+        "title": "Kopioi tunnuksesi nyt",
+        "warning": "__TODO_LOCALE__ This is the only time this token will be shown.",
+        "copy": "Kopioi tunnus",
+        "copied": "Tunnus kopioitu"
+      },
+      "cliInstructions": {},
+      "create": "Luo tunnus",
+      "scope": {
+        "label": "Scope",
+        "read": "Luku — aikataulu, sessiot, dokumentit",
+        "write": "Kirjoita — luku ja RSVP, profiilin päivitys",
+        "admin": "Admin — täysi pääsy (vain admin)"
+      }
+    },
+    "cli": {
+      "title": "__TODO_LOCALE__ Using the CLI",
+      "description": "__TODO_LOCALE__ Talk to Kizuna from a terminal or hand it to your AI agent. The CLI uses the API keys above for authentication.",
+      "copy": "__TODO_LOCALE__ Copy command",
+      "copied": "__TODO_LOCALE__ Copied",
+      "step1": {
+        "title": "__TODO_LOCALE__ Install the CLI",
+        "body": "__TODO_LOCALE__ Once installed, the kizuna binary lives on your PATH. Requires Node.js 20 or newer."
+      },
+      "step2": {
+        "title": "__TODO_LOCALE__ Log in",
+        "body": "__TODO_LOCALE__ Opens a browser tab for you to authorize the CLI. The token is saved to ~/.kizuna/config.json with private file permissions."
+      },
+      "step3": {
+        "title": "__TODO_LOCALE__ Run a command",
+        "body": "__TODO_LOCALE__ Every command from your kizuna schema output is fair game. Add --format md for human-readable output, --format json (the default) for piping into jq or another tool."
+      },
+      "step4": {
+        "title": "__TODO_LOCALE__ Plug into an AI agent",
+        "body": "__TODO_LOCALE__ The MCP server bridges Kizuna into Claude Desktop, Cursor, and Claude Code. Add this block to your agent's MCP configuration, swap in a token from above, and restart the agent."
+      }
     }
   },
   "community": {
@@ -264,16 +358,30 @@
       "byHobby": "Ihmiset, joilla on samoja harrastuksia",
       "byHometown": "Ihmiset kotikaupungistasi",
       "byCurrent": "Ihmiset nykyisessä kaupungissasi",
-      "empty": "Ei vielä osumia. Lisää muutama harrastus ja kotikaupunki yhteisöprofiiliisi.",
+      "empty": "Ei vielä osumia.",
       "matchedHobbies": "Yhteiset harrastukset",
       "name": "Nimi",
-      "email": "Sähköposti"
+      "email": "Sähköposti",
+      "firstName": "__TODO_LOCALE__ First name",
+      "lastName": "__TODO_LOCALE__ Last name"
     },
     "person": {
       "back": "Takaisin yhteisöön",
       "notFound": "Henkilöä ei löytynyt.",
       "fromLabel": "Kotoisin: {{value}}",
-      "nowLabel": "Nykyään: {{value}}"
+      "nowLabel": "Nykyään: {{value}}",
+      "identity": {
+        "department": "__TODO_LOCALE__ Department",
+        "team": "__TODO_LOCALE__ Team",
+        "title": "__TODO_LOCALE__ Title",
+        "baseCity": "__TODO_LOCALE__ Base city",
+        "startDate": "__TODO_LOCALE__ Start date",
+        "yearsAttended": "__TODO_LOCALE__ Years at Supafest"
+      },
+      "activity": {
+        "messagesHint": "__TODO_LOCALE__ Latest channel messages",
+        "photosTrailing": "__TODO_LOCALE__ tagged or uploaded"
+      }
     },
     "channels": {
       "title": "Yhteisön kanavat",
@@ -305,7 +413,6 @@
     "theme": "Teema",
     "themes": {
       "light": "Vaalea",
-      "dark": "Tumma",
       "barbie": "Barbie",
       "supa": "Supa",
       "hermione": "Hermione",
@@ -333,7 +440,9 @@
     "agree": "Hyväksyn",
     "close": "Sulje",
     "edit": "Muokkaa",
-    "delete": "Poista"
+    "delete": "Poista",
+    "yes": "__TODO_LOCALE__ Yes",
+    "no": "__TODO_LOCALE__ No"
   },
   "registration": {
     "title": "Ilmoittautuminen",
@@ -351,7 +460,8 @@
       "guests": "Vieraat",
       "dependents": "Huollettavat",
       "swag": "Tuotelahjat",
-      "transport": "Kuljetus"
+      "transport": "Kuljetus",
+      "attending": "__TODO_LOCALE__ Attendance"
     },
     "personalInfo": {
       "preferredName": "Toivottu Nimi",
@@ -364,7 +474,11 @@
       "phoneNumber": "Puhelinnumero",
       "whatsapp": "WhatsApp",
       "baseCity": "Nykyinen Kaupunki",
-      "baseCityHint": "Mistä matkustat."
+      "fromHibob": "__TODO_LOCALE__ From HiBob",
+      "title": "__TODO_LOCALE__ Title",
+      "team": "__TODO_LOCALE__ Team",
+      "startDate": "__TODO_LOCALE__ Start Date",
+      "pronouns": "__TODO_LOCALE__ Pronouns"
     },
     "dietary": {
       "restrictions": "Ruokavaliorajoitukset",
@@ -516,17 +630,14 @@
     },
     "swag": {
       "intro": "Kerro meille T-paidan ja kengän kokosi, jotta voimme tilata oikeat varusteet etukäteen.",
-      "yourSizes": "Sinun kokosi",
-      "guestsHeading": "Lisävieraiden koot",
-      "tshirtSize": "T-paidan koko",
-      "shoeSize": "Kengän koko",
-      "shoeSizeHint": "Valitse järjestelmä, jonka tunnet — tallennamme kaiken EU-kokoina.",
-      "shoeSystem": {
-        "us": "US",
-        "eu": "EU"
-      },
-      "age_one": "{{age}}-vuotias",
-      "age_other": "{{age}}-vuotias"
+      "shoeSystem": {},
+      "empty": "__TODO_LOCALE__ The events team hasn't published any swag items for this event yet.",
+      "pickSize": "__TODO_LOCALE__ Choose a size",
+      "optOut": "__TODO_LOCALE__ I don't need this item",
+      "sizingChart": "__TODO_LOCALE__ View sizing chart",
+      "sizingChartAlt": "__TODO_LOCALE__ Sizing chart",
+      "lockedTitle": "__TODO_LOCALE__ Swag selection is locked.",
+      "lockedBody": "__TODO_LOCALE__ The events team has frozen swag selections for this event. Reach out if you need a change."
     },
     "transport": {
       "intro": "Kerro meille, mille matkaosuuksille haluat lentokenttäkuljetuksen. Käytämme tätä kuljetuslistan rakentamiseen.",
@@ -536,6 +647,13 @@
         "departure": "Tarvitsen kyydin lentokentälle vain lähtiessä.",
         "both": "Tarvitsen kyydit sekä saapumiseen että lähtöön."
       }
+    },
+    "attending": {
+      "intro": "__TODO_LOCALE__ We need to know whether you'll be joining us for {{eventName}} so we can plan accordingly. You can change your mind from your Profile.",
+      "fallbackEventName": "__TODO_LOCALE__ this event",
+      "attendingPrompt": "__TODO_LOCALE__ Are you planning on attending {{eventName}}?",
+      "firstTimePrompt": "__TODO_LOCALE__ Is this your first time attending an event?",
+      "optOutNote": "__TODO_LOCALE__ Saving \"No\" closes the rest of the wizard. You can re-open it later from your Profile."
     }
   },
   "admin": {
@@ -554,7 +672,10 @@
       "nudges": "Viestintä",
       "communication": "Viestintä",
       "reports": "Raportit",
-      "conflicts": "Ristiriidat"
+      "conflicts": "Ristiriidat",
+      "about": "__TODO_LOCALE__ About",
+      "scanQr": "__TODO_LOCALE__ Scan QR Code",
+      "swag": "__TODO_LOCALE__ Swag"
     },
     "groundTransport": {
       "title": "Maakuljetustyökalu",
@@ -638,8 +759,8 @@
       "saved": "Tapahtuma tallennettu.",
       "delete": "Poista tapahtuma",
       "deleted": "Tapahtuma poistettu.",
-      "deleteConfirm": "Poistetaanko tämä tapahtuma kovapoistolla ja kaikki tapahtumakohtaiset rivit (sessiot, ilmoittautumiset, majoitukset, kuljetus, ohjelma, asiakirjat)? Henkilökohtaiset profiilitiedot säilyvät. Tätä ei voi peruuttaa.",
-      "cascading": "Poistetaan",
+      "deleteConfirm": "Poistetaanko tapahtuma ja kaikki siihen liittyvät rivit (sessiot, ilmoittautumiset, majoitus, kuljetus, aikataulu, dokumentit) pysyvästi? Henkilökohtaiset profiilitiedot säilyvät. Tätä ei voi peruuttaa.",
+      "cascading": "Poistetaan...",
       "active": "Aktiivinen",
       "past": "Mennyt",
       "empty": "Ei vielä tapahtumia. Luo ensimmäinen aloittaaksesi.",
@@ -663,7 +784,8 @@
         "isActiveHint": "Vain yksi supafest-tapahtuma voi olla kerralla aktiivinen. Aktiiviset tapahtumat ohjaavat tervetuloruutua.",
         "inviteAll": "Kutsu kaikki työntekijät automaattisesti",
         "inviteAllHint": "Kun käytössä, jokainen aktiivinen työntekijä näkee tämän tapahtuman. Muutoin kutsut on lisättävä yksi kerrallaan."
-      }
+      },
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
     },
     "agenda": {
       "title": "Aikataulu",
@@ -696,7 +818,12 @@
         "capacity": "Kapasiteetti",
         "speakerEmail": "Puhujan sähköposti",
         "abstract": "Tiivistelmä",
-        "mandatory": "Lisää automaattisesti jokaisen olennaisen osallistujan ohjelmaan"
+        "mandatory": "Lisää automaattisesti jokaisen olennaisen osallistujan ohjelmaan",
+        "status": "__TODO_LOCALE__ Status",
+        "statusHint": "__TODO_LOCALE__ Move back to Proposed to clear all registrations and the schedule slot.",
+        "timeZoneHint": "__TODO_LOCALE__ Local time at the event ({{timeZone}}).",
+        "speaker": "__TODO_LOCALE__ Speaker",
+        "speakerPlaceholder": "__TODO_LOCALE__ Start typing a name or email"
       },
       "types": {
         "keynote": "Pääpuhe",
@@ -712,7 +839,35 @@
         "employees_only": "Vain työntekijät",
         "guests_only": "Vain vieraat",
         "opt_in": "Vain ilmoittautuneille"
-      }
+      },
+      "proposalsHeader_one": "{{count}} ehdotus",
+      "proposalsHeader_other": "{{count}} ehdotusta",
+      "proposalsEmpty": "Ei vielä ehdotuksia.",
+      "proposalsVoters": "Äänestäjät:",
+      "proposalsSearchPlaceholder": "Etsi ehdotuksia",
+      "proposalsSearchLabel": "Etsi ehdotuksia",
+      "proposalsSortLabel": "Lajittele",
+      "proposalsSort": {
+        "votes": "Äänten mukaan",
+        "proposer": "Ehdottajan mukaan"
+      },
+      "editTags": "__TODO_LOCALE__ Edit tags",
+      "tags": {
+        "title": "__TODO_LOCALE__ Edit Tags",
+        "placeholder": "__TODO_LOCALE__ Tag name",
+        "add": "__TODO_LOCALE__ Add tag",
+        "added": "__TODO_LOCALE__ Tag added.",
+        "deleted": "__TODO_LOCALE__ Tag removed.",
+        "deleteConfirm": "__TODO_LOCALE__ Delete the \"{{name}}\" tag? Sessions tagged with it will lose the label.",
+        "colorLabel": "__TODO_LOCALE__ Color for {{name}}",
+        "newColorLabel": "__TODO_LOCALE__ Color for new tag",
+        "nameLabel": "__TODO_LOCALE__ Tag name"
+      },
+      "statuses": {
+        "proposed": "__TODO_LOCALE__ Proposed",
+        "active": "__TODO_LOCALE__ On the agenda"
+      },
+      "expectedAttendance": "__TODO_LOCALE__ Expected: {{employees}} employees + {{guests}} guests"
     },
     "documents": {
       "title": "Asiakirjat",
@@ -727,8 +882,8 @@
       "saving": "Tallennetaan",
       "saved": "Syötekohde tallennettu.",
       "delete": "Poista",
-      "deleted": "Syötekohde poistettu.",
-      "deleteConfirm": "Poistetaanko tämä syötekohde etusivulta?",
+      "deleted": "Syötteen kohde poistettu",
+      "deleteConfirm": "Poistetaanko tämä syötteen kohde aloitusnäytöltä?",
       "newItem": "Lisää syötekohde",
       "empty": "Ei vielä mitään täällä. Lisää kohde.",
       "alwaysOpen": "aina",
@@ -852,7 +1007,8 @@
       "transport": "Kuljetuslista",
       "dietary": "Ruokavalioyhteenveto",
       "swag": "Tuotelahjatilaus",
-      "payments": "Maksut"
+      "payments": "Maksut",
+      "swag_totals": "__TODO_LOCALE__ Swag (total order)"
     },
     "pagination": {
       "prev": "Edellinen",
@@ -884,7 +1040,25 @@
       "acceptExternal": "Käytä Ulkoista Arvoa",
       "noConflicts": "Ei avoimia ristiriitoja."
     },
-    "blocked": "Sinulla ei ole oikeutta tarkastella tätä sivua."
+    "blocked": "Sinulla ei ole oikeutta tarkastella tätä sivua.",
+    "about": {
+      "noEvent": "__TODO_LOCALE__ No active event yet. Create one from All events to edit its metadata here."
+    },
+    "scanQr": {
+      "title": "__TODO_LOCALE__ Scan QR Code",
+      "subtitle": "__TODO_LOCALE__ Point the camera at an attendee's check-in code to verify their entry.",
+      "permission": "__TODO_LOCALE__ Camera access denied. Enable camera permissions in your browser and reload.",
+      "cameraFailed": "__TODO_LOCALE__ Could not start the camera.",
+      "approved": "__TODO_LOCALE__ Approved",
+      "invalid": "__TODO_LOCALE__ That QR code isn't a kizuna check-in code.",
+      "userNotFound": "__TODO_LOCALE__ Attendee not found in the directory.",
+      "lookingUp": "__TODO_LOCALE__ Looking up attendee...",
+      "scanAnother": "__TODO_LOCALE__ Scan another"
+    },
+    "empty": {
+      "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
+      "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    }
   },
   "agenda": {
     "title": "Aikataulu",
@@ -896,10 +1070,47 @@
     "unfavorite": "Poista suosikeista",
     "filters": {
       "all": "Kaikki ({{count}})",
-      "favorites": "Omat valintani ({{count}})"
+      "favorites": "Omat valintani ({{count}})",
+      "proposed": "__TODO_LOCALE__ Proposed ({{count}})"
     },
     "allDays": "Kaikki päivät",
-    "dayFilterLabel": "Suodata päivän mukaan"
+    "dayFilterLabel": "Päivä",
+    "mandatoryLabel": "__TODO_LOCALE__ Mandatory session — always in your agenda",
+    "guests": {
+      "prompt": "__TODO_LOCALE__ Which guests will be attending?"
+    },
+    "proposed": "Ehdotettu",
+    "tags": {
+      "fieldLabel": "__TODO_LOCALE__ Tags",
+      "fieldHint": "__TODO_LOCALE__ Pick at least one to help attendees filter the agenda.",
+      "empty": "__TODO_LOCALE__ No tags configured for this event yet."
+    },
+    "speakerTypeahead": {
+      "loading": "__TODO_LOCALE__ Searching attendees…",
+      "empty": "__TODO_LOCALE__ No matching attendees."
+    },
+    "proposals": {
+      "proposeButton": "Ehdota",
+      "dialogTitle": "__TODO_LOCALE__ Propose a Session",
+      "editTitle": "__TODO_LOCALE__ Edit Proposal",
+      "editWarning": "__TODO_LOCALE__ Heads up: editing this proposal will erase all of its existing votes.",
+      "editAction": "__TODO_LOCALE__ Edit \"{{title}}\"",
+      "deleteAction": "__TODO_LOCALE__ Delete \"{{title}}\"",
+      "deleteConfirm": "Poistetaanko ehdotus \"{{title}}\"? Tätä ei voi peruuttaa.",
+      "submit": "__TODO_LOCALE__ Submit proposal",
+      "submitted": "__TODO_LOCALE__ Proposal submitted. Thanks!",
+      "updated": "__TODO_LOCALE__ Proposal updated. Votes were cleared.",
+      "deleted": "Ehdotus poistettu",
+      "empty": "Ei vielä ehdotuksia. Ole ensimmäinen.",
+      "proposedBy": "Ehdottaja: {{name}}",
+      "unknownProposer": "kollega",
+      "vote": "Peukku ylös",
+      "alreadyVoted_one": "__TODO_LOCALE__ Voted ({{count}} vote)",
+      "alreadyVoted_other": "__TODO_LOCALE__ Voted ({{count}} votes)",
+      "voteCount_one": "{{count}} ääni",
+      "voteCount_other": "{{count}} ääntä"
+    },
+    "types": {}
   },
   "shareReport": {
     "eyebrow": "Kizunan jaettu raportti",
@@ -976,7 +1187,8 @@
       "tabs": {
         "paste": "Liitä teksti",
         "upload": "Lataa tiedosto",
-        "email": "Välitä sähköposti"
+        "email": "Välitä sähköposti",
+        "perk": "__TODO_LOCALE__ Sync with Perk"
       },
       "pastePlaceholder": "Liitä lento-, hotelli- tai kuljetusvahvistuksesi tähän…",
       "pasteHint": "Toimii parhaiten vahvistussähköpostin koko tekstillä.",
@@ -992,7 +1204,26 @@
       "uploadError": "Tiedostoa ei voitu lukea. Käytä Liitä teksti tai kokeile toista vientiä.",
       "uploadInvalidType": "Valitse PDF.",
       "emailComingSoonTitle": "Sähköpostin välittäminen tulee pian",
-      "emailComingSoonHint": "Välitä osoitteeseen itinerary@kizuna.dev, kun se on käytössä."
+      "emailComingSoonHint": "Välitä osoitteeseen itinerary@kizuna.dev, kun se on käytössä.",
+      "testItinerary": "__TODO_LOCALE__ Add Test Itinerary",
+      "uploadComingSoonTitle": "__TODO_LOCALE__ PDF upload is coming soon",
+      "uploadComingSoonHint": "__TODO_LOCALE__ Drop a booking PDF and we'll extract the flights, hotel, and transfers in your browser.",
+      "perk": {
+        "title": "__TODO_LOCALE__ Pull your TravelPerk bookings",
+        "hint": "__TODO_LOCALE__ We'll list every active booking on your work email. Pick the one you want to add to your itinerary — re-importing later is safe and updates existing flights in place.",
+        "sync": "__TODO_LOCALE__ Sync now",
+        "syncing": "__TODO_LOCALE__ Looking up your bookings",
+        "refresh": "__TODO_LOCALE__ Refresh",
+        "listHint": "__TODO_LOCALE__ Found {{count}} booking. Pick one to import.",
+        "listHint_other": "__TODO_LOCALE__ Found {{count}} bookings. Pick one to import.",
+        "legs": "__TODO_LOCALE__ {{count}} flight",
+        "legs_other": "__TODO_LOCALE__ {{count}} flights",
+        "import": "__TODO_LOCALE__ Import",
+        "importing": "__TODO_LOCALE__ Importing",
+        "success": "__TODO_LOCALE__ Synced {{count}} flight(s) from TravelPerk.",
+        "nothingFound": "__TODO_LOCALE__ TravelPerk has no active bookings for your email yet.",
+        "error": "__TODO_LOCALE__ We could not reach TravelPerk just now. Try again in a moment."
+      }
     },
     "checkin": {
       "openLabel": "Open check-in QR code",
@@ -1009,7 +1240,8 @@
       "reminder": "Muistutus"
     },
     "conflict": "Päällekkäin toisen kohteen kanssa päivässäsi",
-    "withGuest": "Vieraasi kanssa"
+    "withGuest": "Vieraasi kanssa",
+    "qr": {}
   },
   "guests": {
     "invitationTitle": "Sinut on Kutsuttu Supafestiin",
@@ -1083,7 +1315,10 @@
       "label": "Notion-URL",
       "hint": "Notion-dokumenttisi aukeaa uudessa ikkunassa, kun sitä napsautetaan.",
       "open": "Avaa Notionissa"
-    }
+    },
+    "backToDocuments": "__TODO_LOCALE__ Back to documents",
+    "fullNamePrompt": "__TODO_LOCALE__ Type this exact name to sign: {{name}}",
+    "fullNameMismatch": "__TODO_LOCALE__ The signature must match your full legal name exactly."
   },
   "uploader": {
     "dropOrClick": "Pudota tiedosto tähän tai klikkaa valitaksesi",
@@ -1146,5 +1381,251 @@
     },
     "previewMarkdown": "Esikatselu",
     "writeMarkdown": "Kirjoita"
+  },
+  "palette": {
+    "title": "Komentopaletti",
+    "placeholder": "Etsi sivuja",
+    "empty": "Ei vastaavia sivuja."
+  },
+  "cli": {
+    "errors": {
+      "forbidden": "Sinulla ei ole pääsyä tähän komentoon.",
+      "patScope": "Tällä tunnuksella ei ole oikeaa scopea tähän komentoon.",
+      "notFound": "Komentoa ei löytynyt.",
+      "validation": "Komennolta puuttuu argumentteja tai ne ovat virheellisiä.",
+      "outputShape": "Komento palautti odottamattoman muodon. Ilmoita tämä.",
+      "internal": "Komento epäonnistui.",
+      "noActiveEvent": "Aktiivista tapahtumaa ei ole määritetty.",
+      "eventNotFound": "Tapahtumaa ei löytynyt.",
+      "idRequired": "ID vaaditaan."
+    },
+    "commands": {
+      "help": {
+        "summary": "__TODO_LOCALE__ Print usage.",
+        "description": "__TODO_LOCALE__ Lists available commands, or usage for one command."
+      },
+      "schema": {
+        "summary": "__TODO_LOCALE__ Emit the command registry.",
+        "description": "__TODO_LOCALE__ Returns machine-readable command metadata for clients and agents."
+      },
+      "me": {
+        "summary": "__TODO_LOCALE__ Profile snapshot for the authenticated user.",
+        "description": "__TODO_LOCALE__ Shows your profile identity and role."
+      },
+      "meItinerary": {
+        "summary": "__TODO_LOCALE__ Show your itinerary.",
+        "description": "__TODO_LOCALE__ Lists itinerary items, optionally filtered by day or date."
+      },
+      "meSessions": {
+        "summary": "__TODO_LOCALE__ Show sessions you are connected to.",
+        "description": "__TODO_LOCALE__ Lists registered or favorited sessions."
+      },
+      "meDocuments": {
+        "summary": "__TODO_LOCALE__ Show documents you can sign.",
+        "description": "__TODO_LOCALE__ Lists active documents and whether you have signed them."
+      },
+      "meRoommates": {
+        "summary": "__TODO_LOCALE__ Show your room assignment.",
+        "description": "__TODO_LOCALE__ Shows the current room block and roommate list."
+      },
+      "meTransport": {
+        "summary": "__TODO_LOCALE__ Show transport requests.",
+        "description": "__TODO_LOCALE__ Lists your arrival and departure transfer requests."
+      },
+      "meNotifications": {
+        "summary": "__TODO_LOCALE__ Show notifications.",
+        "description": "__TODO_LOCALE__ Lists your newest notifications."
+      },
+      "attendees": {
+        "summary": "__TODO_LOCALE__ List attendees matching filters.",
+        "description": "__TODO_LOCALE__ Finds attendee profiles by handle, hobby, or team."
+      },
+      "sessions": {
+        "summary": "__TODO_LOCALE__ List sessions for the active event.",
+        "description": "__TODO_LOCALE__ Shows all sessions, optionally filtered by day, track, or capacity."
+      },
+      "sessionsPropose": {
+        "summary": "__TODO_LOCALE__ Propose a new session.",
+        "description": "__TODO_LOCALE__ Submits a session idea for community voting. Admins promote winners onto the agenda."
+      },
+      "sessionsProposeList": {
+        "summary": "__TODO_LOCALE__ List proposed sessions.",
+        "description": "__TODO_LOCALE__ Shows every proposed session for the active event with vote counts."
+      },
+      "sessionsProposeVote": {
+        "summary": "__TODO_LOCALE__ Vote for a proposal.",
+        "description": "__TODO_LOCALE__ Adds your one-time thumbs-up to a proposed session."
+      },
+      "sessionsProposeDelete": {
+        "summary": "__TODO_LOCALE__ Delete a proposal you submitted.",
+        "description": "__TODO_LOCALE__ Removes one of your own proposals. Admin-promoted sessions cannot be deleted this way."
+      },
+      "tagsList": {
+        "summary": "__TODO_LOCALE__ List session tags for the active event.",
+        "description": "__TODO_LOCALE__ Returns each tag with its color and ordering position."
+      },
+      "tagsCreate": {
+        "summary": "__TODO_LOCALE__ Create a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Pre-populated tags ship with every event; use this to add more."
+      },
+      "tagsUpdate": {
+        "summary": "__TODO_LOCALE__ Rename, recolor, or reorder a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Pass any combination of --name, --color (#rrggbb), and --position."
+      },
+      "tagsDelete": {
+        "summary": "__TODO_LOCALE__ Delete a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Sessions tagged with it lose the label."
+      },
+      "events": {
+        "summary": "__TODO_LOCALE__ List events you can access.",
+        "description": "__TODO_LOCALE__ Shows past, future, or all visible events."
+      },
+      "event": {
+        "summary": "__TODO_LOCALE__ Show event details.",
+        "description": "__TODO_LOCALE__ Shows the active event or a specific event."
+      },
+      "agenda": {
+        "summary": "__TODO_LOCALE__ Show the full event agenda.",
+        "description": "__TODO_LOCALE__ Lists agenda sessions for the active event."
+      },
+      "photos": {
+        "summary": "__TODO_LOCALE__ List visible photos.",
+        "description": "__TODO_LOCALE__ Shows gallery photos for the active event."
+      },
+      "channels": {
+        "summary": "__TODO_LOCALE__ List community channels.",
+        "description": "__TODO_LOCALE__ Shows active community channels."
+      }
+    }
+  },
+  "cliOauth": {
+    "authorize": {
+      "title": "Yhdistä CLI tai agentti",
+      "subtitle": "{{client}} haluaa pääsyn Kizuna-tietoihisi.",
+      "scopeLine": "Pyydetty scope: {{scope}}",
+      "scopeBlurb": {
+        "read": "Vain lukuoikeus aikatauluusi, sessioihisi, dokumentteihisi ja yhteisöprofiiliisi.",
+        "write": "Lukuoikeus sekä mahdollisuus ilmoittautua, suosikoida sessioita ja päivittää profiili.",
+        "admin": "Täysi luku- ja kirjoitusoikeus, mukaan lukien admin-työkalut. Myönnä vain itse kirjoittamillesi työkaluille."
+      },
+      "allow": "Valtuuta",
+      "allowing": "Valtuutetaan...",
+      "deny": "Peruuta",
+      "adminBlocked": "Tarvitset admin-roolin myöntääksesi admin-scope-tunnuksia.",
+      "malformed": "Valtuutusparametrit puuttuvat tai ovat virheellisiä.",
+      "unknown": "Valtuutus ei onnistunut."
+    },
+    "callback": {
+      "title": "Yhdistetään agenttiisi",
+      "delivering": "Lähetetään valtuutuskoodi paikalliselle agentille...",
+      "success": "Olet yhdistetty. Voit sulkea tämän välilehden ja palata agenttiin.",
+      "fallback": "Paikallista agenttia ei tavoitettu. Liitä tämä koodi terminaaliin, jossa ajoit komennon.",
+      "deliverFailed": "Paikallinen callback ei vastannut.",
+      "codeLabel": "Koodi:",
+      "copy": "Kopioi koodi",
+      "copied": "Kopioitu",
+      "malformed": "Callback-parametrit puuttuvat tai ovat virheellisiä."
+    }
+  },
+  "photos": {
+    "section": {
+      "title": "{{event}}-muistot",
+      "fallbackEvent": "Kizuna",
+      "recent": "tuoreet",
+      "viewAll": "Näytä kaikki",
+      "add": "Lisää valokuvia",
+      "empty": "Ei vielä valokuvia. Ole ensimmäinen."
+    },
+    "screen": {
+      "back": "Takaisin yhteisöön",
+      "title": "{{event}}-muistot",
+      "searchPlaceholder": "Etsi tekstillä, #hashtagilla tai @henkilöllä",
+      "searchEmpty": "__TODO_LOCALE__ No matches. Try a different tag or word."
+    },
+    "upload": {
+      "title": "Lähetä valokuvia",
+      "drop": "Vedä tiedostoja tähän tai napsauta valitaksesi",
+      "pick": "Valitse tiedostoja",
+      "addMore": "Lisää lisää",
+      "count": "{{current}} / {{max}}",
+      "replace": "__TODO_LOCALE__ Remove",
+      "editFile": "Muokkaa {{name}}",
+      "caption": "__TODO_LOCALE__ Caption",
+      "captionPlaceholder": "Kirjoita kuvateksti. Käytä #hashtageja järjestämiseen ja @nimeä merkitsemiseen.",
+      "taggedPeople": "__TODO_LOCALE__ Tagged people",
+      "tagPlaceholder": "Etsi merkittävää henkilöä",
+      "removeTag": "Poista {{value}}",
+      "submit": "Lähetä",
+      "submitMany": "Lähetä {{count}}",
+      "success": "__TODO_LOCALE__ Photo uploaded.",
+      "successCount_one": "{{count}} valokuva lähetetty",
+      "successCount_other": "{{count}} valokuvaa lähetetty",
+      "errors": {
+        "type": "Kuvatyyppiä ei tueta.",
+        "size": "Liian suuri. Maksimi {{max}}.",
+        "generic": "__TODO_LOCALE__ Upload failed. Please try again.",
+        "someFailed_one": "{{count}} lähetys epäonnistui.",
+        "someFailed_other": "{{count}} lähetystä epäonnistui."
+      }
+    },
+    "lightbox": {
+      "prev": "__TODO_LOCALE__ Previous photo",
+      "next": "Seuraava valokuva",
+      "close": "Sulje katselin",
+      "copyLink": "Kopioi linkki",
+      "copied": "Linkki kopioitu",
+      "copyFailed": "Linkkiä ei voitu kopioida.",
+      "delete": "Poista",
+      "deleteConfirm": "Poistetaanko tämä valokuva?",
+      "deleteFailed": "Valokuvaa ei voitu poistaa.",
+      "deleted": "Valokuva poistettu",
+      "tagged": "__TODO_LOCALE__ Tagged"
+    }
+  },
+  "adminSwag": {
+    "title": "__TODO_LOCALE__ Swag",
+    "subtitle": "__TODO_LOCALE__ Curate the per-event swag catalogue. Hidden items stay invisible to attendees until you publish them.",
+    "newItem": "__TODO_LOCALE__ Add swag item",
+    "editTitle": "__TODO_LOCALE__ Edit swag item",
+    "lock": "__TODO_LOCALE__ Lock swag selection",
+    "unlock": "__TODO_LOCALE__ Unlock swag selection",
+    "lockHint": "__TODO_LOCALE__ When locked, employees can no longer edit their swag selections.",
+    "locked": "__TODO_LOCALE__ Swag selection is locked.",
+    "unlocked": "__TODO_LOCALE__ Swag selection is unlocked.",
+    "lockedAt": "__TODO_LOCALE__ Locked {{date}}",
+    "created": "__TODO_LOCALE__ Swag item created.",
+    "updated": "__TODO_LOCALE__ Swag item saved.",
+    "deleted": "__TODO_LOCALE__ Swag item deleted.",
+    "deleteConfirm": "__TODO_LOCALE__ Delete \"{{name}}\"? Existing attendee selections for this item will be removed.",
+    "deleteAria": "__TODO_LOCALE__ Delete {{name}}",
+    "edit": "__TODO_LOCALE__ Edit {{name}}",
+    "empty": "__TODO_LOCALE__ No swag items yet. Add the first one to publish it to attendees.",
+    "noSizes": "__TODO_LOCALE__ No sizes added yet.",
+    "addSize": "__TODO_LOCALE__ Add",
+    "addSizePlaceholder": "__TODO_LOCALE__ Custom size",
+    "removeSize": "__TODO_LOCALE__ Remove {{size}}",
+    "sizesHint": "__TODO_LOCALE__ Pick a template to populate the list, then add or remove individual sizes.",
+    "fields": {
+      "name": "__TODO_LOCALE__ Name",
+      "description": "__TODO_LOCALE__ Description",
+      "image": "__TODO_LOCALE__ Cover image",
+      "sizeImage": "__TODO_LOCALE__ Sizing chart",
+      "sizes": "__TODO_LOCALE__ Sizes",
+      "hidden": "__TODO_LOCALE__ Hidden",
+      "hiddenHint": "__TODO_LOCALE__ Visible to admins only. Use for previews before launch.",
+      "optOut": "__TODO_LOCALE__ Allow opt-out",
+      "optOutHint": "__TODO_LOCALE__ Lets attendees decline this item entirely.",
+      "sortOrder": "__TODO_LOCALE__ Sort order"
+    },
+    "templates": {
+      "apparel": "__TODO_LOCALE__ Apparel sizes",
+      "shoesUs": "__TODO_LOCALE__ US shoe sizes",
+      "shoesEu": "__TODO_LOCALE__ EU shoe sizes"
+    },
+    "badges": {
+      "hidden": "__TODO_LOCALE__ Hidden",
+      "visible": "__TODO_LOCALE__ Live",
+      "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
   }
 }

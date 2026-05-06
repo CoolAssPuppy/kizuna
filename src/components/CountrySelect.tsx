@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { COUNTRIES } from '@/features/community/countries';
+import { COUNTRIES } from '@/lib/countries';
 
 interface CountrySelectProps {
   id: string;

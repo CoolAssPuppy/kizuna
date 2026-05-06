@@ -15,19 +15,27 @@
 // Both branches charge the sponsor; fee_amount is captured server-side
 // from guest_fee_for_bracket() to make sure the SPA cannot under-quote.
 
+import { z } from 'zod';
+
 import { corsHeaders, handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { INVITATION_TTL_SECONDS } from '../_shared/constants.ts';
 import { signInvitationToken } from '../_shared/invitationToken.ts';
 import { getCallerUser, getUserClient } from '../_shared/supabaseClient.ts';
 
-type AgeBracket = 'under_12' | 'teen' | 'adult';
+const AgeBracket = z.enum(['under_12', 'teen', 'adult']);
 
-interface RequestBody {
-  age_bracket?: AgeBracket;
-  first_name?: string;
-  last_name?: string;
-  guest_email?: string;
-}
+const RequestSchema = z
+  .object({
+    age_bracket: AgeBracket,
+    first_name: z.string().trim().min(1, 'invalid_first_name').max(100),
+    last_name: z.string().trim().min(1, 'invalid_last_name').max(100),
+    // Required only for adults — minors have no email of their own.
+    guest_email: z.string().trim().toLowerCase().email().optional(),
+  })
+  .refine((d) => d.age_bracket !== 'adult' || d.guest_email !== undefined, {
+    path: ['guest_email'],
+    message: 'invalid_email',
+  });
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -47,26 +55,23 @@ Deno.serve(async (req) => {
   }
   const sponsorUserId = caller.id;
 
-  let body: RequestBody;
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
     return jsonResponse({ error: 'invalid_body' }, { status: 400 });
   }
-
+  const parsed = RequestSchema.safeParse(raw);
+  if (!parsed.success) {
+    // Surface the field-specific error code the SPA expects (the schema
+    // attaches one to each constraint).
+    const code = parsed.error.issues[0]?.message ?? 'invalid_body';
+    return jsonResponse({ error: code }, { status: 400 });
+  }
+  const body = parsed.data;
   const ageBracket = body.age_bracket;
-  if (ageBracket !== 'under_12' && ageBracket !== 'teen' && ageBracket !== 'adult') {
-    return jsonResponse({ error: 'invalid_age_bracket' }, { status: 400 });
-  }
-
-  const firstName = body.first_name?.trim();
-  const lastName = body.last_name?.trim();
-  if (!firstName || firstName.length < 1) {
-    return jsonResponse({ error: 'invalid_first_name' }, { status: 400 });
-  }
-  if (!lastName || lastName.length < 1) {
-    return jsonResponse({ error: 'invalid_last_name' }, { status: 400 });
-  }
+  const firstName = body.first_name;
+  const lastName = body.last_name;
 
   // ------- Minor branch: write straight into additional_guests -------
   if (ageBracket !== 'adult') {
@@ -94,10 +99,8 @@ Deno.serve(async (req) => {
   }
 
   // ------- Adult branch: full email + signed-token invite flow -------
-  const guestEmail = body.guest_email?.trim().toLowerCase();
-  if (!guestEmail || !guestEmail.includes('@')) {
-    return jsonResponse({ error: 'invalid_email' }, { status: 400 });
-  }
+  // Schema-guaranteed when age_bracket === 'adult'.
+  const guestEmail = body.guest_email!;
 
   const expiresAt = new Date(Date.now() + INVITATION_TTL_SECONDS * 1000).toISOString();
   const { data: invitation, error: insertError } = await client

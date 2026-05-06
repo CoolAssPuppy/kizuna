@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import {
   type SessionTag,
@@ -37,6 +38,7 @@ interface Props {
 export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
   const { t } = useTranslation();
   const { show } = useToast();
+  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(DEFAULT_NEW_COLOR);
@@ -140,9 +142,17 @@ export function TagsDialog({ open, eventId, onClose }: Props): JSX.Element {
                   variant="ghost"
                   className="h-9 w-9"
                   onClick={() => {
-                    if (confirm(t('admin.agenda.tags.deleteConfirm', { name: tag.name }))) {
-                      remove.mutate(tag.id);
-                    }
+                    void (async () => {
+                      if (
+                        await confirm({
+                          titleKey: 'admin.agenda.tags.deleteConfirm',
+                          titleValues: { name: tag.name },
+                          destructive: true,
+                        })
+                      ) {
+                        remove.mutate(tag.id);
+                      }
+                    })();
                   }}
                   aria-label={t('actions.delete')}
                 >

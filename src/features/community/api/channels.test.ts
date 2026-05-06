@@ -32,7 +32,8 @@ function makeClient(channels: ChannelRow[], messages: MessageRow[] = []): AppSup
     select: vi.fn().mockReturnThis(),
     in: vi.fn().mockReturnThis(),
     is: vi.fn().mockReturnThis(),
-    order: vi.fn().mockResolvedValue({ data: messages, error: null }),
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue({ data: messages, error: null }),
   };
   return {
     from: vi.fn((table: string) => (table === 'channels' ? channelsBuilder : messagesBuilder)),

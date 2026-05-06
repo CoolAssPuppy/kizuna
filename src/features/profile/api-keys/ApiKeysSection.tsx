@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { CardShell } from '@/components/CardShell';
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 
 import { CliInstructions } from './CliInstructions';
 import { CreateApiKeyDialog } from './CreateApiKeyDialog';
@@ -13,6 +14,7 @@ import type { ApiKeyRow } from './types';
 
 export function ApiKeysSection(): JSX.Element {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const { data: keys = [], isLoading } = useApiKeys();
   const revoke = useRevokeApiKey();
   const [createOpen, setCreateOpen] = useState(false);
@@ -47,9 +49,17 @@ export function ApiKeysSection(): JSX.Element {
                 key={key.id}
                 apiKey={key}
                 onRevoke={() => {
-                  if (window.confirm(t('profile.apiKeys.revokeConfirm', { name: key.name }))) {
-                    void revoke.mutateAsync(key.id);
-                  }
+                  void (async () => {
+                    if (
+                      await confirm({
+                        titleKey: 'profile.apiKeys.revokeConfirm',
+                        titleValues: { name: key.name },
+                        destructive: true,
+                      })
+                    ) {
+                      await revoke.mutateAsync(key.id);
+                    }
+                  })();
                 }}
               />
             ))}

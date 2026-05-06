@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { I18nextProvider } from 'react-i18next';
 import { BrowserRouter } from 'react-router-dom';
 
+import { ConfirmDialogProvider } from '@/components/ui/confirm-dialog';
 import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import i18n from '@/lib/i18n';
@@ -39,7 +40,9 @@ export function AppProviders({ children }: AppProvidersProps): JSX.Element {
             }}
           >
             <ThemeProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                <ConfirmDialogProvider>{children}</ConfirmDialogProvider>
+              </ToastProvider>
             </ThemeProvider>
           </AuthProvider>
         </BrowserRouter>

@@ -40,12 +40,18 @@ export async function listChannelsWithLastMessage(
   const slugs = (channels ?? []).map((c) => c.slug);
   if (slugs.length === 0) return [];
 
+  // Cap at 20 messages per channel × max channel count. The
+  // messages_channel_sent_at_idx index makes this an index-only scan
+  // bounded by the total `slugs.length * 20` upper limit. The first
+  // matching row per slug wins (we sort desc), so 20 is over-spec but
+  // keeps the cost predictable as a chatty channel grows.
   const { data: messages } = await client
     .from('messages')
     .select('channel, body, sent_at')
     .in('channel', slugs)
     .is('deleted_at', null)
-    .order('sent_at', { ascending: false });
+    .order('sent_at', { ascending: false })
+    .limit(slugs.length * 20);
 
   const lastBySlug = new Map<string, { body: string; sent_at: string }>();
   for (const m of messages ?? []) {

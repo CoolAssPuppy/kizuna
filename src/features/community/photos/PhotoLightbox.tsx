@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Avatar } from '@/components/Avatar';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useIsAdmin } from '@/features/auth/hooks';
@@ -24,6 +25,7 @@ interface Props {
 export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): JSX.Element | null {
   const { t } = useTranslation();
   const { show } = useToast();
+  const confirm = useConfirm();
   const { user } = useAuth();
   const isAdmin = useIsAdmin();
   const softDelete = useSoftDeletePhoto();
@@ -65,7 +67,11 @@ export function PhotoLightbox({ photos, activeId, onClose, onChange }: Props): J
 
   async function handleDelete(): Promise<void> {
     if (!photo) return;
-    if (!window.confirm(t('photos.lightbox.deleteConfirm'))) return;
+    const confirmed = await confirm({
+      titleKey: 'photos.lightbox.deleteConfirm',
+      destructive: true,
+    });
+    if (!confirmed) return;
     try {
       await softDelete.mutateAsync(photo.id);
       show(t('photos.lightbox.deleted'));

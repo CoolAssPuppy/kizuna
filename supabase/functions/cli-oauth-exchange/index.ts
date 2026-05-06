@@ -101,6 +101,14 @@ Deno.serve(async (req) => {
   );
 });
 
+// Service-role client. Required because this function runs the OAuth
+// authorization-code → PAT exchange: it must (1) atomically mark the
+// pending oauth_codes row as consumed before another request can replay
+// it, and (2) mint a row in api_keys for the user the code belongs to.
+// The user's own JWT isn't sent on this transport (the CLI flow happens
+// before the PAT exists), so we cannot use the anon-keyed userClient
+// pattern here. Caller authentication is the signed authorization code
+// itself, verified earlier in the request.
 function adminClient() {
   const url = requireEnv('SUPABASE_URL', 'VITE_SUPABASE_URL');
   const key = requireEnv('SUPABASE_SERVICE_ROLE_KEY', 'SB_SECRET_KEY');

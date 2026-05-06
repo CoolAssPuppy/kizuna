@@ -3,7 +3,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getSupabaseClient } from '@/lib/supabase';
 
 import {
-  loadPhotoById,
   loadProfileActivity,
   loadRecentPhotos,
   searchAttendees,
@@ -38,14 +37,6 @@ export function usePhotoSearch(eventId: string | null, queryString: string) {
     queryFn: () =>
       searchPhotos(getSupabaseClient(), { eventId: eventId!, query: classified, limit: 60 }),
     enabled: !!eventId,
-  });
-}
-
-export function usePhotoById(photoId: string | null) {
-  return useQuery<PhotoRecord | null>({
-    queryKey: ['community', 'photos', 'byId', photoId],
-    queryFn: () => loadPhotoById(getSupabaseClient(), photoId!),
-    enabled: !!photoId,
   });
 }
 

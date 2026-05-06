@@ -16,7 +16,8 @@ export async function fetchAllFeedItems(
     .select('*')
     .eq('event_id', eventId)
     .order('location', { ascending: true })
-    .order('position', { ascending: true });
+    .order('position', { ascending: true })
+    .limit(200);
   if (error) throw error;
   return data ?? [];
 }

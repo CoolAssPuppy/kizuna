@@ -10,9 +10,18 @@
 //
 // Returns the new user's id and email so the SPA can sign them in directly.
 
+import { z } from 'zod';
+
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
 import { verifyInvitationToken } from '../_shared/invitationToken.ts';
 import { getAdminClient } from '../_shared/supabaseClient.ts';
+
+const RequestSchema = z.object({
+  token: z.string().min(1),
+  // Supabase Auth requires at least 6, but we want stronger; the guest
+  // password is the only credential they have for the rest of the event.
+  password: z.string().min(8).max(256),
+});
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -24,18 +33,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'misconfigured' }, { status: 500 });
   }
 
-  let body: { token?: string; password?: string };
+  let raw: unknown;
   try {
-    body = await req.json();
+    raw = await req.json();
   } catch {
     return jsonResponse({ error: 'invalid_body' }, { status: 400 });
   }
-  if (!body.token || !body.password) {
-    return jsonResponse({ error: 'missing_fields' }, { status: 400 });
+  const parsed = RequestSchema.safeParse(raw);
+  if (!parsed.success) {
+    const code = parsed.error.issues[0]?.path[0] === 'password' ? 'weak_password' : 'missing_fields';
+    return jsonResponse({ error: code }, { status: 400 });
   }
-  if (body.password.length < 8) {
-    return jsonResponse({ error: 'weak_password' }, { status: 400 });
-  }
+  const body = parsed.data;
 
   const verification = await verifyInvitationToken({ secret: tokenSecret, token: body.token });
   if (!verification.ok) {

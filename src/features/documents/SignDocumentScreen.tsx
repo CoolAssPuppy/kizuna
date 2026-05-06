@@ -14,10 +14,10 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
+import { fetchDocumentById, fetchSignatureFullName } from './api';
 import { detectDeviceType } from './deviceType';
-import { signDocument } from './createDocument';
+import { signDocument } from './signDocument';
 import { isScrolledToBottom } from './scroll';
-import type { DocumentRow } from './types';
 
 export function SignDocumentScreen(): JSX.Element {
   const { t } = useTranslation();
@@ -31,36 +31,15 @@ export function SignDocumentScreen(): JSX.Element {
   const { data: expectedFullName = '' } = useQuery({
     queryKey: ['document-signature-name', user?.id],
     enabled: !!user,
-    queryFn: async (): Promise<string> => {
-      if (!user) return '';
-      const { data } = await getSupabaseClient()
-        .from('users')
-        .select(
-          `employee_profiles ( preferred_name, legal_name ), guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )`,
-        )
-        .eq('id', user.id)
-        .maybeSingle();
-
-      const employee = data?.employee_profiles;
-      if (employee?.legal_name) return employee.legal_name.trim();
-      if (employee?.preferred_name) return employee.preferred_name.trim();
-      const guest = data?.guest_profiles;
-      return `${guest?.first_name ?? ''} ${guest?.last_name ?? ''}`.trim();
-    },
+    queryFn: () =>
+      user ? fetchSignatureFullName(getSupabaseClient(), user.id) : Promise.resolve(''),
   });
 
   const { data: document = null } = useQuery({
     queryKey: ['document', documentId],
     enabled: !!documentId,
-    queryFn: async (): Promise<DocumentRow | null> => {
-      if (!documentId) return null;
-      const { data } = await getSupabaseClient()
-        .from('documents')
-        .select('*')
-        .eq('id', documentId)
-        .maybeSingle();
-      return data;
-    },
+    queryFn: () =>
+      documentId ? fetchDocumentById(getSupabaseClient(), documentId) : Promise.resolve(null),
   });
   const [reachedBottom, setReachedBottom] = useState(false);
   const [fullName, setFullName] = useState('');

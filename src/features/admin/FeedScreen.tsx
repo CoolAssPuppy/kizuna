@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
@@ -91,6 +92,7 @@ export function FeedScreen(): JSX.Element {
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
   const { show } = useToast();
+  const confirm = useConfirm();
   const [editing, setEditing] = useState<DraftItem | null>(null);
 
   const { data: items } = useQuery({
@@ -177,7 +179,16 @@ export function FeedScreen(): JSX.Element {
               items={bucket}
               onEdit={(row) => setEditing(rowToDraft(row))}
               onDelete={(row) => {
-                if (confirm(t('admin.feed.deleteConfirm'))) remove.mutate(row.id);
+                void (async () => {
+                  if (
+                    await confirm({
+                      titleKey: 'admin.feed.deleteConfirm',
+                      destructive: true,
+                    })
+                  ) {
+                    remove.mutate(row.id);
+                  }
+                })();
               }}
               onReorder={(orderedIds) => reorder.mutate(orderedIds)}
             />

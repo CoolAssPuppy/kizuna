@@ -16,7 +16,7 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { loadCommunityProfile, loadHobbyCatalog, saveCommunityProfile } from './api';
 import { CountrySelect } from '@/components/CountrySelect';
 
-import { isValidCountryCode } from './countries';
+import { isValidCountryCode } from '@/lib/countries';
 
 interface FormState {
   bio: string;

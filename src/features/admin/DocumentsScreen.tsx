@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
@@ -27,6 +28,7 @@ export function DocumentsScreen(): JSX.Element {
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
   const { show } = useToast();
+  const confirm = useConfirm();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -108,7 +110,16 @@ export function DocumentsScreen(): JSX.Element {
                   size="icon"
                   variant="ghost"
                   onClick={() => {
-                    if (confirm(t('adminDocuments.deleteConfirm'))) remove.mutate(doc.id);
+                    void (async () => {
+                      if (
+                        await confirm({
+                          titleKey: 'adminDocuments.deleteConfirm',
+                          destructive: true,
+                        })
+                      ) {
+                        remove.mutate(doc.id);
+                      }
+                    })();
                   }}
                 >
                   <Trash2 aria-hidden className="h-3.5 w-3.5 text-destructive" />

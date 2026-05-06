@@ -106,7 +106,7 @@ function registerTools(server: McpServer): void {
               text: renderPayload(payload, transportFormat),
             },
           ],
-          structuredContent: payload as unknown as Record<string, unknown>,
+          structuredContent: { ...payload },
           isError: payload.ok === false,
         };
       },

@@ -288,9 +288,35 @@ Routes other than `/sign-in`, `/accept-invitation`, and `/share/*` show the `App
 
 ## Database
 
-37 tables defined declaratively in `supabase/schemas/`. RLS is enabled on every table; the service-role key never touches client code.
+48 tables defined declaratively in `supabase/schemas/`. RLS is enabled on every table by a single `do $$ ... loop ... execute format(...) ... end $$` block at the top of `90_rls.sql`; the service-role key never touches client code. To verify the count yourself: `grep -c '^create table' supabase/schemas/*.sql`.
 
-Highlights:
+### Why declarative schemas instead of timestamped migrations
+
+Schemas live as plain SQL files under `supabase/schemas/` (`00_extensions.sql`, `10_enums.sql`, `20_identity.sql`, ...). `npm run db:apply` re-applies every file in alphabetical order against a clean database. There are **no** `supabase/migrations/*.sql` files in this repo. The trade-off:
+
+- **Pro:** the schema is the single source of truth. A diff between two branches is a diff of the schema files. New developers read a small handful of well-named files instead of replaying a hundred migrations.
+- **Pro:** every reset starts from a known-good state. CI's pgTAP run never inherits drift.
+- **Con:** to push a schema change to a hosted Supabase project, you generate a migration with `npm run db:diff -f <name>` and apply it with `supabase db push`. The diff is the deploy artefact.
+
+This pattern is documented in `supabase/schemas/README.md`. It's a deliberate fit for an app where the schema is the load-bearing primitive — not where the data is.
+
+### Why a JWT custom claim for `app_role`
+
+Supabase Auth issues JWTs with a top-level `role` claim that maps to a Postgres role (`anon` / `authenticated` / `service_role`). RLS policies that say `using (auth.role() = 'authenticated')` rely on that claim staying intact. Kizuna needs **four** application-level roles — `employee`, `guest`, `admin`, `super_admin` — and they're orthogonal to the Postgres role mapping.
+
+The fix: a Custom Access Token Hook (`supabase/schemas/85_auth_hooks.sql` and `[auth.hook.custom_access_token]` in `supabase/config.toml`) injects `app_role` and `is_leadership` claims from `public.users` into every JWT. RLS policies read them through `public.auth_role()` (which decodes `auth.jwt() ->> 'app_role'`) and `public.is_leadership_user()`. The standard `role` claim stays `authenticated`/`anon`, so Postgres role permissions still work.
+
+### Why Supabase Vault for secrets
+
+The `pgcrypto` symmetric key for passport-number encryption (`KIZUNA_PASSPORT_KEY`) is stored in **Supabase Vault**, not as a database GUC, environment variable, or hard-coded fixture. The encryption RPC (`public.set_passport`) reads the key via `vault.create_secret`/`vault.read_secret` so:
+
+1. The key never appears in `pg_settings`, `pg_stat_activity`, or any logfile a `service_role` query might capture.
+2. The key never ships in `.env.example` or any tracked file.
+3. Rotating the key is a matter of writing a new vault secret and updating the function reference — no schema change, no service restart.
+
+The same pattern would apply to any other server-side secret (HMAC keys, API tokens) that can't go in env. For SPA-visible config (`VITE_*`), env is fine; for cron-job secrets and crypto keys, Vault.
+
+### Highlights
 
 - **Identity** — `users`, `employee_profiles`, `guest_profiles`, `guest_invitations`, `additional_guests`, `accessibility_preferences`, `emergency_contacts`. `users.is_leadership` is a boolean flag (orthogonal to role) writable only by admins via the `users_leadership_change_guard` trigger and `set_user_leadership` RPC.
 - **Registration** — `registrations` + `registration_tasks` (the trigger-maintained `completion_pct` lives here), `passport_details` (encrypted via pgcrypto, no admin SELECT policy), `dietary_preferences`.
@@ -380,13 +406,15 @@ This lets the entire app run locally without any third-party setup.
 
 Three themes ship — Light (default Supabase), Dark (Supabase inverted), and Barbie (pink, playful). They're selected via the dropdown in the footer and persisted to `localStorage`. Every visual token is a CSS variable defined in `src/styles/globals.css`. A designer can re-skin Kizuna without touching component code.
 
-i18n is i18next + react-i18next with `en-US` as the default and only locale today. Adding a new language is a matter of:
+i18n is i18next + react-i18next with `en-US` as the source-of-truth locale. Eight locales ship: `en-US`, `de-DE`, `es-ES`, `fi-FI`, `fr-FR`, `it-IT`, `pt-BR`, `pt-PT`. en-US is the fallback; missing keys in any other locale fall through. The footer flag dropdown enumerates whatever locales `i18n.ts` exposes.
 
-1. Create `src/locales/<lang>/common.json` with translations
-2. Add the locale to `SUPPORTED_LOCALES` in `src/lib/i18n.ts`
-3. Register the resource in the `i18n.init` call
+Adding or expanding a language:
 
-Every visible string flows through `t()` — there is no raw English in JSX. The footer's flag dropdown enumerates whatever locales `i18n.ts` exposes.
+1. Open `src/locales/<lang>/common.json` (or create one mirroring `en-US/common.json`)
+2. Run `tsx scripts/check-locale-parity.ts` to list missing keys against en-US
+3. Add the locale to `SUPPORTED_LOCALES` in `src/lib/i18n.ts` if new, and register it in `resources`
+
+Every visible string flows through `t()` — there is no raw English in JSX. Locale parity is checked in CI via `npm run i18n:check`.
 
 ## Email templates
 

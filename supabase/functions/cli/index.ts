@@ -189,6 +189,14 @@ async function authenticateSessionJwt(authHeader: string): Promise<Authenticated
   };
 }
 
+// Service-role client. Required because this function authenticates a
+// PAT (api_keys row) WITHOUT a user JWT — the bearer token IS the PAT
+// — and then needs to verify the token hash against api_keys to resolve
+// who's calling. RLS on api_keys would block reading another user's
+// row (which is exactly what we need to do here, since we don't yet
+// know which user the PAT belongs to). After resolution, every database
+// action runs through `scopedClient(authHeader)` so RLS still gates
+// command behavior. The service role is used only to look up the PAT.
 function adminClient(): SupabaseClient<Database> {
   const url = requireEnv('SUPABASE_URL', 'VITE_SUPABASE_URL');
   const key = requireEnv('SUPABASE_SERVICE_ROLE_KEY', 'SB_SECRET_KEY');

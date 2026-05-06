@@ -2,38 +2,6 @@ import type { AppSupabaseClient } from '@/lib/supabase';
 
 import type { DocumentRow } from './types';
 
-interface CreateDocumentArgs {
-  eventId: string | null;
-  documentKey: DocumentRow['document_key'];
-  title: string;
-  body: string;
-  requiresAcknowledgement: boolean;
-}
-
-export async function createDocument(
-  client: AppSupabaseClient,
-  args: CreateDocumentArgs,
-): Promise<DocumentRow> {
-  const { data, error } = await client
-    .from('documents')
-    .insert({
-      event_id: args.eventId,
-      document_key: args.documentKey,
-      version: 1,
-      title: args.title,
-      body: args.body,
-      applies_to: 'all',
-      requires_acknowledgement: args.requiresAcknowledgement,
-      requires_scroll: args.requiresAcknowledgement,
-      display_order: 100,
-      is_active: true,
-    })
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
-}
-
 interface SignDocumentArgs {
   userId: string;
   eventId: string;

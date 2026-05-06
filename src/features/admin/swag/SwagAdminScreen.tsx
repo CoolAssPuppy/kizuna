@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import {
@@ -26,6 +27,7 @@ export function SwagAdminScreen(): JSX.Element {
   const eventId = event?.id ?? null;
   const queryClient = useQueryClient();
   const { show } = useToast();
+  const confirm = useConfirm();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
@@ -108,9 +110,17 @@ export function SwagAdminScreen(): JSX.Element {
               rowProps={rowProps(item.id)}
               onEdit={() => setEditingId(item.id)}
               onDelete={() => {
-                if (window.confirm(t('adminSwag.deleteConfirm', { name: item.name }))) {
-                  remove.mutate(item.id);
-                }
+                void (async () => {
+                  if (
+                    await confirm({
+                      titleKey: 'adminSwag.deleteConfirm',
+                      titleValues: { name: item.name },
+                      destructive: true,
+                    })
+                  ) {
+                    remove.mutate(item.id);
+                  }
+                })();
               }}
               disabled={isLocked}
             />

@@ -1,4 +1,5 @@
 import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
+import { communityGalleryFolder } from '@/lib/storagePaths';
 import { type AppSupabaseClient, flatJoin, type Joined } from '@/lib/supabase';
 
 import type { GalleryQuery } from './searchQuery';
@@ -130,7 +131,7 @@ export async function loadRecentPhotos(
   return ((data ?? []) as unknown as RawPhotoRow[]).map(rawToRecord);
 }
 
-export async function loadPhotoById(
+async function loadPhotoById(
   client: AppSupabaseClient,
   photoId: string,
 ): Promise<PhotoRecord | null> {
@@ -172,10 +173,14 @@ export async function searchPhotos(
   }
 
   if (query.kind === 'mention') {
+    // Use .ilike directly instead of .or — passing user input through .or
+    // string-interpolates into PostgREST filter syntax, where a comma
+    // splits the clause into two filters and parens nest. .ilike sends
+    // the value as a parameter and is escape-safe by construction.
     const { data: users, error } = await client
       .from('users')
       .select('id')
-      .or(`email.ilike.%${query.value}%`)
+      .ilike('email', `%${query.value}%`)
       .limit(50);
     if (error) throw error;
     const userIds = (users ?? []).map((u) => u.id);
@@ -292,7 +297,7 @@ export async function uploadPhoto(
   if (insertError) throw insertError;
 
   const photoId = photoRow.id;
-  const prefix = `${eventId}/gallery/${uploaderId}/${photoId}`;
+  const prefix = communityGalleryFolder({ eventId, userId: uploaderId, mediaItemId: photoId });
 
   await Promise.all([
     client.storage.from(PHOTOS_BUCKET).upload(`${prefix}/original.${ext}`, original, {
@@ -381,19 +386,4 @@ export async function searchAttendees(
     if (matched.length >= limit) break;
   }
   return matched;
-}
-
-export function photoStorageUrls(
-  prefix: string,
-  originalExt: string,
-): {
-  originalPath: string;
-  previewPath: string;
-  thumbPath: string;
-} {
-  return {
-    originalPath: `${prefix}/original.${originalExt}`,
-    previewPath: `${prefix}/preview.webp`,
-    thumbPath: `${prefix}/thumb.webp`,
-  };
 }

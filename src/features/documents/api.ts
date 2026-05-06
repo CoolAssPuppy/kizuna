@@ -53,6 +53,44 @@ export async function fetchDocuments(
 }
 
 /**
+ * Resolves the user's expected legal-name string for the signature
+ * field. Employee `legal_name` wins, then employee `preferred_name`,
+ * then guest first+last. Empty string when nothing is on file.
+ */
+export async function fetchSignatureFullName(
+  client: AppSupabaseClient,
+  userId: string,
+): Promise<string> {
+  const { data } = await client
+    .from('users')
+    .select(
+      `employee_profiles ( preferred_name, legal_name ), guest_profiles!guest_profiles_user_id_fkey ( first_name, last_name )`,
+    )
+    .eq('id', userId)
+    .maybeSingle();
+
+  const employee = data?.employee_profiles;
+  if (employee?.legal_name) return employee.legal_name.trim();
+  if (employee?.preferred_name) return employee.preferred_name.trim();
+  const guest = data?.guest_profiles;
+  return `${guest?.first_name ?? ''} ${guest?.last_name ?? ''}`.trim();
+}
+
+/** Loads a single document by id. Returns null when missing or RLS-hidden. */
+export async function fetchDocumentById(
+  client: AppSupabaseClient,
+  documentId: string,
+): Promise<DocumentRow | null> {
+  const { data, error } = await client
+    .from('documents')
+    .select('*')
+    .eq('id', documentId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/**
  * Records a consent event. Idempotent on (user_id, event_id, document_key,
  * document_version) so repeated calls are safe.
  */

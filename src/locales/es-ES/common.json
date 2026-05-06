@@ -82,7 +82,19 @@
     }
   },
   "terminal": {
-    "palettePlaceholder": "escribe / para abrir la paleta"
+    "label": "Línea de comandos",
+    "placeholder": "escribe un comando o `/` para la paleta · `?` para ayuda",
+    "help": "Escribe `help` para ver los comandos disponibles, o `/` para enfocar la barra.",
+    "copy": "Copiar salida",
+    "copied": "Salida copiada",
+    "title": "Indicador",
+    "openPrompt": "Abrir indicador",
+    "results": "Resultados del comando",
+    "resultsLabel": "Resultados",
+    "format": {
+      "json": "JSON",
+      "md": "Markdown"
+    }
   },
   "email": {
     "copy": "Copiar correo",
@@ -126,7 +138,8 @@
         "registrationsStarted": "registrations.in_progress",
         "registrationsComplete": "registrations.complete",
         "documentsSigned": "documents.signed"
-      }
+      },
+      "feedItemLabel": "__TODO_LOCALE__ News"
     },
     "factsTitle": "Datos Sobre Nuestro Evento",
     "factsSubtitle": "Larga vida a la leyenda del Equipo 18.",
@@ -163,7 +176,14 @@
       "subtitle": "Una curiosidad real de otro asistente. Adivina y luego descubre la respuesta.",
       "reveal": "Mostrar la respuesta",
       "tryAnother": "Probar con otra"
-    }
+    },
+    "eventAccess": {
+      "label": "__TODO_LOCALE__ Event Access Code:"
+    },
+    "memories": {
+      "cta": "__TODO_LOCALE__ Make your own {{event}} memories"
+    },
+    "feed": {}
   },
   "welcome": {
     "title": "Bienvenido a {{eventName}}",
@@ -208,7 +228,9 @@
       "guests": "Invitados",
       "dependents": "Acompañantes",
       "swag": "Merchandising",
-      "transport": "Transporte"
+      "transport": "Transporte",
+      "attendance": "__TODO_LOCALE__ Attendance",
+      "apiKeys": "__TODO_LOCALE__ API Keys"
     },
     "cards": {
       "personalInfo": "Nombre, nombre para la acreditación y la ciudad que llamas hogar.",
@@ -229,7 +251,79 @@
       "accessibilitySaved": "Preferencias de accesibilidad guardadas.",
       "swagSaved": "Selecciones de merchandising guardadas.",
       "transportSaved": "Preferencia de transporte guardada.",
-      "error": "Algo salió mal. Por favor, inténtalo de nuevo."
+      "error": "No se pudo guardar. Inténtalo de nuevo.",
+      "attendingSaved": "Respuesta guardada"
+    },
+    "checklist": {
+      "label": "__TODO_LOCALE__ Registration progress",
+      "tasks": {
+        "attending": "__TODO_LOCALE__ Attendance",
+        "personal_info": "__TODO_LOCALE__ Personal info",
+        "passport": "__TODO_LOCALE__ Passport details",
+        "emergency_contact": "__TODO_LOCALE__ Emergency contact",
+        "dietary": "__TODO_LOCALE__ Dietary preferences",
+        "accessibility": "__TODO_LOCALE__ Accessibility",
+        "swag": "__TODO_LOCALE__ Swag sizes",
+        "transport": "__TODO_LOCALE__ Transport",
+        "documents": "__TODO_LOCALE__ Documents"
+      }
+    },
+    "apiKeys": {
+      "title": "Tokens de acceso personal de la CLI",
+      "description": "Los tokens autentican la CLI de Kizuna y los servidores MCP. Trátalos como contraseñas.",
+      "empty": "Aún no hay tokens activos.",
+      "createDescription": "__TODO_LOCALE__ Create a personal access token for scripts, local agents, or the Kizuna CLI.",
+      "name": "Nombre",
+      "nameHelp": "__TODO_LOCALE__ What is this key for? You can rename it later.",
+      "revoke": "Revocar",
+      "revokeConfirm": "¿Revocar el token \"{{name}}\"? Los clientes que lo usen fallarán inmediatamente.",
+      "revoked": "Tokens revocados",
+      "created": "Creado el {{date}}",
+      "lastUsed": "Último uso {{date}}",
+      "neverUsed": "__TODO_LOCALE__ Never used",
+      "expiry": {
+        "label": "__TODO_LOCALE__ Expiry",
+        "30d": "__TODO_LOCALE__ 30 days",
+        "90d": "__TODO_LOCALE__ 90 days",
+        "1y": "__TODO_LOCALE__ 1 year",
+        "never": "__TODO_LOCALE__ Never"
+      },
+      "revealOnce": {
+        "title": "Copia tu token ahora",
+        "warning": "__TODO_LOCALE__ This is the only time this token will be shown.",
+        "copy": "Copiar token",
+        "copied": "Token copiado"
+      },
+      "cliInstructions": {},
+      "create": "Crear token",
+      "scope": {
+        "label": "Alcance",
+        "read": "Lectura — itinerario, sesiones, documentos",
+        "write": "Escritura — lectura más RSVP y actualizar perfil",
+        "admin": "Admin — acceso completo (solo admins)"
+      }
+    },
+    "cli": {
+      "title": "__TODO_LOCALE__ Using the CLI",
+      "description": "__TODO_LOCALE__ Talk to Kizuna from a terminal or hand it to your AI agent. The CLI uses the API keys above for authentication.",
+      "copy": "__TODO_LOCALE__ Copy command",
+      "copied": "__TODO_LOCALE__ Copied",
+      "step1": {
+        "title": "__TODO_LOCALE__ Install the CLI",
+        "body": "__TODO_LOCALE__ Once installed, the kizuna binary lives on your PATH. Requires Node.js 20 or newer."
+      },
+      "step2": {
+        "title": "__TODO_LOCALE__ Log in",
+        "body": "__TODO_LOCALE__ Opens a browser tab for you to authorize the CLI. The token is saved to ~/.kizuna/config.json with private file permissions."
+      },
+      "step3": {
+        "title": "__TODO_LOCALE__ Run a command",
+        "body": "__TODO_LOCALE__ Every command from your kizuna schema output is fair game. Add --format md for human-readable output, --format json (the default) for piping into jq or another tool."
+      },
+      "step4": {
+        "title": "__TODO_LOCALE__ Plug into an AI agent",
+        "body": "__TODO_LOCALE__ The MCP server bridges Kizuna into Claude Desktop, Cursor, and Claude Code. Add this block to your agent's MCP configuration, swap in a token from above, and restart the agent."
+      }
     }
   },
   "community": {
@@ -264,16 +358,30 @@
       "byHobby": "Personas que comparten tus aficiones",
       "byHometown": "Personas de tu ciudad natal",
       "byCurrent": "Personas en tu ciudad actual",
-      "empty": "Aún no hay coincidencias. Añade algunas aficiones y una ciudad natal a tu perfil de comunidad.",
+      "empty": "Aún no hay coincidencias.",
       "matchedHobbies": "Aficiones coincidentes",
       "name": "Nombre",
-      "email": "Correo electrónico"
+      "email": "Correo electrónico",
+      "firstName": "__TODO_LOCALE__ First name",
+      "lastName": "__TODO_LOCALE__ Last name"
     },
     "person": {
       "back": "Volver a la comunidad",
       "notFound": "No encontramos a esa persona.",
       "fromLabel": "De {{value}}",
-      "nowLabel": "Ahora en {{value}}"
+      "nowLabel": "Ahora en {{value}}",
+      "identity": {
+        "department": "__TODO_LOCALE__ Department",
+        "team": "__TODO_LOCALE__ Team",
+        "title": "__TODO_LOCALE__ Title",
+        "baseCity": "__TODO_LOCALE__ Base city",
+        "startDate": "__TODO_LOCALE__ Start date",
+        "yearsAttended": "__TODO_LOCALE__ Years at Supafest"
+      },
+      "activity": {
+        "messagesHint": "__TODO_LOCALE__ Latest channel messages",
+        "photosTrailing": "__TODO_LOCALE__ tagged or uploaded"
+      }
     },
     "channels": {
       "title": "Canales de la comunidad",
@@ -305,7 +413,6 @@
     "theme": "Tema",
     "themes": {
       "light": "Claro",
-      "dark": "Oscuro",
       "barbie": "Barbie",
       "supa": "Supa",
       "hermione": "Hermione",
@@ -333,7 +440,9 @@
     "agree": "Acepto",
     "close": "Cerrar",
     "edit": "Editar",
-    "delete": "Eliminar"
+    "delete": "Eliminar",
+    "yes": "__TODO_LOCALE__ Yes",
+    "no": "__TODO_LOCALE__ No"
   },
   "registration": {
     "title": "Inscripción",
@@ -351,7 +460,8 @@
       "guests": "Invitados",
       "dependents": "Acompañantes",
       "swag": "Merchandising",
-      "transport": "Transporte"
+      "transport": "Transporte",
+      "attending": "__TODO_LOCALE__ Attendance"
     },
     "personalInfo": {
       "preferredName": "Nombre Preferido",
@@ -364,7 +474,11 @@
       "phoneNumber": "Número de Teléfono",
       "whatsapp": "WhatsApp",
       "baseCity": "Ciudad Actual",
-      "baseCityHint": "Desde dónde viajas."
+      "fromHibob": "__TODO_LOCALE__ From HiBob",
+      "title": "__TODO_LOCALE__ Title",
+      "team": "__TODO_LOCALE__ Team",
+      "startDate": "__TODO_LOCALE__ Start Date",
+      "pronouns": "__TODO_LOCALE__ Pronouns"
     },
     "dietary": {
       "restrictions": "Restricciones dietéticas",
@@ -516,17 +630,14 @@
     },
     "swag": {
       "intro": "Dinos tus tallas de camiseta y de calzado para que podamos encargar el material adecuado con antelación.",
-      "yourSizes": "Tus tallas",
-      "guestsHeading": "Tallas para acompañantes adicionales",
-      "tshirtSize": "Talla de camiseta",
-      "shoeSize": "Talla de calzado",
-      "shoeSizeHint": "Elige el sistema que conozcas: lo guardamos todo en EU.",
-      "shoeSystem": {
-        "us": "US",
-        "eu": "EU"
-      },
-      "age_one": "{{age}} año",
-      "age_other": "{{age}} años"
+      "shoeSystem": {},
+      "empty": "__TODO_LOCALE__ The events team hasn't published any swag items for this event yet.",
+      "pickSize": "__TODO_LOCALE__ Choose a size",
+      "optOut": "__TODO_LOCALE__ I don't need this item",
+      "sizingChart": "__TODO_LOCALE__ View sizing chart",
+      "sizingChartAlt": "__TODO_LOCALE__ Sizing chart",
+      "lockedTitle": "__TODO_LOCALE__ Swag selection is locked.",
+      "lockedBody": "__TODO_LOCALE__ The events team has frozen swag selections for this event. Reach out if you need a change."
     },
     "transport": {
       "intro": "Dinos para qué trayectos necesitas traslado al aeropuerto. Lo usamos para preparar la lista de las lanzaderas.",
@@ -536,6 +647,13 @@
         "departure": "Solo necesito un traslado al aeropuerto a la salida.",
         "both": "Necesito traslados tanto a la llegada como a la salida."
       }
+    },
+    "attending": {
+      "intro": "__TODO_LOCALE__ We need to know whether you'll be joining us for {{eventName}} so we can plan accordingly. You can change your mind from your Profile.",
+      "fallbackEventName": "__TODO_LOCALE__ this event",
+      "attendingPrompt": "__TODO_LOCALE__ Are you planning on attending {{eventName}}?",
+      "firstTimePrompt": "__TODO_LOCALE__ Is this your first time attending an event?",
+      "optOutNote": "__TODO_LOCALE__ Saving \"No\" closes the rest of the wizard. You can re-open it later from your Profile."
     }
   },
   "admin": {
@@ -554,7 +672,10 @@
       "nudges": "Comunicación",
       "communication": "Comunicación",
       "reports": "Informes",
-      "conflicts": "Conflictos"
+      "conflicts": "Conflictos",
+      "about": "__TODO_LOCALE__ About",
+      "scanQr": "__TODO_LOCALE__ Scan QR Code",
+      "swag": "__TODO_LOCALE__ Swag"
     },
     "groundTransport": {
       "title": "Herramienta de Transporte Terrestre",
@@ -638,8 +759,8 @@
       "saved": "Evento guardado.",
       "delete": "Eliminar evento",
       "deleted": "Evento eliminado.",
-      "deleteConfirm": "¿Eliminar definitivamente este evento y todas las filas vinculadas a él (sesiones, inscripciones, alojamientos, transporte, itinerario, documentos)? Los datos del perfil personal se mantienen. Esto no se puede deshacer.",
-      "cascading": "Eliminando",
+      "deleteConfirm": "¿Eliminar este evento y todas las filas vinculadas (sesiones, registros, alojamiento, transporte, itinerario, documentos)? Los datos personales del perfil se conservan. No se puede deshacer.",
+      "cascading": "Eliminando...",
       "active": "Activo",
       "past": "Pasado",
       "empty": "Aún no hay eventos. Crea el primero para empezar.",
@@ -663,7 +784,8 @@
         "isActiveHint": "Solo puede haber un evento de Supafest activo a la vez. Los eventos activos aparecen en la pantalla de bienvenida.",
         "inviteAll": "Invitar a todos los empleados automáticamente",
         "inviteAllHint": "Cuando está activo, todos los empleados activos verán este evento. Si no, las invitaciones deben añadirse una a una."
-      }
+      },
+      "imageUploadAfterSave": "__TODO_LOCALE__ Save the event first; image uploads land here once it has an id."
     },
     "agenda": {
       "title": "Agenda",
@@ -696,7 +818,12 @@
         "capacity": "Aforo",
         "speakerEmail": "Correo del ponente",
         "abstract": "Resumen",
-        "mandatory": "Añadir automáticamente al itinerario de cada asistente relevante"
+        "mandatory": "Añadir automáticamente al itinerario de cada asistente relevante",
+        "status": "__TODO_LOCALE__ Status",
+        "statusHint": "__TODO_LOCALE__ Move back to Proposed to clear all registrations and the schedule slot.",
+        "timeZoneHint": "__TODO_LOCALE__ Local time at the event ({{timeZone}}).",
+        "speaker": "__TODO_LOCALE__ Speaker",
+        "speakerPlaceholder": "__TODO_LOCALE__ Start typing a name or email"
       },
       "types": {
         "keynote": "Charla magistral",
@@ -712,7 +839,35 @@
         "employees_only": "Solo empleados",
         "guests_only": "Solo invitados",
         "opt_in": "Solo por inscripción"
-      }
+      },
+      "proposalsHeader_one": "{{count}} propuesta",
+      "proposalsHeader_other": "{{count}} propuestas",
+      "proposalsEmpty": "Aún no hay propuestas.",
+      "proposalsVoters": "Votos de",
+      "proposalsSearchPlaceholder": "Buscar propuestas",
+      "proposalsSearchLabel": "Buscar propuestas",
+      "proposalsSortLabel": "Ordenar",
+      "proposalsSort": {
+        "votes": "Por votos",
+        "proposer": "Por proponente"
+      },
+      "editTags": "__TODO_LOCALE__ Edit tags",
+      "tags": {
+        "title": "__TODO_LOCALE__ Edit Tags",
+        "placeholder": "__TODO_LOCALE__ Tag name",
+        "add": "__TODO_LOCALE__ Add tag",
+        "added": "__TODO_LOCALE__ Tag added.",
+        "deleted": "__TODO_LOCALE__ Tag removed.",
+        "deleteConfirm": "__TODO_LOCALE__ Delete the \"{{name}}\" tag? Sessions tagged with it will lose the label.",
+        "colorLabel": "__TODO_LOCALE__ Color for {{name}}",
+        "newColorLabel": "__TODO_LOCALE__ Color for new tag",
+        "nameLabel": "__TODO_LOCALE__ Tag name"
+      },
+      "statuses": {
+        "proposed": "__TODO_LOCALE__ Proposed",
+        "active": "__TODO_LOCALE__ On the agenda"
+      },
+      "expectedAttendance": "__TODO_LOCALE__ Expected: {{employees}} employees + {{guests}} guests"
     },
     "documents": {
       "title": "Documentos",
@@ -727,7 +882,7 @@
       "saving": "Guardando",
       "saved": "Elemento del feed guardado.",
       "delete": "Eliminar",
-      "deleted": "Elemento del feed eliminado.",
+      "deleted": "Elemento del feed eliminado",
       "deleteConfirm": "¿Quitar este elemento del feed de la pantalla de inicio?",
       "newItem": "Añadir elemento al feed",
       "empty": "Aún no hay nada aquí. Añade un elemento.",
@@ -852,7 +1007,8 @@
       "transport": "Lista de transporte",
       "dietary": "Resumen dietético",
       "swag": "Pedido de merchandising",
-      "payments": "Pagos"
+      "payments": "Pagos",
+      "swag_totals": "__TODO_LOCALE__ Swag (total order)"
     },
     "pagination": {
       "prev": "Anterior",
@@ -884,7 +1040,25 @@
       "acceptExternal": "Usar el Valor Externo",
       "noConflicts": "No hay conflictos abiertos."
     },
-    "blocked": "No tienes permiso para ver esta página."
+    "blocked": "No tienes permiso para ver esta página.",
+    "about": {
+      "noEvent": "__TODO_LOCALE__ No active event yet. Create one from All events to edit its metadata here."
+    },
+    "scanQr": {
+      "title": "__TODO_LOCALE__ Scan QR Code",
+      "subtitle": "__TODO_LOCALE__ Point the camera at an attendee's check-in code to verify their entry.",
+      "permission": "__TODO_LOCALE__ Camera access denied. Enable camera permissions in your browser and reload.",
+      "cameraFailed": "__TODO_LOCALE__ Could not start the camera.",
+      "approved": "__TODO_LOCALE__ Approved",
+      "invalid": "__TODO_LOCALE__ That QR code isn't a kizuna check-in code.",
+      "userNotFound": "__TODO_LOCALE__ Attendee not found in the directory.",
+      "lookingUp": "__TODO_LOCALE__ Looking up attendee...",
+      "scanAnother": "__TODO_LOCALE__ Scan another"
+    },
+    "empty": {
+      "rooming": "__TODO_LOCALE__ Room assignments must be completed first.",
+      "transport": "__TODO_LOCALE__ Ground transport assignments must be completed first."
+    }
   },
   "agenda": {
     "title": "Agenda",
@@ -896,10 +1070,47 @@
     "unfavorite": "Quitar de favoritos",
     "filters": {
       "all": "Todas ({{count}})",
-      "favorites": "Mis elegidas ({{count}})"
+      "favorites": "Mis elegidas ({{count}})",
+      "proposed": "__TODO_LOCALE__ Proposed ({{count}})"
     },
     "allDays": "Todos los días",
-    "dayFilterLabel": "Filtrar por día"
+    "dayFilterLabel": "Día",
+    "mandatoryLabel": "__TODO_LOCALE__ Mandatory session — always in your agenda",
+    "guests": {
+      "prompt": "__TODO_LOCALE__ Which guests will be attending?"
+    },
+    "proposed": "Propuesto",
+    "tags": {
+      "fieldLabel": "__TODO_LOCALE__ Tags",
+      "fieldHint": "__TODO_LOCALE__ Pick at least one to help attendees filter the agenda.",
+      "empty": "__TODO_LOCALE__ No tags configured for this event yet."
+    },
+    "speakerTypeahead": {
+      "loading": "__TODO_LOCALE__ Searching attendees…",
+      "empty": "__TODO_LOCALE__ No matching attendees."
+    },
+    "proposals": {
+      "proposeButton": "Proponer",
+      "dialogTitle": "__TODO_LOCALE__ Propose a Session",
+      "editTitle": "__TODO_LOCALE__ Edit Proposal",
+      "editWarning": "__TODO_LOCALE__ Heads up: editing this proposal will erase all of its existing votes.",
+      "editAction": "__TODO_LOCALE__ Edit \"{{title}}\"",
+      "deleteAction": "__TODO_LOCALE__ Delete \"{{title}}\"",
+      "deleteConfirm": "¿Eliminar la propuesta \"{{title}}\"? No se puede deshacer.",
+      "submit": "__TODO_LOCALE__ Submit proposal",
+      "submitted": "__TODO_LOCALE__ Proposal submitted. Thanks!",
+      "updated": "__TODO_LOCALE__ Proposal updated. Votes were cleared.",
+      "deleted": "Propuesta eliminada",
+      "empty": "Aún no hay propuestas. Sé la primera.",
+      "proposedBy": "Propuesto por {{name}}",
+      "unknownProposer": "una compañera",
+      "vote": "Pulgar arriba",
+      "alreadyVoted_one": "__TODO_LOCALE__ Voted ({{count}} vote)",
+      "alreadyVoted_other": "__TODO_LOCALE__ Voted ({{count}} votes)",
+      "voteCount_one": "{{count}} voto",
+      "voteCount_other": "{{count}} votos"
+    },
+    "types": {}
   },
   "shareReport": {
     "eyebrow": "Informe compartido de Kizuna",
@@ -976,7 +1187,8 @@
       "tabs": {
         "paste": "Pegar texto",
         "upload": "Subir archivo",
-        "email": "Reenviar correo"
+        "email": "Reenviar correo",
+        "perk": "__TODO_LOCALE__ Sync with Perk"
       },
       "pastePlaceholder": "Pega aquí tu confirmación de vuelo, hotel o traslado…",
       "pasteHint": "Funciona mejor con el texto completo del correo de confirmación.",
@@ -992,7 +1204,26 @@
       "uploadError": "No se pudo leer ese archivo. Usa Pegar texto o prueba con otra exportación.",
       "uploadInvalidType": "Por favor, elige un PDF.",
       "emailComingSoonTitle": "El reenvío por correo llegará pronto",
-      "emailComingSoonHint": "Reenvía a itinerary@kizuna.dev en cuanto lo tengamos configurado."
+      "emailComingSoonHint": "Reenvía a itinerary@kizuna.dev en cuanto lo tengamos configurado.",
+      "testItinerary": "__TODO_LOCALE__ Add Test Itinerary",
+      "uploadComingSoonTitle": "__TODO_LOCALE__ PDF upload is coming soon",
+      "uploadComingSoonHint": "__TODO_LOCALE__ Drop a booking PDF and we'll extract the flights, hotel, and transfers in your browser.",
+      "perk": {
+        "title": "__TODO_LOCALE__ Pull your TravelPerk bookings",
+        "hint": "__TODO_LOCALE__ We'll list every active booking on your work email. Pick the one you want to add to your itinerary — re-importing later is safe and updates existing flights in place.",
+        "sync": "__TODO_LOCALE__ Sync now",
+        "syncing": "__TODO_LOCALE__ Looking up your bookings",
+        "refresh": "__TODO_LOCALE__ Refresh",
+        "listHint": "__TODO_LOCALE__ Found {{count}} booking. Pick one to import.",
+        "listHint_other": "__TODO_LOCALE__ Found {{count}} bookings. Pick one to import.",
+        "legs": "__TODO_LOCALE__ {{count}} flight",
+        "legs_other": "__TODO_LOCALE__ {{count}} flights",
+        "import": "__TODO_LOCALE__ Import",
+        "importing": "__TODO_LOCALE__ Importing",
+        "success": "__TODO_LOCALE__ Synced {{count}} flight(s) from TravelPerk.",
+        "nothingFound": "__TODO_LOCALE__ TravelPerk has no active bookings for your email yet.",
+        "error": "__TODO_LOCALE__ We could not reach TravelPerk just now. Try again in a moment."
+      }
     },
     "checkin": {
       "openLabel": "Open check-in QR code",
@@ -1009,7 +1240,8 @@
       "reminder": "Recordatorio"
     },
     "conflict": "Se solapa con otro elemento de tu día",
-    "withGuest": "Con tu acompañante"
+    "withGuest": "Con tu acompañante",
+    "qr": {}
   },
   "guests": {
     "invitationTitle": "Estás Invitado a Supafest",
@@ -1083,7 +1315,10 @@
       "label": "URL de Notion",
       "hint": "Tu documento de Notion se abrirá en una nueva ventana al hacer clic.",
       "open": "Abrir en Notion"
-    }
+    },
+    "backToDocuments": "__TODO_LOCALE__ Back to documents",
+    "fullNamePrompt": "__TODO_LOCALE__ Type this exact name to sign: {{name}}",
+    "fullNameMismatch": "__TODO_LOCALE__ The signature must match your full legal name exactly."
   },
   "uploader": {
     "dropOrClick": "Suelta un archivo aquí o haz clic para elegir",
@@ -1146,5 +1381,251 @@
     },
     "previewMarkdown": "Previsualizar",
     "writeMarkdown": "Escribir"
+  },
+  "palette": {
+    "title": "Paleta de comandos",
+    "placeholder": "Buscar páginas",
+    "empty": "Sin páginas coincidentes."
+  },
+  "cli": {
+    "errors": {
+      "forbidden": "No tienes acceso a ese comando.",
+      "patScope": "Este token no tiene el alcance correcto para ese comando.",
+      "notFound": "Comando no encontrado.",
+      "validation": "Al comando le faltan argumentos o son inválidos.",
+      "outputShape": "El comando devolvió una forma inesperada. Repórtalo.",
+      "internal": "El comando falló.",
+      "noActiveEvent": "No hay un evento activo configurado.",
+      "eventNotFound": "Evento no encontrado.",
+      "idRequired": "Se requiere un id."
+    },
+    "commands": {
+      "help": {
+        "summary": "__TODO_LOCALE__ Print usage.",
+        "description": "__TODO_LOCALE__ Lists available commands, or usage for one command."
+      },
+      "schema": {
+        "summary": "__TODO_LOCALE__ Emit the command registry.",
+        "description": "__TODO_LOCALE__ Returns machine-readable command metadata for clients and agents."
+      },
+      "me": {
+        "summary": "__TODO_LOCALE__ Profile snapshot for the authenticated user.",
+        "description": "__TODO_LOCALE__ Shows your profile identity and role."
+      },
+      "meItinerary": {
+        "summary": "__TODO_LOCALE__ Show your itinerary.",
+        "description": "__TODO_LOCALE__ Lists itinerary items, optionally filtered by day or date."
+      },
+      "meSessions": {
+        "summary": "__TODO_LOCALE__ Show sessions you are connected to.",
+        "description": "__TODO_LOCALE__ Lists registered or favorited sessions."
+      },
+      "meDocuments": {
+        "summary": "__TODO_LOCALE__ Show documents you can sign.",
+        "description": "__TODO_LOCALE__ Lists active documents and whether you have signed them."
+      },
+      "meRoommates": {
+        "summary": "__TODO_LOCALE__ Show your room assignment.",
+        "description": "__TODO_LOCALE__ Shows the current room block and roommate list."
+      },
+      "meTransport": {
+        "summary": "__TODO_LOCALE__ Show transport requests.",
+        "description": "__TODO_LOCALE__ Lists your arrival and departure transfer requests."
+      },
+      "meNotifications": {
+        "summary": "__TODO_LOCALE__ Show notifications.",
+        "description": "__TODO_LOCALE__ Lists your newest notifications."
+      },
+      "attendees": {
+        "summary": "__TODO_LOCALE__ List attendees matching filters.",
+        "description": "__TODO_LOCALE__ Finds attendee profiles by handle, hobby, or team."
+      },
+      "sessions": {
+        "summary": "__TODO_LOCALE__ List sessions for the active event.",
+        "description": "__TODO_LOCALE__ Shows all sessions, optionally filtered by day, track, or capacity."
+      },
+      "sessionsPropose": {
+        "summary": "__TODO_LOCALE__ Propose a new session.",
+        "description": "__TODO_LOCALE__ Submits a session idea for community voting. Admins promote winners onto the agenda."
+      },
+      "sessionsProposeList": {
+        "summary": "__TODO_LOCALE__ List proposed sessions.",
+        "description": "__TODO_LOCALE__ Shows every proposed session for the active event with vote counts."
+      },
+      "sessionsProposeVote": {
+        "summary": "__TODO_LOCALE__ Vote for a proposal.",
+        "description": "__TODO_LOCALE__ Adds your one-time thumbs-up to a proposed session."
+      },
+      "sessionsProposeDelete": {
+        "summary": "__TODO_LOCALE__ Delete a proposal you submitted.",
+        "description": "__TODO_LOCALE__ Removes one of your own proposals. Admin-promoted sessions cannot be deleted this way."
+      },
+      "tagsList": {
+        "summary": "__TODO_LOCALE__ List session tags for the active event.",
+        "description": "__TODO_LOCALE__ Returns each tag with its color and ordering position."
+      },
+      "tagsCreate": {
+        "summary": "__TODO_LOCALE__ Create a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Pre-populated tags ship with every event; use this to add more."
+      },
+      "tagsUpdate": {
+        "summary": "__TODO_LOCALE__ Rename, recolor, or reorder a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Pass any combination of --name, --color (#rrggbb), and --position."
+      },
+      "tagsDelete": {
+        "summary": "__TODO_LOCALE__ Delete a session tag.",
+        "description": "__TODO_LOCALE__ Admin only. Sessions tagged with it lose the label."
+      },
+      "events": {
+        "summary": "__TODO_LOCALE__ List events you can access.",
+        "description": "__TODO_LOCALE__ Shows past, future, or all visible events."
+      },
+      "event": {
+        "summary": "__TODO_LOCALE__ Show event details.",
+        "description": "__TODO_LOCALE__ Shows the active event or a specific event."
+      },
+      "agenda": {
+        "summary": "__TODO_LOCALE__ Show the full event agenda.",
+        "description": "__TODO_LOCALE__ Lists agenda sessions for the active event."
+      },
+      "photos": {
+        "summary": "__TODO_LOCALE__ List visible photos.",
+        "description": "__TODO_LOCALE__ Shows gallery photos for the active event."
+      },
+      "channels": {
+        "summary": "__TODO_LOCALE__ List community channels.",
+        "description": "__TODO_LOCALE__ Shows active community channels."
+      }
+    }
+  },
+  "cliOauth": {
+    "authorize": {
+      "title": "Conectar una CLI o un agente",
+      "subtitle": "{{client}} quiere acceder a tus datos de Kizuna.",
+      "scopeLine": "Alcance solicitado: {{scope}}",
+      "scopeBlurb": {
+        "read": "Acceso de solo lectura a tu itinerario, sesiones, documentos y perfil de comunidad.",
+        "write": "Acceso de lectura más la capacidad de inscribirte, marcar sesiones favoritas y actualizar tu perfil.",
+        "admin": "Acceso completo de lectura y escritura, incluidas las herramientas de admin. Concédelo solo a herramientas que tú hayas escrito."
+      },
+      "allow": "Autorizar",
+      "allowing": "Autorizando...",
+      "deny": "Cancelar",
+      "adminBlocked": "Necesitas un rol de admin para emitir tokens con alcance de admin.",
+      "malformed": "Faltan parámetros de autorización o son inválidos.",
+      "unknown": "No se pudo autorizar."
+    },
+    "callback": {
+      "title": "Conectando con tu agente",
+      "delivering": "Enviando el código de autorización a tu agente local...",
+      "success": "Estás conectada. Puedes cerrar esta pestaña y volver a tu agente.",
+      "fallback": "No pudimos contactar a tu agente local. Pega este código en la terminal donde ejecutaste el comando.",
+      "deliverFailed": "El callback local no respondió.",
+      "codeLabel": "Código:",
+      "copy": "Copiar código",
+      "copied": "Copiado",
+      "malformed": "Faltan parámetros del callback o son inválidos."
+    }
+  },
+  "photos": {
+    "section": {
+      "title": "Recuerdos de {{event}}",
+      "fallbackEvent": "Kizuna",
+      "recent": "recientes",
+      "viewAll": "Ver todo",
+      "add": "Añadir fotos",
+      "empty": "Aún no hay fotos. Sé la primera en publicar."
+    },
+    "screen": {
+      "back": "Volver a la comunidad",
+      "title": "Recuerdos de {{event}}",
+      "searchPlaceholder": "Buscar por leyenda, #hashtag o @persona",
+      "searchEmpty": "__TODO_LOCALE__ No matches. Try a different tag or word."
+    },
+    "upload": {
+      "title": "Subir fotos",
+      "drop": "Arrastra archivos aquí o haz clic para elegir",
+      "pick": "Elegir archivos",
+      "addMore": "Añadir más",
+      "count": "{{current}} de {{max}}",
+      "replace": "__TODO_LOCALE__ Remove",
+      "editFile": "Editar {{name}}",
+      "caption": "__TODO_LOCALE__ Caption",
+      "captionPlaceholder": "Escribe una leyenda. Usa #hashtags para organizar y @nombre para etiquetar.",
+      "taggedPeople": "__TODO_LOCALE__ Tagged people",
+      "tagPlaceholder": "Buscar persona para etiquetar",
+      "removeTag": "Quitar {{value}}",
+      "submit": "Subir",
+      "submitMany": "Subir {{count}}",
+      "success": "__TODO_LOCALE__ Photo uploaded.",
+      "successCount_one": "{{count}} foto subida",
+      "successCount_other": "{{count}} fotos subidas",
+      "errors": {
+        "type": "Tipo de imagen no admitido.",
+        "size": "Demasiado grande. Máximo {{max}}.",
+        "generic": "__TODO_LOCALE__ Upload failed. Please try again.",
+        "someFailed_one": "{{count}} subida falló.",
+        "someFailed_other": "{{count}} subidas fallaron."
+      }
+    },
+    "lightbox": {
+      "prev": "__TODO_LOCALE__ Previous photo",
+      "next": "Foto siguiente",
+      "close": "Cerrar visor",
+      "copyLink": "Copiar enlace",
+      "copied": "Enlace copiado",
+      "copyFailed": "No se pudo copiar el enlace.",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar esta foto?",
+      "deleteFailed": "No se pudo eliminar la foto.",
+      "deleted": "Foto eliminada",
+      "tagged": "__TODO_LOCALE__ Tagged"
+    }
+  },
+  "adminSwag": {
+    "title": "__TODO_LOCALE__ Swag",
+    "subtitle": "__TODO_LOCALE__ Curate the per-event swag catalogue. Hidden items stay invisible to attendees until you publish them.",
+    "newItem": "__TODO_LOCALE__ Add swag item",
+    "editTitle": "__TODO_LOCALE__ Edit swag item",
+    "lock": "__TODO_LOCALE__ Lock swag selection",
+    "unlock": "__TODO_LOCALE__ Unlock swag selection",
+    "lockHint": "__TODO_LOCALE__ When locked, employees can no longer edit their swag selections.",
+    "locked": "__TODO_LOCALE__ Swag selection is locked.",
+    "unlocked": "__TODO_LOCALE__ Swag selection is unlocked.",
+    "lockedAt": "__TODO_LOCALE__ Locked {{date}}",
+    "created": "__TODO_LOCALE__ Swag item created.",
+    "updated": "__TODO_LOCALE__ Swag item saved.",
+    "deleted": "__TODO_LOCALE__ Swag item deleted.",
+    "deleteConfirm": "__TODO_LOCALE__ Delete \"{{name}}\"? Existing attendee selections for this item will be removed.",
+    "deleteAria": "__TODO_LOCALE__ Delete {{name}}",
+    "edit": "__TODO_LOCALE__ Edit {{name}}",
+    "empty": "__TODO_LOCALE__ No swag items yet. Add the first one to publish it to attendees.",
+    "noSizes": "__TODO_LOCALE__ No sizes added yet.",
+    "addSize": "__TODO_LOCALE__ Add",
+    "addSizePlaceholder": "__TODO_LOCALE__ Custom size",
+    "removeSize": "__TODO_LOCALE__ Remove {{size}}",
+    "sizesHint": "__TODO_LOCALE__ Pick a template to populate the list, then add or remove individual sizes.",
+    "fields": {
+      "name": "__TODO_LOCALE__ Name",
+      "description": "__TODO_LOCALE__ Description",
+      "image": "__TODO_LOCALE__ Cover image",
+      "sizeImage": "__TODO_LOCALE__ Sizing chart",
+      "sizes": "__TODO_LOCALE__ Sizes",
+      "hidden": "__TODO_LOCALE__ Hidden",
+      "hiddenHint": "__TODO_LOCALE__ Visible to admins only. Use for previews before launch.",
+      "optOut": "__TODO_LOCALE__ Allow opt-out",
+      "optOutHint": "__TODO_LOCALE__ Lets attendees decline this item entirely.",
+      "sortOrder": "__TODO_LOCALE__ Sort order"
+    },
+    "templates": {
+      "apparel": "__TODO_LOCALE__ Apparel sizes",
+      "shoesUs": "__TODO_LOCALE__ US shoe sizes",
+      "shoesEu": "__TODO_LOCALE__ EU shoe sizes"
+    },
+    "badges": {
+      "hidden": "__TODO_LOCALE__ Hidden",
+      "visible": "__TODO_LOCALE__ Live",
+      "optOut": "__TODO_LOCALE__ Opt-out allowed"
+    }
   }
 }

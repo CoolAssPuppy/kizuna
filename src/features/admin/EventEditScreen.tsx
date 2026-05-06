@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { StorageImageUploader } from '@/components/StorageImageUploader';
+import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
 import { useHydratedFormState } from '@/hooks/useHydratedFormState';
 import { STORAGE_BUCKETS } from '@/lib/storageBuckets';
@@ -94,6 +95,7 @@ export function EventEditScreen({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { show } = useToast();
+  const confirm = useConfirm();
   const isNew = eventId === 'new' || !eventId;
 
   const {
@@ -320,7 +322,16 @@ export function EventEditScreen({
               variant="destructive"
               disabled={remove.isPending}
               onClick={() => {
-                if (confirm(t('admin.events.deleteConfirm'))) remove.mutate();
+                void (async () => {
+                  if (
+                    await confirm({
+                      titleKey: 'admin.events.deleteConfirm',
+                      destructive: true,
+                    })
+                  ) {
+                    remove.mutate();
+                  }
+                })();
               }}
             >
               {remove.isPending ? t('admin.events.cascading') : t('admin.events.delete')}

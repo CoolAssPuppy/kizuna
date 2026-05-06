@@ -18,6 +18,7 @@
 //     so the admin nudge log is complete.
 
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4';
+import { z } from 'zod';
 
 import { requireAdmin } from '../_shared/adminGuard.ts';
 import { handlePreflight, jsonResponse } from '../_shared/cors.ts';
@@ -27,20 +28,21 @@ import { getAdminClient } from '../_shared/supabaseClient.ts';
 
 declare const Deno: { serve: (handler: (req: Request) => Response | Promise<Response>) => void };
 
-interface NotificationInput {
-  userId: string;
-  channel: 'slack' | 'email' | 'in_app';
-  type:
-    | 'nudge'
-    | 'deadline_reminder'
-    | 'flight_update'
-    | 'room_assignment'
-    | 'announcement'
-    | 'checkin_reminder';
-  subject: string;
-  body: string;
-  taskId?: string;
-}
+const NotificationSchema = z.object({
+  userId: z.string().uuid(),
+  channel: z.enum(['slack', 'email', 'in_app']),
+  type: z.enum([
+    'nudge',
+    'deadline_reminder',
+    'flight_update',
+    'room_assignment',
+    'announcement',
+    'checkin_reminder',
+  ]),
+  subject: z.string().min(1).max(200),
+  body: z.string().min(1).max(4000),
+  taskId: z.string().uuid().optional(),
+});
 
 Deno.serve(async (req) => {
   const preflight = handlePreflight(req);
@@ -50,12 +52,17 @@ Deno.serve(async (req) => {
   if (guard instanceof Response) return guard;
   const senderId = guard.userId;
 
-  let payload: NotificationInput;
+  let raw: unknown;
   try {
-    payload = (await req.json()) as NotificationInput;
+    raw = await req.json();
   } catch {
     return jsonResponse({ error: 'invalid_body' }, { status: 400 });
   }
+  const parsed = NotificationSchema.safeParse(raw);
+  if (!parsed.success) {
+    return jsonResponse({ error: 'invalid_body' }, { status: 400 });
+  }
+  const payload = parsed.data;
 
   const admin = getAdminClient();
 
