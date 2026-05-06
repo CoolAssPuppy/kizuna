@@ -146,10 +146,14 @@ export function EventEditScreen({
         hero_image_path: state.hero_image_path || null,
         logo_path: state.logo_path || null,
         invite_all_employees: state.invite_all_employees,
-        // Empty out the domain list when the box is off so a stale
-        // value can't accidentally re-grant access if the admin flips
-        // the toggle on later.
-        allowed_domains: state.invite_all_employees ? state.allowed_domains : [],
+        // Persist the configured domains regardless of the toggle so an
+        // admin who flips between "open to all" and "invite-only"
+        // doesn't lose their list. Eligibility only consults
+        // allowed_domains when invite_all_employees=true (see
+        // public.user_eligible_for_event), so the values are inert
+        // while the toggle is off and immediately re-active when it
+        // flips back on.
+        allowed_domains: state.allowed_domains,
         is_active: state.is_active,
       };
       if (isNew) return createEvent(getSupabaseClient(), payload);

@@ -13,9 +13,11 @@ import {
   Shirt,
   Users,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router-dom';
 
+import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { cn } from '@/lib/utils';
 
 interface NavSection {
@@ -25,7 +27,14 @@ interface NavSection {
   labelKey: string;
 }
 
-const SECTIONS: ReadonlyArray<NavSection> = [
+// Invitations live in the nav only when the active event is invite-only.
+// When the event is "open to all employees" the per-row invitation list
+// is irrelevant — domains in About are doing that work — so the nav
+// link disappears to avoid implying an empty page is the source of
+// truth. The data on event_invitations is preserved across toggle
+// flips, so an admin who turns off "open to all" later sees the same
+// rows they had before.
+const ALL_SECTIONS: ReadonlyArray<NavSection> = [
   { to: '/admin/about', icon: Info, labelKey: 'admin.nav.about' },
   { to: '/admin/invitations', icon: Mail, labelKey: 'admin.nav.invitations' },
   { to: '/admin/agenda', icon: CalendarRange, labelKey: 'admin.nav.agenda' },
@@ -42,6 +51,11 @@ const SECTIONS: ReadonlyArray<NavSection> = [
 
 export function AdminLayout(): JSX.Element {
   const { t } = useTranslation();
+  const { data: event } = useActiveEvent();
+  const sections = useMemo(
+    () => ALL_SECTIONS.filter((s) => s.to !== '/admin/invitations' || !event?.invite_all_employees),
+    [event?.invite_all_employees],
+  );
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-8 sm:py-10">
       <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight md:hidden">
@@ -54,7 +68,7 @@ export function AdminLayout(): JSX.Element {
         className="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-2 md:hidden"
         style={{ scrollbarWidth: 'thin' }}
       >
-        {SECTIONS.map(({ to, end, icon: Icon, labelKey }) => (
+        {sections.map(({ to, end, icon: Icon, labelKey }) => (
           <NavLink
             key={to}
             to={to}
@@ -78,7 +92,7 @@ export function AdminLayout(): JSX.Element {
         <aside className="hidden w-56 shrink-0 space-y-1 md:block">
           <h1 className="px-3 pb-3 text-2xl font-semibold tracking-tight">{t('admin.title')}</h1>
           <nav className="flex flex-col gap-0.5" aria-label={t('admin.nav.label')}>
-            {SECTIONS.map(({ to, end, icon: Icon, labelKey }) => (
+            {sections.map(({ to, end, icon: Icon, labelKey }) => (
               <NavLink
                 key={to}
                 to={to}
