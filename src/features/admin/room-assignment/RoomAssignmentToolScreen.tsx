@@ -18,9 +18,9 @@ import {
   removeOccupant,
   type AssignableUser,
   type RoomWithOccupants,
-} from './api/rooms';
-import { autoAssignRooms } from './room-assignment/autoAssign';
-import { ImportRoomBlockDialog } from './room-assignment/ImportRoomBlockDialog';
+} from '../api/rooms';
+import { autoAssignRooms } from './autoAssign';
+import { ImportRoomBlockDialog } from './ImportRoomBlockDialog';
 
 /**
  * Room Assignment Tool. CSV-driven import of a hotel block, then

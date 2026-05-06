@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 
-import { EventEditScreen } from './EventEditScreen';
+import { EventEditScreen } from './events/EventEditScreen';
 
 /**
  * Admin "About" tab. Loads the currently active event and re-uses the

@@ -25,7 +25,7 @@ import {
   type DocumentRow,
   createDocument,
   updateDocument,
-} from './api/documents';
+} from '../api/documents';
 import { PdfUploader } from '@/components/PdfUploader';
 
 type DocumentKey = DocumentRow['document_key'];

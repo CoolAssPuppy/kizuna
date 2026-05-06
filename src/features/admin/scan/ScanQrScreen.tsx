@@ -10,7 +10,7 @@ import { useMountEffect } from '@/hooks/useMountEffect';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
-import { fetchScannedAttendee, parseCheckinPayload } from './scan/scannerApi';
+import { fetchScannedAttendee, parseCheckinPayload } from './scannerApi';
 
 const SCANNER_ELEMENT_ID = 'kizuna-admin-scanner';
 

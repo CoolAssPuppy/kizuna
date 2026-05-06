@@ -5,18 +5,18 @@ import { useIsAdmin } from '@/features/auth/hooks';
 
 import { AboutScreen } from './AboutScreen';
 import { AdminLayout } from './AdminLayout';
-import { AgendaAdminScreen } from './AgendaAdminScreen';
-import { ConflictsScreen } from './ConflictsScreen';
-import { DocumentsScreen } from './DocumentsScreen';
-import { EventEditScreen } from './EventEditScreen';
-import { FeedScreen } from './FeedScreen';
-import { GroundTransportToolScreen } from './GroundTransportToolScreen';
+import { AgendaAdminScreen } from './agenda/AgendaAdminScreen';
+import { ConflictsScreen } from './conflicts/ConflictsScreen';
+import { DocumentsScreen } from './documents/DocumentsScreen';
+import { EventEditScreen } from './events/EventEditScreen';
+import { FeedScreen } from './feed/FeedScreen';
+import { GroundTransportToolScreen } from './ground-transport/GroundTransportToolScreen';
 import { InvitationsScreen } from './invitations/InvitationsScreen';
-import { NudgesScreen } from './NudgesScreen';
-import { ReportsScreen } from './ReportsScreen';
-import { RoomAssignmentToolScreen } from './RoomAssignmentToolScreen';
-import { ScanQrScreen } from './ScanQrScreen';
-import { StatsScreen } from './StatsScreen';
+import { NudgesScreen } from './nudges/NudgesScreen';
+import { ReportsScreen } from './reports/ReportsScreen';
+import { RoomAssignmentToolScreen } from './room-assignment/RoomAssignmentToolScreen';
+import { ScanQrScreen } from './scan/ScanQrScreen';
+import { StatsScreen } from './stats/StatsScreen';
 import { SwagAdminScreen } from './swag/SwagAdminScreen';
 
 export function AdminRoute(): JSX.Element {

@@ -19,7 +19,7 @@ import {
   fetchSwagOrder,
   fetchSwagOrderTotals,
   fetchTransportManifest,
-} from './reports';
+} from './index';
 import { ReportTable } from './ReportTable';
 
 interface ReportConfig {

@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { mediumDateTimeFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { fetchNudgeHistory } from './api/nudges';
+import { fetchNudgeHistory } from '../api/nudges';
+import type { CsvRow } from '../reports/csv';
+import { ReportTable } from '../reports/ReportTable';
 import { NudgeDialog } from './NudgeDialog';
-import { ReportTable } from './ReportTable';
-import type { CsvRow } from './csv';
 
 export function NudgesScreen(): JSX.Element {
   const { t } = useTranslation();

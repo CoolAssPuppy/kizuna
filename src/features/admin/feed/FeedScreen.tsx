@@ -33,7 +33,7 @@ import {
   fetchAllFeedItems,
   reorderFeedItems,
   updateFeedItem,
-} from './api/feed';
+} from '../api/feed';
 
 const LOCATIONS: ReadonlyArray<FeedLocation> = ['main', 'sidebar'];
 

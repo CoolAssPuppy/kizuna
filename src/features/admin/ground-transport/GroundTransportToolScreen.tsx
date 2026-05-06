@@ -17,16 +17,16 @@ import {
   assignVehicle,
   fetchPassengers,
   fetchVehicleOptions,
-} from './api/groundTransport';
+} from '../api/groundTransport';
 import {
   bucketByPickup,
   flightCohortVehicles,
   rankVehiclesForPassenger,
   windowTimeFmt,
   type VehicleStat,
-} from './ground-transport/grouping';
-import { NewVehicleDialog } from './ground-transport/NewVehicleDialog';
-import { VehicleSidebar } from './ground-transport/VehicleSidebar';
+} from './grouping';
+import { NewVehicleDialog } from './NewVehicleDialog';
+import { VehicleSidebar } from './VehicleSidebar';
 
 export function GroundTransportToolScreen(): JSX.Element {
   const { t } = useTranslation();

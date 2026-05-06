@@ -1,6 +1,6 @@
 import { utcIsoToZonedDateTimeLocal } from '@/lib/timezone';
 
-import type { SessionAudience, SessionRow, SessionStatus, SessionType } from './api/sessions';
+import type { SessionAudience, SessionRow, SessionStatus, SessionType } from '../api/sessions';
 
 export interface SessionDraft {
   id?: string;

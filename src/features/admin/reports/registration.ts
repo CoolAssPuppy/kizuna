@@ -1,7 +1,7 @@
 import { resolveProfileName } from '@/lib/fullName';
 import { flatJoin, type AppSupabaseClient, type Joined } from '@/lib/supabase';
 
-import type { CsvRow } from '../csv';
+import type { CsvRow } from './csv';
 import type { NameProfile } from './shared';
 
 export interface RegistrationProgressRow extends CsvRow {

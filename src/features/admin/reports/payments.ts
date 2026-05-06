@@ -1,7 +1,7 @@
 import { joinFullName, resolveProfileName } from '@/lib/fullName';
 import { flatJoin, type AppSupabaseClient } from '@/lib/supabase';
 
-import type { CsvRow } from '../csv';
+import type { CsvRow } from './csv';
 
 export interface PaymentReconciliationRow extends CsvRow {
   first_name: string;

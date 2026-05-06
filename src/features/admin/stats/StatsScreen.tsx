@@ -16,7 +16,7 @@ import {
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { fetchAdminStats, type CategoryCount } from './api/stats';
+import { fetchAdminStats, type CategoryCount } from '../api/stats';
 
 // Theme-driven 8-color palette. Each variant in globals.css defines its
 // own --c-chart-1..8, so charts re-skin automatically when the user

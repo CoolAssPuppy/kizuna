@@ -16,21 +16,21 @@ import { dayHeading, dayKey } from '@/features/agenda/grouping';
 import { loadExpectedAttendance } from '@/features/agenda/guestAttendance';
 import { fetchTagsForSessions, setSessionTags, type SessionTag } from '@/features/agenda/tagsApi';
 
-import { agendaToCsv, blankAgendaCsv, importAgendaCsv, sessionsToCsvRows } from './agendaCsv';
-import { AdminProposalsList, type ProposalSort } from './agenda/AdminProposalsList';
-import { IconAction } from './agenda/IconAction';
-import { SessionListItem } from './agenda/SessionListItem';
+import { downloadCsv } from '../reports/csv';
 import {
   type SessionRow,
   createSession,
   deleteSession,
   fetchAllSessions,
   updateSession,
-} from './api/sessions';
-import { downloadCsv } from './csv';
+} from '../api/sessions';
+import { TagsDialog } from '../tags/TagsDialog';
+import { agendaToCsv, blankAgendaCsv, importAgendaCsv, sessionsToCsvRows } from './agendaCsv';
+import { AdminProposalsList, type ProposalSort } from './AdminProposalsList';
+import { IconAction } from './IconAction';
 import { SessionDialog } from './SessionDialog';
+import { SessionListItem } from './SessionListItem';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from './sessionDraft';
-import { TagsDialog } from './TagsDialog';
 
 interface DayBucket {
   iso: string;

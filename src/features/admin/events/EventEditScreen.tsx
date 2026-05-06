@@ -20,7 +20,7 @@ import {
   fetchEventById,
   updateEvent,
   type EventInsert,
-} from './api/events';
+} from '../api/events';
 import { DomainsInput } from './DomainsInput';
 
 interface EventEditScreenProps {

@@ -19,7 +19,7 @@ import { TagPicker } from '@/features/agenda/TagPicker';
 import { fetchEventTags } from '@/features/agenda/tagsApi';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import type { SessionAudience, SessionStatus, SessionType } from './api/sessions';
+import type { SessionAudience, SessionStatus, SessionType } from '../api/sessions';
 import { type SessionDraft, emptySessionDraft } from './sessionDraft';
 
 const SESSION_TYPES: ReadonlyArray<SessionType> = [

@@ -6,8 +6,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useConfirm } from '@/components/ui/confirm-dialog';
 import { useToast } from '@/components/ui/toast';
-import { SessionDialog } from '@/features/admin/SessionDialog';
-import { type SessionDraft, emptySessionDraft, rowToDraft } from '@/features/admin/sessionDraft';
+import { SessionDialog } from '@/features/admin/agenda/SessionDialog';
+import {
+  type SessionDraft,
+  emptySessionDraft,
+  rowToDraft,
+} from '@/features/admin/agenda/sessionDraft';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { getSupabaseClient } from '@/lib/supabase';

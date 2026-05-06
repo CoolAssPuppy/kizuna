@@ -25,7 +25,7 @@ import {
   type UserSearchResult,
   searchUsers,
   sendNudge,
-} from './api/nudges';
+} from '../api/nudges';
 
 const CHANNELS: ReadonlyArray<NotificationChannel> = ['in_app', 'email', 'slack'];
 const TYPES: ReadonlyArray<NotificationType> = [

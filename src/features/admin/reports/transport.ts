@@ -1,6 +1,6 @@
 import { flatJoin, type AppSupabaseClient } from '@/lib/supabase';
 
-import type { CsvRow } from '../csv';
+import type { CsvRow } from './csv';
 import { resolveTraveler, TRAVELER_USER_SELECT, type TravelerJoin } from './shared';
 
 export interface TransportManifestRow extends CsvRow {

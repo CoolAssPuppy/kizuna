@@ -23,7 +23,7 @@
 import type { AppSupabaseClient } from '@/lib/supabase';
 import type { Database } from '@/types/database.types';
 
-import { rowsToCsv } from './csv';
+import { rowsToCsv } from '../reports/csv';
 
 type SessionType = Database['public']['Enums']['session_type'];
 type SessionAudience = Database['public']['Enums']['session_audience'];

@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast';
-import { EventEditScreen } from '@/features/admin/EventEditScreen';
+import { EventEditScreen } from '@/features/admin/events/EventEditScreen';
 import { useIsAdmin } from '@/features/auth/hooks';
 import { fetchAllEvents, type EventRow } from '@/features/admin/api/events';
 import { mediumDateFormatter } from '@/lib/formatters';
