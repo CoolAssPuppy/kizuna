@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 
-import { type ProposedSession } from '../api';
-import { TagPills } from '../TagPill';
+import { type ProposedSession } from './api';
+import { TagPills } from './TagPill';
 
 interface ProposalsListProps {
   proposals: ReadonlyArray<ProposedSession>;

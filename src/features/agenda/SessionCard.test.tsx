@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders, screen, userEvent } from '@/test/renderWithProviders';
 
-import { type AgendaSession } from '../api';
+import { type AgendaSession } from './api';
 import { SessionCard } from './SessionCard';
 
 function getMockSession(overrides?: Partial<AgendaSession>): AgendaSession {

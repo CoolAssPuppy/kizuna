@@ -5,9 +5,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
 
-import { type AgendaSession } from '../api';
-import { attendanceKey } from '../guestAttendance';
-import { TagPills } from '../TagPill';
+import { type AgendaSession } from './api';
+import { attendanceKey } from './guestAttendance';
+import { TagPills } from './TagPill';
 
 type AdditionalGuestRow = Database['public']['Tables']['additional_guests']['Row'];
 

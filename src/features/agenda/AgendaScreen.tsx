@@ -24,9 +24,9 @@ import {
   deleteOwnProposal,
   updateOwnProposal,
 } from './api';
-import { FilterTab } from './components/FilterTab';
-import { ProposalsList } from './components/ProposalsList';
-import { SessionCard } from './components/SessionCard';
+import { FilterTab } from './FilterTab';
+import { ProposalsList } from './ProposalsList';
+import { SessionCard } from './SessionCard';
 import { dayKey, groupSessionsByDay } from './grouping';
 import { attendanceKey, loadSponsorGuestAttendance, setGuestAttendance } from './guestAttendance';
 import { isGuestOptInSession } from './sessionRules';
