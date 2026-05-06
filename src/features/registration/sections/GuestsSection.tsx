@@ -9,13 +9,13 @@ import { useToast } from '@/components/ui/toast';
 import { useAuth } from '@/features/auth/AuthContext';
 import {
   cancelGuestInvitation,
-  listAdditionalGuests,
   listGuestInvitations,
   removeAdditionalGuest,
   renameAdditionalGuest,
   updateGuestInvitation,
 } from '@/features/guests/api';
 import type { GuestInvitationRow } from '@/features/guests/types';
+import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { mediumDateFormatter } from '@/lib/formatters';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
@@ -56,12 +56,7 @@ export function GuestsSection(_props: SectionProps): JSX.Element {
     queryFn: () =>
       user ? listGuestInvitations(getSupabaseClient(), user.id) : Promise.resolve([]),
   });
-  const { data: minors } = useQuery({
-    queryKey: ['additional-guests', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () =>
-      user ? listAdditionalGuests(getSupabaseClient(), user.id) : Promise.resolve([]),
-  });
+  const { data: minors } = useAdditionalGuests(user?.id ?? null);
 
   const cancel = useMutation({
     mutationFn: (id: string) => cancelGuestInvitation(getSupabaseClient(), id),

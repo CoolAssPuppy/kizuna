@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import type { LucideIcon } from 'lucide-react';
 import {
   Accessibility,
@@ -20,7 +19,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { LeadershipPill, RolePill } from '@/components/RolePill';
 import { useAuth } from '@/features/auth/AuthContext';
 import { CommunityProfileSection } from '@/features/community/CommunityProfileSection';
-import { listAdditionalGuests } from '@/features/guests/api';
+import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { ApiKeysSection } from '@/features/profile/api-keys/ApiKeysSection';
 import { AccessibilitySection } from '@/features/registration/sections/AccessibilitySection';
 import { AttendingSection } from '@/features/registration/sections/AttendingSection';
@@ -32,7 +31,6 @@ import { PassportSection } from '@/features/registration/sections/PassportSectio
 import { PersonalInfoSection } from '@/features/registration/sections/PersonalInfoSection';
 import { SwagSection } from '@/features/registration/sections/SwagSection';
 import { TransportSection } from '@/features/registration/sections/TransportSection';
-import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 
 import { ActiveSubjectProvider } from './ActiveSubjectContext';
@@ -173,12 +171,7 @@ function ProfileScreenInner(): JSX.Element {
   const navigate = useNavigate();
   const { sectionId } = useParams<{ sectionId?: string }>();
 
-  // Shared query key with GuestsSection + DependentsSection.
-  const { data: minors } = useQuery({
-    queryKey: ['additional-guests', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () => listAdditionalGuests(getSupabaseClient(), user!.id),
-  });
+  const { data: minors } = useAdditionalGuests(user?.id ?? null);
   const hasMinors = (minors?.length ?? 0) > 0;
 
   const sections = SECTIONS.filter((s) => {

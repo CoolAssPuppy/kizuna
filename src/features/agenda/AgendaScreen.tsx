@@ -9,7 +9,7 @@ import { useToast } from '@/components/ui/toast';
 import { SessionDialog } from '@/features/admin/SessionDialog';
 import { type SessionDraft, emptySessionDraft, rowToDraft } from '@/features/admin/sessionDraft';
 import { useAuth } from '@/features/auth/AuthContext';
-import { listAdditionalGuests } from '@/features/guests/api';
+import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { getSupabaseClient } from '@/lib/supabase';
 import { cn } from '@/lib/utils';
 import type { Database } from '@/types/database.types';
@@ -61,14 +61,8 @@ export function AgendaScreen({ event }: Props): JSX.Element {
   const queryClient = useQueryClient();
 
   // Sponsors with additional_guests can opt those guests in/out of
-  // audience='all' meal/social/activity sessions. Both queries stay
-  // disabled (and effectively silent) when the user has no guests.
-  const guestsQuery = useQuery({
-    queryKey: ['additional-guests', userId ?? null],
-    enabled: !!userId,
-    queryFn: () => listAdditionalGuests(getSupabaseClient(), userId!),
-  });
-  const myGuests: ReadonlyArray<AdditionalGuestRow> = guestsQuery.data ?? [];
+  // audience='all' meal/social/activity sessions.
+  const myGuests: ReadonlyArray<AdditionalGuestRow> = useAdditionalGuests(userId).data ?? [];
   const hasGuests = myGuests.length > 0;
 
   const attendanceQuery = useQuery({

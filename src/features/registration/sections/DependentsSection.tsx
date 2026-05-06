@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
@@ -7,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useAdditionalGuests } from '@/features/guests/useAdditionalGuests';
 import { getSupabaseClient } from '@/lib/supabase';
 
-import { loadAdditionalGuests, saveAdditionalGuests } from '../api';
+import { saveAdditionalGuests } from '../api';
 import { SectionChrome } from './SectionChrome';
 import type { SectionProps } from './types';
 import { useHydratedFormState } from '@/hooks/useHydratedFormState';
@@ -38,11 +38,7 @@ interface MinorEntry {
 export function DependentsSection({ mode }: SectionProps): JSX.Element {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: rows, isSuccess: hydrated } = useQuery({
-    queryKey: ['additional-guests', user?.id ?? null],
-    enabled: !!user,
-    queryFn: () => loadAdditionalGuests(getSupabaseClient(), user!.id),
-  });
+  const { data: rows, isSuccess: hydrated } = useAdditionalGuests(user?.id ?? null);
   const [minors, setMinors] = useHydratedFormState<typeof rows, MinorEntry[]>(
     hydrated,
     rows,
