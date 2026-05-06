@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { cn } from '@/lib/utils';
 
 import type { EventStats } from '../useEventStats';

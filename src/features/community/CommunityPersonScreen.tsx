@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { Button } from '@/components/ui/button';
 import { useActiveEvent } from '@/features/events/useActiveEvent';
 import { getSupabaseClient } from '@/lib/supabase';

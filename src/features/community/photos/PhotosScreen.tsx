@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useActiveEvent } from '@/features/events/useActiveEvent';

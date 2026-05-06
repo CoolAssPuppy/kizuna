@@ -1,7 +1,7 @@
 import { Briefcase, Calendar, Hash, MapPin, Users as UsersIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { mediumDateFormatter } from '@/lib/formatters';
 
 import type { EmployeeIdentity } from './loadEmployeeIdentity';

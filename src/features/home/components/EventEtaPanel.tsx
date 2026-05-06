@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { cn } from '@/lib/utils';
 

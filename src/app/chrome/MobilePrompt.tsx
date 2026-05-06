@@ -2,7 +2,7 @@ import { TerminalSquare, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TerminalResults } from '@/components/TerminalResults';
+import { TerminalResults } from '@/components/terminal/TerminalResults';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { useTerminal } from '@/features/cli/useTerminal';
 

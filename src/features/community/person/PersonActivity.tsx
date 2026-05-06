@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 import { useStorageImage } from '@/lib/useStorageImage';
 
 import { type PhotoRecord, PHOTOS_BUCKET } from '../photos/api';

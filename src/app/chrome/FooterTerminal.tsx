@@ -2,7 +2,7 @@ import { X } from 'lucide-react';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TerminalResults } from '@/components/TerminalResults';
+import { TerminalResults } from '@/components/terminal/TerminalResults';
 import { useMountEffect } from '@/hooks/useMountEffect';
 import { useTerminal, type TerminalHistoryEntry } from '@/features/cli/useTerminal';
 

@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { AppFooter } from '@/components/AppFooter';
 import { CommandPalette } from '@/features/cli/CommandPalette';
-import { FooterTerminal } from '@/components/FooterTerminal';
-import { OfflineBanner } from '@/components/OfflineBanner';
-import { TerminalHeader } from '@/components/TerminalHeader';
 import { useAuth } from '@/features/auth/AuthContext';
 
+import { AppFooter } from './chrome/AppFooter';
+import { FooterTerminal } from './chrome/FooterTerminal';
+import { OfflineBanner } from './chrome/OfflineBanner';
+import { TerminalHeader } from './chrome/TerminalHeader';
 import { EventRouterGate } from './EventRouterGate';
 import { GlobalRealtime } from './GlobalRealtime';
 

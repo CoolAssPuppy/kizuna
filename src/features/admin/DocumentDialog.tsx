@@ -26,7 +26,7 @@ import {
   createDocument,
   updateDocument,
 } from './api/documents';
-import { PdfUploader } from './PdfUploader';
+import { PdfUploader } from '@/components/PdfUploader';
 
 type DocumentKey = DocumentRow['document_key'];
 type Audience = DocumentRow['applies_to'];

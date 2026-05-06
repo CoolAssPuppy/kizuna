@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Avatar } from '@/components/Avatar';
 import { EmailField } from '@/components/EmailField';
-import { TerminalEyebrow } from '@/components/TerminalEyebrow';
+import { TerminalEyebrow } from '@/components/terminal/TerminalEyebrow';
 
 import { COUNTRIES } from '@/lib/countries';
 
